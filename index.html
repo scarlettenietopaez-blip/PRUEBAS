@@ -2946,6 +2946,133 @@ td{
 }
 </style>
 
+
+<style>
+/* ==========================================================
+   V121 SOBRE V120
+   - Quita el banner superior del formulario.
+   - Devuelve el panel pequeño a la izquierda.
+   - El desarrollo del formulario queda a la derecha.
+   ========================================================== */
+
+#institutionalHeroV120,
+.institutional-form-hero-v120{
+  display:none!important;
+}
+
+/* Layout: panel izquierdo + formulario derecho */
+main{
+  max-width:1680px!important;
+  padding:20px 22px 28px!important;
+}
+
+.grid{
+  display:grid!important;
+  grid-template-columns:380px minmax(0,1fr)!important;
+  gap:20px!important;
+  align-items:start!important;
+}
+
+.grid > aside.side-stack{
+  order:1!important;
+  position:sticky!important;
+  top:92px!important;
+  max-height:calc(100vh - 110px)!important;
+  overflow:auto!important;
+  padding-right:4px;
+}
+
+.grid > section{
+  order:2!important;
+  min-width:0!important;
+}
+
+/* El panel izquierdo debe sentirse compacto */
+.side-stack .card{
+  padding:15px!important;
+  border-radius:16px!important;
+}
+
+.side-stack .card h2{
+  font-size:13px!important;
+  margin-bottom:12px!important;
+}
+
+.side-stack input,
+.side-stack select,
+.side-stack textarea{
+  min-height:36px!important;
+  padding:8px 9px!important;
+  font-size:12px!important;
+}
+
+.side-stack .field{
+  margin-bottom:10px!important;
+}
+
+.side-stack .row{
+  grid-template-columns:1fr!important;
+  gap:8px!important;
+}
+
+.side-stack .side-actions{
+  grid-template-columns:1fr 1fr!important;
+  gap:6px!important;
+  padding:9px!important;
+}
+
+.side-stack .side-actions button{
+  min-height:30px!important;
+  font-size:10px!important;
+}
+
+/* Ajuste de pestañas sin banner */
+.tabs{
+  top:76px!important;
+  margin-top:0!important;
+}
+
+/* Quita espacio visual que dejaba el banner */
+.grid > section > .tabs:first-child{
+  margin-top:0!important;
+}
+
+/* Mejor lectura del contenido del formulario a la derecha */
+.grid > section .tab.card{
+  padding:20px!important;
+  border-radius:18px!important;
+}
+
+/* El panel PIT y guardados quedan dentro del lado izquierdo */
+#pitDetailCardV41{
+  order:2!important;
+}
+
+.side-stack > .search-card{
+  order:3!important;
+}
+
+/* Responsive */
+@media(max-width:1180px){
+  .grid{
+    grid-template-columns:1fr!important;
+  }
+  .grid > aside.side-stack{
+    order:1!important;
+    position:relative!important;
+    top:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .grid > section{
+    order:2!important;
+  }
+  .tabs{
+    top:70px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -19693,6 +19820,65 @@ window.addEventListener('load',()=>{
     patchInstitutionalTitlesV120();
     reorderPitPanelV120();
   },1200);
+});
+</script>
+
+
+<script>
+/* ==========================================================
+   V121 SOBRE V120
+   Refuerzo:
+   - Elimina el banner hero si ya fue insertado por v120.
+   - Mantiene PIT antes de Buscar informe registrado en el panel izquierdo.
+   ========================================================== */
+
+function removeInstitutionalHeroV121(){
+  document.querySelectorAll('#institutionalHeroV120, .institutional-form-hero-v120').forEach(el=>el.remove());
+}
+
+/* Desactiva la inserción del hero de v120. */
+ensureInstitutionalHeroV120 = function(){
+  removeInstitutionalHeroV121();
+};
+
+function keepLeftPanelOrderV121(){
+  const aside=document.querySelector('.grid > aside.side-stack');
+  const pit=document.getElementById('pitDetailCardV41');
+  const search=document.querySelector('.side-stack .search-card');
+
+  if(aside && pit && search && pit.nextElementSibling!==search){
+    search.insertAdjacentElement('beforebegin', pit);
+  }
+
+  const pitTitle=document.querySelector('#pitDetailCardV41 h2');
+  if(pitTitle) pitTitle.textContent='2. Detalle del Código PIT';
+
+  const searchTitle=document.querySelector('.search-card h2');
+  if(searchTitle) searchTitle.textContent='3. Buscar informe registrado';
+
+  const firstTitle=document.querySelector('.side-stack > .card:first-child h2');
+  if(firstTitle) firstTitle.textContent='1. Identificación del informe';
+}
+
+const _renderPitDetailV41_base_V121 = typeof renderPitDetailV41 === 'function' ? renderPitDetailV41 : null;
+if(_renderPitDetailV41_base_V121){
+  renderPitDetailV41 = function(){
+    const out=_renderPitDetailV41_base_V121();
+    keepLeftPanelOrderV121();
+    removeInstitutionalHeroV121();
+    return out;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    removeInstitutionalHeroV121();
+    keepLeftPanelOrderV121();
+  },250);
+  setTimeout(()=>{
+    removeInstitutionalHeroV121();
+    keepLeftPanelOrderV121();
+  },1000);
 });
 </script>
 
