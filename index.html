@@ -3115,6 +3115,192 @@ main{
 }
 </style>
 
+
+<style>
+/* ==========================================================
+   V123 - Selector de tipo de proyecto + Anteproyecto
+   ========================================================== */
+
+.project-entry-v123{
+  position:fixed;
+  inset:0;
+  z-index:88;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:28px;
+  background:
+    linear-gradient(122deg,#082c3d 0%,#092c3c 48%,#eef5f2 48.2%,#f7fbfa 100%);
+}
+.project-entry-v123.hidden{
+  display:none!important;
+}
+.project-entry-card-v123{
+  width:min(980px,96vw);
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:28px;
+  box-shadow:0 30px 80px rgba(7,31,49,.26);
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:340px 1fr;
+}
+.project-entry-brand-v123{
+  background:
+    radial-gradient(circle at top right, rgba(181,22,43,.35), transparent 40%),
+    linear-gradient(160deg,#082c3d,#0b2b4c);
+  color:white;
+  padding:34px 28px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:430px;
+}
+.project-entry-brand-v123 .brand-kicker{
+  color:#69d9d2;
+  text-transform:uppercase;
+  font-weight:1000;
+  font-size:12px;
+  letter-spacing:.7px;
+}
+.project-entry-brand-v123 h2{
+  color:white!important;
+  margin:14px 0 8px!important;
+  font-size:32px!important;
+  line-height:1.02!important;
+  text-transform:none!important;
+}
+.project-entry-brand-v123 p{
+  color:#d5e8f1;
+  font-size:14px;
+  line-height:1.45;
+}
+.project-entry-logo-v123{
+  width:84px;
+  height:84px;
+  border-radius:24px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#0b2b4c;
+  font-weight:1000;
+  font-size:19px;
+  box-shadow:0 18px 42px rgba(0,0,0,.22);
+}
+.project-entry-content-v123{
+  padding:34px;
+}
+.project-entry-content-v123 h3{
+  margin:0 0 8px;
+  color:#0b2b4c;
+  font-size:24px;
+}
+.project-entry-content-v123 .hint{
+  margin:0 0 20px;
+  color:#64748b;
+  font-size:13px;
+}
+.project-options-v123{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+.project-option-v123{
+  border:1px solid #d7e4ed;
+  background:linear-gradient(180deg,#fff,#f8fbfd);
+  border-radius:18px;
+  padding:18px;
+  text-align:left;
+  box-shadow:0 10px 22px rgba(11,43,76,.08);
+  color:#0b2b4c!important;
+  text-transform:none!important;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:14px;
+  align-items:center;
+  width:100%;
+}
+.project-option-v123:hover{
+  transform:translateY(-2px);
+  border-color:#9db5c8;
+}
+.project-option-v123 .num{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  background:#0b2b4c;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:1000;
+}
+.project-option-v123 .title{
+  font-size:17px;
+  font-weight:1000;
+  color:#0b2b4c;
+}
+.project-option-v123 .desc{
+  font-size:12px;
+  color:#64748b;
+  margin-top:3px;
+  line-height:1.35;
+}
+.project-option-v123 .arrow{
+  color:#b5162b;
+  font-weight:1000;
+  font-size:22px;
+}
+.current-project-pill-v123{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin:0 0 10px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:#eef5fb;
+  color:#0b2b4c;
+  border:1px solid #d7e4ed;
+  font-size:11px;
+  font-weight:1000;
+  text-transform:uppercase;
+}
+.current-project-pill-v123::before{
+  content:"●";
+  color:#b5162b;
+}
+.change-project-v123{
+  width:100%;
+  margin-bottom:12px;
+  background:#e9f0f6!important;
+  color:#0b2b4c!important;
+  font-size:10.5px!important;
+}
+.project-badge-tab-v123{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin-left:auto;
+  padding:8px 12px;
+  border-radius:999px;
+  background:#fff;
+  color:#0b2b4c;
+  border:1px solid #d7e4ed;
+  font-size:11px;
+  font-weight:900;
+}
+@media(max-width:820px){
+  .project-entry-card-v123{
+    grid-template-columns:1fr;
+  }
+  .project-entry-brand-v123{
+    min-height:auto;
+    padding:26px;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -19921,6 +20107,378 @@ window.addEventListener('load',()=>{
     removeInstitutionalHeroV121();
     keepLeftPanelOrderV121();
   },1000);
+});
+</script>
+
+
+<script>
+/* ==========================================================
+   V123 SOBRE V122
+   Selector de proyecto + Anteproyecto de Edificación.
+   ========================================================== */
+
+const PROJECTS_V123 = {
+  obra_mayor_definitivo:{
+    id:'obra_mayor_definitivo',
+    nombre:'Obra Mayor Definitivo',
+    corto:'Obra Mayor',
+    descripcion:'Informes para revisión de proyecto técnico definitivo de obra mayor.'
+  },
+  anteproyecto_edificacion:{
+    id:'anteproyecto_edificacion',
+    nombre:'Anteproyecto de Edificación',
+    corto:'Anteproyecto',
+    descripcion:'Informes para observaciones, aprobación y desistimiento de anteproyectos de edificación.'
+  }
+};
+
+function projectTypeV123(){
+  return state?.projectType || localStorage.getItem('GADMR_PROJECT_TYPE_V123') || '';
+}
+
+function currentProjectV123(){
+  return PROJECTS_V123[projectTypeV123()] || PROJECTS_V123.obra_mayor_definitivo;
+}
+
+function isAnteproyectoV123(){
+  return projectTypeV123()==='anteproyecto_edificacion';
+}
+
+function ensureProjectEntryV123(){
+  if(document.getElementById('projectEntryV123')) return;
+
+  const div=document.createElement('div');
+  div.id='projectEntryV123';
+  div.className='project-entry-v123 hidden';
+  div.innerHTML=`
+    <div class="project-entry-card-v123">
+      <div class="project-entry-brand-v123">
+        <div>
+          <div class="project-entry-logo-v123">Rio</div>
+          <div class="brand-kicker">GADMR · Gestión PHDU</div>
+          <h2>Seleccione el tipo de proyecto</h2>
+          <p>El formulario cargará las reglas, títulos y textos técnicos según el proyecto que esté revisando.</p>
+        </div>
+        <p class="mini" style="color:#b9d6e5">En el futuro se podrán agregar más tipos de proyectos.</p>
+      </div>
+      <div class="project-entry-content-v123">
+        <h3>¿Qué va a generar?</h3>
+        <p class="hint">Seleccione una opción para continuar al formulario.</p>
+        <div class="project-options-v123">
+          <button type="button" class="project-option-v123" onclick="selectProjectV123('obra_mayor_definitivo')">
+            <span class="num">1</span>
+            <span><span class="title">Obra Mayor Definitivo</span><span class="desc">Tipo de trámite trabajado hasta ahora.</span></span>
+            <span class="arrow">→</span>
+          </button>
+          <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_edificacion')">
+            <span class="num">2</span>
+            <span><span class="title">Anteproyecto de Edificación</span><span class="desc">Nuevo proyecto con textos y secciones adaptadas.</span></span>
+            <span class="arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(div);
+}
+
+function showProjectEntryV123(){
+  ensureProjectEntryV123();
+  document.getElementById('projectEntryV123')?.classList.remove('hidden');
+}
+
+function hideProjectEntryV123(){
+  document.getElementById('projectEntryV123')?.classList.add('hidden');
+}
+
+function selectProjectV123(projectId){
+  if(!PROJECTS_V123[projectId]) projectId='obra_mayor_definitivo';
+
+  if(typeof state !== 'undefined'){
+    state.projectType=projectId;
+  }
+
+  localStorage.setItem('GADMR_PROJECT_TYPE_V123', projectId);
+  hideProjectEntryV123();
+  ensureReportTypesV123();
+  updateProjectBadgeV123();
+  patchLabelsByProjectV123();
+
+  if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+  if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+  if(typeof renderReport==='function') renderReport();
+  if(typeof renderPreview==='function') renderPreview();
+}
+
+function changeProjectV123(){
+  showProjectEntryV123();
+}
+
+function ensureReportTypesV123(){
+  const sel=document.getElementById('tipoInforme');
+  if(!sel) return;
+
+  const options=[...sel.options].map(o=>o.textContent.trim());
+  if(!options.includes('Informe de Desistimiento')){
+    const op=document.createElement('option');
+    op.textContent='Informe de Desistimiento';
+    op.value='Informe de Desistimiento';
+    sel.appendChild(op);
+  }
+}
+
+function updateProjectBadgeV123(){
+  const p=currentProjectV123();
+
+  let first=document.querySelector('.side-stack > .card:first-child');
+  if(first && !document.getElementById('currentProjectPillV123')){
+    const pill=document.createElement('div');
+    pill.id='currentProjectPillV123';
+    pill.className='current-project-pill-v123';
+    first.prepend(pill);
+
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='secondary change-project-v123';
+    btn.textContent='Cambiar tipo de proyecto';
+    btn.onclick=changeProjectV123;
+    pill.insertAdjacentElement('afterend',btn);
+  }
+
+  const pill=document.getElementById('currentProjectPillV123');
+  if(pill) pill.textContent=p.nombre;
+
+  let tabs=document.querySelector('.tabs');
+  if(tabs && !document.getElementById('projectBadgeTabsV123')){
+    const badge=document.createElement('span');
+    badge.id='projectBadgeTabsV123';
+    badge.className='project-badge-tab-v123';
+    tabs.appendChild(badge);
+  }
+
+  const badge=document.getElementById('projectBadgeTabsV123');
+  if(badge) badge.textContent=p.nombre;
+}
+
+function patchLabelsByProjectV123(){
+  const ante=isAnteproyectoV123();
+
+  // Etiquetas visibles en formulario de información general.
+  document.querySelectorAll('label, th, td, .apr-info-label').forEach(el=>{
+    if(!el || !el.textContent) return;
+
+    if(ante){
+      if(/PROYECTO\s+DEFINITIVO/i.test(el.textContent)){
+        el.textContent=el.textContent.replace(/PROYECTO\s+DEFINITIVO/gi,'ANTEPROYECTO');
+      }
+    }
+  });
+}
+
+/* Nuevo formulario conserva el tipo de proyecto seleccionado. */
+const _nuevoFormulario_base_V123 = typeof nuevoFormulario === 'function' ? nuevoFormulario : null;
+if(_nuevoFormulario_base_V123){
+  nuevoFormulario = function(){
+    const current=projectTypeV123() || 'obra_mayor_definitivo';
+    const out=_nuevoFormulario_base_V123();
+    state.projectType=current;
+    localStorage.setItem('GADMR_PROJECT_TYPE_V123', current);
+    updateProjectBadgeV123();
+    patchLabelsByProjectV123();
+    return out;
+  };
+}
+
+/* Al cargar un formulario guardado sin projectType, se asume Obra Mayor. */
+const _applyStateToUI_base_V123 = typeof applyStateToUI === 'function' ? applyStateToUI : null;
+if(_applyStateToUI_base_V123){
+  applyStateToUI = function(){
+    if(!state.projectType) state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
+    localStorage.setItem('GADMR_PROJECT_TYPE_V123', state.projectType);
+    const out=_applyStateToUI_base_V123();
+    ensureReportTypesV123();
+    updateProjectBadgeV123();
+    patchLabelsByProjectV123();
+    return out;
+  };
+}
+
+const _collectTop_base_V123 = typeof collectTop === 'function' ? collectTop : null;
+if(_collectTop_base_V123){
+  collectTop = function(){
+    _collectTop_base_V123();
+    if(!state.projectType){
+      state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
+    }
+  };
+}
+
+function replaceAnteproyectoTextV123(html, reportType=''){
+  if(!isAnteproyectoV123()) return String(html||'');
+
+  let out=String(html||'');
+
+  // Títulos principales
+  out=out
+    .replace(/INFORME\s+T[ÉE]CNICO\s+DE\s+OBSERVACIONES\s+(DE\s+)?OBRA\s+MAYOR/gi,'INFORME TÉCNICO DE OBSERVACIONES ANTEPROYECTO DE EDIFICACIÓN')
+    .replace(/INFORME\s+T[ÉE]CNICO\s+APROBATORIO\s+(DE\s+)?OBRA\s+MAYOR/gi,'INFORME TÉCNICO APROBATORIO ANTEPROYECTO DE EDIFICACIÓN')
+    .replace(/INFORME\s+T[ÉE]CNICO\s+DE\s+DESISTIMIENTO\s+(DE\s+)?OBRA\s+MAYOR/gi,'INFORME TÉCNICO DE DESISTIMIENTO ANTEPROYECTO DE EDIFICACIÓN');
+
+  // Antecedentes / denominación de trámite
+  out=out
+    .replace(/OBRA\s+MAYOR\s*[–—-]\s*DEFINITIVO/gi,'ANTEPROYECTO DE EDIFICACIÓN')
+    .replace(/OBRA\s+MAYOR\s*DEFINITIVO/gi,'ANTEPROYECTO DE EDIFICACIÓN');
+
+  // Proyecto definitivo -> Anteproyecto
+  out=out
+    .replace(/\bEl\s+PROYECTO\s+DEFINITIVO\b/g,'EL ANTEPROYECTO DE EDIFICACIÓN')
+    .replace(/\bEL\s+PROYECTO\s+DEFINITIVO\b/g,'EL ANTEPROYECTO DE EDIFICACIÓN')
+    .replace(/\bProyecto\s+Definitivo\b/g,'Anteproyecto')
+    .replace(/\bPROYECTO\s+DEFINITIVO\b/g,'ANTEPROYECTO');
+
+  // Base técnico legal específica
+  out=out
+    .replace(/Del\s+Procedimiento\s+Administrativo\s+para\s+el\s+Otorgamiento\s+de\s+la\s+Licencia\s+Urban[íi]stica\s+de\s+Edificaci[óo]n\s+de\s+Obras\s+Mayores/gi,
+      'Del Procedimiento Administrativo para la Aprobación de Anteproyectos de Edificación')
+    .replace(/SECCI[ÓO]N\s+QUINTA\s+Licencia\s+Urban[íi]stica\s+de\s+Edificaci[óo]n\s+de\s+Obas\s+Mayores\s*\(Art[íi]culos\s*92\s*-\s*95\)/gi,
+      'SECCIÓN TERCERA Aprobación Urbanística de Anteproyectos de Edificación (Artículos 81 - 86)')
+    .replace(/SECCI[ÓO]N\s+QUINTA\s+Licencia\s+Urban[íi]stica\s+de\s+Edificaci[óo]n\s+de\s+Obras\s+Mayores\s*\(Art[íi]culos\s*92\s*-\s*95\)/gi,
+      'SECCIÓN TERCERA Aprobación Urbanística de Anteproyectos de Edificación (Artículos 81 - 86)');
+
+  // Estudios complementarios -> Factibilidades
+  out=out.replace(/Estudios\s+complementarios/gi,'Factibilidades');
+
+  // Conclusión técnica
+  out=out
+    .replace(/Artículo\s*92<\/strong>\s*Componentes\s+del\s+Proyecto\s+T[ée]cnico\s+de\s+Edificaci[óo]n\s+de\s+Obras\s+Mayores/gi,
+      'Artículo 84</strong>, Contenido de la Propuesta Técnica de Anteproyectos de Edificación')
+    .replace(/Artículo\s*92\s+Componentes\s+del\s+Proyecto\s+T[ée]cnico\s+de\s+Edificaci[óo]n\s+de\s+Obras\s+Mayores/gi,
+      'Artículo 84, Contenido de la Propuesta Técnica de Anteproyectos de Edificación');
+
+  if(reportType==='aprobatorio'){
+    // Quitar sección Consideraciones Estructurales completa.
+    out=out.replace(/<h2[^>]*>\s*\d*\.?\s*Consideraciones\s+estructurales\s*<\/h2>[\s\S]*?(?=<h2[^>]*>\s*\d*\.?\s*)/i,'');
+
+    // Quitar fila BOMBEROS de factibilidades.
+    out=out.replace(/<tr[^>]*>[\s\S]*?BOMBEROS[\s\S]*?<\/tr>/gi,'');
+  }
+
+  // Reenumerar h2 del informe
+  let n=1;
+  out=out.replace(/<h2([^>]*)>\s*\d+\.\s*/g,()=>`<h2$1>${n++}. `);
+
+  return out;
+}
+
+function isBomberosV123(row){
+  const txt=String(row?.estudio || row?.Estudio || row?.documento || row?.Documento || '').toUpperCase();
+  return txt.includes('BOMBER');
+}
+
+/* Formulario de factibilidades para Anteproyecto: oculta BOMBEROS. */
+if(typeof renderEstudiosTableHtmlV111 === 'function'){
+  const _renderEstudiosTableHtmlV111_base_V123 = renderEstudiosTableHtmlV111;
+  renderEstudiosTableHtmlV111 = function(){
+    if(!isAnteproyectoV123()) return _renderEstudiosTableHtmlV111_base_V123();
+
+    if(typeof initEstudiosComplementariosV111 === 'function') initEstudiosComplementariosV111();
+    if(state.aprobatorio && Array.isArray(state.aprobatorio.estudios)){
+      state.aprobatorio.estudios=state.aprobatorio.estudios.filter(r=>!isBomberosV123(r));
+    }
+
+    let out=_renderEstudiosTableHtmlV111_base_V123();
+    out=String(out)
+      .replace(/Estudios\s+Complementarios/gi,'Factibilidades')
+      .replace(/estudios\s+complementarios/gi,'factibilidades')
+      .replace(/<tr[^>]*>[\s\S]*?BOMBEROS[\s\S]*?<\/tr>/gi,'');
+
+    return out;
+  };
+}
+
+/* Transformaciones directas por tipo de informe. */
+if(typeof renderInformeObservaciones === 'function'){
+  const _renderInformeObservaciones_base_V123 = renderInformeObservaciones;
+  renderInformeObservaciones = function(){
+    return replaceAnteproyectoTextV123(_renderInformeObservaciones_base_V123(),'observaciones');
+  };
+}
+
+if(typeof renderInformeAprobatorio === 'function'){
+  const _renderInformeAprobatorio_base_V123 = renderInformeAprobatorio;
+  renderInformeAprobatorio = function(){
+    return replaceAnteproyectoTextV123(_renderInformeAprobatorio_base_V123(),'aprobatorio');
+  };
+}
+
+if(typeof renderInformeDesistimientoV69 === 'function'){
+  const _renderInformeDesistimientoV69_base_V123 = renderInformeDesistimientoV69;
+  renderInformeDesistimientoV69 = function(){
+    return replaceAnteproyectoTextV123(_renderInformeDesistimientoV69_base_V123(),'desistimiento');
+  };
+}
+
+if(typeof renderInformeDesistimiento === 'function'){
+  const _renderInformeDesistimiento_base_V123 = renderInformeDesistimiento;
+  renderInformeDesistimiento = function(){
+    return replaceAnteproyectoTextV123(_renderInformeDesistimiento_base_V123(),'desistimiento');
+  };
+}
+
+const _renderReport_base_V123 = typeof renderReport === 'function' ? renderReport : null;
+if(_renderReport_base_V123){
+  renderReport = function(){
+    const out=_renderReport_base_V123();
+    const reportEl=document.getElementById('report');
+    if(reportEl && isAnteproyectoV123()){
+      const type = state.tipoInforme==='Informe Técnico Aprobatorio'
+        ? 'aprobatorio'
+        : (state.tipoInforme==='Informe de Desistimiento' ? 'desistimiento' : 'observaciones');
+      reportEl.innerHTML=replaceAnteproyectoTextV123(reportEl.innerHTML,type);
+    }
+    return out;
+  };
+}
+
+const _renderInfoForm_base_V123b = typeof renderInfoForm === 'function' ? renderInfoForm : null;
+if(_renderInfoForm_base_V123b){
+  renderInfoForm = function(){
+    const out=_renderInfoForm_base_V123b();
+    setTimeout(patchLabelsByProjectV123,0);
+    return out;
+  };
+}
+
+/* Guardado: persistir tipo de proyecto */
+const _guardarFormulario_base_V123 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
+if(_guardarFormulario_base_V123){
+  guardarFormulario = async function(showMessage=true){
+    if(!state.projectType){
+      state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
+    }
+    return _guardarFormulario_base_V123(showMessage);
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    ensureProjectEntryV123();
+    ensureReportTypesV123();
+
+    if(!projectTypeV123()){
+      showProjectEntryV123();
+    }else{
+      if(!state.projectType) state.projectType=projectTypeV123();
+      hideProjectEntryV123();
+    }
+
+    updateProjectBadgeV123();
+    patchLabelsByProjectV123();
+
+    if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  },900);
 });
 </script>
 
