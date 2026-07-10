@@ -3073,6 +3073,48 @@ main{
 }
 </style>
 
+
+<style>
+/* ==========================================================
+   V122 SOBRE V121
+   Pestañas:
+   - Mejora contraste de pestañas no activas.
+   - Letras más visibles, sin transparencia baja.
+   ========================================================== */
+
+.tabs{
+  background:rgba(237,243,247,.96)!important;
+}
+
+.tab-btn{
+  background:#e8f0f7!important;
+  color:#0b2b4c!important;
+  border:1px solid #b9c9d8!important;
+  opacity:1!important;
+  font-weight:900!important;
+  text-shadow:none!important;
+}
+
+.tab-btn:not(.active){
+  color:#0b2b4c!important;
+  background:linear-gradient(180deg,#eef5fb,#dfeaf3)!important;
+  box-shadow:0 5px 12px rgba(11,43,76,.10)!important;
+}
+
+.tab-btn:not(.active):hover{
+  background:#d8e7f2!important;
+  color:#071d33!important;
+  border-color:#8fa8bd!important;
+}
+
+.tab-btn.active{
+  background:linear-gradient(135deg,#0b2b4c,#104b76)!important;
+  color:#ffffff!important;
+  border-color:#0b2b4c!important;
+  opacity:1!important;
+}
+</style>
+
 </head>
 <body>
 
