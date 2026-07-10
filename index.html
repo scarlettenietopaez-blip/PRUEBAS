@@ -2430,6 +2430,522 @@ input,select,textarea{
 }
 </style>
 
+
+<style>
+/* ==========================================================
+   V120 - Rediseño institucional del formulario
+   Colores institucionales: azul + rojo
+   Mantiene funcionalidades; solo reordena y mejora la vista.
+   ========================================================== */
+
+:root{
+  --inst-azul:#0b2b4c;
+  --inst-azul-2:#123d63;
+  --inst-azul-3:#0e4b76;
+  --inst-rojo:#b5162b;
+  --inst-rojo-2:#e33b4f;
+  --inst-fondo:#edf3f7;
+  --inst-panel:#f8fbfd;
+  --inst-card:#ffffff;
+  --inst-linea:#d9e3ec;
+  --inst-texto:#12263a;
+  --inst-muted:#64748b;
+  --inst-shadow:0 18px 42px rgba(11,43,76,.11);
+  --inst-shadow-soft:0 8px 22px rgba(11,43,76,.08);
+  --inst-radius:18px;
+}
+
+body{
+  background:
+    radial-gradient(circle at top left, rgba(181,22,43,.08), transparent 28%),
+    linear-gradient(135deg,#edf3f7 0%,#f7fafc 46%,#eef5f3 100%)!important;
+  color:var(--inst-texto)!important;
+}
+
+/* Header institucional */
+header.no-print{
+  position:sticky;
+  top:0;
+  z-index:80;
+  background:
+    linear-gradient(135deg, var(--inst-azul) 0%, #092131 62%, var(--inst-rojo) 160%)!important;
+  padding:14px 26px!important;
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  box-shadow:0 10px 28px rgba(7,26,44,.22)!important;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+header.no-print::before{
+  content:"Riobamba";
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:#fff;
+  color:var(--inst-azul);
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:-.5px;
+  box-shadow:0 8px 20px rgba(0,0,0,.18);
+  flex:0 0 auto;
+}
+header.no-print h1{
+  margin:0!important;
+  font-size:17px!important;
+  line-height:1.05!important;
+  letter-spacing:.3px!important;
+  color:#fff!important;
+}
+header.no-print h1::after{
+  content:"Dirección General de Gestión de Planificación, Hábitat y Desarrollo Urbanístico";
+  display:block;
+  margin-top:5px;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.5px;
+  color:#b9d6e5;
+  text-transform:uppercase;
+}
+header.no-print p{
+  margin:0!important;
+  margin-left:auto!important;
+  text-align:right;
+  font-size:11px!important;
+  color:#d6e5ed!important;
+}
+#dataSourceStatus{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:rgba(255,255,255,.11);
+  border:1px solid rgba(255,255,255,.16);
+  color:#dff5ee!important;
+}
+#dataSourceStatus::before{
+  content:"●";
+  color:#38d39f;
+}
+
+/* Login */
+.password-overlay{
+  background:
+    linear-gradient(122deg, #092c3c 0%, #092c3c 48%, #eef5f2 48.2%, #f7fbfa 100%)!important;
+}
+.password-box{
+  margin-left:auto!important;
+  margin-right:8vw!important;
+  border:0!important;
+  border-radius:22px!important;
+  padding:34px!important;
+  box-shadow:0 24px 60px rgba(11,43,76,.18)!important;
+}
+.password-box::before{
+  content:"Acceso seguro";
+  display:inline-flex;
+  align-items:center;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color:#0d7b68;
+  background:#e8f7f2;
+  padding:7px 9px;
+  border-radius:999px;
+  font-weight:900;
+  margin-bottom:12px;
+}
+.password-box h2{
+  color:var(--inst-azul)!important;
+  text-transform:none!important;
+  font-size:24px!important;
+}
+
+/* Layout principal: panel lateral fijo a la derecha */
+main{
+  max-width:1680px!important;
+  padding:22px 24px 28px!important;
+}
+.grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 390px!important;
+  gap:20px!important;
+  align-items:start!important;
+}
+.grid > section{
+  order:1;
+  min-width:0;
+}
+.grid > aside.side-stack{
+  order:2;
+  position:sticky!important;
+  top:92px!important;
+  max-height:calc(100vh - 110px)!important;
+  overflow:auto!important;
+  padding-right:3px;
+}
+.grid > aside.side-stack::-webkit-scrollbar{width:8px}
+.grid > aside.side-stack::-webkit-scrollbar-thumb{background:#b6c5d3;border-radius:999px}
+
+/* Tarjeta superior tipo formulario institucional */
+.institutional-form-hero-v120{
+  background:
+    linear-gradient(135deg, rgba(11,43,76,.98), rgba(16,72,96,.92)),
+    radial-gradient(circle at top right, rgba(181,22,43,.35), transparent 42%);
+  color:#fff;
+  border-radius:24px;
+  padding:22px 24px;
+  box-shadow:var(--inst-shadow);
+  margin-bottom:16px;
+  position:relative;
+  overflow:hidden;
+}
+.institutional-form-hero-v120::after{
+  content:"";
+  position:absolute;
+  right:-60px;
+  top:-80px;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  background:rgba(255,255,255,.08);
+}
+.institutional-form-hero-v120 .eyebrow{
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  color:#7ee0d1;
+  margin-bottom:6px;
+}
+.institutional-form-hero-v120 h2{
+  margin:0!important;
+  color:#fff!important;
+  font-size:25px!important;
+  line-height:1.12!important;
+  text-transform:none!important;
+  border:0!important;
+  padding:0!important;
+}
+.institutional-form-hero-v120 p{
+  margin:8px 0 0;
+  color:#d8e8ef;
+  max-width:760px;
+  font-size:13px;
+}
+.institutional-form-hero-v120 .hero-badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.institutional-form-hero-v120 .hero-badge{
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  border-radius:999px;
+  padding:6px 10px;
+  font-weight:900;
+  font-size:11px;
+}
+
+/* Panel lateral y cards */
+.card{
+  background:rgba(255,255,255,.94)!important;
+  border:1px solid rgba(217,227,236,.95)!important;
+  border-radius:var(--inst-radius)!important;
+  box-shadow:var(--inst-shadow-soft)!important;
+  padding:18px!important;
+  backdrop-filter:blur(8px);
+}
+.side-stack .card{
+  background:linear-gradient(180deg,#ffffff 0%,#f8fbfd 100%)!important;
+}
+.side-stack .card h2,
+.tab.card > h2{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:-2px 0 14px!important;
+  color:var(--inst-azul)!important;
+  font-size:14px!important;
+  text-transform:uppercase!important;
+  letter-spacing:.25px;
+}
+.side-stack .card h2::before,
+.tab.card > h2::before{
+  content:"";
+  width:5px;
+  height:28px;
+  border-radius:999px;
+  background:linear-gradient(180deg,var(--inst-rojo),#ee6a76);
+  flex:0 0 auto;
+}
+.search-card{
+  margin-top:16px!important;
+}
+#pitDetailCardV41{
+  margin-top:16px!important;
+  order:2;
+}
+.search-card{
+  order:3;
+}
+
+/* Reordena visual dentro del panel */
+.side-stack{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.side-stack > .card:first-child{order:1}
+#pitDetailCardV41{order:2}
+.side-stack > .search-card{order:3}
+
+/* Tabs tipo navegación institucional */
+.tabs{
+  position:sticky!important;
+  top:76px!important;
+  z-index:50!important;
+  background:rgba(237,243,247,.88)!important;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(217,227,236,.85);
+  border-radius:999px;
+  padding:8px!important;
+  box-shadow:0 10px 24px rgba(11,43,76,.07);
+  margin-bottom:16px!important;
+}
+.tab-btn{
+  border:0!important;
+  background:transparent!important;
+  color:#31536d!important;
+  border-radius:999px!important;
+  padding:10px 14px!important;
+  font-size:12px!important;
+  letter-spacing:.1px;
+}
+.tab-btn.active{
+  background:linear-gradient(135deg,var(--inst-azul),var(--inst-azul-3))!important;
+  color:#fff!important;
+  box-shadow:0 8px 16px rgba(11,43,76,.18);
+}
+.tab-btn.active::before{
+  content:"";
+  display:inline-block;
+  width:7px;
+  height:7px;
+  background:#fff;
+  border-radius:50%;
+  margin-right:7px;
+}
+
+/* Formularios y secciones */
+.field label,
+label{
+  color:#26394c!important;
+  font-size:11px!important;
+  letter-spacing:.25px;
+}
+input,select,textarea{
+  border:1px solid #cdd9e5!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  min-height:39px;
+  box-shadow:inset 0 1px 0 rgba(11,43,76,.02);
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--inst-azul-3)!important;
+  outline:3px solid rgba(14,75,118,.12)!important;
+}
+.section-title{
+  background:linear-gradient(90deg,#eef5fb,#f8fbfd)!important;
+  border-left:5px solid var(--inst-rojo)!important;
+  border-radius:0 12px 12px 0!important;
+  color:var(--inst-azul)!important;
+  padding:12px 14px!important;
+  margin:20px 0 12px!important;
+  box-shadow:0 4px 14px rgba(11,43,76,.04);
+}
+.note-box,
+.conclusion-help-v73,
+.calc-note{
+  background:#f4f9fc!important;
+  border:1px solid #d6e5ef!important;
+  border-left:4px solid var(--inst-azul-3)!important;
+  border-radius:14px!important;
+  box-shadow:0 6px 16px rgba(11,43,76,.04);
+}
+
+/* Botones */
+button{
+  border-radius:12px!important;
+  transition:transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+button:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.02);
+}
+button:active{
+  transform:translateY(0);
+}
+button:not(.secondary):not(.danger):not(.success):not(.ghost){
+  background:linear-gradient(135deg,var(--inst-azul),var(--inst-azul-3))!important;
+}
+button.secondary{
+  background:#e9f0f6!important;
+  color:var(--inst-azul)!important;
+}
+button.danger{
+  background:linear-gradient(135deg,var(--inst-rojo),var(--inst-rojo-2))!important;
+}
+button.success{
+  background:linear-gradient(135deg,#0b6f5d,#11816b)!important;
+}
+.side-actions{
+  background:#f1f7fb!important;
+  border:1px solid #d7e4ed!important;
+  border-radius:16px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+}
+.side-actions-title{
+  color:var(--inst-azul)!important;
+}
+
+/* Tablas */
+table{
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid var(--inst-linea)!important;
+}
+th{
+  background:#e8f0f7!important;
+  color:var(--inst-azul)!important;
+}
+td{
+  background:#fff;
+}
+.req-compact,
+.editable-conclusion,
+.req-table-v112{
+  box-shadow:0 8px 22px rgba(11,43,76,.04);
+}
+
+/* PIT panel institucional */
+#pitDetailCardV41 .section-title{
+  margin-top:0!important;
+}
+#pitDetailContentV41{
+  font-size:12px!important;
+}
+.pit-detail-table th{
+  background:#eef5fb!important;
+  color:var(--inst-azul)!important;
+}
+.pit-warning{
+  background:#fff7f8!important;
+  border-color:#f3c5ce!important;
+  color:#83192b!important;
+}
+#pitCoordToolsV42 .pit-coord-tools,
+.pit-coord-tools{
+  background:#f7fbfd!important;
+  border:1px solid #d7e4ed!important;
+}
+
+/* Guardados */
+.saved-side{
+  max-height:240px;
+  overflow:auto;
+  padding-right:4px;
+}
+.saved-item{
+  border-radius:15px!important;
+  border:1px solid #d7e4ed!important;
+  background:linear-gradient(180deg,#fff,#f9fcfe)!important;
+  box-shadow:0 6px 18px rgba(11,43,76,.05);
+}
+.saved-item strong{
+  color:var(--inst-azul)!important;
+  font-size:13px;
+}
+
+/* Alertas */
+.alert{
+  border-radius:14px!important;
+  border:1px solid #cfe2f3!important;
+  box-shadow:0 8px 20px rgba(11,43,76,.06);
+}
+
+/* Vista del informe no se deforma */
+.report,
+.report *{
+  backdrop-filter:none!important;
+}
+
+/* Responsive */
+@media(max-width:1180px){
+  .grid{
+    grid-template-columns:1fr!important;
+  }
+  .grid > aside.side-stack{
+    order:1;
+    position:relative!important;
+    top:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .grid > section{
+    order:2;
+  }
+  .tabs{
+    top:70px!important;
+    border-radius:16px!important;
+  }
+}
+@media(max-width:760px){
+  main{
+    padding:14px!important;
+  }
+  header.no-print{
+    position:relative!important;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  header.no-print p{
+    text-align:left;
+    margin-left:0!important;
+  }
+  .institutional-form-hero-v120 h2{
+    font-size:20px!important;
+  }
+  .row,.row3{
+    grid-template-columns:1fr!important;
+  }
+  .tabs{
+    position:relative!important;
+    top:auto!important;
+    border-radius:16px!important;
+  }
+}
+@media print{
+  header.no-print,
+  .institutional-form-hero-v120{
+    display:none!important;
+  }
+  .grid{
+    display:block!important;
+  }
+  .side-stack,
+  .tabs{
+    display:none!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -19095,6 +19611,88 @@ window.addEventListener('load',()=>{
     if(typeof renderSavedList==='function') renderSavedList();
   },900);
   setTimeout(patchSegundaObservacionV119,1800);
+});
+</script>
+
+
+<script>
+/* ==========================================================
+   V120 - Rediseño institucional:
+   Inserta cabecera de formulario y reubica PIT antes de búsqueda.
+   ========================================================== */
+
+function ensureInstitutionalHeroV120(){
+  const section=document.querySelector('.grid > section');
+  if(!section || document.getElementById('institutionalHeroV120')) return;
+
+  const hero=document.createElement('div');
+  hero.id='institutionalHeroV120';
+  hero.className='institutional-form-hero-v120 no-print';
+  hero.innerHTML=`
+    <div class="eyebrow">Gestión institucional · Obras mayores</div>
+    <h2>Formulario generador de informes técnicos</h2>
+    <p>Complete la información del trámite, valide requisitos y genere informes con una presentación clara, ordenada e institucional.</p>
+    <div class="hero-badges">
+      <span class="hero-badge">Información general</span>
+      <span class="hero-badge">Requisitos</span>
+      <span class="hero-badge">Observaciones</span>
+      <span class="hero-badge">Aprobatorio</span>
+      <span class="hero-badge">Vista del informe</span>
+    </div>`;
+
+  const tabs=section.querySelector('.tabs');
+  if(tabs) section.insertBefore(hero,tabs);
+  else section.prepend(hero);
+}
+
+function reorderPitPanelV120(){
+  const pit=document.getElementById('pitDetailCardV41');
+  const search=document.querySelector('.side-stack .search-card');
+  if(pit && search && pit.nextElementSibling!==search){
+    search.insertAdjacentElement('beforebegin', pit);
+  }
+}
+
+const _renderPitDetailV41_base_V120 = typeof renderPitDetailV41 === 'function' ? renderPitDetailV41 : null;
+if(_renderPitDetailV41_base_V120){
+  renderPitDetailV41 = function(){
+    const out=_renderPitDetailV41_base_V120();
+    reorderPitPanelV120();
+    return out;
+  };
+}
+
+const _renderInfoForm_base_V120 = typeof renderInfoForm === 'function' ? renderInfoForm : null;
+if(_renderInfoForm_base_V120){
+  renderInfoForm = function(){
+    const out=_renderInfoForm_base_V120();
+    setTimeout(reorderPitPanelV120,0);
+    return out;
+  };
+}
+
+function patchInstitutionalTitlesV120(){
+  const pit=document.querySelector('#pitDetailCardV41 h2');
+  if(pit) pit.textContent='2. Detalle del Código PIT';
+
+  const search=document.querySelector('.search-card h2');
+  if(search) search.textContent='3. Buscar informe registrado';
+
+  const first=document.querySelector('.side-stack > .card:first-child h2');
+  if(first) first.textContent='1. Identificación del informe';
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    ensureInstitutionalHeroV120();
+    patchInstitutionalTitlesV120();
+    reorderPitPanelV120();
+  },300);
+  setTimeout(()=>{
+    ensureInstitutionalHeroV120();
+    patchInstitutionalTitlesV120();
+    reorderPitPanelV120();
+  },1200);
 });
 </script>
 
