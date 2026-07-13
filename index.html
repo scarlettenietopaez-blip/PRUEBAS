@@ -21054,5 +21054,129 @@ header.no-print h1::after{
 }
 </style>
 
+
+
+<style>
+/* ==========================================================
+   V128 SOBRE V127
+   - Botón de inicio en la esquina superior izquierda.
+   - Título del generador alineado en la esquina superior derecha.
+   ========================================================== */
+.home-project-v124{
+  left:18px !important;
+  top:11px !important;
+  bottom:auto !important;
+  z-index:95 !important;
+}
+header.no-print{
+  justify-content:flex-end !important;
+  align-items:center !important;
+}
+header.no-print h1{
+  margin-left:auto !important;
+  margin-right:0 !important;
+  text-align:right !important;
+}
+@media(max-width:760px){
+  header.no-print{
+    flex-direction:row !important;
+    align-items:center !important;
+    justify-content:flex-end !important;
+    padding-left:78px !important;
+  }
+  header.no-print h1{
+    width:100% !important;
+    text-align:right !important;
+  }
+}
+</style>
+
+<script>
+/* ==========================================================
+   V128 SOBRE V127
+   Requisitos independientes para Anteproyecto de Edificación.
+   La base de Obra Mayor se conserva sin modificaciones.
+   ========================================================== */
+const REQUISITOS_ANTEPROYECTO_FALLBACK_V128 = [{"id": "AP_REQ_001", "grupo": "Requisitos Generales:", "texto": "1. Solicitud en formulario normalizado, dirigida al Director de Gestión de Ordenamiento Territorial o Patrimonio, según corresponda, suscrita por el o los propietarios y el profesional responsable. Cuando el propietario sea una persona jurídica, deberá estar suscrita por el representante legal.", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_002", "grupo": "Requisitos Generales:", "texto": "2. Informe Predial de Regulaciones de Uso de Suelo (IPRUS vigente).", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_003", "grupo": "Requisitos Generales:", "texto": "3. Copia simple de la escritura del inmueble inscrita en el Registro de la Propiedad.", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_004", "grupo": "Requisitos Generales:", "texto": "4. Certificado de gravamen actualizado.", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_005", "grupo": "Requisitos Generales:", "texto": "5. Para edificaciones de hasta 2 pisos o 400 m² de área bruta, se deberá adjuntar la disponibilidad de servicios o la carta de pago correspondiente de agua potable, empresa eléctrica y telecomunicaciones.", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_006", "grupo": "Requisitos Generales:", "texto": "6. Un original físico y digital de la Propuesta Técnica del Anteproyecto de Edificación para la revisión de la propuesta. Una vez aprobada, deberán presentarse 2 originales adicionales.", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_007", "grupo": "Requisitos Generales:", "texto": "7. Comprobante del pago de la tasa administrativa.", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_008", "grupo": "Requisitos Generales:", "texto": "8. Copia del RUC y patente del profesional responsable.", "opciones": ["Cumple", "No Cumple"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_009", "grupo": "Requisitos más de 2 pisos o 400 m2", "texto": "1. Para edificaciones mayores a 2 pisos o 400 m² de área bruta, se deberán adjuntar las factibilidades de servicios o los respectivos pagos de agua potable, empresa eléctrica y telecomunicaciones.", "opciones": ["Cumple", "No Cumple", "No Aplica"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_010", "grupo": "Requisitos Complementarios:", "texto": "1. Para edificaciones en zonas rurales se podrán plantear sistemas alternos, los cuales deberán ser aprobados previamente por la empresa correspondiente.", "opciones": ["Cumple", "No Cumple", "No Aplica"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_011", "grupo": "Requisitos Complementarios:", "texto": "2. En caso de copropiedad, designación de un representante común, que podrá realizarse en el formulario normalizado, mediante autorización con reconocimiento de firma y rúbrica o mediante poder.", "opciones": ["Cumple", "No Cumple", "No Aplica"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_012", "grupo": "Requisitos Complementarios:", "texto": "3. Para proyectos de ampliación o modificación de construcciones existentes: a) original o copia certificada de los planos arquitectónicos aprobados, o licencia urbanística con el plano arquitectónico habilitante; y b) memoria técnica justificativa de las modificaciones o ampliaciones y planos de la propuesta, conforme al artículo correspondiente.", "opciones": ["Cumple", "No Cumple", "No Aplica"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}, {"id": "AP_REQ_013", "grupo": "Requisitos Complementarios:", "texto": "4. En el caso de edificaciones declaradas en propiedad horizontal, autorización de al menos el 75 % de los copropietarios.", "opciones": ["Cumple", "No Cumple", "No Aplica"], "normaDefault": "Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación", "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."}];
+let REQUISITOS_ANTEPROYECTO_V128 = JSON.parse(JSON.stringify(REQUISITOS_ANTEPROYECTO_FALLBACK_V128));
+const REQUISITOS_OBRA_MAYOR_V128 = JSON.parse(JSON.stringify(DATA.requisitos || []));
+
+function mapReqCSVV128(rows){
+  return (rows || [])
+    .filter(r=>r.id || r.ID)
+    .map(r=>({
+      id:r.id || r.ID || '',
+      grupo:r.grupo || r.Grupo || '',
+      texto:r.texto || r.Requisito || r.requisito || '',
+      opciones:typeof splitOptV32==='function'
+        ? splitOptV32(r.opciones || r.Opciones || '')
+        : String(r.opciones || r.Opciones || '').split('|').map(x=>x.trim()).filter(Boolean),
+      normaDefault:r.normaDefault || r.Norma || r.norma || 'Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación',
+      correccionDefault:r.correccionDefault || r.Correccion || r.correccion || 'Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.'
+    }));
+}
+
+async function loadRequisitosAnteproyectoV128(){
+  try{
+    const text=await fetchCSVTextV32('data/requisitos_anteproyecto_edificacion.csv');
+    const rows=typeof parseCSVV32==='function' ? parseCSVV32(text) : [];
+    const mapped=mapReqCSVV128(rows);
+    if(mapped.length) REQUISITOS_ANTEPROYECTO_V128=mapped;
+  }catch(err){
+    console.warn('No se pudo cargar requisitos_anteproyecto_edificacion.csv; se usa la base interna V128.',err);
+  }
+  return REQUISITOS_ANTEPROYECTO_V128;
+}
+
+function requisitosParaProyectoV128(projectId){
+  return projectId==='anteproyecto_edificacion'
+    ? REQUISITOS_ANTEPROYECTO_V128
+    : REQUISITOS_OBRA_MAYOR_V128;
+}
+
+function applyProjectRequirementsV128(projectId, rerender=true){
+  const id=projectId || (typeof projectTypeV123==='function' ? projectTypeV123() : '') || 'obra_mayor_definitivo';
+  DATA.requisitos=JSON.parse(JSON.stringify(requisitosParaProyectoV128(id)));
+
+  if(rerender){
+    if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+    if(typeof renderObsSeleccionadas==='function') renderObsSeleccionadas();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  }
+}
+
+const _loadExternalCSVsV32_base_V128 = typeof loadExternalCSVsV32==='function' ? loadExternalCSVsV32 : async()=>{};
+loadExternalCSVsV32 = async function(){
+  await _loadExternalCSVsV32_base_V128();
+  await loadRequisitosAnteproyectoV128();
+  applyProjectRequirementsV128(typeof projectTypeV123==='function' ? projectTypeV123() : '', false);
+};
+
+const _selectProjectV123_base_V128 = typeof selectProjectV123==='function' ? selectProjectV123 : null;
+selectProjectV123 = function(projectId){
+  applyProjectRequirementsV128(projectId, false);
+  const out=_selectProjectV123_base_V128 ? _selectProjectV123_base_V128(projectId) : undefined;
+  applyProjectRequirementsV128(projectId, true);
+  return out;
+};
+
+const _applyStateToUI_base_V128 = typeof applyStateToUI==='function' ? applyStateToUI : null;
+if(_applyStateToUI_base_V128){
+  applyStateToUI = function(){
+    const id=state?.projectType || localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
+    applyProjectRequirementsV128(id, false);
+    return _applyStateToUI_base_V128();
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(async()=>{
+    await loadRequisitosAnteproyectoV128();
+    applyProjectRequirementsV128(typeof projectTypeV123==='function' ? projectTypeV123() : '', true);
+  },1100);
+});
+</script>
+
 </body>
 </html>
