@@ -22816,5 +22816,101 @@ window.addEventListener('load',()=>{
 });
 </script>
 
+
+
+<style>
+/* ==========================================================
+   V132 SOBRE V131
+   - Iconos Nuevo/Guardar con fondo blanco y mayor contraste.
+   - Resultados de informes guardados blancos, azules y compactos.
+   - Panel lateral del carrusel más estrecho.
+   ========================================================== */
+
+/* 1. Botones de acciones claramente visibles sobre el encabezado */
+header.no-print .header-report-actions-v131 .header-report-action-v131{
+  background:#ffffff!important;
+  color:#0b2b4c!important;
+  border:2px solid #ffffff!important;
+  box-shadow:0 5px 14px rgba(0,0,0,.22)!important;
+  opacity:1!important;
+}
+header.no-print .header-report-actions-v131 .header-report-action-v131:hover,
+header.no-print .header-report-actions-v131 .header-report-action-v131:focus-visible{
+  background:#f3f7fa!important;
+  color:#061f38!important;
+  border-color:#d9e6ef!important;
+}
+header.no-print .header-report-actions-v131 .header-report-action-v131 svg{
+  stroke:#0b2b4c!important;
+  color:#0b2b4c!important;
+  opacity:1!important;
+}
+header.no-print .header-report-actions-v131 .header-report-action-v131.action-new-v131{
+  color:#0b2b4c!important;
+}
+
+/* 2. Informes registrados: tarjetas blancas, tipografía azul y menor altura */
+body .project-entry-content-v123 .saved-search-results-v131{
+  padding:5px!important;
+  background:#edf3f8!important;
+}
+body .project-entry-content-v123 .saved-search-results-v131 .saved-search-result-v131{
+  min-height:0!important;
+  padding:6px 9px!important;
+  margin:0 0 4px!important;
+  border:1px solid #d4e0ea!important;
+  border-radius:8px!important;
+  background:#ffffff!important;
+  color:#0b4b75!important;
+  box-shadow:0 2px 7px rgba(11,43,76,.06)!important;
+  font-size:10px!important;
+  line-height:1.16!important;
+}
+body .project-entry-content-v123 .saved-search-results-v131 .saved-search-result-v131:last-child{
+  margin-bottom:0!important;
+}
+body .project-entry-content-v123 .saved-search-results-v131 .saved-search-result-v131:hover,
+body .project-entry-content-v123 .saved-search-results-v131 .saved-search-result-v131:focus{
+  background:#f7fbfe!important;
+  color:#082f50!important;
+  border-color:#80a8c4!important;
+}
+body .project-entry-content-v123 .saved-search-results-v131 .saved-search-result-v131 strong{
+  color:#0b4b75!important;
+  font-size:10.5px!important;
+  line-height:1.15!important;
+}
+body .project-entry-content-v123 .saved-search-results-v131 .saved-search-result-v131 span{
+  margin-top:2px!important;
+  color:#456881!important;
+  font-size:9px!important;
+  line-height:1.14!important;
+}
+
+/* 3. Carrusel lateral más compacto para aprovechar mejor el área central */
+@media(min-width:981px){
+  .grid{
+    grid-template-columns:minmax(0,1fr) 330px!important;
+    gap:16px!important;
+  }
+  .grid > aside.side-stack{
+    width:330px!important;
+    max-width:330px!important;
+  }
+  .side-widget-shell-v129{
+    width:330px!important;
+    max-width:330px!important;
+  }
+  .side-widget-track-v129 > .card{
+    padding:10px!important;
+  }
+  .side-widget-nav-v129{
+    grid-template-columns:36px minmax(0,1fr) 36px!important;
+    gap:6px!important;
+    padding:6px!important;
+  }
+}
+</style>
+
 </body>
 </html>
