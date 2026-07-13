@@ -23678,5 +23678,50 @@ html body .tabs .tab-btn.active{
 }
 </style>
 
+
+<script>
+/* ==========================================================
+   V137 SOBRE V136
+   Base técnico-legal completa para Anteproyecto de Edificación.
+   - Incorpora CAPÍTULO III y sus cinco secciones generales.
+   - CAPÍTULO IV se genera dinámicamente según el Uso Principal,
+     con la misma lógica del aprobatorio de Obra Mayor Definitivo.
+   ========================================================== */
+function anteproyectoBaseLegalV134(){
+  const base=[
+    'ORDENANZA 016-2023 de Actualización del Código Urbano, publicada en el Registro Oficial No. 885, Edición Especial del 23 de mayo de 2023.',
+    'Del Procedimiento Administrativo para la Aprobación de Anteproyectos de Edificación',
+    'SECCIÓN TERCERA Aprobación Urbanística de Anteproyectos de Edificación (Artículos 81 - 86)',
+    'CAPÍTULO III NORMAS GENERALES DE ARQUITECTURA',
+    'SECCIÓN PRIMERA Dimensiones de Locales (Artículos 201 - 209)',
+    'SECCIÓN SEGUNDA Iluminación y Ventilación de Locales (Artículos 210 - 223)',
+    'SECCIÓN TERCERA Circulación en las edificaciones (Artículos 224 - 231)',
+    'SECCIÓN CUARTA Accesos y Salidas (Artículos 232 - 240)',
+    'SECCIÓN QUINTA Ascensores y Elevadores (Artículos 241 - 256)',
+    'CAPÍTULO IV NORMAS POR TIPO DE EDIFICACIÓN'
+  ].join('\n');
+
+  /* formatBaseTecnicoLegalAprobatorio incorpora aquí las normas
+     dinámicas del Uso Principal mediante baseLegalAprobatorioConUsoV63. */
+  if(typeof formatBaseTecnicoLegalAprobatorio==='function'){
+    return formatBaseTecnicoLegalAprobatorio(base);
+  }
+
+  const dynamic=typeof baseLegalAprobatorioConUsoV63==='function'
+    ? baseLegalAprobatorioConUsoV63(base)
+    : base;
+  return `<div class="legal-block"><p>${typeof nl2br==='function'?nl2br(dynamic):dynamic}</p></div>`;
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()){
+      if(typeof renderReport==='function') renderReport();
+      if(typeof renderPreview==='function') renderPreview();
+    }
+  },1650);
+});
+</script>
+
 </body>
 </html>
