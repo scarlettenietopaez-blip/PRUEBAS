@@ -22191,5 +22191,630 @@ window.addEventListener('load',()=>{
 });
 </script>
 
+
+<style>
+/* ==========================================================
+   V131 SOBRE V130
+   - Cada proyecto abre un formulario nuevo y vacío.
+   - Buscador escrito por eGOB, propietario o nombre de proyecto.
+   - Acciones Nuevo/Guardar como iconos en el encabezado.
+   - Consulta PIT automática al escribir X/Y.
+   - Carrusel lateral de altura fija, sin desplazamiento vertical.
+   ========================================================== */
+
+/* 3. Acciones compactas después del título */
+header.no-print{
+  flex-wrap:nowrap!important;
+}
+header.no-print h1{
+  margin-left:auto!important;
+  margin-right:0!important;
+  white-space:nowrap;
+}
+.header-report-actions-v131{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:0 0 auto;
+}
+.header-report-action-v131{
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  padding:0!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:11px!important;
+  background:#ffffff!important;
+  color:#0b2b4c!important;
+  border:1px solid rgba(255,255,255,.96)!important;
+  box-shadow:0 6px 15px rgba(0,0,0,.18)!important;
+}
+.header-report-action-v131:hover{
+  background:#edf4f8!important;
+  color:#071f37!important;
+  transform:translateY(-1px)!important;
+}
+.header-report-action-v131 svg{
+  width:21px;
+  height:21px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.35;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.header-report-action-v131.action-new-v131{
+  font-size:28px!important;
+  line-height:1!important;
+  font-weight:700!important;
+}
+body.project-home-open-v130 .header-report-actions-v131{
+  display:none!important;
+}
+
+/* Nuevo y Guardar ya no aparecen al pie del widget de identificación */
+.side-widget-track-v129 .side-actions{
+  display:none!important;
+}
+
+/* 2. Buscador escrito en la portada */
+.project-entry-content-v123 .project-search-toolbar-v129.project-search-v131{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto auto auto!important;
+  align-items:end!important;
+  gap:9px!important;
+}
+.project-search-v131 .search-title-v129,
+.project-search-v131 .search-field-v131{
+  grid-column:1/-1!important;
+}
+.project-search-v131 .search-field-v131{
+  position:relative;
+  margin:0!important;
+}
+.project-search-v131 .search-input-wrap-v131{
+  position:relative;
+}
+.project-search-v131 input[type="search"]{
+  width:100%!important;
+  min-height:44px!important;
+  padding:10px 42px 10px 13px!important;
+  border:1px solid #c8d7e5!important;
+  border-radius:11px!important;
+  background:#f8fbfd!important;
+  color:#0b2b4c!important;
+  font-size:12px!important;
+}
+.project-search-v131 input[type="search"]:focus{
+  border-color:#0d4f77!important;
+  box-shadow:0 0 0 3px rgba(13,79,119,.12)!important;
+}
+.search-icon-v131{
+  position:absolute;
+  right:13px;
+  top:50%;
+  width:19px;
+  height:19px;
+  transform:translateY(-50%);
+  color:#0d4f77;
+  pointer-events:none;
+}
+.saved-search-results-v131{
+  display:none;
+  position:absolute;
+  z-index:9999;
+  left:0;
+  right:0;
+  top:calc(100% + 5px);
+  max-height:270px;
+  overflow:auto;
+  padding:6px;
+  border:1px solid #c8d7e5;
+  border-radius:12px;
+  background:#ffffff;
+  box-shadow:0 16px 34px rgba(11,43,76,.18);
+}
+.saved-search-results-v131.open{
+  display:block;
+}
+.saved-search-result-v131{
+  width:100%!important;
+  display:block!important;
+  padding:9px 10px!important;
+  margin:0 0 5px!important;
+  text-align:left!important;
+  border-radius:9px!important;
+  border:1px solid transparent!important;
+  background:#f4f8fb!important;
+  color:#0b2b4c!important;
+  box-shadow:none!important;
+  font-size:11px!important;
+  line-height:1.25!important;
+}
+.saved-search-result-v131:last-child{
+  margin-bottom:0!important;
+}
+.saved-search-result-v131:hover,
+.saved-search-result-v131:focus{
+  background:#e7f0f7!important;
+  border-color:#9fb9cf!important;
+}
+.saved-search-result-v131 strong{
+  display:block;
+  color:#0b2b4c;
+  font-size:11.5px;
+}
+.saved-search-result-v131 span{
+  display:block;
+  margin-top:3px;
+  color:#52687a;
+  font-size:10px;
+}
+.saved-search-empty-v131{
+  padding:11px;
+  color:#607487;
+  font-size:11px;
+  text-align:center;
+}
+.project-search-v131 .search-help-v131{
+  margin-top:5px;
+  color:#61778a;
+  font-size:10px;
+}
+
+/* 4. La búsqueda por coordenadas no necesita encabezado ni botón */
+#pitCoordToolsV42,
+.pit-coord-tools{
+  display:none!important;
+}
+
+/* 5. Carrusel fijo, únicamente navegación horizontal */
+.grid > aside.side-stack{
+  max-height:none!important;
+  overflow:hidden!important;
+  padding-right:0!important;
+}
+.side-widget-shell-v129{
+  height:calc(100vh - 114px)!important;
+  min-height:570px!important;
+  max-height:760px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+.side-widget-nav-v129{
+  flex:0 0 auto!important;
+  margin-bottom:8px!important;
+}
+.side-widget-viewport-v129{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  overflow:hidden!important;
+}
+.side-widget-track-v129{
+  height:100%!important;
+  align-items:stretch!important;
+}
+.side-widget-track-v129 > .card{
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+  padding:12px!important;
+}
+/* El título ya está en la barra del carrusel */
+.side-widget-track-v129 > .card > h2{
+  display:none!important;
+}
+.side-widget-track-v129 .field{
+  margin-bottom:7px!important;
+}
+.side-widget-track-v129 input,
+.side-widget-track-v129 select,
+.side-widget-track-v129 textarea{
+  min-height:33px!important;
+  padding:7px 8px!important;
+}
+.side-widget-track-v129 label{
+  margin-bottom:4px!important;
+  font-size:10.5px!important;
+}
+.side-widget-track-v129 .mini{
+  font-size:9.5px!important;
+  line-height:1.15!important;
+}
+#pitDetailContentV41{
+  height:100%!important;
+  overflow:hidden!important;
+  font-size:10px!important;
+}
+#pitDetailCardV41 .pit-map-v43{
+  margin:5px 0 6px!important;
+}
+#pitDetailCardV41 .pit-map-v43 svg{
+  height:108px!important;
+}
+#pitDetailCardV41 .pit-map-caption-v43,
+#pitDetailCardV41 .pit-geo-note-v43{
+  display:none!important;
+}
+#pitDetailCardV41 .pit-detail-table{
+  margin-top:5px!important;
+  font-size:9px!important;
+  line-height:1.08!important;
+}
+#pitDetailCardV41 .pit-detail-table th,
+#pitDetailCardV41 .pit-detail-table td{
+  padding:2px 4px!important;
+}
+#pitDetailCardV41 .pit-pill{
+  margin-bottom:3px!important;
+  padding:4px 8px!important;
+  font-size:10px!important;
+}
+.side-widget-viewport-v129{
+  touch-action:pan-y;
+}
+
+@media(max-width:1180px){
+  .side-widget-shell-v129{
+    height:650px!important;
+    min-height:650px!important;
+    max-height:650px!important;
+  }
+}
+@media(max-width:760px){
+  header.no-print h1{
+    white-space:normal;
+  }
+  .header-report-action-v131{
+    width:35px!important;
+    height:35px!important;
+    min-width:35px!important;
+    min-height:35px!important;
+  }
+  .project-entry-content-v123 .project-search-toolbar-v129.project-search-v131{
+    grid-template-columns:1fr 1fr!important;
+  }
+  .side-widget-shell-v129{
+    height:630px!important;
+    min-height:630px!important;
+    max-height:630px!important;
+  }
+}
+</style>
+
+<script>
+/* ==========================================================
+   V131 SOBRE V130
+   Comportamiento funcional.
+   ========================================================== */
+
+function normalizeSearchV131(value){
+  return String(value||'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toUpperCase()
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function savedOwnerV131(record){
+  const owners=Array.isArray(record?.propietarios)
+    ? record.propietarios.map(p=>String(p?.nombre||'').trim()).filter(Boolean)
+    : [];
+  if(owners.length) return owners.join(' / ');
+  const field=(DATA.infoFields||[]).find(f=>normalizeSearchV131(f.label).includes('NOMBRE DEL PROPIETARIO'));
+  return field ? String(record?.info?.[field.key]||'').trim() : '';
+}
+
+function savedProjectV131(record){
+  const field=(DATA.infoFields||[]).find(f=>normalizeSearchV131(f.label).includes('NOMBRE DEL PROYECTO'));
+  return field ? String(record?.info?.[field.key]||'').trim() : '';
+}
+
+function savedRecordKeyV131(record){
+  return String(record?.egob||'').trim();
+}
+
+function savedRecordSearchTextV131(record){
+  return normalizeSearchV131([
+    savedRecordKeyV131(record),
+    typeof savedTitleV119==='function' ? savedTitleV119(record) : '',
+    savedOwnerV131(record),
+    savedProjectV131(record),
+    record?.tipoInforme||''
+  ].join(' '));
+}
+
+let savedReportsCacheV131=[];
+
+function closeSavedSearchV131(){
+  document.getElementById('savedReportsResultsV131')?.classList.remove('open');
+}
+
+function renderSavedSearchResultsV131(query=''){
+  const list=document.getElementById('savedReportsResultsV131');
+  if(!list) return;
+  const q=normalizeSearchV131(query);
+  let matches=savedReportsCacheV131.filter(item=>!q || savedRecordSearchTextV131(item).includes(q));
+  matches=matches.slice(0,10);
+
+  if(!matches.length){
+    list.innerHTML='<div class="saved-search-empty-v131">No se encontraron informes guardados.</div>';
+  }else{
+    list.innerHTML=matches.map(item=>{
+      const key=savedRecordKeyV131(item);
+      const owner=savedOwnerV131(item)||'Propietario no registrado';
+      const project=savedProjectV131(item)||'Proyecto sin nombre';
+      const title=typeof savedTitleV119==='function' ? savedTitleV119(item) : `eGOB ${key}`;
+      return `<button type="button" class="saved-search-result-v131" data-saved-key-v131="${encodeURIComponent(key)}"><strong>${esc(title)}</strong><span>${esc(owner)} · ${esc(project)}</span></button>`;
+    }).join('');
+  }
+  list.classList.add('open');
+}
+
+async function refreshSavedSearchV131(){
+  if(typeof dbAll!=='function' || !db) return;
+  try{
+    savedReportsCacheV131=(await dbAll()||[])
+      .sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+    const input=document.getElementById('savedReportsSearchV131');
+    if(input && document.activeElement===input) renderSavedSearchResultsV131(input.value);
+  }catch(error){
+    console.warn('V131: no se pudo actualizar el buscador de informes',error);
+  }
+}
+
+async function openSavedRecordV131(key){
+  if(!key) return;
+  closeSavedSearchV131();
+  if(typeof cargarFormulario==='function') await cargarFormulario(key);
+  if(typeof hideProjectEntryV123==='function') hideProjectEntryV123();
+  if(typeof ensureHeaderProjectControlsV130==='function') ensureHeaderProjectControlsV130();
+  ensureHeaderReportActionsV131();
+  setTimeout(()=>{
+    if(typeof enforceTwoWidgetCarouselV130==='function') enforceTwoWidgetCarouselV130();
+    if(typeof showSideWidgetV129==='function') showSideWidgetV129(0);
+  },80);
+}
+
+function bindSavedSearchV131(){
+  const bar=document.getElementById('projectSearchToolbarV129');
+  const input=document.getElementById('savedReportsSearchV131');
+  const list=document.getElementById('savedReportsResultsV131');
+  if(!bar || !input || !list || bar.dataset.boundV131==='1') return;
+  bar.dataset.boundV131='1';
+
+  input.addEventListener('focus',()=>renderSavedSearchResultsV131(input.value));
+  input.addEventListener('input',()=>renderSavedSearchResultsV131(input.value));
+  input.addEventListener('keydown',event=>{
+    if(event.key==='Escape') closeSavedSearchV131();
+    if(event.key==='Enter'){
+      const first=list.querySelector('[data-saved-key-v131]');
+      if(first){
+        event.preventDefault();
+        openSavedRecordV131(decodeURIComponent(first.dataset.savedKeyV131||''));
+      }
+    }
+  });
+  list.addEventListener('click',event=>{
+    const button=event.target.closest('[data-saved-key-v131]');
+    if(button) openSavedRecordV131(decodeURIComponent(button.dataset.savedKeyV131||''));
+  });
+  document.addEventListener('pointerdown',event=>{
+    if(!bar.contains(event.target)) closeSavedSearchV131();
+  });
+}
+
+function ensureProjectSearchToolbarV131(){
+  if(typeof ensureProjectEntryV123==='function') ensureProjectEntryV123();
+  const content=document.querySelector('#projectEntryV123 .project-entry-content-v123');
+  const options=content?.querySelector('.project-options-v123');
+  if(!content || !options) return;
+
+  let bar=document.getElementById('projectSearchToolbarV129');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='projectSearchToolbarV129';
+    options.insertAdjacentElement('afterend',bar);
+  }
+  bar.className='project-search-toolbar-v129 project-search-v131 no-print';
+  if(bar.dataset.versionV131!=='1'){
+    bar.dataset.versionV131='1';
+    bar.dataset.boundV131='0';
+    bar.innerHTML=`
+      <div class="search-title-v129">Buscar informe registrado</div>
+      <div class="field search-field-v131">
+        <label for="savedReportsSearchV131">eGOB, propietario o nombre del proyecto</label>
+        <div class="search-input-wrap-v131">
+          <input id="savedReportsSearchV131" type="search" autocomplete="off" placeholder="Escriba el Nro. eGOB, propietario o proyecto...">
+          <svg class="search-icon-v131" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4.2-4.2"></path></svg>
+          <div id="savedReportsResultsV131" class="saved-search-results-v131"></div>
+        </div>
+        <div class="search-help-v131">La búsqueda revisa los informes guardados en este navegador.</div>
+      </div>
+      <button type="button" class="secondary" onclick="refreshSavedSearchV131()">Actualizar</button>
+      <button type="button" class="secondary" onclick="exportarRespaldo()">Exportar</button>
+      <button type="button" class="secondary" onclick="document.getElementById('importFileTopV131').click()">Importar</button>
+      <input type="file" id="importFileTopV131" accept=".json" hidden onchange="importarRespaldo(event);setTimeout(refreshSavedSearchV131,250)">
+    `;
+  }
+  if(bar.parentElement!==content) options.insertAdjacentElement('afterend',bar);
+  bindSavedSearchV131();
+  refreshSavedSearchV131();
+}
+
+/* Las llamadas heredadas de V129/V130 usan el nuevo buscador escrito. */
+ensureProjectSearchToolbarV129=ensureProjectSearchToolbarV131;
+ensureProjectSearchToolbarV130=ensureProjectSearchToolbarV131;
+refreshSavedDropdownV129=refreshSavedSearchV131;
+
+function newIconV131(){
+  return '+';
+}
+function saveIconV131(){
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5h12.2L20.5 7v13.5h-17v-17Z"></path><path d="M7.5 3.5v6h9v-6"></path><path d="M7.5 20.5v-7h9v7"></path></svg>`;
+}
+function ensureHeaderReportActionsV131(){
+  const header=document.querySelector('header.no-print');
+  const title=header?.querySelector('h1');
+  if(!header || !title) return;
+  let actions=document.getElementById('headerReportActionsV131');
+  if(!actions){
+    actions=document.createElement('div');
+    actions.id='headerReportActionsV131';
+    actions.className='header-report-actions-v131 no-print';
+    actions.innerHTML=`
+      <button type="button" class="header-report-action-v131 action-new-v131" onclick="nuevoFormulario()" title="Nuevo formulario" aria-label="Nuevo formulario">${newIconV131()}</button>
+      <button type="button" class="header-report-action-v131" onclick="guardarFormulario()" title="Guardar formulario" aria-label="Guardar formulario">${saveIconV131()}</button>`;
+  }
+  if(actions.previousElementSibling!==title) title.insertAdjacentElement('afterend',actions);
+}
+
+/* 1. Entrar a cualquiera de los proyectos siempre inicia un formulario vacío. */
+function resetBlankProjectV131(projectId){
+  const clean=defaultState();
+  clean.projectType=projectId;
+  clean.fechaSubsanacion=typeof addBusinessDays==='function'
+    ? addBusinessDays(clean.fechaRevision||today(),10)
+    : '';
+  state=clean;
+  localStorage.setItem('GADMR_PROJECT_TYPE_V123',projectId);
+  if(typeof applyStateToUI==='function') applyStateToUI();
+  if(typeof updateProjectBadgeV123==='function') updateProjectBadgeV123();
+  if(typeof patchLabelsByProjectV123==='function') patchLabelsByProjectV123();
+  if(typeof renderPitDetailV41==='function') renderPitDetailV41();
+  if(typeof showTab==='function') showTab('tab-info');
+  if(typeof showSideWidgetV129==='function') showSideWidgetV129(0);
+}
+
+const _selectProjectV123_base_V131=typeof selectProjectV123==='function'?selectProjectV123:null;
+if(_selectProjectV123_base_V131){
+  selectProjectV123=function(projectId){
+    const valid=(typeof PROJECTS_V123!=='undefined' && PROJECTS_V123[projectId])
+      ? projectId
+      : 'obra_mayor_definitivo';
+    const out=_selectProjectV123_base_V131(valid);
+    resetBlankProjectV131(valid);
+    ensureHeaderReportActionsV131();
+    setTimeout(()=>{
+      if(typeof enforceTwoWidgetCarouselV130==='function') enforceTwoWidgetCarouselV130();
+      if(typeof showSideWidgetV129==='function') showSideWidgetV129(0);
+    },90);
+    return out;
+  };
+}
+
+/* 4. Consulta automática del PIT al completar X e Y. */
+let pitAutoTimerV131=null;
+let pitAutoSignatureV131='';
+let pitAutoBusyV131=false;
+
+function coordinateElementV131(axis){
+  const field=(DATA.infoFields||[]).find(item=>{
+    const label=normalizeSearchV131(item.label).replace(/\s+/g,'');
+    return axis==='X' ? label==='X:' || label==='X' : label==='Y:' || label==='Y';
+  });
+  return field ? document.getElementById('info_'+field.key) : null;
+}
+
+function autoSearchPitV131(){
+  if(pitAutoBusyV131) return;
+  const xEl=coordinateElementV131('X');
+  const yEl=coordinateElementV131('Y');
+  const x=Number(String(xEl?.value||'').replace(',','.'));
+  const y=Number(String(yEl?.value||'').replace(',','.'));
+  if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+  const signature=`${x}|${y}`;
+  if(signature===pitAutoSignatureV131) return;
+  pitAutoSignatureV131=signature;
+
+  if(!Array.isArray(DATA.iprusPitIndex) || !DATA.iprusPitIndex.length) return;
+  pitAutoBusyV131=true;
+  try{
+    const hit=typeof findPitByPointV43==='function' ? findPitByPointV43(x,y) : null;
+    state.pitMap={x,y,codigo:hit?hit.codigo_pit:''};
+    if(hit){
+      if(typeof setCodigoPitV43==='function') setCodigoPitV43(hit.codigo_pit);
+      if(typeof setParroquiaV43==='function') setParroquiaV43(pgetV43(hit.properties,'parroquia'));
+      if(typeof setUsoPrincipalFromPitV43==='function') setUsoPrincipalFromPitV43(pgetV43(hit.properties,'uso_principal','u_principa'));
+    }else if(typeof setCodigoPitV43==='function'){
+      setCodigoPitV43('');
+    }
+    if(typeof renderPitDetailV41==='function') renderPitDetailV41();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  }finally{
+    pitAutoBusyV131=false;
+  }
+}
+
+function bindAutoPitSearchV131(){
+  if(document.documentElement.dataset.autoPitV131==='1') return;
+  document.documentElement.dataset.autoPitV131='1';
+  document.addEventListener('input',event=>{
+    const xEl=coordinateElementV131('X');
+    const yEl=coordinateElementV131('Y');
+    if(event.target!==xEl && event.target!==yEl) return;
+    clearTimeout(pitAutoTimerV131);
+    pitAutoTimerV131=setTimeout(autoSearchPitV131,420);
+  });
+}
+
+pitCoordToolsHTMLV42=function(){ return ''; };
+
+function removePitCoordinateToolsV131(){
+  document.getElementById('pitCoordToolsV42')?.remove();
+}
+
+const _renderPitDetailV41_base_V131=typeof renderPitDetailV41==='function'?renderPitDetailV41:null;
+if(_renderPitDetailV41_base_V131){
+  renderPitDetailV41=function(){
+    const out=_renderPitDetailV41_base_V131();
+    removePitCoordinateToolsV131();
+    return out;
+  };
+}
+
+/* 5. La altura del carrusel ya no cambia entre widgets. */
+resizeSideWidgetViewportV129=function(){
+  const viewport=document.getElementById('sideWidgetViewportV129');
+  if(viewport) viewport.style.removeProperty('height');
+};
+showSideWidgetV129=function(index){
+  const cards=widgetCardsV129();
+  if(!cards.length) return;
+  sideWidgetIndexV129=Math.max(0,Math.min(Number(index)||0,cards.length-1));
+  const track=document.getElementById('sideWidgetTrackV129');
+  if(track) track.style.transform=`translateX(-${sideWidgetIndexV129*100}%)`;
+  cards.forEach((card,i)=>card.setAttribute('aria-hidden',i===sideWidgetIndexV129?'false':'true'));
+  if(typeof updateWidgetNavV129==='function') updateWidgetNavV129();
+  resizeSideWidgetViewportV129();
+};
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    ensureProjectSearchToolbarV131();
+    ensureHeaderReportActionsV131();
+    bindAutoPitSearchV131();
+    removePitCoordinateToolsV131();
+    if(typeof enforceTwoWidgetCarouselV130==='function') enforceTwoWidgetCarouselV130();
+    if(typeof showSideWidgetV129==='function') showSideWidgetV129(sideWidgetIndexV129||0);
+  },650);
+  setTimeout(()=>{
+    ensureProjectSearchToolbarV131();
+    ensureHeaderReportActionsV131();
+    refreshSavedSearchV131();
+    removePitCoordinateToolsV131();
+  },1700);
+});
+</script>
+
 </body>
 </html>
