@@ -21805,5 +21805,391 @@ window.addEventListener('load',()=>{
 });
 </script>
 
+
+<style>
+/* ==========================================================
+   V130 SOBRE V129
+   - Inicio más visible con icono SVG.
+   - El proyecto activo solo aparece dentro del formulario.
+   - Buscador de informes trasladado a la portada principal.
+   - Carrusel limitado a Identificación y Código PIT.
+   - Sin títulos repetidos dentro de PIT ni debajo de las pestañas.
+   ========================================================== */
+
+/* 1. Botón Inicio más grande, centrado y con trazo grueso */
+#homeProjectBtnV124.home-project-v124{
+  width:54px!important;
+  height:54px!important;
+  min-width:54px!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:15px!important;
+  background:#ffffff!important;
+  color:#0b2b4c!important;
+  border:2px solid #ffffff!important;
+  line-height:1!important;
+}
+#homeProjectBtnV124.home-project-v124 svg{
+  width:25px!important;
+  height:25px!important;
+  display:block!important;
+  stroke:currentColor!important;
+  stroke-width:2.7!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+  fill:none!important;
+}
+
+/* 2. En la portada no se muestran los controles del proyecto activo */
+body.project-home-open-v130 .header-project-controls-v129{
+  display:none!important;
+}
+body:not(.project-home-open-v130) .header-project-controls-v129{
+  display:flex!important;
+}
+
+/* 3. Buscador dentro de la página principal */
+.project-entry-content-v123 .project-search-toolbar-v129{
+  width:100%!important;
+  max-width:760px!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:9px!important;
+  align-items:end!important;
+  margin:24px 0 0!important;
+  padding:16px!important;
+  background:#ffffff!important;
+  border:1px solid #cdd9e5!important;
+  border-left:5px solid #b5162b!important;
+  border-radius:15px!important;
+  box-shadow:0 10px 24px rgba(11,43,76,.10)!important;
+}
+.project-entry-content-v123 .project-search-toolbar-v129 .search-title-v129,
+.project-entry-content-v123 .project-search-toolbar-v129 .search-field-v129{
+  grid-column:1/-1!important;
+}
+.project-entry-content-v123 .project-search-toolbar-v129 .search-title-v129{
+  font-size:12px!important;
+  color:#0b2b4c!important;
+}
+.project-entry-content-v123 .project-search-toolbar-v129 select{
+  min-height:42px!important;
+}
+.project-entry-content-v123 .project-search-toolbar-v129 button{
+  width:100%!important;
+  min-height:39px!important;
+}
+/* El buscador no aparece sobre el formulario */
+main > .project-search-toolbar-v129{
+  display:none!important;
+}
+
+/* Mensajes del sistema independientes del buscador de portada */
+.global-msg-host-v130{
+  margin:0 0 10px!important;
+}
+.global-msg-host-v130 #msg{
+  margin:0!important;
+}
+
+/* 4. La antigua tarjeta de búsqueda se conserva solo como soporte oculto */
+#legacySearchStoreV130,
+#legacySearchStoreV130 .search-card{
+  display:none!important;
+}
+
+/* 5. Carrusel limpio y flechas blancas */
+.side-widget-nav-v129 button{
+  background:#0d4f77!important;
+  color:#ffffff!important;
+  border:1px solid #0d4f77!important;
+  opacity:1!important;
+  font-weight:1000!important;
+}
+.side-widget-nav-v129 button:hover:not(:disabled){
+  background:#083b5d!important;
+  color:#ffffff!important;
+}
+.side-widget-nav-v129 button:disabled{
+  background:#8ca5b8!important;
+  color:#ffffff!important;
+  opacity:.55!important;
+}
+/* El título del PIT aparece únicamente en la barra del carrusel */
+#pitDetailCardV41 > h2,
+#pitDetailCardV41 > h3,
+#pitDetailCardV41 > .section-title,
+#pitDetailCardV41 .pit-header-v59{
+  display:none!important;
+}
+#pitDetailCardV41{
+  padding-top:14px!important;
+}
+
+/* 6. El nombre de cada pestaña aparece solamente en la navegación */
+#tab-info > h2,
+#tab-req > h2,
+#tab-obs > h2,
+#tab-apr > h2,
+#tab-guardados > h2{
+  display:none!important;
+}
+#tab-info.card,
+#tab-req.card,
+#tab-obs.card,
+#tab-apr.card{
+  padding-top:14px!important;
+}
+
+@media(max-width:760px){
+  #homeProjectBtnV124.home-project-v124{
+    width:48px!important;
+    height:48px!important;
+    min-width:48px!important;
+  }
+  #homeProjectBtnV124.home-project-v124 svg{
+    width:23px!important;
+    height:23px!important;
+  }
+  .project-entry-content-v123 .project-search-toolbar-v129{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+</style>
+
+<script>
+/* ==========================================================
+   V130 SOBRE V129
+   Comportamiento de portada, buscador y carrusel depurado.
+   ========================================================== */
+
+function homeIconSvgV130(){
+  return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 10.7 12 3.8l8.5 6.9"></path><path d="M5.8 9.5v10.2h12.4V9.5"></path><path d="M9.4 19.7v-6.1h5.2v6.1"></path></svg>`;
+}
+
+function projectHomeIsOpenV130(){
+  const entry=document.getElementById('projectEntryV123');
+  return !!entry && !entry.classList.contains('hidden');
+}
+
+function syncProjectHeaderVisibilityV130(){
+  document.body.classList.toggle('project-home-open-v130',projectHomeIsOpenV130());
+  const name=document.getElementById('headerProjectNameV129');
+  if(name && !projectHomeIsOpenV130()) name.textContent=projectDisplayNameV129();
+}
+
+function ensureHeaderProjectControlsV130(){
+  if(typeof ensureHeaderProjectControlsV129==='function') ensureHeaderProjectControlsV129();
+  const home=document.getElementById('homeProjectBtnV124');
+  if(home){
+    home.innerHTML=homeIconSvgV130();
+    home.setAttribute('aria-label','Volver a la página principal');
+    home.title='Volver a la página principal';
+  }
+  syncProjectHeaderVisibilityV130();
+}
+
+/* La lista se integra debajo de las opciones de proyecto. */
+function ensureProjectSearchToolbarV130(){
+  if(typeof ensureProjectEntryV123==='function') ensureProjectEntryV123();
+  const content=document.querySelector('#projectEntryV123 .project-entry-content-v123');
+  const options=content?.querySelector('.project-options-v123');
+  if(!content || !options) return;
+
+  let bar=document.getElementById('projectSearchToolbarV129');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='projectSearchToolbarV129';
+    bar.className='project-search-toolbar-v129 no-print';
+    bar.innerHTML=`
+      <div class="search-title-v129">Buscar informe registrado</div>
+      <div class="field search-field-v129">
+        <label for="savedReportsSelectV129">Informes guardados</label>
+        <select id="savedReportsSelectV129"><option value="">Seleccione un informe registrado...</option></select>
+      </div>
+      <button type="button" onclick="openSavedDropdownV130()">Abrir</button>
+      <button type="button" class="secondary" onclick="refreshSavedDropdownV129()">Actualizar</button>
+      <button type="button" class="secondary" onclick="exportarRespaldo()">Exportar</button>
+      <button type="button" class="secondary" onclick="document.getElementById('importFileTopV129').click()">Importar</button>
+      <input type="file" id="importFileTopV129" accept=".json" hidden onchange="importarRespaldo(event);setTimeout(refreshSavedDropdownV129,250)">
+    `;
+  }
+  if(bar.parentElement!==content) options.insertAdjacentElement('afterend',bar);
+  if(typeof refreshSavedDropdownV129==='function') refreshSavedDropdownV129();
+}
+
+/* Sustituye la función de v129 para que cualquier llamada antigua use la portada. */
+ensureProjectSearchToolbarV129=ensureProjectSearchToolbarV130;
+
+function ensureGlobalMessageV130(){
+  const main=document.querySelector('main');
+  const grid=main?.querySelector('.grid');
+  const msgBox=document.getElementById('msg');
+  if(!main || !grid || !msgBox) return;
+  let host=document.getElementById('globalMsgHostV130');
+  if(!host){
+    host=document.createElement('div');
+    host.id='globalMsgHostV130';
+    host.className='global-msg-host-v130 no-print';
+    main.insertBefore(host,grid);
+  }
+  if(msgBox.parentElement!==host) host.appendChild(msgBox);
+}
+
+function removeLegacySearchFromCarouselV130(){
+  const search=document.querySelector('.search-card');
+  if(!search) return;
+  let store=document.getElementById('legacySearchStoreV130');
+  if(!store){
+    store=document.createElement('div');
+    store.id='legacySearchStoreV130';
+    document.body.appendChild(store);
+  }
+  if(search.parentElement!==store) store.appendChild(search);
+}
+
+function cleanPitCardV130(){
+  const card=document.getElementById('pitDetailCardV41');
+  if(!card) return;
+  card.classList.remove('collapsed-v57','collapsed-v58','collapsed-v59');
+  const content=document.getElementById('pitDetailContentV41');
+  if(content) content.style.display='block';
+  [...card.children].forEach(el=>{
+    if(el.id==='pitDetailContentV41') return;
+    if(el.matches('h2,h3,.section-title,.pit-header-v59') || /DETALLE\s+DEL\s+C[ÓO]DIGO\s+PIT/i.test(el.textContent||'')){
+      el.remove();
+    }
+  });
+}
+
+function widgetTitleV130(card,index){
+  if(card?.id==='pitDetailCardV41') return '2. Detalle del Código PIT';
+  return '1. Identificación del informe';
+}
+widgetTitleV129=widgetTitleV130;
+
+function enforceTwoWidgetCarouselV130(){
+  removeLegacySearchFromCarouselV130();
+  if(typeof ensureSideWidgetCarouselV129==='function') ensureSideWidgetCarouselV129();
+  const track=document.getElementById('sideWidgetTrackV129');
+  const aside=document.querySelector('.grid > aside.side-stack');
+  if(!track || !aside) return;
+
+  let identification=[...track.children].find(el=>el.classList?.contains('card') && el.id!=='pitDetailCardV41' && !el.classList.contains('search-card'));
+  if(!identification){
+    identification=[...aside.children].find(el=>el.classList?.contains('card') && el.id!=='pitDetailCardV41' && !el.classList.contains('search-card'));
+    if(identification) track.appendChild(identification);
+  }
+  const pit=document.getElementById('pitDetailCardV41');
+  if(pit && pit.parentElement!==track) track.appendChild(pit);
+
+  [...track.children].forEach(el=>{
+    if(el!==identification && el!==pit){
+      if(el.classList?.contains('search-card')) removeLegacySearchFromCarouselV130();
+      else el.remove();
+    }
+  });
+  if(identification && track.firstElementChild!==identification) track.insertBefore(identification,track.firstChild);
+  if(pit && pit.previousElementSibling!==identification) track.appendChild(pit);
+
+  cleanPitCardV130();
+  if(sideWidgetIndexV129>1) sideWidgetIndexV129=0;
+  if(typeof updateWidgetNavV129==='function') updateWidgetNavV129();
+  if(typeof showSideWidgetV129==='function') showSideWidgetV129(sideWidgetIndexV129);
+}
+
+function hideRepeatedTabTitlesV130(){
+  document.querySelectorAll('#tab-info > h2,#tab-req > h2,#tab-obs > h2,#tab-apr > h2,#tab-guardados > h2').forEach(el=>el.style.display='none');
+}
+
+async function openSavedDropdownV130(){
+  const sel=document.getElementById('savedReportsSelectV129');
+  const key=String(sel?.value||'').trim();
+  if(!key){
+    if(typeof msg==='function') msg('Seleccione un informe registrado de la lista.');
+    return;
+  }
+  if(typeof cargarFormulario==='function') await cargarFormulario(key);
+  if(typeof hideProjectEntryV123==='function') hideProjectEntryV123();
+  ensureHeaderProjectControlsV130();
+  setTimeout(()=>{
+    enforceTwoWidgetCarouselV130();
+    if(typeof showSideWidgetV129==='function') showSideWidgetV129(0);
+  },80);
+}
+openSavedDropdownV129=openSavedDropdownV130;
+
+/* Sincroniza el encabezado al entrar o salir de la portada. */
+const _showProjectEntryV123_base_V130=typeof showProjectEntryV123==='function'?showProjectEntryV123:null;
+if(_showProjectEntryV123_base_V130){
+  showProjectEntryV123=function(){
+    const out=_showProjectEntryV123_base_V130();
+    ensureProjectSearchToolbarV130();
+    syncProjectHeaderVisibilityV130();
+    return out;
+  };
+}
+const _hideProjectEntryV123_base_V130=typeof hideProjectEntryV123==='function'?hideProjectEntryV123:null;
+if(_hideProjectEntryV123_base_V130){
+  hideProjectEntryV123=function(){
+    const out=_hideProjectEntryV123_base_V130();
+    syncProjectHeaderVisibilityV130();
+    return out;
+  };
+}
+
+const _selectProjectV123_base_V130=typeof selectProjectV123==='function'?selectProjectV123:null;
+if(_selectProjectV123_base_V130){
+  selectProjectV123=function(projectId){
+    const out=_selectProjectV123_base_V130(projectId);
+    setTimeout(()=>{
+      ensureHeaderProjectControlsV130();
+      enforceTwoWidgetCarouselV130();
+      hideRepeatedTabTitlesV130();
+    },80);
+    return out;
+  };
+}
+
+const _renderPitDetailV41_base_V130=typeof renderPitDetailV41==='function'?renderPitDetailV41:null;
+if(_renderPitDetailV41_base_V130){
+  renderPitDetailV41=function(){
+    const out=_renderPitDetailV41_base_V130();
+    setTimeout(()=>{
+      cleanPitCardV130();
+      enforceTwoWidgetCarouselV130();
+      if(typeof resizeSideWidgetViewportV129==='function') resizeSideWidgetViewportV129();
+    },0);
+    return out;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    ensureProjectSearchToolbarV130();
+    ensureGlobalMessageV130();
+    removeLegacySearchFromCarouselV130();
+    ensureHeaderProjectControlsV130();
+    cleanPitCardV130();
+    enforceTwoWidgetCarouselV130();
+    hideRepeatedTabTitlesV130();
+    syncProjectHeaderVisibilityV130();
+  },500);
+  setTimeout(()=>{
+    ensureProjectSearchToolbarV130();
+    ensureGlobalMessageV130();
+    removeLegacySearchFromCarouselV130();
+    ensureHeaderProjectControlsV130();
+    cleanPitCardV130();
+    enforceTwoWidgetCarouselV130();
+    hideRepeatedTabTitlesV130();
+    syncProjectHeaderVisibilityV130();
+  },1700);
+});
+</script>
+
 </body>
 </html>
