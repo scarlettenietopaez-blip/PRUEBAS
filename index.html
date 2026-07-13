@@ -24805,5 +24805,126 @@ window.addEventListener('load',()=>{
 });
 </script>
 
+
+
+<style>
+/* ==========================================================
+   V143 SOBRE V142
+   Encabezado técnico definitivo de secciones del informe.
+   Se aplica a la vista, impresión, PDF y contenido copiado.
+   ========================================================== */
+html body #report h2.report-section-heading-v143,
+html body .report h2.report-section-heading-v143{
+  display:block !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  margin:18px 0 10px !important;
+  padding:0 0 5px 0 !important;
+  border:0 !important;
+  border-bottom:1px solid #222222 !important;
+  border-radius:0 !important;
+  background:none !important;
+  box-shadow:none !important;
+  color:#111111 !important;
+  font-family:Arial,Helvetica,sans-serif !important;
+  font-size:14px !important;
+  font-weight:700 !important;
+  line-height:1.2 !important;
+  text-align:left !important;
+  text-transform:uppercase !important;
+}
+@media print{
+  html body #report h2.report-section-heading-v143,
+  html body .report h2.report-section-heading-v143{
+    margin:14px 0 8px !important;
+    padding-bottom:4px !important;
+    border-bottom:1px solid #000000 !important;
+    color:#000000 !important;
+    background:none !important;
+    box-shadow:none !important;
+    break-after:avoid !important;
+    page-break-after:avoid !important;
+  }
+}
+</style>
+
+<script>
+/* ==========================================================
+   V143 SOBRE V142
+   La numeración y la línea se incorporan directamente al HTML
+   devuelto por cada generador de informe. De esta manera no
+   dependen de cuándo se abra la pestaña Vista del informe.
+   ========================================================== */
+function formatReportSectionHeadingsV143(html){
+  const template=document.createElement('template');
+  template.innerHTML=String(html||'');
+  const headings=[...template.content.querySelectorAll('h2')];
+  headings.forEach((heading,index)=>{
+    const clean=String(heading.textContent||'')
+      .replace(/^\s*\d+\s*[\.\)\-:]?\s*/,'')
+      .trim();
+    if(!clean) return;
+    heading.textContent=`${index+1}. ${clean.toLocaleUpperCase('es-EC')}`;
+    heading.classList.remove('report-section-heading-v142');
+    heading.classList.add('report-section-heading-v143');
+  });
+  return template.innerHTML;
+}
+
+function applyReportSectionHeadingsV143(root=document.getElementById('report')){
+  if(!root) return '';
+  const formatted=formatReportSectionHeadingsV143(root.innerHTML);
+  if(root.innerHTML!==formatted) root.innerHTML=formatted;
+  return formatted;
+}
+
+function wrapReportGeneratorV143(name){
+  const base=window[name];
+  if(typeof base!=='function' || base.__wrappedV143) return;
+  const wrapped=function(...args){
+    return formatReportSectionHeadingsV143(base.apply(this,args));
+  };
+  wrapped.__wrappedV143=true;
+  wrapped.__baseV143=base;
+  window[name]=wrapped;
+}
+
+[
+  'renderInformeObservaciones',
+  'renderInformeAprobatorio',
+  'renderInformeDesistimientoV69',
+  'renderInformeDesistimiento'
+].forEach(wrapReportGeneratorV143);
+
+if(typeof renderReport==='function'){
+  const _renderReport_base_V143=renderReport;
+  renderReport=function(){
+    const out=_renderReport_base_V143();
+    return applyReportSectionHeadingsV143(document.getElementById('report')) || formatReportSectionHeadingsV143(out);
+  };
+}
+
+/* Refuerzo para cambios de pestaña, tipo de informe y carga de registros. */
+document.addEventListener('click',event=>{
+  if(event.target?.closest?.('[data-tab="tab-vista"], #tab-vista, .tab-btn')){
+    setTimeout(()=>applyReportSectionHeadingsV143(),0);
+  }
+});
+document.addEventListener('change',event=>{
+  if(event.target?.id==='tipoInforme') setTimeout(()=>applyReportSectionHeadingsV143(),0);
+});
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    [
+      'renderInformeObservaciones',
+      'renderInformeAprobatorio',
+      'renderInformeDesistimientoV69',
+      'renderInformeDesistimiento'
+    ].forEach(wrapReportGeneratorV143);
+    applyReportSectionHeadingsV143();
+  },1200);
+});
+</script>
+
 </body>
 </html>
