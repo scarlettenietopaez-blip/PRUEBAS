@@ -20756,14 +20756,7 @@ function ensureProjectEntryV123(){
   div.className='project-entry-v123';
   div.innerHTML=`
     <div class="project-entry-card-v123">
-      <div class="project-entry-brand-v123">
-        <div>
-          <div class="project-entry-logo-v123">Rio</div>
-          <div class="brand-kicker">GADMR · Gestión PHDU</div>
-          <h2>Seleccione el tipo de proyecto</h2>
-          <p>El sistema cargará automáticamente los títulos, textos técnicos, secciones y reglas según el tipo de proyecto que vaya a revisar.</p>
-        </div>
-      </div>
+      <div class="project-entry-brand-v123 project-entry-brand-v126" aria-hidden="true"></div>
       <div class="project-entry-content-v123">
         <h3>Proyectos disponibles</h3>
         <p class="hint">Seleccione el proyecto para continuar al formulario.</p>
@@ -20984,6 +20977,51 @@ window.addEventListener('load',()=>{
       showProjectEntryV123();
     }
   },1050);
+});
+</script>
+
+
+<style>
+/* ==========================================================
+   V126 SOBRE V125
+   Portada izquierda con imagen institucional sin textos.
+   ========================================================== */
+.project-entry-brand-v123.project-entry-brand-v126{
+  background:#e73b42 url('assets/portada_inicio_riobamba.png') center center / cover no-repeat !important;
+  position:relative !important;
+}
+.project-entry-brand-v123.project-entry-brand-v126::before{
+  display:none !important;
+}
+.project-entry-brand-v123.project-entry-brand-v126 > *{
+  display:none !important;
+}
+@media(max-width:980px){
+  .project-entry-brand-v123.project-entry-brand-v126{
+    min-height:300px !important;
+    background-size:cover !important;
+    background-position:center center !important;
+  }
+}
+</style>
+
+<script>
+/* ==========================================================
+   V126 SOBRE V125
+   Garantiza que la portada use la imagen institucional en el panel izquierdo.
+   ========================================================== */
+function patchProjectEntryImageV126(){
+  ensureProjectEntryV123();
+  const left=document.querySelector('#projectEntryV123 .project-entry-brand-v123');
+  if(left){
+    left.classList.add('project-entry-brand-v126');
+    left.innerHTML='';
+    left.setAttribute('aria-hidden','true');
+  }
+}
+window.addEventListener('load',()=>{
+  setTimeout(patchProjectEntryImageV126,300);
+  setTimeout(patchProjectEntryImageV126,1200);
 });
 </script>
 
