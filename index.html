@@ -23030,7 +23030,7 @@ function ensureAnteFactibilidadesV134(){
   emapar.estudio='EMAPAR';
   eersa.estudio='EERSA';
   cnt.estudio='CNT';
-  state.aprobatorio.estudios=[eersa,emapar,cnt];
+  state.aprobatorio.estudios=[emapar,eersa,cnt];
   return state.aprobatorio.estudios;
 }
 
@@ -23240,6 +23240,204 @@ window.addEventListener('load',()=>{
   },1450);
 });
 </script>
+
+
+<style>
+/* ==========================================================
+   V135 SOBRE V134
+   Mejora visual de la tabla Conclusión Técnica para ambos proyectos.
+   Mantiene todas las funciones de filas, niveles, cálculo y eliminación.
+   ========================================================== */
+#conclusionTabla{
+  width:100%;
+  overflow-x:auto;
+  padding:2px 2px 8px;
+  box-sizing:border-box;
+}
+
+#conclusionTabla .editable-conclusion{
+  width:100%!important;
+  min-width:760px;
+  table-layout:fixed!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  border:1px solid #b9cad9!important;
+  border-radius:14px!important;
+  overflow:hidden!important;
+  background:#ffffff!important;
+  box-shadow:0 10px 26px rgba(11,43,76,.07)!important;
+}
+
+#conclusionTabla .editable-conclusion th,
+#conclusionTabla .editable-conclusion td{
+  box-sizing:border-box!important;
+  border:0!important;
+  border-right:1px solid #c7d4df!important;
+  border-bottom:1px solid #c7d4df!important;
+}
+
+#conclusionTabla .editable-conclusion th:last-child,
+#conclusionTabla .editable-conclusion td:last-child{
+  border-right:0!important;
+}
+
+#conclusionTabla .editable-conclusion tbody tr:last-child td{
+  border-bottom:0!important;
+}
+
+#conclusionTabla .editable-conclusion th{
+  padding:12px 10px!important;
+  background:#e7f0f7!important;
+  color:#0b2b4c!important;
+  font-size:12px!important;
+  line-height:1.2!important;
+  text-align:left!important;
+  vertical-align:middle!important;
+}
+
+#conclusionTabla .editable-conclusion td{
+  padding:8px!important;
+  background:#ffffff!important;
+  vertical-align:middle!important;
+}
+
+#conclusionTabla .editable-conclusion tbody tr:nth-child(even) td{
+  background:#fbfdff!important;
+}
+
+#conclusionTabla .editable-conclusion tbody tr:hover td{
+  background:#f4f9fc!important;
+}
+
+/* Distribución de columnas más equilibrada. */
+#conclusionTabla .editable-conclusion th:nth-child(1),
+#conclusionTabla .editable-conclusion td:nth-child(1){width:34%!important;}
+#conclusionTabla .editable-conclusion th:nth-child(2),
+#conclusionTabla .editable-conclusion td:nth-child(2){width:18%!important;}
+#conclusionTabla .editable-conclusion th:nth-child(3),
+#conclusionTabla .editable-conclusion td:nth-child(3){width:18%!important;}
+#conclusionTabla .editable-conclusion th:nth-child(4),
+#conclusionTabla .editable-conclusion td:nth-child(4){width:14%!important;}
+#conclusionTabla .editable-conclusion th:nth-child(5),
+#conclusionTabla .editable-conclusion td:nth-child(5){
+  width:110px!important;
+  min-width:110px!important;
+  text-align:center!important;
+}
+
+#conclusionTabla .editable-conclusion textarea.concl-edit-v87,
+#conclusionTabla .editable-conclusion input.concl-edit-v87,
+#conclusionTabla .editable-conclusion .level-item input{
+  margin:0!important;
+  border:1px solid #c7d6e3!important;
+  border-radius:10px!important;
+  background:#ffffff!important;
+  box-shadow:none!important;
+}
+
+#conclusionTabla .editable-conclusion textarea.concl-edit-v87{
+  min-height:46px!important;
+  resize:vertical!important;
+}
+
+#conclusionTabla .editable-conclusion input.concl-edit-v87{
+  min-height:42px!important;
+}
+
+#conclusionTabla .editable-conclusion .levels-edit{
+  min-width:0!important;
+  background:inherit!important;
+}
+
+#conclusionTabla .editable-conclusion .level-item{
+  grid-template-columns:minmax(0,1fr) 28px!important;
+  align-items:center!important;
+  gap:6px!important;
+  margin:0 0 6px!important;
+}
+
+#conclusionTabla .editable-conclusion .add-level-row{
+  min-height:32px!important;
+  padding:6px 10px!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:#e7f0f7!important;
+  color:#0b2b4c!important;
+  box-shadow:none!important;
+}
+
+/* La celda debe conservar comportamiento de tabla. Esto elimina el doble recuadro. */
+#conclusionTabla .editable-conclusion td.row-actions{
+  display:table-cell!important;
+  padding:8px!important;
+  vertical-align:middle!important;
+  background:inherit!important;
+}
+
+#conclusionTabla .editable-conclusion .actions-v73{
+  width:100%!important;
+  min-height:42px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  flex-wrap:wrap!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+#conclusionTabla .editable-conclusion .mini-plus{
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  min-height:32px!important;
+  padding:0!important;
+  border:1px solid #0b4c75!important;
+  border-radius:50%!important;
+  background:#0b4c75!important;
+  color:#ffffff!important;
+  font-size:18px!important;
+  line-height:1!important;
+  box-shadow:0 4px 10px rgba(11,76,117,.18)!important;
+}
+
+#conclusionTabla .editable-conclusion .danger.mini-btn{
+  min-height:32px!important;
+  padding:6px 9px!important;
+  border:0!important;
+  border-radius:9px!important;
+  font-size:10px!important;
+  white-space:nowrap!important;
+  box-shadow:none!important;
+}
+
+#conclusionTabla .editable-conclusion .no-row-action-v73{
+  display:inline-flex!important;
+  width:32px!important;
+  height:32px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#8da0b2!important;
+  font-size:16px!important;
+  font-weight:700!important;
+}
+
+#conclusionTabla .conclusion-help-v73,
+#conclusionTabla .calc-note{
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
+
+@media(max-width:900px){
+  #conclusionTabla .editable-conclusion{
+    min-width:720px!important;
+  }
+}
+</style>
 
 </body>
 </html>
