@@ -24185,5 +24185,260 @@ window.addEventListener('load',()=>{
 });
 </script>
 
+
+
+<style>
+/* ==========================================================
+   V140 SOBRE V139
+   1. Controles compactos en tablas de requisitos.
+   2. Tipo de proyecto integrado al título del registro guardado.
+   ========================================================== */
+
+/* Los checks de Cumple / No cumple / No aplica conservan tamaño nativo compacto. */
+html body #requisitosForm .req-table-v112 input[type="checkbox"],
+html body #requisitosForm .req-compact input[type="checkbox"]{
+  -webkit-appearance:auto!important;
+  appearance:auto!important;
+  display:block!important;
+  width:18px!important;
+  min-width:18px!important;
+  max-width:18px!important;
+  height:18px!important;
+  min-height:18px!important;
+  max-height:18px!important;
+  padding:0!important;
+  margin:2px auto!important;
+  border-radius:3px!important;
+  box-shadow:none!important;
+  accent-color:#0b4c75!important;
+  cursor:pointer!important;
+}
+html body #requisitosForm .req-table-v112 td.center,
+html body #requisitosForm .req-compact td.center{
+  padding:8px 4px!important;
+  text-align:center!important;
+  vertical-align:top!important;
+}
+
+/* El tipo de proyecto forma parte de la misma línea del título. */
+html body #savedReportsResultsV131 .saved-search-open-v139 strong{
+  color:#0b2b4c!important;
+  font-size:10.5px!important;
+  font-weight:900!important;
+  opacity:1!important;
+}
+html body #savedReportsResultsV131 .saved-meta-v139{
+  color:#456881!important;
+  opacity:1!important;
+}
+</style>
+
+<script>
+/* ==========================================================
+   V140 SOBRE V139
+   - Lista: eGOB - Tipo de informe - Tipo de proyecto.
+   - Autocompletado de Resolución de Anteproyecto por eGOB para
+     Informe Técnico Aprobatorio de Obra Mayor Definitivo.
+   ========================================================== */
+
+function savedProjectTypeTextV140(record){
+  return typeof savedProjectTypeLabelV139==='function' && savedProjectTypeLabelV139(record)==='ANTEPROYECTO'
+    ? 'Anteproyecto'
+    : 'Definitivo';
+}
+
+function savedCombinedTitleV140(record){
+  let title=typeof savedTitleV119==='function'
+    ? savedTitleV119(record)
+    : `eGOB ${savedRecordKeyV131(record)}`;
+  title=String(title||'').replace(/^\s*eGOB\s*/i,'').trim();
+  return `${title} - ${savedProjectTypeTextV140(record)}`;
+}
+
+renderSavedSearchResultsV131=function(query=''){
+  const list=document.getElementById('savedReportsResultsV131');
+  if(!list) return;
+  const q=normalizeSearchV131(query);
+  let matches=(savedReportsCacheV131||[]).filter(item=>!q || savedRecordSearchTextV131(item).includes(q));
+  matches=matches.slice(0,12);
+
+  if(!matches.length){
+    list.innerHTML='<div class="saved-search-empty-v131">No se encontraron informes guardados.</div>';
+  }else{
+    list.innerHTML=matches.map(item=>{
+      const key=savedRecordKeyV131(item);
+      const encoded=encodeURIComponent(key);
+      const owner=savedOwnerV131(item)||'Propietario no registrado';
+      const project=savedProjectV131(item)||'Proyecto sin nombre';
+      const title=savedCombinedTitleV140(item);
+      return `<div class="saved-search-result-row-v139">
+        <button type="button" class="saved-search-result-v131 saved-search-open-v139" data-saved-key-v131="${esc(encoded)}">
+          <strong>${esc(title)}</strong>
+          <span class="saved-meta-v139">${esc(owner)} · ${esc(project)}</span>
+        </button>
+        <button type="button" class="saved-search-delete-v139" data-delete-key-v139="${esc(encoded)}" onclick="deleteSavedRecordV139(decodeURIComponent(this.dataset.deleteKeyV139||''),event)" title="Eliminar informe" aria-label="Eliminar informe">${trashIconV139()}</button>
+      </div>`;
+    }).join('');
+  }
+  list.classList.add('open');
+};
+
+function normalizedEgobV140(value){
+  let out=String(value||'').trim();
+  if(typeof obsBaseEgobV119==='function') out=obsBaseEgobV119(out);
+  return out.replace(/^\s*eGOB\s*/i,'').replace(/\s+/g,'').toUpperCase();
+}
+
+function isObraMayorAprobatorioV140(){
+  const project=typeof projectTypeV123==='function' ? projectTypeV123() : (state?.projectType||'');
+  const report=normalizeSearchV131(state?.tipoInforme || document.getElementById('tipoInforme')?.value || '');
+  return project==='obra_mayor_definitivo' && report.includes('APROBATORIO');
+}
+
+function savedInfoValueV140(record, labels){
+  const wanted=(Array.isArray(labels)?labels:[labels]).map(normalizeSearchV131);
+  const fields=DATA.infoFields||[];
+  for(const field of fields){
+    const label=normalizeSearchV131(field?.label||'');
+    if(wanted.some(key=>label===key || label.includes(key) || key.includes(label))){
+      const value=record?.info?.[field.key];
+      if(String(value||'').trim()) return value;
+    }
+  }
+  return '';
+}
+
+function recordIsAnteproyectoV140(record){
+  return savedProjectTypeTextV140(record)==='Anteproyecto';
+}
+
+function recordIsAprobatorioV140(record){
+  return normalizeSearchV131(record?.tipoInforme||'').includes('APROBATORIO');
+}
+
+async function findSavedByEgobV140(egob){
+  const target=normalizedEgobV140(egob);
+  if(!target || target.length<3) return null;
+  let rows=[];
+  try{
+    rows=typeof dbAll==='function' && db ? await dbAll() : (savedReportsCacheV131||[]);
+  }catch(error){
+    console.warn('V140: no se pudo consultar los informes guardados',error);
+    rows=savedReportsCacheV131||[];
+  }
+  const exact=(rows||[]).filter(row=>normalizedEgobV140(row?.egob)===target);
+  exact.sort((a,b)=>{
+    const score=x=>(recordIsAnteproyectoV140(x)?100:0)+(recordIsAprobatorioV140(x)?50:0);
+    const diff=score(b)-score(a);
+    if(diff) return diff;
+    return String(b?.updatedAt||'').localeCompare(String(a?.updatedAt||''));
+  });
+  return exact[0]||null;
+}
+
+function copyGeneralInfoFromSavedV140(source){
+  if(!source) return;
+  if(!state.info) state.info={};
+  if(source.info && typeof source.info==='object'){
+    Object.assign(state.info, JSON.parse(JSON.stringify(source.info)));
+  }
+  if(Array.isArray(source.propietarios) && source.propietarios.length){
+    state.propietarios=JSON.parse(JSON.stringify(source.propietarios));
+  }
+  ['apoderado','catastral','pitMap'].forEach(key=>{
+    if(source[key] && typeof source[key]==='object') state[key]=JSON.parse(JSON.stringify(source[key]));
+  });
+}
+
+function resolutionDocumentV140(source){
+  return source?.aprobatorio?.anteproyecto?.documento
+    || source?.resolucionAnteproyecto?.documento
+    || source?.documento
+    || source?.tipoInforme
+    || 'INFORME TÉCNICO APROBATORIO';
+}
+
+function fillResolutionFromSavedV140(source,egob){
+  ensureAprobatorioData();
+  const previous=state.aprobatorio?.anteproyecto||{};
+  const proyectista=savedInfoValueV140(source,['PROYECTISTA']);
+  const senescyt=savedInfoValueV140(source,['REGISTRO SENESCYT','REG. SENESCYT']);
+  state.aprobatorio.anteproyecto={
+    ...previous,
+    activo:true,
+    manualToggle:true,
+    documento:String(resolutionDocumentV140(source)||'').toUpperCase(),
+    egob:String(egob||source?.egob||'').trim().toUpperCase(),
+    tecnico:String(source?.aprobatorio?.anteproyecto?.tecnico || source?.tecnico || '').toUpperCase(),
+    criterio:'FAVORABLE',
+    calculista:String(source?.aprobatorio?.anteproyecto?.calculista || proyectista || '').toUpperCase(),
+    senescyt:typeof formatSenescyt==='function'
+      ? formatSenescyt(source?.aprobatorio?.anteproyecto?.senescyt || senescyt || '')
+      : String(source?.aprobatorio?.anteproyecto?.senescyt || senescyt || '')
+  };
+}
+
+let anteEgobLookupTimerV140=null;
+let anteEgobLookupBusyV140=false;
+let anteEgobLastAppliedV140='';
+
+async function autoFillAnteproyectoByEgobV140(value){
+  if(anteEgobLookupBusyV140 || !isObraMayorAprobatorioV140()) return;
+  const target=normalizedEgobV140(value);
+  if(!target || target.length<3 || target===anteEgobLastAppliedV140) return;
+  anteEgobLookupBusyV140=true;
+  try{
+    const source=await findSavedByEgobV140(value);
+    if(!source) return;
+    copyGeneralInfoFromSavedV140(source);
+    fillResolutionFromSavedV140(source,value);
+    anteEgobLastAppliedV140=target;
+
+    /* Conserva el eGOB principal, técnico, tipo y fechas del trámite definitivo. */
+    if(typeof applyStateToUI==='function') applyStateToUI();
+    else{
+      if(typeof renderInfoForm==='function') renderInfoForm();
+      if(typeof setInfoValues==='function') setInfoValues();
+      if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+      if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+      if(typeof renderReport==='function') renderReport();
+      if(typeof renderPreview==='function') renderPreview();
+    }
+    if(typeof msg==='function'){
+      msg(`Datos autocompletados desde el Anteproyecto eGOB ${source.egob||value}.`,true);
+    }
+  }finally{
+    anteEgobLookupBusyV140=false;
+  }
+}
+
+function bindAnteEgobAutocompleteV140(){
+  const input=document.getElementById('antEgob');
+  if(!input || input.dataset.autocompleteV140==='1' || !isObraMayorAprobatorioV140()) return;
+  input.dataset.autocompleteV140='1';
+  input.addEventListener('input',()=>{
+    clearTimeout(anteEgobLookupTimerV140);
+    anteEgobLookupTimerV140=setTimeout(()=>autoFillAnteproyectoByEgobV140(input.value),450);
+  });
+  input.addEventListener('change',()=>autoFillAnteproyectoByEgobV140(input.value));
+}
+
+if(typeof renderAprobatorioForm==='function'){
+  const _renderAprobatorioForm_base_V140=renderAprobatorioForm;
+  renderAprobatorioForm=function(){
+    const out=_renderAprobatorioForm_base_V140();
+    setTimeout(bindAnteEgobAutocompleteV140,0);
+    return out;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    bindAnteEgobAutocompleteV140();
+    if(typeof refreshSavedSearchV131==='function') refreshSavedSearchV131();
+  },1100);
+});
+</script>
+
 </body>
 </html>
