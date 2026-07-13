@@ -24734,5 +24734,76 @@ document.addEventListener('focusout',event=>{
 });
 </script>
 
+
+
+<style>
+/* ==========================================================
+   V142 SOBRE V141
+   Encabezados uniformes para todos los tipos de informe.
+   ========================================================== */
+html body .report h2{
+  display:block!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  margin:18px 0 10px!important;
+  padding:0 0 6px 0!important;
+  border:0!important;
+  border-bottom:1px solid #333333!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#111111!important;
+  font-size:14px!important;
+  line-height:1.25!important;
+  font-weight:700!important;
+  text-align:left!important;
+  text-transform:uppercase!important;
+}
+@media print{
+  html body .report h2{
+    margin:14px 0 8px!important;
+    padding-bottom:5px!important;
+    border-bottom:1px solid #333333!important;
+    color:#000000!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+}
+</style>
+
+<script>
+/* ==========================================================
+   V142 SOBRE V141
+   Numera consecutivamente todos los encabezados H2 del informe.
+   Se aplica a Observaciones, Aprobatorio y Desistimiento, tanto
+   para Obra Mayor Definitivo como para Anteproyecto.
+   ========================================================== */
+function normalizeReportHeadingsV142(root=document.getElementById('report')){
+  if(!root) return '';
+  const headings=[...root.querySelectorAll('h2')];
+  headings.forEach((heading,index)=>{
+    const clean=String(heading.textContent||'')
+      .replace(/^\s*\d+\s*[\.\)\-:]?\s*/,'')
+      .trim();
+    if(!clean) return;
+    heading.textContent=`${index+1}. ${clean.toLocaleUpperCase('es-EC')}`;
+    heading.classList.add('report-section-heading-v142');
+  });
+  return root.innerHTML;
+}
+
+if(typeof renderReport==='function'){
+  const _renderReport_base_V142=renderReport;
+  renderReport=function(){
+    _renderReport_base_V142();
+    return normalizeReportHeadingsV142(document.getElementById('report'));
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>normalizeReportHeadingsV142(),900);
+});
+</script>
+
 </body>
 </html>
