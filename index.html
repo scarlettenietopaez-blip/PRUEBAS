@@ -3571,7 +3571,7 @@ main{
 </div>
 
 <header class="no-print">
-  <h1>Generador Local de Informes de Obras Mayores</h1>
+  <h1>GENERADOR LOCAL DE INFORMES</h1>
   <p><br><span id="dataSourceStatus">Fuente de datos: verificando CSV...</span></p>
 </header>
 
@@ -21024,6 +21024,35 @@ window.addEventListener('load',()=>{
   setTimeout(patchProjectEntryImageV126,1200);
 });
 </script>
+
+
+<style>
+/* ==========================================================
+   V127 SOBRE V126
+   Ajustes del encabezado y de la portada principal.
+   ========================================================== */
+/* Quitar el ícono superior de Riobamba */
+header.no-print::before{
+  content:none !important;
+  display:none !important;
+}
+
+/* Quitar el texto institucional pequeño bajo el título */
+header.no-print h1::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Texto institucional inferior de la portada en azul marino */
+.project-entry-brand-v123.project-entry-brand-v126::after{
+  color:#0b2b4c !important;
+}
+
+/* Línea divisoria vertical en azul marino */
+.project-entry-content-v123{
+  border-left-color:#0b2b4c !important;
+}
+</style>
 
 </body>
 </html>
