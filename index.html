@@ -23439,5 +23439,244 @@ window.addEventListener('load',()=>{
 }
 </style>
 
+
+
+<style>
+/* ==========================================================
+   V136 SOBRE V135
+   Inversión institucional de botones en todo el formulario:
+   - Botones azules -> fondo blanco y texto azul marino.
+   - Botones blancos o claros -> fondo azul marino y texto blanco.
+   - Se conservan sin cambios las pestañas de navegación y los
+     botones semánticos de peligro, éxito y favoritos.
+   ========================================================== */
+
+/* 1. Botones primarios que antes tenían fondo azul. */
+html body button:not(.tab-btn):not(.secondary):not(.ghost):not(.danger):not(.success):not(.star-btn-v55):not(.star-btn-v59):not(.use-fav-btn-v61):not(.remove-fav-btn-v61):not(.validation-go-v96):not(.header-report-action-v131):not(.saved-search-result-v131):not(.home-project-v124),
+html body .button-label button:not(.tab-btn):not(.secondary):not(.ghost):not(.danger):not(.success):not(.star-btn-v55):not(.star-btn-v59):not(.use-fav-btn-v61):not(.remove-fav-btn-v61):not(.validation-go-v96){
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#0b2b4c!important;
+  border:1.5px solid #0b4c75!important;
+  box-shadow:0 4px 10px rgba(11,43,76,.10)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+html body button:not(.tab-btn):not(.secondary):not(.ghost):not(.danger):not(.success):not(.star-btn-v55):not(.star-btn-v59):not(.use-fav-btn-v61):not(.remove-fav-btn-v61):not(.validation-go-v96):not(.header-report-action-v131):not(.saved-search-result-v131):not(.home-project-v124):hover,
+html body button:not(.tab-btn):not(.secondary):not(.ghost):not(.danger):not(.success):not(.star-btn-v55):not(.star-btn-v59):not(.use-fav-btn-v61):not(.remove-fav-btn-v61):not(.validation-go-v96):not(.header-report-action-v131):not(.saved-search-result-v131):not(.home-project-v124):focus-visible{
+  background:#f2f7fb!important;
+  color:#071f37!important;
+  border-color:#082f50!important;
+  box-shadow:0 6px 14px rgba(11,43,76,.16)!important;
+}
+
+/* 2. Botones secundarios, claros o transparentes pasan a azul. */
+html body button.secondary:not(.tab-btn),
+html body button.ghost:not(.tab-btn),
+html body button.search-toggle-v44,
+html body button.pit-toggle-v59,
+html body #errorModalV71 button.close-error-v71,
+html body button.validation-close-v96,
+html body button.validation-muted-v96{
+  background:#0b4c75!important;
+  background-image:none!important;
+  color:#ffffff!important;
+  border:1.5px solid #0b4c75!important;
+  box-shadow:0 4px 10px rgba(11,43,76,.16)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+html body button.secondary:not(.tab-btn):hover,
+html body button.secondary:not(.tab-btn):focus-visible,
+html body button.ghost:not(.tab-btn):hover,
+html body button.ghost:not(.tab-btn):focus-visible,
+html body button.search-toggle-v44:hover,
+html body button.pit-toggle-v59:hover,
+html body #errorModalV71 button.close-error-v71:hover,
+html body button.validation-close-v96:hover,
+html body button.validation-muted-v96:hover{
+  background:#073a5b!important;
+  color:#ffffff!important;
+  border-color:#073a5b!important;
+}
+
+/* 3. Acciones del encabezado: antes blancas, ahora azules. */
+html body header.no-print #headerReportActionsV131 .header-report-action-v131,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:hover,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:focus,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:focus-visible,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:active{
+  background:#0b4c75!important;
+  background-image:none!important;
+  color:#ffffff!important;
+  border:2px solid #ffffff!important;
+  box-shadow:0 5px 14px rgba(0,0,0,.24)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:hover,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:focus-visible{
+  background:#073a5b!important;
+}
+html body header.no-print #headerReportActionsV131 .header-report-action-v131 svg,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:hover svg,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:focus svg,
+html body header.no-print #headerReportActionsV131 .header-report-action-v131:active svg{
+  stroke:#ffffff!important;
+  color:#ffffff!important;
+  opacity:1!important;
+}
+
+/* 4. Botón Inicio: antes blanco, ahora azul con icono blanco. */
+html body #homeProjectBtnV124.home-project-v124,
+html body #homeProjectBtnV124.home-project-v124:hover,
+html body #homeProjectBtnV124.home-project-v124:focus,
+html body #homeProjectBtnV124.home-project-v124:focus-visible,
+html body #homeProjectBtnV124.home-project-v124:active{
+  background:#0b4c75!important;
+  background-image:none!important;
+  color:#ffffff!important;
+  border:2px solid #ffffff!important;
+  box-shadow:0 7px 18px rgba(0,0,0,.24)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+html body #homeProjectBtnV124.home-project-v124:hover,
+html body #homeProjectBtnV124.home-project-v124:focus-visible{
+  background:#073a5b!important;
+}
+html body #homeProjectBtnV124.home-project-v124 svg{
+  stroke:#ffffff!important;
+  color:#ffffff!important;
+}
+
+/* 5. Informes guardados: antes blancos, ahora azules. */
+html body #savedReportsResultsV131 .saved-search-result-v131,
+html body #savedReportsResultsV131 .saved-search-result-v131:hover,
+html body #savedReportsResultsV131 .saved-search-result-v131:focus,
+html body #savedReportsResultsV131 .saved-search-result-v131:focus-visible,
+html body #savedReportsResultsV131 .saved-search-result-v131:active{
+  background:#0b4c75!important;
+  background-image:none!important;
+  color:#ffffff!important;
+  border:1px solid #0b4c75!important;
+  box-shadow:0 3px 9px rgba(11,43,76,.14)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+html body #savedReportsResultsV131 .saved-search-result-v131:hover,
+html body #savedReportsResultsV131 .saved-search-result-v131:focus-visible{
+  background:#073a5b!important;
+  border-color:#073a5b!important;
+}
+html body #savedReportsResultsV131 .saved-search-result-v131 strong,
+html body #savedReportsResultsV131 .saved-search-result-v131 span{
+  color:#ffffff!important;
+}
+html body #savedReportsResultsV131 .saved-search-result-v131 span{
+  opacity:.82!important;
+}
+
+/* 6. Flechas del carrusel: antes azules, ahora blancas. */
+html body .side-widget-nav-v129 button:not(.tab-btn),
+html body .side-widget-nav-v129 button:not(.tab-btn):hover:not(:disabled),
+html body .side-widget-nav-v129 button:not(.tab-btn):focus-visible{
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#0b2b4c!important;
+  border:1.5px solid #0b4c75!important;
+  box-shadow:0 3px 8px rgba(11,43,76,.10)!important;
+  opacity:1!important;
+}
+html body .side-widget-nav-v129 button:not(.tab-btn):hover:not(:disabled),
+html body .side-widget-nav-v129 button:not(.tab-btn):focus-visible{
+  background:#edf4f8!important;
+  color:#071f37!important;
+}
+html body .side-widget-nav-v129 button:disabled{
+  background:#f1f5f8!important;
+  color:#8094a5!important;
+  border-color:#c5d2dc!important;
+  opacity:.72!important;
+}
+
+/* 7. Opciones de proyecto: antes azules, ahora blancas. */
+html body .project-entry-v123 .project-option-v123,
+html body .project-entry-v123 .project-option-v123:hover,
+html body .project-entry-v123 .project-option-v123:focus-visible{
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#0b2b4c!important;
+  border:2px solid #0b4c75!important;
+  box-shadow:0 12px 25px rgba(11,43,76,.12)!important;
+}
+html body .project-entry-v123 .project-option-v123:hover,
+html body .project-entry-v123 .project-option-v123:focus-visible{
+  background:#f2f7fb!important;
+  border-color:#073a5b!important;
+}
+html body .project-entry-v123 .project-option-v123 .num{
+  background:#0b4c75!important;
+  color:#ffffff!important;
+  border-color:#0b4c75!important;
+}
+html body .project-entry-v123 .project-option-v123 .title,
+html body .project-entry-v123 .project-option-v123 .arrow{
+  color:#0b2b4c!important;
+}
+
+/* 8. Conclusión técnica: botón + azul pasa a blanco. */
+html body #conclusionTabla .editable-conclusion .mini-plus,
+html body #conclusionTabla .editable-conclusion .mini-plus:hover,
+html body #conclusionTabla .editable-conclusion .mini-plus:focus-visible{
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#0b4c75!important;
+  border:1.5px solid #0b4c75!important;
+  box-shadow:0 4px 10px rgba(11,76,117,.12)!important;
+}
+html body #conclusionTabla .editable-conclusion .mini-plus:hover,
+html body #conclusionTabla .editable-conclusion .mini-plus:focus-visible{
+  background:#edf4f8!important;
+}
+
+/* 9. Botón nativo de archivos, originalmente claro, pasa a azul. */
+html body input[type="file"]::file-selector-button{
+  background:#0b4c75!important;
+  color:#ffffff!important;
+  border:1px solid #0b4c75!important;
+  border-radius:8px!important;
+  padding:7px 9px!important;
+  font-weight:800!important;
+  cursor:pointer!important;
+}
+html body input[type="file"]::file-selector-button:hover{
+  background:#073a5b!important;
+}
+
+/* 10. Las pestañas conservan exactamente la configuración previa. */
+html body .tabs .tab-btn{
+  background:#0d4f77!important;
+  color:#ffffff!important;
+  border:1px solid #0d4f77!important;
+  border-bottom:4px solid transparent!important;
+  opacity:.68!important;
+  box-shadow:0 6px 13px rgba(11,43,76,.15)!important;
+}
+html body .tabs .tab-btn:not(.active):hover{
+  background:#0d4f77!important;
+  color:#ffffff!important;
+  opacity:.88!important;
+}
+html body .tabs .tab-btn.active{
+  background:#0b4266!important;
+  color:#ffffff!important;
+  border-color:#0b4266!important;
+  border-bottom-color:#d91f3d!important;
+  opacity:1!important;
+  box-shadow:0 7px 16px rgba(11,43,76,.22), inset 0 -2px 0 #d91f3d!important;
+}
+</style>
+
 </body>
 </html>
