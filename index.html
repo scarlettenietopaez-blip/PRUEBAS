@@ -23781,5 +23781,409 @@ window.addEventListener('load',()=>{
 });
 </script>
 
+
+
+<style>
+/* ==========================================================
+   V139 SOBRE V138
+   1. Restaura la apariencia técnica de las tablas del informe.
+   2. Lista de guardados con tipo de proyecto y acción Eliminar.
+   3. Panel PIT: mapa más pequeño y tabla de datos más legible.
+   ========================================================== */
+
+/* 1. TABLAS DE LA VISTA DEL INFORME
+   Se anula el estilo institucional redondeado aplicado globalmente
+   a las tablas. En la vista y en impresión se usa cuadrícula completa. */
+.report table,
+.report table.informe-table,
+.report table.apr-info-table,
+.report table.info-general-v98{
+  width:100%!important;
+  border-collapse:collapse!important;
+  border-spacing:0!important;
+  border:1px solid #000!important;
+  border-radius:0!important;
+  overflow:visible!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+.report table thead,
+.report table tbody,
+.report table tfoot,
+.report table tr,
+.report table th,
+.report table td{
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.report table th,
+.report table td{
+  border:1px solid #000!important;
+  background:#fff!important;
+  color:#000!important;
+  background-clip:padding-box!important;
+}
+.report table th,
+.report table.informe-table th{
+  background:#d9d9d9!important;
+  color:#000!important;
+  font-weight:900!important;
+}
+.report table.apr-info-table .apr-info-label,
+.report table.info-general-v98 .apr-info-label,
+.report table.informe-table .label-cell,
+.report table.informe-table .study-cell{
+  background:#d9d9d9!important;
+  color:#000!important;
+  font-weight:900!important;
+}
+.report table.apr-info-table .apr-info-section,
+.report table.info-general-v98 .apr-info-section{
+  background:#cfcfcf!important;
+  color:#000!important;
+  font-weight:900!important;
+  text-align:center!important;
+}
+.report table.apr-info-table .apr-info-value,
+.report table.informe-table .data-cell,
+.report table.informe-table .highlight{
+  background:#fff!important;
+  color:#000!important;
+}
+.report table.estudios-table th{
+  background:#d9d9d9!important;
+}
+.report table.estudios-table td{
+  background:#fff!important;
+}
+@media print{
+  .report table,
+  .report table.informe-table,
+  .report table.apr-info-table,
+  .report table.info-general-v98{
+    border-collapse:collapse!important;
+    border-spacing:0!important;
+    border:1px solid #000!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+  }
+  .report table th,
+  .report table td{
+    border:1px solid #000!important;
+    border-radius:0!important;
+  }
+}
+
+/* 2. RESULTADOS DE INFORMES GUARDADOS */
+html body #savedReportsResultsV131{
+  padding:5px!important;
+  background:#fff!important;
+}
+.saved-search-result-row-v139{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 34px!important;
+  align-items:stretch!important;
+  gap:5px!important;
+  margin:0 0 5px!important;
+}
+.saved-search-result-row-v139:last-child{
+  margin-bottom:0!important;
+}
+html body #savedReportsResultsV131 .saved-search-open-v139,
+html body #savedReportsResultsV131 .saved-search-open-v139:hover,
+html body #savedReportsResultsV131 .saved-search-open-v139:focus,
+html body #savedReportsResultsV131 .saved-search-open-v139:focus-visible,
+html body #savedReportsResultsV131 .saved-search-open-v139:active{
+  width:100%!important;
+  min-height:45px!important;
+  display:block!important;
+  padding:6px 9px!important;
+  margin:0!important;
+  text-align:left!important;
+  border:1px solid #c7d7e5!important;
+  border-radius:7px!important;
+  background:#fff!important;
+  background-image:none!important;
+  color:#0b2b4c!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  text-transform:none!important;
+}
+html body #savedReportsResultsV131 .saved-search-open-v139:hover,
+html body #savedReportsResultsV131 .saved-search-open-v139:focus-visible{
+  border-color:#0b4c75!important;
+  background:#f4f8fb!important;
+}
+.saved-search-titleline-v139{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:7px!important;
+}
+html body #savedReportsResultsV131 .saved-search-open-v139 strong{
+  display:block!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#0b2b4c!important;
+  font-size:10.5px!important;
+  line-height:1.15!important;
+  font-weight:900!important;
+}
+html body #savedReportsResultsV131 .saved-search-open-v139 .saved-meta-v139{
+  display:block!important;
+  margin-top:3px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  color:#49657c!important;
+  font-size:9.5px!important;
+  line-height:1.15!important;
+  opacity:1!important;
+}
+.saved-project-badge-v139{
+  flex:0 0 auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  min-height:18px!important;
+  padding:2px 6px!important;
+  border-radius:999px!important;
+  background:#e8f0f7!important;
+  color:#0b2b4c!important;
+  font-size:8px!important;
+  line-height:1!important;
+  font-weight:1000!important;
+  letter-spacing:.2px!important;
+  text-transform:uppercase!important;
+}
+html body #savedReportsResultsV131 .saved-search-delete-v139,
+html body #savedReportsResultsV131 .saved-search-delete-v139:hover,
+html body #savedReportsResultsV131 .saved-search-delete-v139:focus,
+html body #savedReportsResultsV131 .saved-search-delete-v139:focus-visible,
+html body #savedReportsResultsV131 .saved-search-delete-v139:active{
+  width:34px!important;
+  min-width:34px!important;
+  min-height:45px!important;
+  padding:0!important;
+  margin:0!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1px solid #d21f3c!important;
+  border-radius:7px!important;
+  background:#fff!important;
+  background-image:none!important;
+  color:#d21f3c!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+}
+html body #savedReportsResultsV131 .saved-search-delete-v139:hover,
+html body #savedReportsResultsV131 .saved-search-delete-v139:focus-visible{
+  background:#fff1f3!important;
+  color:#a91029!important;
+  border-color:#a91029!important;
+}
+.saved-search-delete-v139 svg{
+  width:16px!important;
+  height:16px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:2!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+
+/* 3. PANEL PIT: mantener carrusel fijo, reduciendo mapa y ampliando datos. */
+#pitDetailCardV41 .pit-map-actions-v44{
+  margin:3px 0 5px!important;
+}
+#pitDetailCardV41 .pit-map-actions-v44 button{
+  min-height:31px!important;
+  padding:5px 8px!important;
+  font-size:10px!important;
+}
+#pitDetailCardV41 #pitLeafletMapV44,
+#pitDetailCardV41 .pit-leaflet-map-v44{
+  height:175px!important;
+  min-height:175px!important;
+  max-height:175px!important;
+  margin:0!important;
+  border-radius:8px!important;
+}
+#pitDetailCardV41 .pit-map-legend-v46{
+  gap:5px!important;
+  padding:3px 0 0!important;
+  font-size:8.5px!important;
+  line-height:1.05!important;
+}
+#pitDetailCardV41 .pit-detail-table{
+  width:100%!important;
+  table-layout:fixed!important;
+  margin-top:4px!important;
+  font-size:10px!important;
+  line-height:1.14!important;
+  border-collapse:collapse!important;
+}
+#pitDetailCardV41 .pit-detail-table th,
+#pitDetailCardV41 .pit-detail-table td{
+  padding:3px 5px!important;
+  font-size:10px!important;
+  line-height:1.14!important;
+}
+#pitDetailCardV41 .pit-detail-table th{
+  width:40%!important;
+}
+#pitDetailCardV41 .pit-pill{
+  margin:3px 0!important;
+  padding:3px 7px!important;
+  font-size:9.5px!important;
+}
+</style>
+
+<script>
+/* ==========================================================
+   V139 SOBRE V138 - Funciones
+   ========================================================== */
+
+function enforceTechnicalReportTablesV139(root){
+  const roots=root ? [root] : [...document.querySelectorAll('.report')];
+  roots.filter(Boolean).forEach(container=>{
+    container.querySelectorAll('table').forEach(table=>{
+      table.style.setProperty('width','100%','important');
+      table.style.setProperty('border-collapse','collapse','important');
+      table.style.setProperty('border-spacing','0','important');
+      table.style.setProperty('border','1px solid #000','important');
+      table.style.setProperty('border-radius','0','important');
+      table.style.setProperty('box-shadow','none','important');
+      table.querySelectorAll('thead,tbody,tfoot,tr,th,td').forEach(el=>{
+        el.style.setProperty('border-radius','0','important');
+        el.style.setProperty('box-shadow','none','important');
+      });
+      table.querySelectorAll('th,td').forEach(cell=>{
+        cell.style.setProperty('border','1px solid #000','important');
+        cell.style.setProperty('color','#000','important');
+      });
+      table.querySelectorAll('th').forEach(cell=>{
+        cell.style.setProperty('background','#d9d9d9','important');
+      });
+      table.querySelectorAll('td').forEach(cell=>{
+        cell.style.setProperty('background','#fff','important');
+      });
+      table.querySelectorAll('.apr-info-label,.label-cell,.study-cell').forEach(cell=>{
+        cell.style.setProperty('background','#d9d9d9','important');
+        cell.style.setProperty('font-weight','900','important');
+      });
+      table.querySelectorAll('.apr-info-section').forEach(cell=>{
+        cell.style.setProperty('background','#cfcfcf','important');
+        cell.style.setProperty('font-weight','900','important');
+        cell.style.setProperty('text-align','center','important');
+      });
+    });
+  });
+}
+
+if(typeof renderReport==='function'){
+  const _renderReport_base_V139=renderReport;
+  renderReport=function(){
+    const out=_renderReport_base_V139();
+    enforceTechnicalReportTablesV139(document.getElementById('report'));
+    return out;
+  };
+}
+
+function savedProjectTypeLabelV139(record){
+  const raw=String(record?.projectType||record?.tipoProyecto||record?.project_type||'').toLowerCase();
+  const all=String([
+    raw,
+    record?.nombreProyectoTipo||'',
+    record?.tipoProyectoNombre||'',
+    record?.tituloProyecto||''
+  ].join(' ')).toLowerCase();
+  if(raw==='anteproyecto_edificacion' || all.includes('anteproyecto')) return 'ANTEPROYECTO';
+  return 'DEFINITIVO';
+}
+
+function trashIconV139(){
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="M7 7l1 13h8l1-13"></path><path d="M10 11v5M14 11v5"></path></svg>`;
+}
+
+renderSavedSearchResultsV131=function(query=''){
+  const list=document.getElementById('savedReportsResultsV131');
+  if(!list) return;
+  const q=normalizeSearchV131(query);
+  let matches=(savedReportsCacheV131||[]).filter(item=>!q || savedRecordSearchTextV131(item).includes(q));
+  matches=matches.slice(0,12);
+
+  if(!matches.length){
+    list.innerHTML='<div class="saved-search-empty-v131">No se encontraron informes guardados.</div>';
+  }else{
+    list.innerHTML=matches.map(item=>{
+      const key=savedRecordKeyV131(item);
+      const encoded=encodeURIComponent(key);
+      const owner=savedOwnerV131(item)||'Propietario no registrado';
+      const project=savedProjectV131(item)||'Proyecto sin nombre';
+      const title=typeof savedTitleV119==='function' ? savedTitleV119(item) : `eGOB ${key}`;
+      const projectType=savedProjectTypeLabelV139(item);
+      return `<div class="saved-search-result-row-v139">
+        <button type="button" class="saved-search-result-v131 saved-search-open-v139" data-saved-key-v131="${esc(encoded)}">
+          <span class="saved-search-titleline-v139"><strong>${esc(title)}</strong><span class="saved-project-badge-v139">${esc(projectType)}</span></span>
+          <span class="saved-meta-v139">${esc(owner)} · ${esc(project)}</span>
+        </button>
+        <button type="button" class="saved-search-delete-v139" data-delete-key-v139="${esc(encoded)}" onclick="deleteSavedRecordV139(decodeURIComponent(this.dataset.deleteKeyV139||''),event)" title="Eliminar informe" aria-label="Eliminar informe">${trashIconV139()}</button>
+      </div>`;
+    }).join('');
+  }
+  list.classList.add('open');
+};
+
+async function deleteSavedRecordV139(key,event){
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  if(!key || typeof dbDelete!=='function') return;
+  if(!confirm(`¿Eliminar definitivamente el informe guardado ${key}?`)) return;
+  try{
+    await dbDelete(key);
+    savedReportsCacheV131=(savedReportsCacheV131||[]).filter(item=>savedRecordKeyV131(item)!==key);
+    const input=document.getElementById('savedReportsSearchV131');
+    renderSavedSearchResultsV131(input?.value||'');
+    if(typeof renderSavedList==='function') renderSavedList();
+    if(typeof msg==='function') msg('Informe eliminado correctamente.',true);
+  }catch(error){
+    console.error('V139: no se pudo eliminar el informe',error);
+    if(typeof msg==='function') msg('No se pudo eliminar el informe seleccionado.');
+  }
+}
+
+function adjustPitLayoutV139(){
+  try{
+    if(typeof pitLeafletMapV44!=='undefined' && pitLeafletMapV44){
+      setTimeout(()=>pitLeafletMapV44.invalidateSize?.(),80);
+    }
+  }catch(error){}
+}
+
+if(typeof renderPitDetailV41==='function'){
+  const _renderPitDetailV41_base_V139=renderPitDetailV41;
+  renderPitDetailV41=function(){
+    const out=_renderPitDetailV41_base_V139();
+    setTimeout(adjustPitLayoutV139,120);
+    return out;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    enforceTechnicalReportTablesV139();
+    adjustPitLayoutV139();
+    if(typeof refreshSavedSearchV131==='function') refreshSavedSearchV131();
+  },900);
+});
+</script>
+
 </body>
 </html>
