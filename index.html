@@ -23146,6 +23146,67 @@ function anteproyectoBaseLegalV134(){
   </div>`;
 }
 
+
+/* ==========================================================
+   V138 - Texto final configurable del informe aprobatorio de Anteproyecto.
+   Se carga desde data/anteproyecto_edificacion_config.csv.
+   ========================================================== */
+const ANTEPROYECTO_CONCLUSION_FINAL_FALLBACK_V138 = `EL ANTEPROYECTO DE EDIFICACIÓN, tiene un área a construir de {{Area Bruta}} m2, valor a tomar en cuenta para efecto del cálculo para el pago de la tasa administrativa. Por lo expuesto se establece que el trámite es FAVORABLE y se SOLICITA QUE PARA LA APROBACIÓN DEL PROYECTO DEFINITIVO se adjunte los requisitos establecidos en la Ordenanza 016-2023 de la Actualización del Código Urbano, Artículo 94.\nNota. - La información y datos que están en el proyecto son de exclusiva responsabilidad del proyectista y propietario, en el caso de existir datos erróneos, ocultos, la aprobación quedará automáticamente insubsistente.`;
+
+window.__ANTEPROYECTO_CONFIG_V138__ = window.__ANTEPROYECTO_CONFIG_V138__ || {
+  loaded:false,
+  loading:false,
+  values:{CONCLUSION_FINAL_APROBATORIO:ANTEPROYECTO_CONCLUSION_FINAL_FALLBACK_V138}
+};
+
+async function loadAnteproyectoConfigV138(force=false){
+  const store=window.__ANTEPROYECTO_CONFIG_V138__;
+  if(store.loading) return store.values;
+  if(store.loaded && !force) return store.values;
+  store.loading=true;
+  try{
+    const response=await fetch('data/anteproyecto_edificacion_config.csv',{cache:'no-store'});
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    const raw=await response.text();
+    const values={...store.values};
+    raw.replace(/^\uFEFF/,'').split(/\r?\n/).forEach((line,index)=>{
+      if(!line.trim() || index===0) return;
+      const cut=line.indexOf(';');
+      if(cut<0) return;
+      const key=line.slice(0,cut).trim();
+      const value=line.slice(cut+1).trim().replace(/\\n/g,'\n');
+      if(key) values[key]=value;
+    });
+    store.values=values;
+    store.loaded=true;
+  }catch(error){
+    console.warn('V138: no se pudo cargar la configuración de Anteproyecto; se usa el texto integrado.',error);
+  }finally{
+    store.loading=false;
+  }
+  return store.values;
+}
+
+function conclusionFinalAnteproyectoV138(){
+  const cfg=window.__ANTEPROYECTO_CONFIG_V138__?.values||{};
+  let text=String(cfg.CONCLUSION_FINAL_APROBATORIO||ANTEPROYECTO_CONCLUSION_FINAL_FALLBACK_V138)
+    .replace(/\\n/g,'\n');
+  const area=typeof infoValue==='function' ? String(infoValue('Área Bruta')||'') : '';
+  text=text
+    .replace(/\{\{\s*Area\s+Bruta\s*\}\}/gi,area)
+    .replace(/\{\{\s*Área\s+Bruta\s*\}\}/gi,area);
+  return text;
+}
+
+window.addEventListener('load',()=>{
+  loadAnteproyectoConfigV138().then(()=>{
+    if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()){
+      if(typeof renderReport==='function') renderReport();
+      if(typeof renderPreview==='function') renderPreview();
+    }
+  });
+});
+
 /* Render propio: evita perder secciones al transformar el informe de Obra Mayor. */
 const _renderInformeAprobatorio_base_V134=typeof renderInformeAprobatorio==='function'
   ? renderInformeAprobatorio : null;
@@ -23168,10 +23229,7 @@ renderInformeAprobatorio=function(){
   let detalle=String(inf2?.Texto_Base||'').trim();
   if(typeof replaceAnteproyectoTextV123==='function') detalle=replaceAnteproyectoTextV123(detalle,'aprobatorio');
 
-  const con2Row=typeof tmplRow==='function' ? tmplRow(t,'CON_002') : {};
-  let con2=String(con2Row?.Texto_Base||'').trim();
-  if(typeof replaceTemplate==='function') con2=replaceTemplate(con2).replaceAll('{{TABLA_HOJA_CONCLUSION_TECNICA_BASE}}','');
-  if(typeof replaceAnteproyectoTextV123==='function') con2=replaceAnteproyectoTextV123(con2,'aprobatorio');
+  const con2=conclusionFinalAnteproyectoV138();
 
   let n=1;
   let html=`${typeof reportHeaderAprobatorioV55==='function'?reportHeaderAprobatorioV55(title):''}${alertReq}`;
@@ -23180,8 +23238,8 @@ renderInformeAprobatorio=function(){
   html+=`<h2>${n++}. Base técnico - legal</h2>${anteproyectoBaseLegalV134()}`;
   html+=`<h2>${n++}. Factibilidades</h2>${factibilidadesReportV134()}`;
   html+=`<h2>${n++}. Conclusión técnica</h2><p>En concordancia con la Ordenanza No. 016-2023 de Actualización del Código Urbano, <strong>Artículo 84, Contenido de la Propuesta Técnica de Anteproyectos de Edificación</strong>, se concluye emitir el presente <strong>INFORME TÉCNICO FAVORABLE</strong>, de conformidad con el siguiente detalle:</p>${typeof conclusionReport==='function'?conclusionReport():''}`;
-  if(con2) html+=`<p>${typeof nl2br==='function'?nl2br(con2):esc(con2)}</p>`;
   if(typeof notaAprobatorioReportV66==='function') html+=notaAprobatorioReportV66();
+  if(con2) html+=`<p class="anteproyecto-conclusion-final-v138">${typeof nl2br==='function'?nl2br(con2):esc(con2)}</p>`;
   return html;
 };
 
