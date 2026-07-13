@@ -22928,5 +22928,318 @@ html body #savedReportsResultsV131 .saved-search-result-v131 span{
 }
 </style>
 
+
+
+<style>
+/* ==========================================================
+   V134 SOBRE V133
+   Anteproyecto de Edificación:
+   - Tabla de factibilidades dentro del requisito AP_REQ_009.
+   - Se eliminan Resolución de Anteproyecto y Consideraciones
+     estructurales del formulario de Anteproyecto.
+   - Estructura propia y estable del informe aprobatorio.
+   ========================================================== */
+.req-factibilidades-v134{
+  width:100%!important;
+  margin-top:8px!important;
+  overflow-x:auto!important;
+}
+.req-factibilidades-v134 .mini{
+  margin:0 0 7px!important;
+  color:#415d75!important;
+  font-size:10px!important;
+}
+.req-factibilidades-table-v134{
+  width:100%!important;
+  min-width:720px!important;
+  table-layout:fixed!important;
+  border-collapse:collapse!important;
+  background:#ffffff!important;
+}
+.req-factibilidades-table-v134 th{
+  background:#e7eff6!important;
+  color:#0b2b4c!important;
+  font-size:10px!important;
+  line-height:1.15!important;
+  padding:7px 6px!important;
+}
+.req-factibilidades-table-v134 td{
+  padding:5px!important;
+  vertical-align:top!important;
+}
+.req-factibilidades-table-v134 input,
+.req-factibilidades-table-v134 textarea{
+  width:100%!important;
+  min-height:34px!important;
+  margin:0!important;
+  padding:6px 8px!important;
+  font-size:11px!important;
+  box-sizing:border-box!important;
+}
+.req-factibilidades-table-v134 textarea{
+  min-height:48px!important;
+  resize:vertical!important;
+}
+.req-table-req9-v112 .req9-detail{
+  width:54%!important;
+}
+.req-table-req9-v112 td:nth-last-child(3){
+  min-width:520px!important;
+}
+</style>
+
+<script>
+/* ==========================================================
+   V134 SOBRE V133 - Correcciones funcionales de Anteproyecto
+   ========================================================== */
+
+function normStudyV134(value){
+  return String(value||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toUpperCase().replace(/\s+/g,' ').trim();
+}
+
+function isAnteReqFactibilidadesV134(req){
+  return typeof isAnteproyectoV123==='function'
+    && isAnteproyectoV123()
+    && String(req?.id||'').trim()==='AP_REQ_009';
+}
+
+function ensureAnteFactibilidadesV134(){
+  if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();
+  if(!state.aprobatorio) state.aprobatorio={};
+  const current=Array.isArray(state.aprobatorio.estudios) ? state.aprobatorio.estudios : [];
+
+  const take=(tests)=>{
+    const found=current.find(row=>{
+      const text=normStudyV134(`${row?.estudio||''} ${row?.documento||''}`);
+      return tests.some(test=>text.includes(test));
+    });
+    return found ? {
+      estudio:found.estudio||'',
+      documento:found.documento||'',
+      fecha:found.fecha||'',
+      evidencia:found.evidencia||''
+    } : {estudio:'',documento:'',fecha:'',evidencia:''};
+  };
+
+  const emapar=take(['EMAPAR','AGUA POTABLE']);
+  const eersa=take(['EERSA','EMPRESA ELECTRICA','ELÉCTRICA']);
+  const cnt=take(['CNT','TELECOMUNIC']);
+
+  emapar.estudio='EMAPAR';
+  eersa.estudio='EERSA';
+  cnt.estudio='CNT';
+  state.aprobatorio.estudios=[eersa,emapar,cnt];
+  return state.aprobatorio.estudios;
+}
+
+function renderAnteFactibilidadesTableV134(){
+  const rows=ensureAnteFactibilidadesV134();
+  return `<div class="req-factibilidades-v134">
+    <div class="mini">Registre la factibilidad o el pago correspondiente de cada empresa prestadora del servicio.</div>
+    <table class="req-factibilidades-table-v134">
+      <thead><tr>
+        <th style="width:14%">EMPRESA</th>
+        <th style="width:30%">DOCUMENTO / TRÁMITE</th>
+        <th style="width:16%">FECHA</th>
+        <th>EVIDENCIA / DETALLE</th>
+      </tr></thead>
+      <tbody>${rows.map((row,index)=>`<tr>
+        <td><input value="${esc(row.estudio||'')}" readonly></td>
+        <td><input value="${esc(row.documento||'')}" oninput="updEstudio(${index},'documento',this)"></td>
+        <td><input type="date" value="${esc(row.fecha||'')}" oninput="updEstudio(${index},'fecha',this)"></td>
+        <td><textarea oninput="updEstudio(${index},'evidencia',this)">${esc(row.evidencia||'')}</textarea></td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+/* El requisito AP_REQ_009 usa la misma lógica separada que el requisito
+   de factibilidades de Obra Mayor, pero con EMAPAR, EERSA y CNT. */
+const _isSistemasSoporteReqV111_base_V134=typeof isSistemasSoporteReqV111==='function'
+  ? isSistemasSoporteReqV111 : null;
+isSistemasSoporteReqV111=function(req){
+  if(isAnteReqFactibilidadesV134(req)) return true;
+  return _isSistemasSoporteReqV111_base_V134
+    ? _isSistemasSoporteReqV111_base_V134(req)
+    : false;
+};
+
+const _renderEstudiosTableHtmlV111_base_V134=typeof renderEstudiosTableHtmlV111==='function'
+  ? renderEstudiosTableHtmlV111 : null;
+renderEstudiosTableHtmlV111=function(){
+  if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()){
+    return renderAnteFactibilidadesTableV134();
+  }
+  return _renderEstudiosTableHtmlV111_base_V134
+    ? _renderEstudiosTableHtmlV111_base_V134()
+    : '';
+};
+
+const _renderReq9SeparadoV112_base_V134=typeof renderReq9SeparadoV112==='function'
+  ? renderReq9SeparadoV112 : null;
+if(_renderReq9SeparadoV112_base_V134){
+  renderReq9SeparadoV112=function(req,showNA,forceNA){
+    let out=_renderReq9SeparadoV112_base_V134(req,showNA,forceNA);
+    if(isAnteReqFactibilidadesV134(req)){
+      out=String(out).replace('Requisito 9 - Sistemas públicos de soporte','Factibilidades de servicios');
+    }
+    return out;
+  };
+}
+
+function removeAprobatorioSectionV134(pattern){
+  const box=document.getElementById('aprobatorioForm');
+  if(!box) return;
+  const title=[...box.children].find(el=>
+    el.classList?.contains('section-title') && pattern.test(el.textContent||'')
+  );
+  if(!title) return;
+  let node=title.nextElementSibling;
+  while(node && !node.classList.contains('section-title')){
+    const next=node.nextElementSibling;
+    node.remove();
+    node=next;
+  }
+  title.remove();
+}
+
+function cleanAnteproyectoAprobatorioFormV134(){
+  if(!(typeof isAnteproyectoV123==='function' && isAnteproyectoV123())) return;
+  removeAprobatorioSectionV134(/RESOLUCI[ÓO]N\s+DE\s+ANTEPROYECTO/i);
+  removeAprobatorioSectionV134(/CONSIDERACIONES\s+ESTRUCTURALES/i);
+}
+
+const _renderAprobatorioForm_base_V134=typeof renderAprobatorioForm==='function'
+  ? renderAprobatorioForm : null;
+if(_renderAprobatorioForm_base_V134){
+  renderAprobatorioForm=function(){
+    if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()){
+      ensureAnteFactibilidadesV134();
+    }
+    const out=_renderAprobatorioForm_base_V134();
+    cleanAnteproyectoAprobatorioFormV134();
+    setTimeout(cleanAnteproyectoAprobatorioFormV134,0);
+    return out;
+  };
+}
+
+function factibilidadesReportV134(){
+  const rows=ensureAnteFactibilidadesV134();
+  return `<table class="informe-table estudios-table">
+    <thead><tr><th>EMPRESA</th><th colspan="2">DOCUMENTO / TRÁMITE</th></tr></thead>
+    <tbody>${rows.map(row=>{
+      const evidencia=String(row.evidencia||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+      const span=Math.max(1,evidencia.length+1);
+      let html=`<tr><td class="study-cell" rowspan="${span}">${esc(row.estudio||'')}</td><td class="doc-title">${esc(row.documento||'')}</td><td class="doc-title center" style="width:16%">${esc(typeof fmtDate==='function'?fmtDate(row.fecha):row.fecha||'')}</td></tr>`;
+      evidencia.forEach(line=>{ html+=`<tr><td colspan="2">${esc(line)}</td></tr>`; });
+      return html;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+function anteproyectoBaseLegalV134(){
+  return `<div class="legal-block">
+    <p><strong>Del Procedimiento Administrativo para la Aprobación de Anteproyectos de Edificación</strong></p>
+    <ul class="section-list"><li>SECCIÓN TERCERA Aprobación Urbanística de Anteproyectos de Edificación (<strong>Artículos 81 - 86</strong>)</li></ul>
+  </div>`;
+}
+
+/* Render propio: evita perder secciones al transformar el informe de Obra Mayor. */
+const _renderInformeAprobatorio_base_V134=typeof renderInformeAprobatorio==='function'
+  ? renderInformeAprobatorio : null;
+renderInformeAprobatorio=function(){
+  if(!(typeof isAnteproyectoV123==='function' && isAnteproyectoV123())){
+    return _renderInformeAprobatorio_base_V134
+      ? _renderInformeAprobatorio_base_V134()
+      : '';
+  }
+
+  ensureAnteFactibilidadesV134();
+  const t=DATA.plantillaAprobatorio||[];
+  const title='INFORME TÉCNICO APROBATORIO ANTEPROYECTO DE EDIFICACIÓN';
+  const incumplidos=typeof requisitosPorEstado==='function' ? requisitosPorEstado('No Cumple') : [];
+  const alertReq=incumplidos.length
+    ? `<div class="apr-alert">ALERTA: Existen ${incumplidos.length} requisito(s) marcado(s) como NO CUMPLE. Revise la pestaña Requisitos antes de emitir el informe técnico aprobatorio.</div>`
+    : '';
+
+  const inf2=typeof tmplRow==='function' ? tmplRow(t,'INF_002') : {};
+  let detalle=String(inf2?.Texto_Base||'').trim();
+  if(typeof replaceAnteproyectoTextV123==='function') detalle=replaceAnteproyectoTextV123(detalle,'aprobatorio');
+
+  const con2Row=typeof tmplRow==='function' ? tmplRow(t,'CON_002') : {};
+  let con2=String(con2Row?.Texto_Base||'').trim();
+  if(typeof replaceTemplate==='function') con2=replaceTemplate(con2).replaceAll('{{TABLA_HOJA_CONCLUSION_TECNICA_BASE}}','');
+  if(typeof replaceAnteproyectoTextV123==='function') con2=replaceAnteproyectoTextV123(con2,'aprobatorio');
+
+  let n=1;
+  let html=`${typeof reportHeaderAprobatorioV55==='function'?reportHeaderAprobatorioV55(title):''}${alertReq}`;
+  html+=`<h2>${n++}. Información general</h2>${typeof reportInfoGeneralAprobatorio==='function'?reportInfoGeneralAprobatorio():''}`;
+  html+=`<h2>${n++}. Detalle del anteproyecto</h2>${detalle?`<p>${typeof nl2br==='function'?nl2br(detalle):esc(detalle)}</p>`:''}${typeof reqTable==='function'&&typeof requisitosPorEstado==='function'?reqTable(requisitosPorEstado('Cumple'),'apr'):''}`;
+  html+=`<h2>${n++}. Base técnico - legal</h2>${anteproyectoBaseLegalV134()}`;
+  html+=`<h2>${n++}. Factibilidades</h2>${factibilidadesReportV134()}`;
+  html+=`<h2>${n++}. Conclusión técnica</h2><p>En concordancia con la Ordenanza No. 016-2023 de Actualización del Código Urbano, <strong>Artículo 84, Contenido de la Propuesta Técnica de Anteproyectos de Edificación</strong>, se concluye emitir el presente <strong>INFORME TÉCNICO FAVORABLE</strong>, de conformidad con el siguiente detalle:</p>${typeof conclusionReport==='function'?conclusionReport():''}`;
+  if(con2) html+=`<p>${typeof nl2br==='function'?nl2br(con2):esc(con2)}</p>`;
+  if(typeof notaAprobatorioReportV66==='function') html+=notaAprobatorioReportV66();
+  return html;
+};
+
+function inferSavedProjectV134(record){
+  if(record?.projectType==='anteproyecto_edificacion' || record?.projectType==='obra_mayor_definitivo'){
+    return record.projectType;
+  }
+  if(Object.keys(record?.requisitos||{}).some(key=>String(key).startsWith('AP_REQ_'))){
+    return 'anteproyecto_edificacion';
+  }
+  const raw=normStudyV134(JSON.stringify(record||{}));
+  if(raw.includes('ANTEPROYECTO DE EDIFICACION')) return 'anteproyecto_edificacion';
+  const active=localStorage.getItem('GADMR_PROJECT_TYPE_V123');
+  return active==='anteproyecto_edificacion' ? active : 'obra_mayor_definitivo';
+}
+
+/* Migración al cargar: fija primero el proyecto y luego reconstruye requisitos,
+   formularios y vista del informe con la estructura correspondiente. */
+const _cargarFormulario_base_V134=typeof cargarFormulario==='function'
+  ? cargarFormulario : null;
+if(_cargarFormulario_base_V134){
+  cargarFormulario=async function(key){
+    let saved=null;
+    try{ saved=typeof dbGet==='function' ? await dbGet(key) : null; }catch(error){ console.warn('V134 lectura previa:',error); }
+    const projectId=inferSavedProjectV134(saved);
+    localStorage.setItem('GADMR_PROJECT_TYPE_V123',projectId);
+
+    const out=await _cargarFormulario_base_V134(key);
+    if(!state) return out;
+
+    state.projectType=projectId;
+    if(typeof applyProjectRequirementsV128==='function') applyProjectRequirementsV128(projectId,false);
+    if(projectId==='anteproyecto_edificacion') ensureAnteFactibilidadesV134();
+    if(typeof applyStateToUI==='function') applyStateToUI();
+    if(typeof updateProjectBadgeV123==='function') updateProjectBadgeV123();
+    if(typeof patchLabelsByProjectV123==='function') patchLabelsByProjectV123();
+    if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+    if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+    cleanAnteproyectoAprobatorioFormV134();
+    return out;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()){
+      ensureAnteFactibilidadesV134();
+      if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+      if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+      if(typeof renderReport==='function') renderReport();
+      if(typeof renderPreview==='function') renderPreview();
+      cleanAnteproyectoAprobatorioFormV134();
+    }
+  },1450);
+});
+</script>
+
 </body>
 </html>
