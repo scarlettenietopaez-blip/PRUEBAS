@@ -3993,6 +3993,17 @@ main{
       "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."
     },
     {
+      "id": "REQ_032",
+      "grupo": "Requisitos Generales:",
+      "texto": "9. Certificado de aprobación de planos y factibilidad de los sistemas públicos de soporte emitidos por las dependencias competentes.",
+      "opciones": [
+        "Cumple",
+        "No Cumple"
+      ],
+      "normaDefault": "Ordenanza 016-2023, Artículo 98",
+      "correccionDefault": "Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión."
+    },
+    {
       "id": "REQ_033",
       "grupo": "Requisitos más de 2 pisos o 400 m2",
       "texto": "1. Aprobación del Anteproyecto de Edificación con sus respectivos habilitantes.",
@@ -24923,6 +24934,59 @@ window.addEventListener('load',()=>{
     ].forEach(wrapReportGeneratorV143);
     applyReportSectionHeadingsV143();
   },1200);
+});
+</script>
+
+
+<script>
+/* ==========================================================
+   V144 SOBRE V143
+   Restaura el Requisito 9 de Obra Mayor Definitivo y su tabla
+   de estudios complementarios (EP-EMAPAR, EERSA, CNT, BOMBEROS).
+   ========================================================== */
+const REQUISITO_9_OBRA_MAYOR_V144 = {
+  id:'REQ_032',
+  grupo:'Requisitos Generales:',
+  texto:'9. Certificado de aprobación de planos y factibilidad de los sistemas públicos de soporte emitidos por las dependencias competentes.',
+  opciones:['Cumple','No Cumple'],
+  normaDefault:'Ordenanza 016-2023, Artículo 98',
+  correccionDefault:'Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.'
+};
+
+function asegurarRequisito9ObraMayorV144(lista){
+  if(!Array.isArray(lista)) return lista;
+  if(lista.some(r=>String(r?.id||'')==='REQ_032')) return lista;
+  const copia=JSON.parse(JSON.stringify(REQUISITO_9_OBRA_MAYOR_V144));
+  const pos=lista.findIndex(r=>String(r?.id||'')==='REQ_031');
+  if(pos>=0) lista.splice(pos+1,0,copia);
+  else lista.push(copia);
+  return lista;
+}
+
+/* Refuerza tanto la base estable de Obra Mayor como la lista activa. */
+if(typeof REQUISITOS_OBRA_MAYOR_V128!=='undefined'){
+  asegurarRequisito9ObraMayorV144(REQUISITOS_OBRA_MAYOR_V128);
+}
+if(typeof DATA!=='undefined' && !(typeof isAnteproyectoV123==='function' && isAnteproyectoV123())){
+  asegurarRequisito9ObraMayorV144(DATA.requisitos);
+}
+
+const _requisitosParaProyectoV128_base_V144 = typeof requisitosParaProyectoV128==='function'
+  ? requisitosParaProyectoV128 : null;
+if(_requisitosParaProyectoV128_base_V144){
+  requisitosParaProyectoV128=function(projectId){
+    const lista=_requisitosParaProyectoV128_base_V144(projectId);
+    if(projectId!=='anteproyecto_edificacion') asegurarRequisito9ObraMayorV144(lista);
+    return lista;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()) return;
+    if(typeof DATA!=='undefined') asegurarRequisito9ObraMayorV144(DATA.requisitos);
+    if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+  },1300);
 });
 </script>
 
