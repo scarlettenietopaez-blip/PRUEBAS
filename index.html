@@ -24990,5 +24990,388 @@ window.addEventListener('load',()=>{
 });
 </script>
 
+
+
+<style>
+/* ==========================================================
+   V145 SOBRE V144
+   - Tablas grandes de Factibilidades y Estudios Complementarios.
+   - Campo Área del predio (IPRUS).
+   ========================================================== */
+.req-large-v145{
+  margin:10px 0 16px!important;
+  border:1px solid #b9cde0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+  background:#fff!important;
+}
+.req-large-title-v145{
+  padding:10px 14px!important;
+  border-left:4px solid #c81d43!important;
+  background:#eef5fa!important;
+  color:#0b2b4c!important;
+  font-weight:900!important;
+}
+.req-large-v145 .req-table-v112{
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+}
+.req-large-v145 .req-factibilidades-table-v134,
+.req-large-v145 .req-estudios-table-v111{
+  min-width:650px!important;
+}
+.req-detail-v145-area{
+  margin-top:7px!important;
+}
+.req-detail-v145-area input{
+  text-align:left!important;
+}
+.combined-studies-v145 th,
+.combined-studies-v145 td{
+  border:1px solid #222!important;
+}
+.combined-studies-v145 .entity-v145{
+  font-weight:800!important;
+  text-align:center!important;
+  background:#f1f1f1!important;
+}
+.combined-studies-v145 .type-v145{
+  font-weight:700!important;
+  text-align:center!important;
+}
+</style>
+
+<script>
+/* ==========================================================
+   V145 SOBRE V144
+   1. Dos motivos de desistimiento.
+   2. Estudios Complementarios en REQ_034 y Factibilidades en REQ_032.
+   3. Tabla combinada en la Vista del Informe.
+   4. Área del predio (IPRUS) y autocompletado de Conclusión Técnica.
+   ========================================================== */
+
+const DES_MOTIVO_OBS_V145='Observaciones No Subsanadas/Parcialmente Subsanadas';
+const DES_MOTIVO_PET_V145='Petición del Administrado';
+
+function normTextV145(value){
+  return String(value||'').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toUpperCase().replace(/[^A-Z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+}
+function normalizeDesMotivoV145(value){
+  const n=normTextV145(value);
+  if(n.includes('PETICION') && n.includes('ADMINISTRADO')) return DES_MOTIVO_PET_V145;
+  if(n.includes('OBSERVACIONES')) return DES_MOTIVO_OBS_V145;
+  return String(value||'');
+}
+
+const _ensureDesistimientoV69_base_V145=typeof ensureDesistimientoV69==='function'?ensureDesistimientoV69:null;
+ensureDesistimientoV69=function(){
+  if(_ensureDesistimientoV69_base_V145) _ensureDesistimientoV69_base_V145();
+  if(!state.desistimiento) state.desistimiento={motivo:'',conclusiones:''};
+  state.desistimiento.motivo=normalizeDesMotivoV145(state.desistimiento.motivo);
+};
+
+/* Fallback actualizado, coherente con data/plantilla_desistimiento.csv. */
+if(typeof DATA!=='undefined'){
+  DATA.plantillaDesistimiento=[
+    {ID_Bloque:'DES_TIT_001',Motivo:DES_MOTIVO_OBS_V145,Titulo:'Título',Texto_Base:'INFORME TÉCNICO NO FAVORABLE DE DESISTIMIENTO',Mostrar:'Sí'},
+    {ID_Bloque:'DES_CON_001',Motivo:DES_MOTIVO_OBS_V145,Titulo:'Conclusión base',Texto_Base:'Por las conclusiones antes expuestas se emite criterio técnico NO FAVORABLE,',Mostrar:'Sí'},
+    {ID_Bloque:'DES_TIT_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Título',Texto_Base:'INFORME TÉCNICO DE DESISTIMIENTO',Mostrar:'Sí'},
+    {ID_Bloque:'DES_BLG_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Base legal petición administrado',Texto_Base:"CÓDIGO ORGÁNICO ADMINISTRATIVO\nArt. 211.- Desistimiento. La persona interesada puede desistir del procedimiento cuando no esté prohibido por la ley. Debe indicarse expresamente si se trata de un desistimiento total o parcial. Si no se precisa, se considera que se trata de un desistimiento total. En los casos de desistimiento, la persona interesada no puede volver a plantear, igual pretensión, en otro procedimiento con el mismo objeto y causa. El desistimiento puede realizarse por cualquier medio que permita su constancia en cualquier momento antes de que se notifique el acto administrativo. Solo afecta a aquellos que lo soliciten. En el supuesto de realizarse de forma verbal, se formaliza con la comparecencia de la persona interesada ante el servidor público encargado de la instrucción del asunto, quien, conjuntamente con aquella, suscribirá la respectiva diligencia. En los procedimientos iniciados de oficio, la administración pública podrá ordenar el archivo en los supuestos y con los requisitos previstos en la ley.",Mostrar:'Sí'},
+    {ID_Bloque:'DES_CON_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Conclusión',Texto_Base:"En base al Artículo 211 del COA, por Petición del Administrado se procede con el Desistimiento del Trámite.\nArtículo 211.- Desistimiento. La persona interesada puede desistir del procedimiento cuando no esté prohibido por la ley.\nDebe indicarse expresamente si se trata de un desistimiento total o parcial. Si no se precisa, se considera que se trata de un desistimiento total.\nEn los casos de desistimiento, la persona interesada no puede volver a plantear, igual pretensión, en otro procedimiento con el mismo objeto y causa.\nEl desistimiento puede realizarse por cualquier medio que permita su constancia en cualquier momento antes de que se notifique el acto administrativo. Solo afecta a aquellos que lo soliciten.\nEn el supuesto de realizarse de forma verbal, se formaliza con la comparecencia de la persona interesada ante el servidor público encargado de la instrucción del asunto, quien, conjuntamente con aquella, suscribirá la respectiva diligencia.\nEn los procedimientos iniciados de oficio, la administración pública podrá ordenar el archivo en los supuestos y con los requisitos previstos en la ley.",Mostrar:'Sí'},
+    {ID_Bloque:'DES_REC_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Recomendación',Texto_Base:"Se recomienda remitir el presente trámite para la emisión de la Resolución Administrativa correspondiente.",Mostrar:'Sí'}
+  ];
+}
+
+isDesPeticionV69=function(){
+  ensureDesistimientoV69();
+  return state.desistimiento?.motivo===DES_MOTIVO_PET_V145;
+};
+desTituloV69=function(){
+  ensureDesistimientoV69();
+  return isDesPeticionV69()
+    ? (desRowV69('DES_TIT_003').Texto_Base||'INFORME TÉCNICO DE DESISTIMIENTO')
+    : (desRowV69('DES_TIT_001').Texto_Base||'INFORME TÉCNICO NO FAVORABLE DE DESISTIMIENTO');
+};
+
+renderDesistimientoFormV69=function(){
+  ensureDesistimientoV69();
+  const box=document.getElementById('desistimientoForm');
+  if(!box) return;
+  const m=normalizeDesMotivoV145(state.desistimiento.motivo||'');
+  state.desistimiento.motivo=m;
+  const needsObs=m===DES_MOTIVO_OBS_V145;
+  box.innerHTML=`<div class="desistimiento-panel-v69">
+    <div class="field"><label>Motivo *</label>
+      <select id="desMotivoV69">
+        <option value="">Seleccione...</option>
+        <option value="${DES_MOTIVO_OBS_V145}" ${m===DES_MOTIVO_OBS_V145?'selected':''}>${DES_MOTIVO_OBS_V145}</option>
+        <option value="${DES_MOTIVO_PET_V145}" ${m===DES_MOTIVO_PET_V145?'selected':''}>${DES_MOTIVO_PET_V145}</option>
+      </select>
+    </div>
+    ${needsObs?`<div class="field"><label>Conclusiones complementarias</label>
+      <textarea id="desConclusionesV69" placeholder="Complete el texto que continuará después del criterio técnico NO FAVORABLE.">${esc(state.desistimiento.conclusiones||'')}</textarea>
+      <div class="desistimiento-note-v69">Se mantiene la pestaña Observaciones y el informe toma la tabla de criterio técnico.</div></div>`:''}
+    ${m===DES_MOTIVO_PET_V145?`<div class="desistimiento-fixed-v69"><strong>Conclusión automática:</strong><br>${esc(desRowV69('DES_CON_003').Texto_Base||'')}<br><br><strong>Recomendación automática:</strong><br>${esc(desRowV69('DES_REC_003').Texto_Base||'')}</div>`:''}
+  </div>`;
+  const sel=document.getElementById('desMotivoV69');
+  if(sel) sel.addEventListener('change',()=>{
+    state.desistimiento.motivo=sel.value;
+    if(sel.value===DES_MOTIVO_PET_V145) state.desistimiento.conclusiones='';
+    renderDesistimientoFormV69(); updateTabsForType(); renderReport(); renderPreview();
+  });
+  const con=document.getElementById('desConclusionesV69');
+  if(con) con.addEventListener('input',()=>{
+    if(typeof shouldForceUpper==='function' && shouldForceUpper()) normalizeUpperInput(con);
+    state.desistimiento.conclusiones=con.value; renderReport(); renderPreview();
+  });
+};
+
+renderInformeDesistimientoV69=function(){
+  ensureDesistimientoV69();
+  const motivo=normalizeDesMotivoV145(state.desistimiento?.motivo||'');
+  const title=desTituloV69();
+  if(!motivo) return `${reportHeader(title)}<div class="apr-alert">Seleccione el motivo de desistimiento en la pestaña Desistimiento.</div>`;
+  if(motivo===DES_MOTIVO_PET_V145){
+    const base=desRowV69('DES_BLG_003').Texto_Base||'';
+    const con=desRowV69('DES_CON_003').Texto_Base||'';
+    const rec=desRowV69('DES_REC_003').Texto_Base||'';
+    return `${reportHeader(title)}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
+      <h2>Base legal</h2><p class="legal-text">${formatLegalText(base)}</p>
+      <h2>Conclusiones</h2><p>${nl2br(con)}</p>
+      <h2>Recomendaciones</h2><p>${nl2br(rec)}</p>${firmaTecnicoSection()}`;
+  }
+  const baseConclusion=desRowV69('DES_CON_001').Texto_Base||'Por las conclusiones antes expuestas se emite criterio técnico NO FAVORABLE,';
+  const extra=String(state.desistimiento?.conclusiones||'').trim();
+  const conclusionText=extra?`${baseConclusion} ${extra}`:baseConclusion;
+  return `${reportHeader(title)}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
+    <h2>Criterio técnico</h2>${selectedObsTable()}
+    <h2>Base legal</h2>${baseLegalObservacionesV69()}${textosTecnicosSection()}
+    <h2>Conclusiones</h2><p>${nl2br(conclusionText)}</p>${firmaTecnicoSection()}`;
+};
+
+function isObraMayorV145(){
+  return !(typeof isAnteproyectoV123==='function' && isAnteproyectoV123());
+}
+function isReqFactibilidadesOMV145(req){ return isObraMayorV145() && String(req?.id||'')==='REQ_032'; }
+function isReqEstudiosOMV145(req){ return isObraMayorV145() && String(req?.id||'')==='REQ_034'; }
+
+function ensureEstudiosOMV145(){
+  if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();
+  if(!state.aprobatorio) state.aprobatorio={};
+  let rows=Array.isArray(state.aprobatorio.estudios)?state.aprobatorio.estudios:[];
+  const defaults=['EP-EMAPAR','EERSA','CNT','BOMBEROS'];
+  const hasStudy=rows.some(r=>defaults.some(d=>normTextV145(r?.estudio).includes(normTextV145(d).replace('EP ',''))));
+  if(!hasStudy || rows.length<4){
+    const old=rows;
+    rows=defaults.map(name=>{
+      const key=normTextV145(name).replace('EP ','');
+      const found=old.find(r=>normTextV145(r?.estudio).replace('EP ','').includes(key)||key.includes(normTextV145(r?.estudio).replace('EP ','')));
+      return found?{...found,estudio:name}:{estudio:name,documento:'',fecha:'',evidencia:''};
+    });
+  }
+  state.aprobatorio.estudios=rows;
+  return rows;
+}
+function ensureFactibilidadesOMV145(){
+  if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();
+  if(!state.aprobatorio) state.aprobatorio={};
+  if(!Array.isArray(state.aprobatorio.factibilidadesOMV145)) state.aprobatorio.factibilidadesOMV145=[];
+  const old=state.aprobatorio.factibilidadesOMV145;
+  state.aprobatorio.factibilidadesOMV145=['EMAPAR','EERSA','CNT'].map(name=>{
+    const found=old.find(r=>normTextV145(r?.estudio||r?.empresa)===normTextV145(name));
+    return found?{...found,estudio:name}:{estudio:name,documento:'',fecha:'',evidencia:''};
+  });
+  return state.aprobatorio.factibilidadesOMV145;
+}
+function updateFactibilidadOMV145(i,field,el){
+  const rows=ensureFactibilidadesOMV145();
+  if(!rows[i]) return;
+  let value=el?.value??el??'';
+  if(field!=='fecha'){ value=String(value).toUpperCase(); if(el&&typeof el==='object') el.value=value; }
+  rows[i][field]=value; if(typeof scheduleReportUpdate==='function') scheduleReportUpdate(); else {renderReport();renderPreview();}
+}
+function renderFactibilidadesOMV145(){
+  const rows=ensureFactibilidadesOMV145();
+  return `<div class="req-factibilidades-v134"><div class="mini">Registre la factibilidad o el pago correspondiente de cada empresa prestadora del servicio.</div>
+    <table class="req-factibilidades-table-v134"><thead><tr><th style="width:14%">EMPRESA</th><th style="width:30%">DOCUMENTO / TRÁMITE</th><th style="width:16%">FECHA</th><th>EVIDENCIA / DETALLE</th></tr></thead>
+    <tbody>${rows.map((r,i)=>`<tr><td><input value="${esc(r.estudio||'')}" readonly></td>
+      <td><input value="${esc(r.documento||'')}" oninput="updateFactibilidadOMV145(${i},'documento',this)"></td>
+      <td><input type="date" value="${esc(r.fecha||'')}" oninput="updateFactibilidadOMV145(${i},'fecha',this)"></td>
+      <td><textarea oninput="updateFactibilidadOMV145(${i},'evidencia',this)">${esc(r.evidencia||'')}</textarea></td></tr>`).join('')}</tbody></table></div>`;
+}
+function renderEstudiosOMV145(){
+  const rows=ensureEstudiosOMV145();
+  return `<div class="req-estudios-wrapper-v111"><div class="mini">Complete los estudios de ingeniería aprobados por las dependencias competentes.</div>
+    <table class="req-estudios-table-v111"><thead><tr><th style="width:18%">ESTUDIO</th><th>DOCUMENTO / TRÁMITE</th><th style="width:15%">FECHA</th><th>EVIDENCIA</th></tr></thead>
+    <tbody>${rows.map((r,i)=>`<tr><td><input value="${esc(r.estudio||'')}" oninput="updEstudio(${i},'estudio',this)"></td>
+      <td><input value="${esc(r.documento||'')}" oninput="updEstudio(${i},'documento',this)"></td>
+      <td><input type="date" value="${esc(r.fecha||'')}" oninput="updEstudio(${i},'fecha',this)"></td>
+      <td><textarea class="evidencia-text" oninput="updEstudio(${i},'evidencia',this)">${esc(r.evidencia||'')}</textarea></td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function iprusAreaV145(req){ return state.requisitos?.[req.id]?.detalle?.areaPredioIprus||''; }
+const _reqDetailInputHtmlV94_base_V145=typeof reqDetailInputHtmlV94==='function'?reqDetailInputHtmlV94:null;
+reqDetailInputHtmlV94=function(req){
+  if(isReqFactibilidadesOMV145(req)) return renderFactibilidadesOMV145();
+  if(isReqEstudiosOMV145(req)) return renderEstudiosOMV145();
+  if(typeof isIprusReqV94==='function' && isIprusReqV94(req)){
+    const val=typeof ensureReqObjV94==='function'?ensureReqObjV94(req.id):(state.requisitos[req.id]||={detalle:{}});
+    if(!val.detalle) val.detalle={};
+    const d=val.detalle;
+    return `<div class="req-detail-v94"><label>N° IPRUS</label><input data-req-detail="${esc(req.id)}" data-field="nroIprus" value="${esc(d.nroIprus||'')}" placeholder="N° IPRUS">
+      <label>Fecha</label><input type="date" data-req-detail="${esc(req.id)}" data-field="fechaIprus" value="${esc(d.fechaIprus||'')}">
+      <label>N° eGOB</label><input data-req-detail="${esc(req.id)}" data-field="egobIprus" value="${esc(d.egobIprus||'')}" placeholder="N° eGOB">
+      <div class="req-detail-v145-area"><label>Área del predio (IPRUS) m²</label><input inputmode="decimal" data-req-detail="${esc(req.id)}" data-field="areaPredioIprus" value="${esc(d.areaPredioIprus||'')}" placeholder="Área en m²"></div></div>`;
+  }
+  return _reqDetailInputHtmlV94_base_V145?_reqDetailInputHtmlV94_base_V145(req):'';
+};
+
+const _reqDefaultDetailV94_base_V145=typeof reqDefaultDetailV94==='function'?reqDefaultDetailV94:null;
+reqDefaultDetailV94=function(req){
+  if(typeof isIprusReqV94==='function' && isIprusReqV94(req)){
+    const d=state.requisitos?.[req.id]?.detalle||{}; const lines=[];
+    if(d.nroIprus) lines.push('N° IPRUS: '+d.nroIprus);
+    if(d.fechaIprus) lines.push('Fecha: '+fmtDate(d.fechaIprus));
+    if(d.egobIprus) lines.push('N° eGOB: '+d.egobIprus);
+    if(d.areaPredioIprus) lines.push('Área del predio (IPRUS): '+d.areaPredioIprus+' m²');
+    return lines.join('\n')||(state.requisitos?.[req.id]?.estado||'');
+  }
+  if(isReqFactibilidadesOMV145(req)||isReqEstudiosOMV145(req)) return state.requisitos?.[req.id]?.estado||'';
+  return _reqDefaultDetailV94_base_V145?_reqDefaultDetailV94_base_V145(req):(state.requisitos?.[req.id]?.estado||'');
+};
+
+function renderLargeReqV145(req,showNA,forceNA,title){
+  return `<div class="req-large-v145"><div class="req-large-title-v145">${esc(title)}</div>
+    <table class="req-table-v112"><thead><tr><th class="req9-req">Requisito</th><th class="req9-check">Cumple</th><th class="req9-check">No cumple</th>${showNA?'<th class="req9-check">No aplica</th>':''}<th class="req9-detail">Resultado / detalle</th><th class="req9-obs">Observación para el usuario</th><th class="req9-adj">Adjunto</th></tr></thead>
+    <tbody>${renderReqRowV112(req,showNA,forceNA)}</tbody></table></div>`;
+}
+
+const _renderRequisitosForm_base_V145=typeof renderRequisitosForm==='function'?renderRequisitosForm:null;
+renderRequisitosForm=function(rebuild=true){
+  if(!isObraMayorV145()) return _renderRequisitosForm_base_V145?_renderRequisitosForm_base_V145(rebuild):undefined;
+  if(typeof ensureV55State==='function') ensureV55State();
+  const box=document.getElementById('requisitosForm'); if(!box) return;
+  const reqs=DATA.requisitos.filter(shouldShowReq);
+  const cond=(numVal(infoValue('ALTURA EDIFICACIÓN'))>2||numVal(infoValue('Área Bruta'))>400);
+  let html=`<div class="field"><label class="check-line"><input type="checkbox" id="toggleComplementarios" ${state.mostrarComplementarios?'checked':''}> Mostrar requisitos complementarios cuando apliquen</label></div>`;
+  const groups=[...new Set(reqs.map(r=>r.grupo))];
+  groups.forEach(grupo=>{
+    const rows=reqs.filter(r=>r.grupo===grupo);
+    const forceNA=typeof isReqMasDe2V55==='function'?isReqMasDe2V55(grupo):(normTextV145(grupo).includes('MAS DE 2')||normTextV145(grupo).includes('400'));
+    const showNA=forceNA||rows.some(r=>(r.opciones||[]).includes('No Aplica'));
+    html+=`<div class="section-title">${esc(grupo)}</div>`;
+    let normal=[];
+    const flush=()=>{ if(normal.length){html+=renderReqTableNormalV112(normal,showNA,forceNA);normal=[];} };
+    rows.forEach(req=>{
+      if(isReqFactibilidadesOMV145(req)){flush();html+=renderLargeReqV145(req,showNA,forceNA,'Requisito 9 - Factibilidades de servicios');}
+      else if(isReqEstudiosOMV145(req)){flush();html+=renderLargeReqV145(req,showNA,forceNA,'Requisito 2 - Estudios complementarios');}
+      else normal.push(req);
+    });
+    flush();
+  });
+  html+=`<div class="note-box">Condición automática: ALTURA EDIFICACIÓN = ${esc(infoValue('ALTURA EDIFICACIÓN')||'0')} PISOS / ÁREA BRUTA = ${esc(infoValue('Área Bruta')||'0')} M². ${cond?'SE ACTIVAN':'NO SE ACTIVAN'} LOS REQUISITOS DE MÁS DE 2 PISOS O 400 M².</div>`;
+  box.innerHTML=html;
+  const tog=document.getElementById('toggleComplementarios');
+  if(tog) tog.addEventListener('change',e=>{state.mostrarComplementarios=e.target.checked;renderRequisitosForm();renderObsSeleccionadas();renderReport();renderPreview();});
+  bindReqObsV112(reqs); if(typeof bindReqDetailInputsV94==='function') bindReqDetailInputsV94();
+};
+
+function serviceKeyV145(name){
+  const n=normTextV145(name);
+  if(n.includes('EMAPAR')||n.includes('AGUA POTABLE')||n.includes('RIOBAMBA EP')) return 'EMAPAR';
+  if(n.includes('EERSA')||n.includes('ELECTRICA')) return 'EERSA';
+  if(n.includes('CNT')||n.includes('TELECOMUNIC')) return 'CNT';
+  if(n.includes('BOMBER')) return 'BOMBEROS';
+  return n;
+}
+function serviceHasDataV145(row){ return ['documento','fecha','evidencia'].some(k=>String(row?.[k]||'').trim()); }
+function combinedStudiesReportV145(){
+  const facts=ensureFactibilidadesOMV145(); const studies=ensureEstudiosOMV145();
+  const entities=['EMAPAR','EERSA','CNT','BOMBEROS']; const groups=[];
+  entities.forEach(entity=>{
+    const entries=[];
+    const f=facts.find(r=>serviceKeyV145(r.estudio)===entity); if(f&&serviceHasDataV145(f)) entries.push({type:'Factibilidad',row:f});
+    const s=studies.find(r=>serviceKeyV145(r.estudio)===entity); if(s&&serviceHasDataV145(s)) entries.push({type:'Estudio',row:s});
+    if(entries.length) groups.push({entity,entries});
+  });
+  if(!groups.length) return '<p>No se registran estudios complementarios ni factibilidades.</p>';
+  return `<table class="informe-table estudios-table combined-studies-v145"><thead><tr><th>ENTIDAD</th><th>TIPO</th><th>DOCUMENTO / TRÁMITE</th><th>FECHA</th><th>EVIDENCIA / DETALLE</th></tr></thead><tbody>${groups.map(g=>g.entries.map((e,i)=>`<tr>${i===0?`<td class="entity-v145" rowspan="${g.entries.length}">${esc(g.entity)}</td>`:''}<td class="type-v145">${esc(e.type)}</td><td>${esc(e.row.documento||'')}</td><td>${esc(e.row.fecha?(typeof fmtDate==='function'?fmtDate(e.row.fecha):e.row.fecha):'')}</td><td>${nl2br?nl2br(e.row.evidencia||''):esc(e.row.evidencia||'')}</td></tr>`).join('')).join('')}</tbody></table>`;
+}
+const _estudiosReport_base_V145=typeof estudiosReport==='function'?estudiosReport:null;
+estudiosReport=function(){
+  if(isObraMayorV145()) return combinedStudiesReportV145();
+  return _estudiosReport_base_V145?_estudiosReport_base_V145():'';
+};
+
+function conclusionValueTargetV145(role){
+  if(!Array.isArray(state.aprobatorio?.conclusion)) return -1;
+  return state.aprobatorio.conclusion.findIndex(raw=>{
+    const r=typeof rowConclV108==='function'?rowConclV108(raw):(typeof normalizeConclusionRow==='function'?normalizeConclusionRow(raw):raw||{});
+    const d=normTextV145(r.descripcion||'');
+    if(role==='predio') return d.includes('AREA DEL PREDIO')||d.includes('AREA TOTAL DEL LOTE');
+    if(role==='bruta') return d.includes('AREA BRUTA TOTAL');
+    if(role==='pisos') return d.includes('NUMERO DE PISOS')||d.includes('ALTURA EDIFICACION');
+    return false;
+  });
+}
+function currentIprusAreaV145(){
+  const req=(DATA.requisitos||[]).find(r=>typeof isIprusReqV94==='function'&&isIprusReqV94(r));
+  return req?String(state.requisitos?.[req.id]?.detalle?.areaPredioIprus||''):'';
+}
+function setConclusionQtyV145(index,value){
+  if(index<0||value===undefined||value===null||String(value).trim()==='') return;
+  const raw=state.aprobatorio.conclusion[index];
+  const r=typeof rowConclV108==='function'?rowConclV108(raw):(typeof normalizeConclusionRow==='function'?normalizeConclusionRow(raw):raw||{});
+  r.cantidad=String(value).trim();
+  if(typeof syncConclusionObj==='function') syncConclusionObj(index,r); else state.aprobatorio.conclusion[index]={...raw,...r};
+  const input=document.getElementById('conc_qty_'+index); if(input) input.value=r.cantidad;
+}
+function syncConclusionAutoV145(){
+  if(!state.aprobatorio||!Array.isArray(state.aprobatorio.conclusion)) return;
+  const area=currentIprusAreaV145(); const bruta=String(infoValue('Área Bruta')||''); const pisos=String(infoValue('ALTURA EDIFICACIÓN')||'');
+  setConclusionQtyV145(conclusionValueTargetV145('predio'),area);
+  setConclusionQtyV145(conclusionValueTargetV145('bruta'),bruta);
+  setConclusionQtyV145(conclusionValueTargetV145('pisos'),pisos);
+  if(typeof recalcAreasCOSV36==='function') recalcAreasCOSV36();
+  setConclusionQtyV145(conclusionValueTargetV145('predio'),area);
+  setConclusionQtyV145(conclusionValueTargetV145('bruta'),bruta);
+  setConclusionQtyV145(conclusionValueTargetV145('pisos'),pisos);
+}
+
+const _prepareRowsConclV108_base_V145=typeof prepareRowsConclV108==='function'?prepareRowsConclV108:null;
+if(_prepareRowsConclV108_base_V145) prepareRowsConclV108=function(){_prepareRowsConclV108_base_V145();syncConclusionAutoV145();};
+const _renderConclusionTabla_base_V145=typeof renderConclusionTabla==='function'?renderConclusionTabla:null;
+if(_renderConclusionTabla_base_V145) renderConclusionTabla=function(){syncConclusionAutoV145();const out=_renderConclusionTabla_base_V145();syncConclusionAutoV145();return out;};
+const _conclusionReport_base_V145=typeof conclusionReport==='function'?conclusionReport:null;
+if(_conclusionReport_base_V145) conclusionReport=function(){syncConclusionAutoV145();return _conclusionReport_base_V145();};
+
+const _bindReqDetailInputsV94_base_V145=typeof bindReqDetailInputsV94==='function'?bindReqDetailInputsV94:null;
+bindReqDetailInputsV94=function(){
+  if(_bindReqDetailInputsV94_base_V145) _bindReqDetailInputsV94_base_V145();
+  document.querySelectorAll('[data-field="areaPredioIprus"]').forEach(input=>{
+    if(input.dataset.boundV145==='1') return; input.dataset.boundV145='1';
+    input.addEventListener('input',()=>{syncConclusionAutoV145();if(document.getElementById('conclusionTabla')) renderConclusionTabla();});
+  });
+};
+
+const _renderReport_base_V145=typeof renderReport==='function'?renderReport:null;
+if(_renderReport_base_V145) renderReport=function(){syncConclusionAutoV145();return _renderReport_base_V145();};
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    ensureDesistimientoV69();
+    if(isObraMayorV145()){ensureEstudiosOMV145();ensureFactibilidadesOMV145();}
+    syncConclusionAutoV145();
+    if(typeof renderDesistimientoFormV69==='function') renderDesistimientoFormV69();
+    if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+    if(typeof renderConclusionTabla==='function') renderConclusionTabla();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  },1500);
+});
+</script>
+
 </body>
 </html>
