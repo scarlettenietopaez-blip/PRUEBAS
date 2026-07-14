@@ -25079,7 +25079,7 @@ if(typeof DATA!=='undefined'){
     {ID_Bloque:'DES_CON_001',Motivo:DES_MOTIVO_OBS_V145,Titulo:'Conclusión base',Texto_Base:'Por las conclusiones antes expuestas se emite criterio técnico NO FAVORABLE,',Mostrar:'Sí'},
     {ID_Bloque:'DES_TIT_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Título',Texto_Base:'INFORME TÉCNICO DE DESISTIMIENTO',Mostrar:'Sí'},
     {ID_Bloque:'DES_BLG_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Base legal petición administrado',Texto_Base:"CÓDIGO ORGÁNICO ADMINISTRATIVO\nArt. 211.- Desistimiento. La persona interesada puede desistir del procedimiento cuando no esté prohibido por la ley. Debe indicarse expresamente si se trata de un desistimiento total o parcial. Si no se precisa, se considera que se trata de un desistimiento total. En los casos de desistimiento, la persona interesada no puede volver a plantear, igual pretensión, en otro procedimiento con el mismo objeto y causa. El desistimiento puede realizarse por cualquier medio que permita su constancia en cualquier momento antes de que se notifique el acto administrativo. Solo afecta a aquellos que lo soliciten. En el supuesto de realizarse de forma verbal, se formaliza con la comparecencia de la persona interesada ante el servidor público encargado de la instrucción del asunto, quien, conjuntamente con aquella, suscribirá la respectiva diligencia. En los procedimientos iniciados de oficio, la administración pública podrá ordenar el archivo en los supuestos y con los requisitos previstos en la ley.",Mostrar:'Sí'},
-    {ID_Bloque:'DES_CON_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Conclusión',Texto_Base:"En base al Artículo 211 del COA, por Petición del Administrado se procede con el Desistimiento del Trámite.\nArtículo 211.- Desistimiento. La persona interesada puede desistir del procedimiento cuando no esté prohibido por la ley.\nDebe indicarse expresamente si se trata de un desistimiento total o parcial. Si no se precisa, se considera que se trata de un desistimiento total.\nEn los casos de desistimiento, la persona interesada no puede volver a plantear, igual pretensión, en otro procedimiento con el mismo objeto y causa.\nEl desistimiento puede realizarse por cualquier medio que permita su constancia en cualquier momento antes de que se notifique el acto administrativo. Solo afecta a aquellos que lo soliciten.\nEn el supuesto de realizarse de forma verbal, se formaliza con la comparecencia de la persona interesada ante el servidor público encargado de la instrucción del asunto, quien, conjuntamente con aquella, suscribirá la respectiva diligencia.\nEn los procedimientos iniciados de oficio, la administración pública podrá ordenar el archivo en los supuestos y con los requisitos previstos en la ley.",Mostrar:'Sí'},
+    {ID_Bloque:'DES_CON_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Conclusión',Texto_Base:"En base al Artículo 211 del COA, por Petición del Administrado se procede con el Desistimiento del Trámite.",Mostrar:'Sí'},
     {ID_Bloque:'DES_REC_003',Motivo:DES_MOTIVO_PET_V145,Titulo:'Recomendación',Texto_Base:"Se recomienda remitir el presente trámite para la emisión de la Resolución Administrativa correspondiente.",Mostrar:'Sí'}
   ];
 }
@@ -25370,6 +25370,238 @@ window.addEventListener('load',()=>{
     if(typeof renderReport==='function') renderReport();
     if(typeof renderPreview==='function') renderPreview();
   },1500);
+});
+</script>
+
+
+<style>
+/* ==========================================================
+   V146 SOBRE V145
+   - Mejora el ancho de Factibilidades y Estudios Complementarios.
+   - Reduce las columnas de selección y prioriza Resultado / detalle.
+   ========================================================== */
+.req-large-v145.req-fact-v146 .req-table-v112 th.req9-req{width:17%!important}
+.req-large-v145.req-fact-v146 .req-table-v112 th.req9-check{width:4%!important}
+.req-large-v145.req-fact-v146 .req-table-v112 th.req9-detail{width:53%!important}
+.req-large-v145.req-fact-v146 .req-table-v112 th.req9-obs{width:14%!important}
+.req-large-v145.req-fact-v146 .req-table-v112 th.req9-adj{width:8%!important}
+
+.req-large-v145.req-studies-v146 .req-table-v112 th.req9-req{width:15%!important}
+.req-large-v145.req-studies-v146 .req-table-v112 th.req9-check{width:4.5%!important}
+.req-large-v145.req-studies-v146 .req-table-v112 th.req9-detail{width:55%!important}
+.req-large-v145.req-studies-v146 .req-table-v112 th.req9-obs{width:9.5%!important}
+.req-large-v145.req-studies-v146 .req-table-v112 th.req9-adj{width:7%!important}
+
+.req-large-v145.req-fact-v146 .req-factibilidades-v134,
+.req-large-v145.req-studies-v146 .req-estudios-wrapper-v111{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:visible!important;
+}
+.req-large-v145.req-fact-v146 .req-factibilidades-table-v134,
+.req-large-v145.req-studies-v146 .req-estudios-table-v111{
+  width:100%!important;
+  min-width:0!important;
+  table-layout:fixed!important;
+}
+.req-large-v145.req-fact-v146 .req-factibilidades-table-v134 th:nth-child(1){width:17%!important}
+.req-large-v145.req-fact-v146 .req-factibilidades-table-v134 th:nth-child(2){width:31%!important}
+.req-large-v145.req-fact-v146 .req-factibilidades-table-v134 th:nth-child(3){width:18%!important}
+.req-large-v145.req-fact-v146 .req-factibilidades-table-v134 th:nth-child(4){width:34%!important}
+.req-large-v145.req-studies-v146 .req-estudios-table-v111 th:nth-child(1){width:17%!important}
+.req-large-v145.req-studies-v146 .req-estudios-table-v111 th:nth-child(2){width:31%!important}
+.req-large-v145.req-studies-v146 .req-estudios-table-v111 th:nth-child(3){width:18%!important}
+.req-large-v145.req-studies-v146 .req-estudios-table-v111 th:nth-child(4){width:34%!important}
+.req-large-v145.req-fact-v146 input,
+.req-large-v145.req-fact-v146 textarea,
+.req-large-v145.req-studies-v146 input,
+.req-large-v145.req-studies-v146 textarea{
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+
+/* Cuando Estudios Complementarios se muestra debajo de la Resolución. */
+.estudios-after-resolution-v146{
+  margin-top:12px!important;
+  padding-top:12px!important;
+  border-top:1px solid #b9cde0!important;
+}
+.estudios-after-resolution-v146-title{
+  margin:0 0 8px!important;
+  color:#0b2b4c!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+}
+.estudios-after-resolution-v146 .req-estudios-table-v111{
+  width:100%!important;
+  min-width:0!important;
+  table-layout:fixed!important;
+}
+.estudios-after-resolution-v146 .req-estudios-table-v111 th:nth-child(1){width:17%!important}
+.estudios-after-resolution-v146 .req-estudios-table-v111 th:nth-child(2){width:31%!important}
+.estudios-after-resolution-v146 .req-estudios-table-v111 th:nth-child(3){width:18%!important}
+.estudios-after-resolution-v146 .req-estudios-table-v111 th:nth-child(4){width:34%!important}
+</style>
+
+<script>
+/* ==========================================================
+   V146 SOBRE V145
+   1. Artículo 211 únicamente en Base legal; conclusión corta.
+   2. Orden EMAPAR, EERSA, CNT, BOMBEROS.
+   3. Resolución de Anteproyecto obligatoria al superar 2 pisos o 400 m².
+   4. Si la Resolución se activa manualmente bajo el umbral, muestra
+      Estudios Complementarios inmediatamente después de la tabla.
+   ========================================================== */
+const DES_CONCLUSION_PETICION_V146='En base al Artículo 211 del COA, por Petición del Administrado se procede con el Desistimiento del Trámite.';
+
+function patchDesistimientoConclusionV146(){
+  if(typeof DATA==='undefined' || !Array.isArray(DATA.plantillaDesistimiento)) return;
+  const row=DATA.plantillaDesistimiento.find(r=>String(r?.ID_Bloque||'')==='DES_CON_003');
+  if(row) row.Texto_Base=DES_CONCLUSION_PETICION_V146;
+}
+patchDesistimientoConclusionV146();
+
+if(typeof renderDesistimientoFormV69==='function'){
+  const _renderDesistimientoFormV69_base_V146=renderDesistimientoFormV69;
+  renderDesistimientoFormV69=function(){
+    patchDesistimientoConclusionV146();
+    return _renderDesistimientoFormV69_base_V146();
+  };
+}
+if(typeof renderInformeDesistimientoV69==='function'){
+  const _renderInformeDesistimientoV69_base_V146=renderInformeDesistimientoV69;
+  renderInformeDesistimientoV69=function(){
+    patchDesistimientoConclusionV146();
+    return _renderInformeDesistimientoV69_base_V146();
+  };
+}
+
+function studyServiceKeyV146(value){
+  const n=typeof normTextV145==='function' ? normTextV145(value) : String(value||'').toUpperCase();
+  if(n.includes('EMAPAR') || n.includes('RIOBAMBA EP') || n.includes('EP EMAPAR') || n.includes('AGUA POTABLE')) return 'EMAPAR';
+  if(n.includes('EERSA') || n.includes('ELECTRICA')) return 'EERSA';
+  if(n.includes('CNT') || n.includes('TELECOMUNIC')) return 'CNT';
+  if(n.includes('BOMBER')) return 'BOMBEROS';
+  return n;
+}
+
+/* Reordena siempre, incluso cuando el registro guardado venía con el orden antiguo. */
+ensureEstudiosOMV145=function(){
+  if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();
+  if(!state.aprobatorio) state.aprobatorio={};
+  const old=Array.isArray(state.aprobatorio.estudios)?state.aprobatorio.estudios:[];
+  const defaults=['EMAPAR','EERSA','CNT','BOMBEROS'];
+  state.aprobatorio.estudios=defaults.map(name=>{
+    const found=old.find(row=>studyServiceKeyV146(row?.estudio)===name);
+    return found ? {...found,estudio:name} : {estudio:name,documento:'',fecha:'',evidencia:''};
+  });
+  return state.aprobatorio.estudios;
+};
+
+/* Agrega una clase específica para controlar el ancho de cada requisito. */
+renderLargeReqV145=function(req,showNA,forceNA,title){
+  const kind=typeof isReqFactibilidadesOMV145==='function' && isReqFactibilidadesOMV145(req)
+    ? 'req-fact-v146' : 'req-studies-v146';
+  return `<div class="req-large-v145 ${kind}"><div class="req-large-title-v145">${esc(title)}</div>
+    <table class="req-table-v112"><thead><tr><th class="req9-req">Requisito</th><th class="req9-check">Cumple</th><th class="req9-check">No cumple</th>${showNA?'<th class="req9-check">No aplica</th>':''}<th class="req9-detail">Resultado / detalle</th><th class="req9-obs">Observación para el usuario</th><th class="req9-adj">Adjunto</th></tr></thead>
+    <tbody>${renderReqRowV112(req,showNA,forceNA)}</tbody></table></div>`;
+};
+
+/* La condición automática no puede ser desactivada por el usuario. */
+syncAnteproyectoAuto=function(){
+  ensureAprobatorioData();
+  const a=state.aprobatorio.anteproyecto;
+  const obligatorio=anteproyectoObligatorio();
+  if(obligatorio){
+    a.activo=true;
+  }else if(!a.manualToggle){
+    a.activo=false;
+  }
+};
+
+anteproyectoPanelHtml=function(){
+  ensureAprobatorioData();
+  syncAnteproyectoAuto();
+  const obligatorio=anteproyectoObligatorio();
+  const activo=anteproyectoActivo();
+  const nota=obligatorio
+    ? 'La Resolución de Anteproyecto es obligatoria porque el proyecto supera 2 pisos o 400 m².'
+    : 'Active esta opción cuando el proyecto cuente con una Resolución de Anteproyecto.';
+  let html=`<div class="section-title">Resolución de Anteproyecto</div><div class="anteproyecto-box"><div class="mini">${nota}</div>`;
+  html+=`<label class="check-line" style="margin-top:8px"><input type="checkbox" id="toggleAnteproyecto" ${activo?'checked':''} ${obligatorio?'disabled':''}> El proyecto cuenta con Resolución de Anteproyecto</label>`;
+  if(activo){
+    const a=state.aprobatorio.anteproyecto;
+    html+=`<table class="anteproyecto-table form-report-table"><tbody>
+      <tr><th>Documento</th><td><input id="antDocumento" value="${esc(a.documento||'')}" placeholder="MEMORANDO / RESOLUCIÓN"></td><th>EGOB</th><td><input id="antEgob" value="${esc(a.egob||'')}" placeholder="EGOB"></td></tr>
+      <tr><th>Técnico revisor</th><td colspan="3"><input id="antTecnico" list="listaTecnicos" value="${esc(a.tecnico||'')}" placeholder="TÉCNICO REVISOR"></td></tr>
+      <tr><th>Criterio técnico</th><td><select id="antCriterio"><option></option><option ${a.criterio==='FAVORABLE'?'selected':''}>FAVORABLE</option><option ${a.criterio==='NO FAVORABLE'?'selected':''}>NO FAVORABLE</option></select></td><th>Proyectista</th><td><input id="antCalculista" value="${esc(a.calculista||'')}" placeholder="PROYECTISTA"></td></tr>
+      <tr><th>Reg. SENESCYT</th><td colspan="3"><input id="antSenescyt" value="${esc(a.senescyt||'')}" placeholder="1041-2026-3296002"></td></tr>
+    </tbody></table>`;
+    /* Bajo el umbral, la tabla se habilita aquí porque el grupo >2 pisos/400 m² no se muestra. */
+    if(!obligatorio){
+      html+=`<div class="estudios-after-resolution-v146"><div class="estudios-after-resolution-v146-title">Estudios Complementarios</div>${renderEstudiosOMV145()}</div>`;
+    }
+  }
+  html+='</div>';
+  return html;
+};
+
+bindAnteproyectoFields=function(){
+  ensureAprobatorioData();
+  const obligatorio=anteproyectoObligatorio();
+  const sw=document.getElementById('toggleAnteproyecto');
+  if(sw){
+    sw.addEventListener('change',()=>{
+      if(obligatorio){
+        state.aprobatorio.anteproyecto.activo=true;
+        sw.checked=true;
+        return;
+      }
+      state.aprobatorio.anteproyecto.manualToggle=true;
+      state.aprobatorio.anteproyecto.activo=!!sw.checked;
+      if(!sw.checked){
+        state.aprobatorio.anteproyecto={activo:false,manualToggle:true,documento:'',egob:'',tecnico:'',criterio:'',calculista:'',senescyt:''};
+      }
+      renderAprobatorioForm(); renderReport(); renderPreview();
+    });
+  }
+  if(!anteproyectoActivo()) return;
+  const map=[['Documento','documento'],['Egob','egob'],['Tecnico','tecnico'],['Criterio','criterio'],['Calculista','calculista'],['Senescyt','senescyt']];
+  map.forEach(([idKey,stateKey])=>{
+    const el=document.getElementById('ant'+idKey); if(!el) return;
+    el.addEventListener('input',()=>{
+      if(idKey==='Senescyt') el.value=formatSenescyt(el.value);
+      else normalizeUpperInput(el);
+      state.aprobatorio.anteproyecto[stateKey]=el.value;
+      renderReport(); renderPreview();
+    });
+  });
+};
+
+/* Refuerza el orden y vuelve a enlazar el autocompletado eGOB después de cada render. */
+if(typeof renderAprobatorioForm==='function'){
+  const _renderAprobatorioForm_base_V146=renderAprobatorioForm;
+  renderAprobatorioForm=function(){
+    if(typeof isObraMayorV145==='function' && isObraMayorV145()) ensureEstudiosOMV145();
+    const out=_renderAprobatorioForm_base_V146();
+    setTimeout(()=>{
+      if(typeof bindAnteEgobAutocompleteV140==='function') bindAnteEgobAutocompleteV140();
+    },0);
+    return out;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    patchDesistimientoConclusionV146();
+    if(typeof isObraMayorV145==='function' && isObraMayorV145()) ensureEstudiosOMV145();
+    if(typeof renderDesistimientoFormV69==='function') renderDesistimientoFormV69();
+    if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+    if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  },1700);
 });
 </script>
 
