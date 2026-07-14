@@ -4162,8 +4162,8 @@ main{
     {
       "ID_Bloque": "OBS_001",
       "Orden": 6,
-      "Sección": "Observaciones",
-      "Título": "Observaciones técnicas",
+      "Sección": "Resumen de Observaciones",
+      "Título": "Resumen de Observaciones",
       "Texto_Base": "{{OBSERVACIONES_SELECCIONADAS}}",
       "Tipo_Bloque": "Dinámico",
       "Mostrar": "Sí",
@@ -25413,6 +25413,10 @@ window.addEventListener('load',()=>{
 .req-large-v145.req-studies-v146 .req-estudios-table-v111 th:nth-child(2){width:31%!important}
 .req-large-v145.req-studies-v146 .req-estudios-table-v111 th:nth-child(3){width:18%!important}
 .req-large-v145.req-studies-v146 .req-estudios-table-v111 th:nth-child(4){width:34%!important}
+.req-large-v145.req-fact-v146 .req-table-v112 td,
+.req-large-v145.req-studies-v146 .req-table-v112 td{overflow:hidden!important}
+.req-large-v145.req-fact-v146 .req-table-v112 td.req9-detail,
+.req-large-v145.req-studies-v146 .req-table-v112 td.req9-detail{overflow:visible!important}
 .req-large-v145.req-fact-v146 input,
 .req-large-v145.req-fact-v146 textarea,
 .req-large-v145.req-studies-v146 input,
@@ -25602,6 +25606,119 @@ window.addEventListener('load',()=>{
     if(typeof renderReport==='function') renderReport();
     if(typeof renderPreview==='function') renderPreview();
   },1700);
+});
+</script>
+
+
+<style>
+/* ==========================================================
+   V147 SOBRE V146
+   Informe de observaciones: Resumen de Observaciones y nota
+   de referencia al sustento técnico.
+   ========================================================== */
+.report .obs-summary-reference-v147{
+  margin:8px 0 14px!important;
+  font-size:10.5pt!important;
+  line-height:1.35!important;
+  font-style:italic!important;
+  color:#26384b!important;
+}
+@media print{
+  .report .obs-summary-reference-v147{
+    margin:6px 0 12px!important;
+    font-size:10pt!important;
+    color:#000!important;
+  }
+}
+</style>
+
+<script>
+/* ==========================================================
+   V147 SOBRE V146
+   1. "Criterio Técnico" pasa a "Resumen de Observaciones".
+   2. Se agrega una referencia después de la tabla de observaciones.
+   3. Se actualiza también DATA.plantillaObservaciones.
+   ========================================================== */
+const OBS_REFERENCE_TEXT_V147='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
+
+function patchPlantillaObservacionesV147(){
+  if(typeof DATA==='undefined' || !Array.isArray(DATA.plantillaObservaciones)) return;
+  const row=DATA.plantillaObservaciones.find(r=>String(r?.ID_Bloque||'').trim()==='OBS_001');
+  if(row){
+    row['Sección']='Resumen de Observaciones';
+    row['Título']='Resumen de Observaciones';
+  }
+}
+patchPlantillaObservacionesV147();
+
+function patchResumenObservacionesHtmlV147(html){
+  let out=String(html||'');
+
+  /* Conserva la numeración ya generada por versiones anteriores. */
+  out=out.replace(
+    /<h2([^>]*)>\s*((?:\d+\s*\.\s*)?)Criterio\s+t[ée]cnico\s*<\/h2>/i,
+    (_m,attrs,num)=>`<h2${attrs}>${num}RESUMEN DE OBSERVACIONES</h2>`
+  );
+
+  if(!out.includes('obs-summary-reference-v147')){
+    const note=`<p class="obs-summary-reference-v147">${OBS_REFERENCE_TEXT_V147}</p>`;
+    out=out.replace(
+      /(<h2[^>]*>\s*(?:\d+\s*\.\s*)?RESUMEN DE OBSERVACIONES\s*<\/h2>[\s\S]*?)(?=<h2[^>]*>\s*(?:\d+\s*\.\s*)?BASE LEGAL\s*<\/h2>)/i,
+      (_m,section)=>`${section}${note}`
+    );
+  }
+  return out;
+}
+
+/* Asegura que una carga externa del CSV conserve el nuevo nombre. */
+if(typeof loadExternalCSVsV32==='function'){
+  const _loadExternalCSVsV32_base_V147=loadExternalCSVsV32;
+  loadExternalCSVsV32=async function(){
+    const out=await _loadExternalCSVsV32_base_V147();
+    patchPlantillaObservacionesV147();
+    return out;
+  };
+}
+
+if(typeof renderInformeObservaciones==='function'){
+  const _renderInformeObservaciones_base_V147=renderInformeObservaciones;
+  renderInformeObservaciones=function(){
+    patchPlantillaObservacionesV147();
+    return patchResumenObservacionesHtmlV147(_renderInformeObservaciones_base_V147());
+  };
+}
+
+if(typeof renderReport==='function'){
+  const _renderReport_base_V147=renderReport;
+  renderReport=function(){
+    const out=_renderReport_base_V147();
+    if(state?.tipoInforme==='Informe con Observaciones'){
+      const reportEl=document.getElementById('report');
+      if(reportEl) reportEl.innerHTML=patchResumenObservacionesHtmlV147(reportEl.innerHTML);
+      return patchResumenObservacionesHtmlV147(out);
+    }
+    return out;
+  };
+}
+
+if(typeof renderPreview==='function'){
+  const _renderPreview_base_V147=renderPreview;
+  renderPreview=function(){
+    const out=_renderPreview_base_V147();
+    if(state?.tipoInforme==='Informe con Observaciones'){
+      const reportEl=document.getElementById('report');
+      if(reportEl) reportEl.innerHTML=patchResumenObservacionesHtmlV147(reportEl.innerHTML);
+    }
+    return out;
+  };
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    patchPlantillaObservacionesV147();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  },1800);
 });
 </script>
 
