@@ -28340,5 +28340,446 @@ window.addEventListener('afterprint',()=>{
 })();
 </script>
 
+
+<style>
+/* ==========================================================
+   V164 SOBRE V163
+   Conversión segura entre Obra Mayor Definitivo y Anteproyecto.
+   El registro de origen se conserva y se crea una copia independiente.
+   ========================================================== */
+.header-convert-v164{
+  font-size:19px!important;
+  font-weight:900!important;
+}
+.saved-search-result-row-v164{
+  grid-template-columns:minmax(0,1fr) 34px 34px!important;
+}
+html body #savedReportsResultsV131 .saved-search-convert-v164,
+html body #savedReportsResultsV131 .saved-search-convert-v164:hover,
+html body #savedReportsResultsV131 .saved-search-convert-v164:focus,
+html body #savedReportsResultsV131 .saved-search-convert-v164:focus-visible,
+html body #savedReportsResultsV131 .saved-search-convert-v164:active{
+  width:34px!important;
+  min-width:34px!important;
+  min-height:45px!important;
+  padding:0!important;
+  margin:0!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1px solid #0b4c75!important;
+  border-radius:7px!important;
+  background:#fff!important;
+  color:#0b4c75!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  transform:none!important;
+}
+html body #savedReportsResultsV131 .saved-search-convert-v164:hover,
+html body #savedReportsResultsV131 .saved-search-convert-v164:focus-visible{
+  background:#edf5fa!important;
+  border-color:#062e4b!important;
+  color:#062e4b!important;
+}
+.saved-search-convert-v164 svg{
+  width:17px!important;
+  height:17px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:2!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+</style>
+
+<script>
+/* ==========================================================
+   V164 SOBRE V163
+   CONVERTIR TIPO DE PROYECTO
+   - Crea una copia; nunca elimina ni sobrescribe el origen.
+   - Conserva información general, observaciones, conclusión,
+     factibilidades, estudios, anexos y demás datos compatibles.
+   - Reconstruye los requisitos propios del proyecto de destino y
+     transfiere automáticamente los requisitos equivalentes.
+   ========================================================== */
+(function(){
+  const PROJECT_OM_V164='obra_mayor_definitivo';
+  const PROJECT_AP_V164='anteproyecto_edificacion';
+
+  function cloneV164(value){
+    return JSON.parse(JSON.stringify(value==null?{}:value));
+  }
+
+  function normV164(value){
+    return String(value||'')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .toUpperCase().replace(/[^A-Z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+  }
+
+  function projectNameV164(projectId){
+    return projectId===PROJECT_AP_V164
+      ? 'ANTEPROYECTO DE EDIFICACIÓN'
+      : 'OBRA MAYOR DEFINITIVO';
+  }
+
+  function projectShortV164(projectId){
+    return projectId===PROJECT_AP_V164 ? 'Anteproyecto' : 'Definitivo';
+  }
+
+  function oppositeProjectV164(projectId){
+    return projectId===PROJECT_AP_V164 ? PROJECT_OM_V164 : PROJECT_AP_V164;
+  }
+
+  function inferProjectV164(record){
+    if(record?.projectType===PROJECT_AP_V164 || record?.projectType===PROJECT_OM_V164){
+      return record.projectType;
+    }
+    if(typeof inferSavedProjectV134==='function'){
+      return inferSavedProjectV134(record);
+    }
+    return Object.keys(record?.requisitos||{}).some(key=>String(key).startsWith('AP_REQ_'))
+      ? PROJECT_AP_V164
+      : PROJECT_OM_V164;
+  }
+
+  function baseEgobV164(recordOrValue){
+    if(recordOrValue && typeof recordOrValue==='object'){
+      const record=recordOrValue;
+      if(String(record.egobBaseV164||'').trim()) return String(record.egobBaseV164).trim();
+      if(String(record.egobBaseV119||'').trim()) return String(record.egobBaseV119).trim();
+      if(String(record.egobBaseV116||'').trim()) return String(record.egobBaseV116).trim();
+      return baseEgobV164(record.egob||'');
+    }
+    let value=String(recordOrValue||'').trim();
+    if(typeof obsBaseEgobV119==='function') value=obsBaseEgobV119(value);
+    return value
+      .replace(/\s+-\s+(ANTEPROYECTO|DEFINITIVO|OBRA\s+MAYOR\s+DEFINITIVO)(?:\s*\(\d+\))?\s*$/i,'')
+      .trim();
+  }
+
+  function setInfoEgobV164(record,base){
+    if(typeof setInfoEgobBaseV119==='function'){
+      setInfoEgobBaseV119(record,base);
+      return;
+    }
+    const field=(DATA.infoFields||[]).find(item=>/TR[ÁA]MITE\s+E-?GOB/i.test(String(item?.label||'')));
+    if(field){
+      if(!record.info) record.info={};
+      record.info[field.key]=base;
+    }
+  }
+
+  function requirementDefsV164(projectId){
+    if(projectId===PROJECT_AP_V164){
+      return cloneV164(
+        typeof REQUISITOS_ANTEPROYECTO_V128!=='undefined'
+          ? REQUISITOS_ANTEPROYECTO_V128
+          : (typeof REQUISITOS_ANTEPROYECTO_FALLBACK_V128!=='undefined' ? REQUISITOS_ANTEPROYECTO_FALLBACK_V128 : [])
+      );
+    }
+    return cloneV164(
+      typeof REQUISITOS_OBRA_MAYOR_V128!=='undefined'
+        ? REQUISITOS_OBRA_MAYOR_V128
+        : (DATA.requisitos||[])
+    );
+  }
+
+  function reqSemanticV164(req){
+    const t=normV164(`${req?.grupo||''} ${req?.texto||req?.requisito||''}`);
+    if(t.includes('IPRUS') || t.includes('INFORME PREDIAL')) return 'IPRUS';
+    if(t.includes('SOLICITUD') && t.includes('FORMULARIO')) return 'SOLICITUD';
+    if(t.includes('ESCRITURA') && t.includes('REGISTRO DE LA PROPIEDAD')) return 'ESCRITURA';
+    if(t.includes('GRAVAMEN')) return 'GRAVAMEN';
+    if(t.includes('RUC') && t.includes('PATENTE')) return 'RUC_PATENTE';
+    if(t.includes('TASA ADMINISTRATIVA')) return 'TASA';
+    if(t.includes('PROPUESTA TECNICA') && t.includes('ANTEPROYECTO')) return 'PROPUESTA_ANTEPROYECTO';
+    if((t.includes('MAYORES A 2') || t.includes('MAS DE 2') || t.includes('400 M2')) && t.includes('FACTIBIL')) return 'FACTIBILIDADES';
+    if(t.includes('SISTEMAS PUBLICOS DE SOPORTE') && t.includes('FACTIBIL')) return 'FACTIBILIDADES';
+    if((t.includes('HASTA 2 PISOS') || t.includes('400 M2')) && (t.includes('DISPONIBILIDAD') || t.includes('CARTA DE PAGO'))) return 'SERVICIOS_BASICOS';
+    if(t.includes('ESTUDIOS DE INGENIERIA') || t.includes('ESTUDIOS COMPLEMENTARIOS')) return 'ESTUDIOS';
+    if(t.includes('ZONAS RURALES') && t.includes('SISTEMAS ALTERNOS')) return 'RURAL';
+    if(t.includes('COPROPIEDAD') && t.includes('REPRESENTANTE COMUN')) return 'COPROPIEDAD';
+    if((t.includes('AMPLIACION') || t.includes('MODIFICACION')) && t.includes('CONSTRUCCIONES EXISTENTES')) return 'AMPLIACION';
+    if(t.includes('PROPIEDAD HORIZONTAL') && t.includes('75')) return 'PROPIEDAD_HORIZONTAL';
+    if(t.includes('PLANOS ARQUITECTONICOS') && t.includes('APROBADOS')) return 'PLANOS_APROBADOS';
+    if(t.includes('CUERPO DE BOMBEROS') || t.includes('BOMBEROS')) return 'BOMBEROS';
+    return '';
+  }
+
+  function compatibleReqValueV164(value,destinationReq){
+    const out=cloneV164(value||{});
+    const allowed=Array.isArray(destinationReq?.opciones) ? destinationReq.opciones : [];
+    if(out.estado && allowed.length && !allowed.includes(out.estado)){
+      out.estado=(out.estado==='Cumple'||out.estado==='No Cumple') && allowed.includes(out.estado)
+        ? out.estado
+        : '';
+    }
+    return out;
+  }
+
+  function mapRequirementsV164(record,sourceProject,targetProject){
+    const sourceDefs=requirementDefsV164(sourceProject);
+    const targetDefs=requirementDefsV164(targetProject);
+    const sourceValues=record?.requisitos||{};
+    const result=cloneV164(sourceValues);
+
+    const bySemantic={};
+    sourceDefs.forEach(req=>{
+      const semantic=reqSemanticV164(req);
+      if(semantic && sourceValues[req.id] && !bySemantic[semantic]){
+        bySemantic[semantic]=sourceValues[req.id];
+      }
+    });
+
+    targetDefs.forEach(req=>{
+      if(sourceValues[req.id]){
+        result[req.id]=compatibleReqValueV164(sourceValues[req.id],req);
+        return;
+      }
+      const semantic=reqSemanticV164(req);
+      if(semantic && bySemantic[semantic]){
+        result[req.id]=compatibleReqValueV164(bySemantic[semantic],req);
+      }else if(!result[req.id]){
+        result[req.id]={estado:'',observacion:'',detalle:{}};
+      }
+    });
+    return result;
+  }
+
+  function normalizeServicesV164(rows,names){
+    const current=Array.isArray(rows)?rows:[];
+    const key=value=>{
+      const n=normV164(value);
+      if(n.includes('EMAPAR')||n.includes('RIOBAMBA EP')||n.includes('AGUA POTABLE')) return 'EMAPAR';
+      if(n.includes('EERSA')||n.includes('ELECTRICA')) return 'EERSA';
+      if(n.includes('CNT')||n.includes('TELECOMUNIC')) return 'CNT';
+      if(n.includes('BOMBER')) return 'BOMBEROS';
+      return n;
+    };
+    return names.map(name=>{
+      const found=current.find(row=>key(row?.estudio||row?.empresa||'')===name);
+      return found
+        ? {...cloneV164(found),estudio:name}
+        : {estudio:name,documento:'',fecha:'',evidencia:''};
+    });
+  }
+
+  function adaptAprobatorioV164(record,sourceProject,targetProject){
+    if(!record.aprobatorio) record.aprobatorio={};
+    const apr=record.aprobatorio;
+    if(!Array.isArray(apr.conclusion)) apr.conclusion=[];
+    if(!Array.isArray(apr.anexos)) apr.anexos=[];
+    if(!Array.isArray(apr.adjuntos)) apr.adjuntos=[];
+
+    if(targetProject===PROJECT_AP_V164){
+      const sourceFacts=Array.isArray(apr.factibilidadesOMV145) && apr.factibilidadesOMV145.length
+        ? apr.factibilidadesOMV145
+        : (Array.isArray(apr.estudios)?apr.estudios:[]);
+      apr.estudios=normalizeServicesV164(sourceFacts,['EMAPAR','EERSA','CNT']);
+    }else{
+      const anteFacts=Array.isArray(apr.estudios)?apr.estudios:[];
+      if(!Array.isArray(apr.factibilidadesOMV145) || !apr.factibilidadesOMV145.some(row=>String(row?.documento||row?.fecha||row?.evidencia||'').trim())){
+        apr.factibilidadesOMV145=normalizeServicesV164(anteFacts,['EMAPAR','EERSA','CNT']);
+      }
+      if(!Array.isArray(apr.estudiosOMV145)){
+        apr.estudiosOMV145=normalizeServicesV164([],['EMAPAR','EERSA','CNT','BOMBEROS']);
+      }
+    }
+    return record;
+  }
+
+  async function uniqueConversionKeyV164(base,targetProject){
+    const label=targetProject===PROJECT_AP_V164?'ANTEPROYECTO':'DEFINITIVO';
+    let key=`${base} - ${label}`;
+    let index=2;
+    while(typeof dbGet==='function' && await dbGet(key)){
+      key=`${base} - ${label} (${index++})`;
+    }
+    return key;
+  }
+
+  async function buildConvertedRecordV164(sourceRecord,targetProject){
+    const sourceProject=inferProjectV164(sourceRecord);
+    const base=baseEgobV164(sourceRecord);
+    if(!base) throw new Error('El registro no tiene un número de eGOB válido.');
+
+    const copy=cloneV164(sourceRecord);
+    const newKey=await uniqueConversionKeyV164(base,targetProject);
+    copy.egob=newKey;
+    copy.egobBaseV164=base;
+    copy._savedKeyV164=newKey;
+    copy.projectType=targetProject;
+    copy.convertedFromProjectV164=sourceProject;
+    copy.convertedAtV164=new Date().toISOString();
+    copy.createdAt=new Date().toISOString();
+    copy.updatedAt=copy.createdAt;
+    copy.requisitos=mapRequirementsV164(sourceRecord,sourceProject,targetProject);
+    setInfoEgobV164(copy,base);
+    adaptAprobatorioV164(copy,sourceProject,targetProject);
+    return copy;
+  }
+
+  async function convertRecordAndOpenV164(sourceRecord){
+    const sourceProject=inferProjectV164(sourceRecord);
+    const targetProject=oppositeProjectV164(sourceProject);
+    const base=baseEgobV164(sourceRecord);
+    const question=`Se creará una COPIA del eGOB ${base} como ${projectNameV164(targetProject)}.\n\nEl registro original en ${projectNameV164(sourceProject)} se conservará. ¿Continuar?`;
+    if(!confirm(question)) return null;
+
+    const converted=await buildConvertedRecordV164(sourceRecord,targetProject);
+    await dbPut(converted);
+    if(typeof refreshSavedSearchV131==='function') await refreshSavedSearchV131();
+    if(typeof renderSavedList==='function') renderSavedList();
+    if(typeof cargarFormulario==='function') await cargarFormulario(converted.egob);
+    if(typeof msg==='function') msg(`Copia creada como ${projectNameV164(targetProject)}. Revise los requisitos propios del proyecto antes de guardar.`,true);
+    return converted;
+  }
+
+  window.convertSavedRecordV164=async function(key,event){
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    try{
+      const record=await dbGet(key);
+      if(!record) throw new Error('No se encontró el registro seleccionado.');
+      await convertRecordAndOpenV164(record);
+    }catch(error){
+      console.error('V164 conversión desde lista:',error);
+      if(typeof msg==='function') msg(`No se pudo convertir el registro: ${error.message||error}`);
+    }
+  };
+
+  window.convertCurrentProjectV164=async function(){
+    try{
+      if(typeof collectTop==='function') collectTop();
+      const base=baseEgobV164(state);
+      if(!base){
+        if(typeof msg==='function') msg('Debe colocar el Nro. eGOB antes de convertir el proyecto.');
+        return;
+      }
+      const source=cloneV164(state);
+      source.egob=state?._savedKeyV164 || state?._savedKeyV119 || state?.egob || base;
+      source.egobBaseV164=base;
+      setInfoEgobV164(source,base);
+      await convertRecordAndOpenV164(source);
+    }catch(error){
+      console.error('V164 conversión del formulario abierto:',error);
+      if(typeof msg==='function') msg(`No se pudo convertir el formulario: ${error.message||error}`);
+    }
+  };
+
+  function convertIconV164(){
+    return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3"></path><path d="m18 7-3 3"></path><path d="M17 17H6l3 3"></path><path d="m6 17 3-3"></path></svg>`;
+  }
+
+  function ensureHeaderConvertV164(){
+    if(typeof ensureHeaderReportActionsV131==='function') ensureHeaderReportActionsV131();
+    const actions=document.getElementById('headerReportActionsV131');
+    if(!actions || document.getElementById('headerConvertProjectV164')) return;
+    const button=document.createElement('button');
+    button.type='button';
+    button.id='headerConvertProjectV164';
+    button.className='header-report-action-v131 header-convert-v164';
+    button.title='Convertir a otro tipo de proyecto';
+    button.setAttribute('aria-label','Convertir a otro tipo de proyecto');
+    button.innerHTML='⇄';
+    button.addEventListener('click',window.convertCurrentProjectV164);
+    actions.appendChild(button);
+  }
+
+  window.renderSavedSearchResultsV131=function(query=''){
+    const list=document.getElementById('savedReportsResultsV131');
+    if(!list) return;
+    const q=typeof normalizeSearchV131==='function' ? normalizeSearchV131(query) : normV164(query).toLowerCase();
+    let matches=(savedReportsCacheV131||[]).filter(item=>{
+      const text=typeof savedRecordSearchTextV131==='function' ? savedRecordSearchTextV131(item) : normV164(JSON.stringify(item)).toLowerCase();
+      return !q || text.includes(q);
+    }).slice(0,12);
+
+    if(!matches.length){
+      list.innerHTML='<div class="saved-search-empty-v131">No se encontraron informes guardados.</div>';
+    }else{
+      list.innerHTML=matches.map(item=>{
+        const key=typeof savedRecordKeyV131==='function' ? savedRecordKeyV131(item) : String(item.egob||'');
+        const encoded=encodeURIComponent(key);
+        const owner=typeof savedOwnerV131==='function' ? (savedOwnerV131(item)||'Propietario no registrado') : 'Propietario no registrado';
+        const project=typeof savedProjectV131==='function' ? (savedProjectV131(item)||'Proyecto sin nombre') : 'Proyecto sin nombre';
+        const base=baseEgobV164(item);
+        const title=`${base} - ${item.tipoInforme||'Informe sin tipo'} - ${projectShortV164(inferProjectV164(item))}`;
+        return `<div class="saved-search-result-row-v139 saved-search-result-row-v164">
+          <button type="button" class="saved-search-result-v131 saved-search-open-v139" data-saved-key-v131="${esc(encoded)}">
+            <strong>${esc(title)}</strong>
+            <span class="saved-meta-v139">${esc(owner)} · ${esc(project)}</span>
+          </button>
+          <button type="button" class="saved-search-convert-v164" data-convert-key-v164="${esc(encoded)}" onclick="convertSavedRecordV164(decodeURIComponent(this.dataset.convertKeyV164||''),event)" title="Convertir tipo de proyecto" aria-label="Convertir tipo de proyecto">${convertIconV164()}</button>
+          <button type="button" class="saved-search-delete-v139" data-delete-key-v139="${esc(encoded)}" onclick="deleteSavedRecordV139(decodeURIComponent(this.dataset.deleteKeyV139||''),event)" title="Eliminar informe" aria-label="Eliminar informe">${typeof trashIconV139==='function'?trashIconV139():'×'}</button>
+        </div>`;
+      }).join('');
+    }
+    list.classList.add('open');
+  };
+
+  const loadBaseV164=typeof cargarFormulario==='function' ? cargarFormulario : null;
+  if(loadBaseV164){
+    cargarFormulario=async function(key){
+      let record=null;
+      try{record=await dbGet(key);}catch(error){}
+      const out=await loadBaseV164.apply(this,arguments);
+      if(record?.egobBaseV164 && state){
+        const base=String(record.egobBaseV164||'').trim();
+        state._savedKeyV164=key;
+        state.egobBaseV164=base;
+        state.egob=base;
+        setInfoEgobV164(state,base);
+        if(typeof applyProjectRequirementsV128==='function') applyProjectRequirementsV128(state.projectType,false);
+        if(typeof applyStateToUI==='function') applyStateToUI();
+        const input=document.getElementById('egob');
+        if(input) input.value=base;
+        if(typeof updateProjectBadgeV123==='function') updateProjectBadgeV123();
+        if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+        if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+        if(typeof renderReport==='function') renderReport();
+      }
+      ensureHeaderConvertV164();
+      return out;
+    };
+  }
+
+  const saveBaseV164=typeof guardarFormulario==='function' ? guardarFormulario : null;
+  if(saveBaseV164){
+    guardarFormulario=async function(showMessage=true){
+      if(!state?._savedKeyV164) return saveBaseV164.apply(this,arguments);
+      if(typeof collectTop==='function') collectTop();
+      if(typeof validateTop==='function' && !validateTop()) return false;
+      const base=String(state.egob||state.egobBaseV164||'').trim();
+      const key=String(state._savedKeyV164||'').trim();
+      if(!base || !key) return false;
+      state.egobBaseV164=base;
+      const copy=cloneV164(state);
+      copy.egob=key;
+      copy.egobBaseV164=base;
+      copy._savedKeyV164=key;
+      copy.updatedAt=new Date().toISOString();
+      if(!copy.createdAt) copy.createdAt=copy.updatedAt;
+      setInfoEgobV164(copy,base);
+      await dbPut(copy);
+      state.egob=base;
+      setInfoEgobV164(state,base);
+      if(typeof renderSavedList==='function') renderSavedList();
+      if(typeof refreshSavedSearchV131==='function') await refreshSavedSearchV131();
+      if(showMessage && typeof msg==='function') msg(`Copia convertida guardada correctamente como ${projectNameV164(state.projectType)}.`,true);
+      return true;
+    };
+  }
+
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      ensureHeaderConvertV164();
+      if(typeof refreshSavedSearchV131==='function') refreshSavedSearchV131();
+    },900);
+    setTimeout(ensureHeaderConvertV164,1800);
+  });
+})();
+</script>
+
 </body>
 </html>
