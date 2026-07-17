@@ -31841,5 +31841,583 @@ window.addEventListener('load',()=>{
 })();
 </script>
 
+
+
+<!-- ==========================================================
+     V119X - NOTIFICAR / SIENTO RAZÓN eGOB
+     Base: versión oficial 119W con ANEXOS en Vista del Informe.
+     Este módulo se añade sin reemplazar las funciones existentes.
+     Textos configurables:
+       data/notificacion_correo.csv
+       data/siento_razon.csv
+     ========================================================== -->
+<script>
+(function(){
+  'use strict';
+
+  const TAB_ID_V119X='tab-notificar-siento-v119x';
+  const DEFAULT_NOTIFICATION_TEMPLATES_V119X=[
+    {
+      Tipo_Informe:'Informe con Observaciones',
+      Asunto:'Notificación de {{Tipo de Informe}} – Trámite E-GOB N.° {{Número de EGOB}} – {{Tipo de Proyecto}}',
+      Cuerpo:'De mi consideración:\n\nReciba un cordial saludo.\n\nPor medio del presente, se notifica el contenido del {{Tipo de Informe}}, correspondiente al trámite E-GOB N.° {{Número de EGOB}} de {{Tipo de Proyecto}}, relacionado con el predio de propiedad de los señores {{Propietarios}}.\n\nUna vez realizada la revisión técnica de la documentación presentada, se han determinado observaciones que deberán ser subsanadas conforme al detalle contenido en el informe técnico adjunto, por lo que se emite criterio técnico NO FAVORABLE hasta que dichas observaciones sean atendidas.\n\nDe conformidad con lo establecido en el artículo 140 del Código Orgánico Administrativo, se concede un plazo de diez (10) días hábiles, contados a partir de la presente notificación, para presentar la documentación corregida mediante un alcance al trámite E-GOB N.° {{Número de EGOB}}. La fecha máxima para el ingreso de la subsanación corresponde al día {{Fecha Subsanación}}.\n\nSe solicita revisar detenidamente las observaciones contenidas en el informe adjunto y realizar las correcciones pertinentes a fin de continuar con el proceso administrativo correspondiente.\n\nEn caso de requerir asistencia o aclaraciones técnicas, podrá acercarse a la Mesa Técnica de la Dirección de Gestión de Planificación, Hábitat y Desarrollo Urbanístico, ubicada en las calles Espejo y Olmedo, edificio del Ex Colegio Salesianos, tercer piso.\n\nParticular que comunico para los fines pertinentes.\n\nAtentamente,\n\n{{Nombre del Técnico Revisor}}\n{{Cargo del Técnico Revisor}}',
+      Activo:'Sí'
+    },
+    {
+      Tipo_Informe:'Informe de Desistimiento',
+      Asunto:'Notificación de {{Tipo de Informe}} – Trámite E-GOB N.° {{Número de EGOB}} – {{Tipo de Proyecto}}',
+      Cuerpo:'De mi consideración:\n\nReciba un cordial saludo.\n\nPor medio del presente, se notifica el contenido del {{Tipo de Informe}}, correspondiente al trámite E-GOB N.° {{Número de EGOB}} de {{Tipo de Proyecto}}, relacionado con el predio de propiedad de los señores {{Propietarios}}.\n\nSe adjunta el informe técnico correspondiente para su conocimiento y fines pertinentes.\n\nParticular que comunico para los fines pertinentes.\n\nAtentamente,\n\n{{Nombre del Técnico Revisor}}\n{{Cargo del Técnico Revisor}}',
+      Activo:'Sí'
+    }
+  ];
+  const DEFAULT_SIENTO_TEMPLATES_V119X=[
+    {Tipo_Informe:'Informe con Observaciones',Titulo:'SIENTO RAZÓN',Texto_Base:'Siento razón que con fecha {{Fecha de hoy}} se notificó al correo electrónico registrado {{correo para notificar}}, el informe con observaciones, para su correcta resolución en el término de 10 días.\n\nParticular que informo para los fines correspondientes',Activo:'Sí'},
+    {Tipo_Informe:'Informe de Desistimiento',Titulo:'SIENTO RAZÓN',Texto_Base:'Siento razón que con fecha {{Fecha de hoy}} se notificó al correo electrónico registrado {{correo para notificar}}, el informe de desistimiento, para su conocimiento.\n\nParticular que informo para los fines correspondientes',Activo:'Sí'}
+  ];
+
+  let notificationTemplatesV119X=[...DEFAULT_NOTIFICATION_TEMPLATES_V119X];
+  let sientoTemplatesV119X=[...DEFAULT_SIENTO_TEMPLATES_V119X];
+  let professionalEmailsV119X=[];
+  let respaldoPdfV119X=null;
+  let templatesPromiseV119X=null;
+  let professionalsPromiseV119X=null;
+
+  function normV119X(v){
+    return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+  }
+  function isActiveV119X(v){
+    const n=normV119X(v);
+    return !n || ['SI','SÍ','TRUE','1','ACTIVO'].includes(n);
+  }
+  function eligibleV119X(){
+    return typeof state!=='undefined' && ['Informe con Observaciones','Informe de Desistimiento'].includes(state?.tipoInforme);
+  }
+  function ensureNotificationStateV119X(){
+    if(typeof state==='undefined') return {correo:'',correoAuto:'',correoManual:false,respaldoNombre:''};
+    if(!state.notificacionEgob || typeof state.notificacionEgob!=='object'){
+      state.notificacionEgob={correo:'',correoAuto:'',correoManual:false,respaldoNombre:''};
+    }
+    const n=state.notificacionEgob;
+    n.correo=String(n.correo||'');
+    n.correoAuto=String(n.correoAuto||'');
+    n.correoManual=!!n.correoManual;
+    n.respaldoNombre=String(n.respaldoNombre||'');
+    return n;
+  }
+
+  function parseCsvFallbackV119X(text){
+    if(!text) return [];
+    text=String(text).replace(/^\uFEFF/,'');
+    const first=text.split(/\r?\n/)[0]||'';
+    const delimiter=(first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length?';':',';
+    const rows=[]; let row=[],cell='',quoted=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i],next=text[i+1];
+      if(quoted){
+        if(ch==='"' && next==='"'){cell+='"';i++;}
+        else if(ch==='"') quoted=false;
+        else cell+=ch;
+      }else{
+        if(ch==='"') quoted=true;
+        else if(ch===delimiter){row.push(cell);cell='';}
+        else if(ch==='\n'){row.push(cell);rows.push(row);row=[];cell='';}
+        else if(ch!=='\r') cell+=ch;
+      }
+    }
+    if(cell.length||row.length){row.push(cell);rows.push(row);}
+    if(!rows.length) return [];
+    const headers=rows.shift().map(x=>String(x||'').trim());
+    return rows.filter(r=>r.some(x=>String(x||'').trim())).map(r=>{
+      const o={}; headers.forEach((h,i)=>o[h]=r[i]??''); return o;
+    });
+  }
+  async function fetchCsvV119X(url){
+    try{
+      const response=await fetch(url+(url.includes('?')?'&':'?')+'v='+Date.now(),{cache:'no-store'});
+      if(!response.ok) throw new Error(response.status+' '+response.statusText);
+      const text=await response.text();
+      return typeof parseCSVV32==='function'?parseCSVV32(text):parseCsvFallbackV119X(text);
+    }catch(error){
+      console.warn('V119X no pudo cargar '+url+':',error);
+      return [];
+    }
+  }
+  async function loadTemplatesV119X(){
+    if(templatesPromiseV119X) return templatesPromiseV119X;
+    templatesPromiseV119X=(async()=>{
+      const [noti,siento]=await Promise.all([
+        fetchCsvV119X('data/notificacion_correo.csv'),
+        fetchCsvV119X('data/siento_razon.csv')
+      ]);
+      if(noti.length) notificationTemplatesV119X=noti.filter(r=>isActiveV119X(r.Activo||r.activo));
+      if(siento.length) sientoTemplatesV119X=siento.filter(r=>isActiveV119X(r.Activo||r.activo));
+      renderNotificationTabV119X();
+    })();
+    return templatesPromiseV119X;
+  }
+
+  function firstValueV119X(row,names){
+    for(const name of names){
+      if(row && Object.prototype.hasOwnProperty.call(row,name) && String(row[name]||'').trim()) return String(row[name]).trim();
+    }
+    const keys=Object.keys(row||{});
+    for(const name of names){
+      const wanted=normV119X(name);
+      const key=keys.find(k=>normV119X(k)===wanted);
+      if(key && String(row[key]||'').trim()) return String(row[key]).trim();
+    }
+    return '';
+  }
+  async function loadProfessionalEmailsV119X(){
+    if(professionalsPromiseV119X) return professionalsPromiseV119X;
+    professionalsPromiseV119X=(async()=>{
+      const rows=await fetchCsvV119X('data/profesionales.csv');
+      professionalEmailsV119X=rows.map(row=>({
+        nombre:firstValueV119X(row,['Nombre','Profesional','Proyectista','Nombres y Apellidos','Apellidos y Nombres']),
+        correo:firstValueV119X(row,['Correo electrónico','Correo Electronico','Correo','Email','E-mail','Mail','Correo institucional','Correo Institucional'])
+      })).filter(x=>x.nombre&&x.correo);
+      autoCompleteEmailV119X(false);
+    })();
+    return professionalsPromiseV119X;
+  }
+  function currentProyectistaV119X(){
+    try{ if(typeof infoValue==='function') return String(infoValue('PROYECTISTA')||'').trim(); }catch(_e){}
+    try{
+      const field=(DATA.infoFields||[]).find(f=>normV119X(f.label).includes('PROYECTISTA'));
+      return field?String(state.info?.[field.key]||'').trim():'';
+    }catch(_e){return '';}
+  }
+  function lookupProfessionalEmailV119X(name){
+    const n=normV119X(name); if(!n) return '';
+    let found=professionalEmailsV119X.find(x=>normV119X(x.nombre)===n);
+    if(!found) found=professionalEmailsV119X.find(x=>normV119X(x.nombre).includes(n)||n.includes(normV119X(x.nombre)));
+    return found?.correo||'';
+  }
+  function autoCompleteEmailV119X(force=false){
+    if(typeof state==='undefined') return;
+    const n=ensureNotificationStateV119X();
+    const found=lookupProfessionalEmailV119X(currentProyectistaV119X());
+    if(found && (force || !n.correo || (!n.correoManual && n.correo===n.correoAuto))){
+      n.correo=found;
+      n.correoAuto=found;
+      n.correoManual=false;
+      const input=document.getElementById('correoNotificacionV119X');
+      if(input) input.value=found;
+      renderEmailPreviewV119X();
+      renderSientoPreviewV119X();
+    }
+  }
+
+  function projectLabelV119X(){
+    let id='';
+    try{ if(typeof projectTypeV123==='function') id=projectTypeV123(); }catch(_e){}
+    id=id||state?.projectType||'';
+    return id==='anteproyecto_edificacion'?'Anteproyecto de Edificación':'Obra Mayor – Proyecto Definitivo';
+  }
+  function reportLabelV119X(){
+    return state?.tipoInforme==='Informe de Desistimiento'?'Informe Técnico de Desistimiento':'Informe Técnico de Observaciones';
+  }
+  function ownersV119X(){
+    const names=(state?.propietarios||[]).map(p=>String(p?.nombre||'').trim()).filter(Boolean);
+    if(!names.length) return '';
+    if(names.length===1) return names[0];
+    if(names.length===2) return names.join(' y ');
+    return names.slice(0,-1).join(', ')+' y '+names[names.length-1];
+  }
+  function technicianV119X(){
+    try{ return typeof tecnicoInfo==='function'?tecnicoInfo(state?.tecnico||''):{nombre:state?.tecnico||'',cargo:'TÉCNICO REVISOR'}; }
+    catch(_e){return {nombre:state?.tecnico||'',cargo:'TÉCNICO REVISOR'};}
+  }
+  function longDateV119X(value,uppercaseMonth=false,useDel=false){
+    if(!value) return '';
+    let d;
+    if(value instanceof Date) d=value;
+    else{
+      const s=String(value);
+      d=/^\d{4}-\d{2}-\d{2}$/.test(s)?new Date(s+'T12:00:00'):new Date(s);
+    }
+    if(Number.isNaN(d.getTime())) return String(value);
+    const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    let month=months[d.getMonth()]; if(uppercaseMonth) month=month.toUpperCase();
+    return `${d.getDate()} de ${month} ${useDel?'del':'de'} ${d.getFullYear()}`;
+  }
+  function placeholderDataV119X(){
+    const tech=technicianV119X();
+    const n=ensureNotificationStateV119X();
+    return {
+      '{{Tipo de Informe}}':reportLabelV119X(),
+      '{{Número de EGOB}}':String(state?.egob||''),
+      '{{Tipo de Proyecto}}':projectLabelV119X(),
+      '{{Propietarios}}':ownersV119X(),
+      '{{Fecha Subsanación}}':longDateV119X(state?.fechaSubsanacion||'',false,false),
+      '{{Nombre del Técnico Revisor}}':String(tech?.nombre||state?.tecnico||''),
+      '{{Cargo del Técnico Revisor}}':String(tech?.cargo||'TÉCNICO REVISOR'),
+      '{{Fecha de hoy}}':longDateV119X(new Date(),true,true),
+      '{{correo para notificar}}':String(n.correo||'')
+    };
+  }
+  function replacePlaceholdersV119X(text){
+    let out=String(text||'');
+    const data=placeholderDataV119X();
+    Object.entries(data).forEach(([key,value])=>{out=out.split(key).join(value);});
+    return out;
+  }
+  function templateForV119X(rows){
+    const type=normV119X(state?.tipoInforme||'');
+    return rows.find(r=>normV119X(r.Tipo_Informe||r['Tipo de Informe'])===type)||rows[0]||{};
+  }
+  function emailDataV119X(){
+    const row=templateForV119X(notificationTemplatesV119X);
+    return {
+      subject:replacePlaceholdersV119X(row.Asunto||row.asunto||''),
+      body:replacePlaceholdersV119X(row.Cuerpo||row.cuerpo||row.Texto_Base||'')
+    };
+  }
+  function sientoDataV119X(){
+    const row=templateForV119X(sientoTemplatesV119X);
+    return {
+      title:replacePlaceholdersV119X(row.Titulo||row.titulo||'SIENTO RAZÓN'),
+      text:replacePlaceholdersV119X(row.Texto_Base||row.Texto||row.texto||'')
+    };
+  }
+  function eV119X(v){ return typeof esc==='function'?esc(v):String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
+  function injectStylesV119X(){
+    if(document.getElementById('stylesV119X')) return;
+    const style=document.createElement('style');
+    style.id='stylesV119X';
+    style.textContent=`
+      .noti-grid-v119x{display:grid;grid-template-columns:1fr;gap:16px}
+      .noti-card-v119x{border:1px solid #cbd8e6;border-radius:14px;background:#f8fbff;padding:14px}
+      .noti-title-v119x{border-left:4px solid var(--rojo,#a71930);padding:9px 12px;margin:0 0 12px;background:#eef4fa;color:var(--azul,#17324d);font-weight:900;text-transform:uppercase}
+      .noti-toolbar-v119x{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:8px 0}
+      .noti-preview-v119x{background:#fff;border:1px solid #cbd5e1;border-radius:10px;padding:12px;white-space:pre-wrap;line-height:1.5;color:#172b3f;min-height:150px}
+      .noti-subject-v119x{font-weight:900;margin-bottom:10px;color:#0b2b4c}
+      .siento-preview-v119x{background:#fff;border:1px dashed #9bb1c8;border-radius:10px;padding:12px;white-space:pre-wrap;line-height:1.5;margin:10px 0}
+      .file-status-v119x{font-size:12px;color:#596b7d;margin-top:6px}
+      .noti-note-v119x{font-size:12px;color:#667085;margin-top:6px}
+      .noti-action-primary-v119x{background:#087443!important;color:#fff!important}
+      .noti-action-pdf-v119x{background:#0b4e78!important;color:#fff!important}
+      @media(max-width:720px){.noti-toolbar-v119x{justify-content:stretch}.noti-toolbar-v119x button{flex:1}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function setupNotificationTabV119X(){
+    injectStylesV119X();
+    const tabs=document.querySelector('.tabs');
+    if(tabs && !tabs.querySelector(`[data-tab="${TAB_ID_V119X}"]`)){
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='tab-btn hidden-tab';
+      btn.dataset.tab=TAB_ID_V119X;
+      btn.textContent='Notificar / Siento Razón';
+      btn.onclick=()=>showTab(TAB_ID_V119X);
+      const vista=tabs.querySelector('[data-tab="tab-vista"]');
+      if(vista) vista.insertAdjacentElement('afterend',btn); else tabs.appendChild(btn);
+    }
+    if(!document.getElementById(TAB_ID_V119X)){
+      const panel=document.createElement('div');
+      panel.id=TAB_ID_V119X;
+      panel.className='tab card no-print';
+      const vista=document.getElementById('tab-vista');
+      if(vista) vista.insertAdjacentElement('afterend',panel);
+      else document.querySelector('section')?.appendChild(panel);
+    }
+  }
+
+  function renderEmailPreviewV119X(){
+    const data=emailDataV119X();
+    const subject=document.getElementById('emailSubjectPreviewV119X');
+    const body=document.getElementById('emailBodyPreviewV119X');
+    if(subject) subject.textContent='Asunto: '+data.subject;
+    if(body) body.textContent=data.body;
+  }
+  function renderSientoPreviewV119X(){
+    const data=sientoDataV119X();
+    const title=document.getElementById('sientoTitlePreviewV119X');
+    const text=document.getElementById('sientoTextPreviewV119X');
+    if(title) title.textContent=data.title;
+    if(text) text.textContent=data.text;
+  }
+
+  window.updateNotificationEmailV119X=function(value){
+    const n=ensureNotificationStateV119X();
+    n.correo=String(value||'').trim();
+    n.correoManual=true;
+    renderEmailPreviewV119X();
+    renderSientoPreviewV119X();
+  };
+  window.useRegisteredEmailV119X=function(){
+    const n=ensureNotificationStateV119X();
+    n.correoManual=false;
+    n.correo='';
+    n.correoAuto='';
+    autoCompleteEmailV119X(true);
+    if(!n.correo && typeof msg==='function') msg('No se encontró un correo para el proyectista en el registro de profesionales. Puede escribirlo manualmente.');
+  };
+  window.selectNotificationBackupV119X=function(input){
+    const file=input?.files?.[0]||null;
+    if(file && !(file.type==='application/pdf'||/\.pdf$/i.test(file.name))){
+      input.value=''; respaldoPdfV119X=null;
+      if(typeof msg==='function') msg('Seleccione únicamente un archivo PDF como respaldo de la notificación.');
+      return;
+    }
+    respaldoPdfV119X=file;
+    const n=ensureNotificationStateV119X();
+    n.respaldoNombre=file?.name||'';
+    const status=document.getElementById('backupStatusV119X');
+    if(status) status.textContent=file?`Archivo seleccionado: ${file.name}`:'No se ha seleccionado un PDF.';
+  };
+
+  async function copyTextV119X(text,success){
+    try{
+      if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+      else throw new Error('Clipboard API no disponible');
+      if(typeof msg==='function') msg(success,true);
+    }catch(_e){
+      const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      try{document.execCommand('copy');}catch(_e2){}
+      ta.remove(); if(typeof msg==='function') msg(success,true);
+    }
+  }
+  window.copyNotificationEmailV119X=function(){
+    const data=emailDataV119X();
+    return copyTextV119X(`Asunto: ${data.subject}\n\n${data.body}`,'Contenido del correo copiado.');
+  };
+  function validateEmailV119X(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email||'').trim()); }
+  window.openInstitutionalMailV119X=function(){
+    if(!eligibleV119X()) return;
+    if(typeof collectTop==='function') collectTop();
+    const n=ensureNotificationStateV119X();
+    if(!validateEmailV119X(n.correo)){
+      if(typeof msg==='function') msg('Complete un correo electrónico válido antes de notificar.');
+      document.getElementById('correoNotificacionV119X')?.focus(); return;
+    }
+    const data=emailDataV119X();
+    const href=`mailto:${encodeURIComponent(n.correo)}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.body.replace(/\n/g,'\r\n'))}`;
+    window.location.href=href;
+  };
+
+  async function loadScriptV119X(url){
+    return new Promise((resolve,reject)=>{
+      const existing=[...document.scripts].find(s=>s.src===url);
+      if(existing){ if(window.PDFLib) resolve(); else existing.addEventListener('load',resolve,{once:true}); return; }
+      const script=document.createElement('script'); script.src=url; script.async=true;
+      script.onload=resolve; script.onerror=()=>reject(new Error('No se pudo cargar '+url)); document.head.appendChild(script);
+    });
+  }
+  async function ensurePdfLibV119X(){
+    if(window.PDFLib) return window.PDFLib;
+    const urls=['https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js','https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js'];
+    let last;
+    for(const url of urls){ try{await loadScriptV119X(url); if(window.PDFLib) return window.PDFLib;}catch(e){last=e;} }
+    throw last||new Error('No se pudo cargar el generador PDF.');
+  }
+  async function fetchBackgroundV119X(){
+    const candidates=['assets/fondo_institucional.png','assets/fondo_institucional_informes.png','fondo_institucional.png'];
+    let last;
+    for(const path of candidates){
+      try{
+        const r=await fetch(path+'?v='+Date.now(),{cache:'no-store'});
+        if(!r.ok) throw new Error(r.status+' '+r.statusText);
+        return await r.arrayBuffer();
+      }catch(e){last=e;}
+    }
+    throw last||new Error('No se encontró el fondo institucional.');
+  }
+  function wrapPdfTextV119X(text,font,size,maxWidth){
+    const paragraphs=String(text||'').split(/\n/); const lines=[];
+    paragraphs.forEach((paragraph,pi)=>{
+      if(!paragraph.trim()){lines.push('');return;}
+      const words=paragraph.split(/\s+/); let line='';
+      words.forEach(word=>{
+        const test=line?line+' '+word:word;
+        if(font.widthOfTextAtSize(test,size)<=maxWidth) line=test;
+        else{if(line) lines.push(line); line=word;}
+      });
+      if(line) lines.push(line);
+      if(pi<paragraphs.length-1 && paragraphs[pi+1].trim()) lines.push('');
+    });
+    return lines;
+  }
+  window.generateSientoRazonPdfV119X=async function(){
+    if(!eligibleV119X()) return;
+    const n=ensureNotificationStateV119X();
+    if(!validateEmailV119X(n.correo)){
+      if(typeof msg==='function') msg('Complete un correo electrónico válido para generar el Siento Razón.'); return;
+    }
+    if(!respaldoPdfV119X){
+      if(typeof msg==='function') msg('Seleccione el PDF de respaldo de la notificación por correo.'); return;
+    }
+    const btn=document.getElementById('generateSientoBtnV119X');
+    if(btn){btn.disabled=true;btn.textContent='Generando…';}
+    try{
+      const PDFLib=await ensurePdfLibV119X();
+      const {PDFDocument,StandardFonts,rgb}=PDFLib;
+      const pdf=await PDFDocument.create();
+      const page=pdf.addPage([595.28,841.89]);
+      const width=page.getWidth(),height=page.getHeight();
+      const bgBytes=await fetchBackgroundV119X();
+      const bg=await pdf.embedPng(bgBytes);
+      page.drawImage(bg,{x:0,y:0,width,height});
+      const font=await pdf.embedFont(StandardFonts.Helvetica);
+      const bold=await pdf.embedFont(StandardFonts.HelveticaBold);
+      const data=sientoDataV119X();
+      const titleSize=13;
+      const titleWidth=bold.widthOfTextAtSize(data.title,titleSize);
+      page.drawText(data.title,{x:(width-titleWidth)/2,y:height-155,size:titleSize,font:bold,color:rgb(0.07,0.16,0.27)});
+      page.drawLine({start:{x:72,y:height-164},end:{x:width-72,y:height-164},thickness:0.8,color:rgb(0.15,0.15,0.15)});
+      const lines=wrapPdfTextV119X(data.text,font,11,445);
+      let y=height-200;
+      lines.forEach(line=>{
+        if(!line){y-=10;return;}
+        page.drawText(line,{x:75,y,size:11,font,color:rgb(0,0,0)}); y-=17;
+      });
+      const tech=technicianV119X();
+      const signatureY=185;
+      page.drawLine({start:{x:175,y:signatureY},end:{x:420,y:signatureY},thickness:0.8,color:rgb(0,0,0)});
+      const techName=String(tech?.nombre||state?.tecnico||'').trim();
+      const techCargo=String(tech?.cargo||'TÉCNICO REVISOR').trim();
+      const nameW=bold.widthOfTextAtSize(techName,10);
+      const cargoW=font.widthOfTextAtSize(techCargo,9);
+      page.drawText(techName,{x:(width-nameW)/2,y:signatureY-17,size:10,font:bold,color:rgb(0,0,0)});
+      page.drawText(techCargo,{x:(width-cargoW)/2,y:signatureY-31,size:9,font,color:rgb(0,0,0)});
+      const firma='FIRMA'; const firmaW=font.widthOfTextAtSize(firma,8);
+      page.drawText(firma,{x:(width-firmaW)/2,y:signatureY+8,size:8,font,color:rgb(0.25,0.25,0.25)});
+
+      const evidenceBytes=await respaldoPdfV119X.arrayBuffer();
+      const evidence=await PDFDocument.load(evidenceBytes,{ignoreEncryption:false});
+      const copied=await pdf.copyPages(evidence,evidence.getPageIndices());
+      copied.forEach(p=>pdf.addPage(p));
+      pdf.setTitle(`Siento Razón eGOB ${state?.egob||''}`);
+      pdf.setSubject('Respaldo de notificación electrónica');
+      pdf.setCreator('Generador Local de Informes GADMR');
+      const bytes=await pdf.save();
+      const blob=new Blob([bytes],{type:'application/pdf'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=`SIENTO_RAZON_EGOB_${String(state?.egob||'SIN_NUMERO').replace(/[^0-9A-Za-z_-]/g,'_')}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+      if(typeof msg==='function') msg('PDF Siento Razón generado correctamente.',true);
+    }catch(error){
+      console.error('V119X PDF:',error);
+      if(typeof msg==='function') msg('No se pudo generar el PDF Siento Razón: '+(error?.message||error));
+      else alert('No se pudo generar el PDF: '+(error?.message||error));
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent='Generar PDF';}
+    }
+  };
+
+  window.renderNotificationTabV119X=function(){
+    setupNotificationTabV119X();
+    const panel=document.getElementById(TAB_ID_V119X); if(!panel) return;
+    if(!eligibleV119X()){
+      panel.innerHTML='<p class="mini">Esta pestaña está disponible únicamente para Informes de Observaciones e Informes de Desistimiento.</p>';
+      return;
+    }
+    const n=ensureNotificationStateV119X();
+    const email=emailDataV119X();
+    const siento=sientoDataV119X();
+    panel.innerHTML=`
+      <h2>Notificar / Siento Razón eGOB</h2>
+      <div class="noti-grid-v119x">
+        <section class="noti-card-v119x">
+          <div class="noti-title-v119x">1. Notificar</div>
+          <div class="field">
+            <label>Correo electrónico *</label>
+            <input id="correoNotificacionV119X" type="email" autocomplete="email" value="${eV119X(n.correo)}" placeholder="correo@dominio.com" oninput="updateNotificationEmailV119X(this.value)">
+            <div class="noti-note-v119x">Se autocompleta con el correo del proyectista registrado. Puede corregirlo o escribirlo manualmente.</div>
+          </div>
+          <div class="noti-toolbar-v119x">
+            <button type="button" class="secondary" onclick="useRegisteredEmailV119X()">Autocompletar desde registro</button>
+            <button type="button" class="secondary" onclick="copyNotificationEmailV119X()">Copiar correo</button>
+            <button type="button" class="noti-action-primary-v119x" onclick="openInstitutionalMailV119X()">Notificar</button>
+          </div>
+          <div class="noti-preview-v119x"><div id="emailSubjectPreviewV119X" class="noti-subject-v119x">Asunto: ${eV119X(email.subject)}</div><div id="emailBodyPreviewV119X">${eV119X(email.body)}</div></div>
+          <div class="noti-note-v119x">El botón NOTIFICAR abre el programa de correo configurado en el equipo. El técnico debe adjuntar manualmente el informe firmado antes de enviar.</div>
+        </section>
+        <section class="noti-card-v119x">
+          <div class="noti-title-v119x">2. Siento Razón eGOB</div>
+          <div class="field">
+            <label>Respaldo Notificación Correo (PDF) *</label>
+            <input id="respaldoNotificacionV119X" type="file" accept="application/pdf,.pdf" onchange="selectNotificationBackupV119X(this)">
+            <div id="backupStatusV119X" class="file-status-v119x">${n.respaldoNombre?'El registro conserva el nombre «'+eV119X(n.respaldoNombre)+'», pero debe seleccionar nuevamente el PDF para generar el documento.':'No se ha seleccionado un PDF.'}</div>
+          </div>
+          <div class="siento-preview-v119x"><strong id="sientoTitlePreviewV119X">${eV119X(siento.title)}</strong><br><br><span id="sientoTextPreviewV119X">${eV119X(siento.text)}</span><br><br><em>El documento añadirá un espacio para la firma física y, a continuación, todas las páginas del PDF de respaldo.</em></div>
+          <div class="noti-toolbar-v119x"><button id="generateSientoBtnV119X" type="button" class="noti-action-pdf-v119x" onclick="generateSientoRazonPdfV119X()">Generar PDF</button></div>
+        </section>
+      </div>`;
+    autoCompleteEmailV119X(false);
+  };
+
+  const tabsBaseV119X=typeof tabsForCurrentReport==='function'?tabsForCurrentReport:null;
+  if(tabsBaseV119X){
+    tabsForCurrentReport=function(){
+      let arr=tabsBaseV119X.apply(this,arguments)||[];
+      arr=arr.filter(id=>id!==TAB_ID_V119X);
+      if(eligibleV119X()) arr.push(TAB_ID_V119X);
+      return arr;
+    };
+  }
+  const updateTabsBaseV119X=typeof updateTabsForType==='function'?updateTabsForType:null;
+  if(updateTabsBaseV119X){
+    updateTabsForType=function(){
+      setupNotificationTabV119X();
+      const out=updateTabsBaseV119X.apply(this,arguments);
+      const btn=document.querySelector(`[data-tab="${TAB_ID_V119X}"]`);
+      if(btn) btn.classList.toggle('hidden-tab',!eligibleV119X());
+      renderNotificationTabV119X();
+      return out;
+    };
+  }
+  const showTabBaseV119X=typeof showTab==='function'?showTab:null;
+  if(showTabBaseV119X){
+    showTab=function(id){
+      const out=showTabBaseV119X.apply(this,arguments);
+      if(id===TAB_ID_V119X) renderNotificationTabV119X();
+      return out;
+    };
+  }
+  const renderReportBaseV119X=typeof renderReport==='function'?renderReport:null;
+  if(renderReportBaseV119X){
+    renderReport=function(){
+      const out=renderReportBaseV119X.apply(this,arguments);
+      if(document.getElementById(TAB_ID_V119X)?.classList.contains('active')) renderNotificationTabV119X();
+      return out;
+    };
+  }
+  const applyStateBaseV119X=typeof applyStateToUI==='function'?applyStateToUI:null;
+  if(applyStateBaseV119X){
+    applyStateToUI=function(){
+      ensureNotificationStateV119X(); respaldoPdfV119X=null;
+      const out=applyStateBaseV119X.apply(this,arguments);
+      setTimeout(()=>{setupNotificationTabV119X();renderNotificationTabV119X();},0);
+      return out;
+    };
+  }
+  const newFormBaseV119X=typeof nuevoFormulario==='function'?nuevoFormulario:null;
+  if(newFormBaseV119X){
+    nuevoFormulario=function(){
+      const out=newFormBaseV119X.apply(this,arguments);
+      respaldoPdfV119X=null; ensureNotificationStateV119X();
+      setTimeout(renderNotificationTabV119X,0); return out;
+    };
+  }
+
+  window.addEventListener('load',()=>{
+    setTimeout(async()=>{
+      setupNotificationTabV119X();
+      ensureNotificationStateV119X();
+      renderNotificationTabV119X();
+      updateTabsForType?.();
+      await Promise.allSettled([loadTemplatesV119X(),loadProfessionalEmailsV119X()]);
+      renderNotificationTabV119X();
+    },1100);
+  });
+})();
+</script>
+
 </body>
 </html>
