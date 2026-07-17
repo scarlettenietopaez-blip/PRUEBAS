@@ -31871,7 +31871,7 @@ window.addEventListener('load',()=>{
     }
   ];
   const DEFAULT_SIENTO_TEMPLATES_V119X=[
-    {Tipo_Informe:'Informe con Observaciones',Titulo:'SIENTO RAZÓN',Texto_Base:'Siento razón que con fecha {{Fecha de hoy}} se notificó al correo electrónico registrado {{correo para notificar}}, el informe con observaciones, para su correcta resolución en el término de 10 días.\n\nParticular que informo para los fines correspondientes',Activo:'Sí'},
+    {Tipo_Informe:'Informe con Observaciones',Titulo:'SIENTO RAZÓN',Texto_Base:'Siento razón que con fecha {{Fecha de hoy}} se notificó al correo electrónico registrado {{correo para notificar}}, el {{Tipo de Informe}}, para su correcta resolución en el término de 10 días.\n\nParticular que informo para los fines correspondientes',Activo:'Sí'},
     {Tipo_Informe:'Informe de Desistimiento',Titulo:'SIENTO RAZÓN',Texto_Base:'Siento razón que con fecha {{Fecha de hoy}} se notificó al correo electrónico registrado {{correo para notificar}}, el informe de desistimiento, para su conocimiento.\n\nParticular que informo para los fines correspondientes',Activo:'Sí'}
   ];
 
@@ -31890,7 +31890,7 @@ window.addEventListener('load',()=>{
     return !n || ['SI','SÍ','TRUE','1','ACTIVO'].includes(n);
   }
   function eligibleV119X(){
-    return typeof state!=='undefined' && ['Informe con Observaciones','Informe de Desistimiento'].includes(state?.tipoInforme);
+    return typeof state!=='undefined' && state?.tipoInforme==='Informe con Observaciones';
   }
   function ensureNotificationStateV119X(){
     if(typeof state==='undefined') return {correo:'',correoAuto:'',correoManual:false,respaldoNombre:''};
@@ -32014,8 +32014,23 @@ window.addEventListener('load',()=>{
     id=id||state?.projectType||'';
     return id==='anteproyecto_edificacion'?'Anteproyecto de Edificación':'Obra Mayor – Proyecto Definitivo';
   }
+  function isSecondObservationV119X(){
+    const raw=String(state?.egob||state?.egobBaseV119||state?.egobBaseV116||'');
+    const checkbox=document.getElementById('calc5DiasSubsanacionV55');
+    const activeByForm=typeof obsSegundoActivoV119==='function'
+      ? !!obsSegundoActivoV119()
+      : !!checkbox?.checked;
+    return state?.tipoInforme==='Informe con Observaciones' && (
+      activeByForm ||
+      !!state?.segundaObservacionV116 ||
+      !!state?.fechaSubsanacionCincoDias ||
+      /2do\s+Informe\s+(de|con)\s+Observaciones/i.test(raw)
+    );
+  }
   function reportLabelV119X(){
-    return state?.tipoInforme==='Informe de Desistimiento'?'Informe Técnico de Desistimiento':'Informe Técnico de Observaciones';
+    if(state?.tipoInforme==='Informe de Desistimiento') return 'Informe Técnico de Desistimiento';
+    if(isSecondObservationV119X()) return '2do Informe con Observaciones';
+    return 'Informe Técnico de Observaciones';
   }
   function ownersV119X(){
     const names=(state?.propietarios||[]).map(p=>String(p?.nombre||'').trim()).filter(Boolean);
@@ -32265,12 +32280,8 @@ window.addEventListener('load',()=>{
       const font=await pdf.embedFont(StandardFonts.Helvetica);
       const bold=await pdf.embedFont(StandardFonts.HelveticaBold);
       const data=sientoDataV119X();
-      const titleSize=13;
-      const titleWidth=bold.widthOfTextAtSize(data.title,titleSize);
-      page.drawText(data.title,{x:(width-titleWidth)/2,y:height-155,size:titleSize,font:bold,color:rgb(0.07,0.16,0.27)});
-      page.drawLine({start:{x:72,y:height-164},end:{x:width-72,y:height-164},thickness:0.8,color:rgb(0.15,0.15,0.15)});
       const lines=wrapPdfTextV119X(data.text,font,11,445);
-      let y=height-200;
+      let y=height-155;
       lines.forEach(line=>{
         if(!line){y-=10;return;}
         page.drawText(line,{x:75,y,size:11,font,color:rgb(0,0,0)}); y-=17;
@@ -32284,9 +32295,6 @@ window.addEventListener('load',()=>{
       const cargoW=font.widthOfTextAtSize(techCargo,9);
       page.drawText(techName,{x:(width-nameW)/2,y:signatureY-17,size:10,font:bold,color:rgb(0,0,0)});
       page.drawText(techCargo,{x:(width-cargoW)/2,y:signatureY-31,size:9,font,color:rgb(0,0,0)});
-      const firma='FIRMA'; const firmaW=font.widthOfTextAtSize(firma,8);
-      page.drawText(firma,{x:(width-firmaW)/2,y:signatureY+8,size:8,font,color:rgb(0.25,0.25,0.25)});
-
       const evidenceBytes=await respaldoPdfV119X.arrayBuffer();
       const evidence=await PDFDocument.load(evidenceBytes,{ignoreEncryption:false});
       const copied=await pdf.copyPages(evidence,evidence.getPageIndices());
@@ -32314,7 +32322,7 @@ window.addEventListener('load',()=>{
     setupNotificationTabV119X();
     const panel=document.getElementById(TAB_ID_V119X); if(!panel) return;
     if(!eligibleV119X()){
-      panel.innerHTML='<p class="mini">Esta pestaña está disponible únicamente para Informes de Observaciones e Informes de Desistimiento.</p>';
+      panel.innerHTML='<p class="mini">Esta pestaña está disponible únicamente para Informes de Observaciones.</p>';
       return;
     }
     const n=ensureNotificationStateV119X();
