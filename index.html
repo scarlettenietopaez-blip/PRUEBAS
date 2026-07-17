@@ -32427,5 +32427,268 @@ window.addEventListener('load',()=>{
 })();
 </script>
 
+
+<!-- ==========================================================
+     V119Y - ASUNTO INDEPENDIENTE PARA INFORMES APROBATORIOS
+     - Se muestra antes de ANEXOS en la pestaña APROBATORIO.
+     - Copia únicamente el texto del asunto.
+     - No forma parte del informe, del PDF ni del copiado principal.
+     - Texto configurable desde el bloque ASU_001 de data/plantilla_aprobatorio.csv.
+     ========================================================== -->
+<style>
+.asunto-aprobatorio-v119y{
+  margin-top:22px;
+  padding:16px;
+  border:1px solid #b8cbe0;
+  border-radius:14px;
+  background:#f8fbff;
+}
+.asunto-aprobatorio-v119y .asunto-title-v119y{
+  margin:0 0 6px;
+  padding:10px 12px;
+  border-left:4px solid #c9183a;
+  background:#eef4fa;
+  color:#0b2b4c;
+  font-size:15px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.asunto-aprobatorio-v119y .asunto-help-v119y{
+  margin:0 0 12px;
+  color:#667085;
+  font-size:12px;
+}
+.asunto-grid-v119y{
+  display:grid;
+  grid-template-columns:minmax(180px,230px) minmax(0,1fr);
+  gap:12px;
+  align-items:end;
+}
+.asunto-preview-v119y{
+  min-height:44px;
+  margin-top:12px;
+  padding:11px 12px;
+  border:1px dashed #9bb3ca;
+  border-radius:10px;
+  background:#fff;
+  color:#0b2b4c;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.45;
+  text-transform:uppercase;
+  word-break:break-word;
+}
+.asunto-actions-v119y{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:12px;
+}
+.asunto-actions-v119y button{
+  min-height:34px;
+  background:#fff;
+  color:#0b2b4c;
+  border:1px solid #0b2b4c;
+}
+@media(max-width:720px){
+  .asunto-grid-v119y{grid-template-columns:1fr;}
+}
+@media print{
+  .asunto-aprobatorio-v119y{display:none!important;}
+}
+</style>
+<script>
+(function(){
+  'use strict';
+
+  const ASUNTO_BLOQUE_V119Y='ASU_001';
+  const FALLBACK_TEMPLATE_V119Y='{{Tipo de Informe}} DE {{Tipo de Proyecto}} NRO. {{Número de Informe}} EGOB NRO. {{Número de Trámite}}';
+
+  function normV119Y(value){
+    return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
+  }
+  function escapeV119Y(value){
+    if(typeof esc==='function') return esc(String(value??''));
+    return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function activeV119Y(value){
+    const n=normV119Y(value);
+    return !n || n==='SI' || n==='SÍ' || n==='TRUE' || n==='1' || n==='ACTIVO';
+  }
+  function loadAsuntoTemplateV119Y(){
+    renderAsuntoAprobatorioV119Y();
+    return Promise.resolve();
+  }
+  function ensureAsuntoStateV119Y(){
+    if(typeof state==='undefined') return {numero:''};
+    if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
+    if(!state.aprobatorio.asunto || typeof state.aprobatorio.asunto!=='object'){
+      state.aprobatorio.asunto={numero:''};
+    }
+    state.aprobatorio.asunto.numero=String(state.aprobatorio.asunto.numero||'');
+    return state.aprobatorio.asunto;
+  }
+  function projectIdV119Y(){
+    try{ if(typeof projectTypeV123==='function') return projectTypeV123()||state?.projectType||'obra_mayor_definitivo'; }catch(_e){}
+    return state?.projectType||'obra_mayor_definitivo';
+  }
+  function projectLabelV119Y(){
+    return projectIdV119Y()==='anteproyecto_edificacion'
+      ? 'ANTEPROYECTO DE EDIFICACIÓN'
+      : 'OBRA MAYOR - PROYECTO DEFINITIVO';
+  }
+  function reportLabelV119Y(){
+    return 'INFORME TÉCNICO APROBATORIO';
+  }
+  function templateV119Y(){
+    const rows=(typeof DATA!=='undefined' && Array.isArray(DATA.plantillaAprobatorio))
+      ? DATA.plantillaAprobatorio
+      : [];
+    const row=rows.find(r=>normV119Y(r.ID_Bloque||r.id_bloque)===ASUNTO_BLOQUE_V119Y) || {};
+    return String(row.Texto_Base||row.texto_base||row.Plantilla||row.plantilla||FALLBACK_TEMPLATE_V119Y);
+  }
+  function normalizeNumeroV119Y(value,pad=false){
+    let text=String(value||'').trim().toUpperCase();
+    if(pad && /^\d+$/.test(text)) text=text.padStart(3,'0');
+    return text;
+  }
+  function egobV119Y(){
+    return String(state?.egob||document.getElementById('egob')?.value||'').trim();
+  }
+  function asuntoTextV119Y(placeholder=false){
+    const data=ensureAsuntoStateV119Y();
+    const numero=normalizeNumeroV119Y(data.numero,false)||(placeholder?'…':'');
+    const egob=egobV119Y()||(placeholder?'…':'');
+    return templateV119Y()
+      .split('{{Tipo de Informe}}').join(reportLabelV119Y())
+      .split('{{Tipo de Proyecto}}').join(projectLabelV119Y())
+      .split('{{Número de Informe}}').join(numero)
+      .split('{{Numero de Informe}}').join(numero)
+      .split('{{Número de Trámite}}').join(egob)
+      .split('{{Numero de Trámite}}').join(egob)
+      .replace(/\s+/g,' ')
+      .trim()
+      .toUpperCase();
+  }
+  function isAprobatorioV119Y(){
+    return typeof state!=='undefined' && state?.tipoInforme==='Informe Técnico Aprobatorio';
+  }
+  function insertBeforeAnexosV119Y(box,form){
+    const anexos=document.getElementById('anexosBoxV163');
+    if(anexos && anexos.parentNode===form) form.insertBefore(box,anexos);
+    else if(box.parentNode!==form) form.appendChild(box);
+  }
+
+  window.updateAsuntoNumeroV119Y=function(value,finalize=false){
+    const data=ensureAsuntoStateV119Y();
+    data.numero=normalizeNumeroV119Y(value,finalize);
+    const input=document.getElementById('numeroAsuntoV119Y');
+    if(input && input.value!==data.numero) input.value=data.numero;
+    refreshAsuntoPreviewV119Y();
+  };
+  window.refreshAsuntoPreviewV119Y=function(){
+    const preview=document.getElementById('asuntoPreviewV119Y');
+    if(preview) preview.textContent=asuntoTextV119Y(true);
+  };
+  window.copiarAsuntoV119Y=async function(){
+    const data=ensureAsuntoStateV119Y();
+    data.numero=normalizeNumeroV119Y(data.numero,true);
+    if(!data.numero){
+      if(typeof msg==='function') msg('Complete el Nro. del Informe antes de copiar el asunto.');
+      else alert('Complete el Nro. del Informe antes de copiar el asunto.');
+      document.getElementById('numeroAsuntoV119Y')?.focus();
+      return;
+    }
+    const text=asuntoTextV119Y(false);
+    try{
+      if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(text);
+      else throw new Error('Portapapeles moderno no disponible');
+      if(typeof msg==='function') msg('Asunto copiado para pegar en eGOB.',true);
+    }catch(_e){
+      const ta=document.createElement('textarea');
+      ta.value=text; ta.setAttribute('readonly','');
+      ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      try{document.execCommand('copy');}catch(_e2){}
+      ta.remove();
+      if(typeof msg==='function') msg('Asunto copiado para pegar en eGOB.',true);
+    }
+    renderAsuntoAprobatorioV119Y();
+  };
+  window.renderAsuntoAprobatorioV119Y=function(){
+    const form=document.getElementById('aprobatorioForm');
+    if(!form) return;
+    let box=document.getElementById('asuntoAprobatorioV119Y');
+    if(!isAprobatorioV119Y()){
+      if(box) box.remove();
+      return;
+    }
+    const data=ensureAsuntoStateV119Y();
+    if(!box){
+      box=document.createElement('section');
+      box.id='asuntoAprobatorioV119Y';
+      box.className='asunto-aprobatorio-v119y no-print';
+    }
+    insertBeforeAnexosV119Y(box,form);
+    box.innerHTML=`
+      <div class="asunto-title-v119y">ASUNTO</div>
+      <p class="asunto-help-v119y">El asunto se genera automáticamente para eGOB. Esta sección no se imprime ni forma parte del copiado del informe o de los anexos.</p>
+      <div class="asunto-grid-v119y">
+        <div class="field" style="margin:0">
+          <label for="numeroAsuntoV119Y">Nro. del Informe *</label>
+          <input id="numeroAsuntoV119Y" type="text" inputmode="numeric" maxlength="12" value="${escapeV119Y(data.numero)}" placeholder="Ej.: 001" oninput="updateAsuntoNumeroV119Y(this.value,false)" onblur="updateAsuntoNumeroV119Y(this.value,true)">
+        </div>
+        <div>
+          <label>Texto generado</label>
+          <div id="asuntoPreviewV119Y" class="asunto-preview-v119y">${escapeV119Y(asuntoTextV119Y(true))}</div>
+        </div>
+      </div>
+      <div class="asunto-actions-v119y">
+        <button type="button" onclick="copiarAsuntoV119Y()">Copiar asunto</button>
+      </div>`;
+  };
+
+  const renderAprobatorioBaseV119Y=typeof renderAprobatorioForm==='function'?renderAprobatorioForm:null;
+  if(renderAprobatorioBaseV119Y){
+    renderAprobatorioForm=function(){
+      const out=renderAprobatorioBaseV119Y.apply(this,arguments);
+      setTimeout(renderAsuntoAprobatorioV119Y,15);
+      return out;
+    };
+  }
+  const applyStateBaseV119Y=typeof applyStateToUI==='function'?applyStateToUI:null;
+  if(applyStateBaseV119Y){
+    applyStateToUI=function(){
+      ensureAsuntoStateV119Y();
+      const out=applyStateBaseV119Y.apply(this,arguments);
+      setTimeout(renderAsuntoAprobatorioV119Y,20);
+      return out;
+    };
+  }
+  const nuevoBaseV119Y=typeof nuevoFormulario==='function'?nuevoFormulario:null;
+  if(nuevoBaseV119Y){
+    nuevoFormulario=function(){
+      const out=nuevoBaseV119Y.apply(this,arguments);
+      ensureAsuntoStateV119Y();
+      setTimeout(renderAsuntoAprobatorioV119Y,20);
+      return out;
+    };
+  }
+  document.addEventListener('input',event=>{
+    if(event.target?.id==='egob') setTimeout(refreshAsuntoPreviewV119Y,0);
+  });
+  document.addEventListener('change',event=>{
+    if(event.target?.id==='tipoInforme') setTimeout(renderAsuntoAprobatorioV119Y,0);
+  });
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      ensureAsuntoStateV119Y();
+      renderAsuntoAprobatorioV119Y();
+      loadAsuntoTemplateV119Y();
+    },1250);
+  });
+})();
+</script>
+
 </body>
 </html>
