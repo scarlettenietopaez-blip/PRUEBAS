@@ -32429,11 +32429,13 @@ window.addEventListener('load',()=>{
 
 
 <!-- ==========================================================
-     V119Y - ASUNTO INDEPENDIENTE PARA INFORMES APROBATORIOS
-     - Se muestra antes de ANEXOS en la pestaña APROBATORIO.
-     - Copia únicamente el texto del asunto.
-     - No forma parte del informe, del PDF ni del copiado principal.
-     - Texto configurable desde el bloque ASU_001 de data/plantilla_aprobatorio.csv.
+     V119Z - ASUNTO Y ACCIONES EN VISTA DEL INFORME
+     - En APROBATORIO se conserva únicamente el campo Nro. del Informe.
+     - El texto generado y “Copiar asunto” aparecen en Vista del Informe.
+     - El bloque ASUNTO se ubica antes de ANEXOS.
+     - Los botones principales Copiar informe y PDF se ubican después de ANEXOS.
+     - Todo permanece fuera del informe, del PDF y del copiado principal.
+     - Texto configurable desde ASU_001 de data/plantilla_aprobatorio.csv.
      ========================================================== -->
 <style>
 .asunto-aprobatorio-v119y{
@@ -32460,41 +32462,73 @@ window.addEventListener('load',()=>{
 }
 .asunto-grid-v119y{
   display:grid;
-  grid-template-columns:minmax(180px,230px) minmax(0,1fr);
+  grid-template-columns:minmax(180px,230px);
   gap:12px;
   align-items:end;
 }
-.asunto-preview-v119y{
-  min-height:44px;
-  margin-top:12px;
-  padding:11px 12px;
-  border:1px dashed #9bb3ca;
-  border-radius:10px;
-  background:#fff;
+.asunto-vista-v119z{
+  display:none;
+  margin:0 0 12px;
+  padding:10px 12px;
+  border:1px solid #b8cbe0;
+  border-radius:11px;
+  background:#f8fbff;
+  color:#17324d;
+}
+.asunto-vista-v119z.visible{
+  display:block;
+}
+.asunto-vista-head-v119z{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:7px;
+}
+.asunto-vista-title-v119z{
   color:#0b2b4c;
   font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.asunto-vista-head-v119z button{
+  min-height:30px;
+  padding:6px 10px;
+  font-size:10.5px;
+  background:#fff;
+  color:#0b2b4c;
+  border:1px solid #0b2b4c;
+}
+.asunto-vista-label-v119z{
+  margin:0 0 6px;
+  color:#334e68;
+  font-size:10px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.asunto-vista-text-v119z{
+  min-height:42px;
+  padding:9px 10px;
+  border:1px dashed #9bb3ca;
+  border-radius:8px;
+  background:#fff;
+  color:#0b2b4c;
+  font-size:11px;
   font-weight:800;
   line-height:1.45;
   text-transform:uppercase;
   word-break:break-word;
 }
-.asunto-actions-v119y{
-  display:flex;
-  justify-content:flex-end;
-  gap:8px;
-  margin-top:12px;
-}
-.asunto-actions-v119y button{
-  min-height:34px;
-  background:#fff;
-  color:#0b2b4c;
-  border:1px solid #0b2b4c;
+#copyPanelAprobatorio.copy-egob-panel-v119z{
+  margin:0 0 12px;
 }
 @media(max-width:720px){
   .asunto-grid-v119y{grid-template-columns:1fr;}
+  .asunto-vista-head-v119z{align-items:flex-start;flex-direction:column;}
 }
 @media print{
-  .asunto-aprobatorio-v119y{display:none!important;}
+  .asunto-aprobatorio-v119y,
+  .asunto-vista-v119z{display:none!important;}
 }
 </style>
 <script>
@@ -32511,12 +32545,9 @@ window.addEventListener('load',()=>{
     if(typeof esc==='function') return esc(String(value??''));
     return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
-  function activeV119Y(value){
-    const n=normV119Y(value);
-    return !n || n==='SI' || n==='SÍ' || n==='TRUE' || n==='1' || n==='ACTIVO';
-  }
   function loadAsuntoTemplateV119Y(){
     renderAsuntoAprobatorioV119Y();
+    renderAsuntoVistaV119Z();
     return Promise.resolve();
   }
   function ensureAsuntoStateV119Y(){
@@ -32578,6 +32609,32 @@ window.addEventListener('load',()=>{
     if(anexos && anexos.parentNode===form) form.insertBefore(box,anexos);
     else if(box.parentNode!==form) form.appendChild(box);
   }
+  function positionVistaBlocksV119Z(){
+    const tab=document.getElementById('tab-vista');
+    if(!tab) return;
+    const reportWrap=tab.querySelector('.report-wrap');
+    const asunto=document.getElementById('asuntoVistaV119Z');
+    const anexos=document.getElementById('anexosVistaV163');
+    const panel=document.getElementById('copyPanelAprobatorio');
+
+    if(asunto){
+      if(anexos && anexos.parentNode===tab) tab.insertBefore(asunto,anexos);
+      else if(reportWrap) tab.insertBefore(asunto,reportWrap);
+      else if(asunto.parentNode!==tab) tab.appendChild(asunto);
+    }
+
+    if(panel){
+      panel.classList.add('copy-egob-panel-v119z');
+      if(anexos && anexos.parentNode===tab){
+        const next=anexos.nextSibling;
+        if(next!==panel) tab.insertBefore(panel,next);
+      }else if(reportWrap){
+        tab.insertBefore(panel,reportWrap);
+      }else if(panel.parentNode!==tab){
+        tab.appendChild(panel);
+      }
+    }
+  }
 
   window.updateAsuntoNumeroV119Y=function(value,finalize=false){
     const data=ensureAsuntoStateV119Y();
@@ -32587,16 +32644,22 @@ window.addEventListener('load',()=>{
     refreshAsuntoPreviewV119Y();
   };
   window.refreshAsuntoPreviewV119Y=function(){
+    const text=asuntoTextV119Y(true);
     const preview=document.getElementById('asuntoPreviewV119Y');
-    if(preview) preview.textContent=asuntoTextV119Y(true);
+    if(preview) preview.textContent=text;
+    const vista=document.getElementById('asuntoVistaTextV119Z');
+    if(vista) vista.textContent=text;
   };
   window.copiarAsuntoV119Y=async function(){
     const data=ensureAsuntoStateV119Y();
     data.numero=normalizeNumeroV119Y(data.numero,true);
+    const input=document.getElementById('numeroAsuntoV119Y');
+    if(input && input.value!==data.numero) input.value=data.numero;
     if(!data.numero){
       if(typeof msg==='function') msg('Complete el Nro. del Informe antes de copiar el asunto.');
       else alert('Complete el Nro. del Informe antes de copiar el asunto.');
-      document.getElementById('numeroAsuntoV119Y')?.focus();
+      if(typeof showTab==='function') showTab('tab-apr');
+      setTimeout(()=>document.getElementById('numeroAsuntoV119Y')?.focus(),50);
       return;
     }
     const text=asuntoTextV119Y(false);
@@ -32614,7 +32677,9 @@ window.addEventListener('load',()=>{
       if(typeof msg==='function') msg('Asunto copiado para pegar en eGOB.',true);
     }
     renderAsuntoAprobatorioV119Y();
+    renderAsuntoVistaV119Z();
   };
+
   window.renderAsuntoAprobatorioV119Y=function(){
     const form=document.getElementById('aprobatorioForm');
     if(!form) return;
@@ -32632,27 +32697,56 @@ window.addEventListener('load',()=>{
     insertBeforeAnexosV119Y(box,form);
     box.innerHTML=`
       <div class="asunto-title-v119y">ASUNTO</div>
-      <p class="asunto-help-v119y">El asunto se genera automáticamente para eGOB. Esta sección no se imprime ni forma parte del copiado del informe o de los anexos.</p>
+      <p class="asunto-help-v119y">Complete el número del informe. El texto generado y el botón para copiar se muestran en Vista del Informe, antes de ANEXOS.</p>
       <div class="asunto-grid-v119y">
         <div class="field" style="margin:0">
           <label for="numeroAsuntoV119Y">Nro. del Informe *</label>
           <input id="numeroAsuntoV119Y" type="text" inputmode="numeric" maxlength="12" value="${escapeV119Y(data.numero)}" placeholder="Ej.: 001" oninput="updateAsuntoNumeroV119Y(this.value,false)" onblur="updateAsuntoNumeroV119Y(this.value,true)">
         </div>
-        <div>
-          <label>Texto generado</label>
-          <div id="asuntoPreviewV119Y" class="asunto-preview-v119y">${escapeV119Y(asuntoTextV119Y(true))}</div>
-        </div>
-      </div>
-      <div class="asunto-actions-v119y">
-        <button type="button" onclick="copiarAsuntoV119Y()">Copiar asunto</button>
       </div>`;
   };
+
+  window.renderAsuntoVistaV119Z=function(){
+    const tab=document.getElementById('tab-vista');
+    if(!tab) return;
+    let box=document.getElementById('asuntoVistaV119Z');
+    if(!box){
+      box=document.createElement('section');
+      box.id='asuntoVistaV119Z';
+      box.className='asunto-vista-v119z no-print';
+    }
+    if(box.parentNode!==tab) tab.appendChild(box);
+    const visible=isAprobatorioV119Y();
+    box.classList.toggle('visible',visible);
+    if(!visible){
+      box.innerHTML='';
+      positionVistaBlocksV119Z();
+      return;
+    }
+    box.innerHTML=`
+      <div class="asunto-vista-head-v119z">
+        <div class="asunto-vista-title-v119z">ASUNTO</div>
+        <button type="button" onclick="copiarAsuntoV119Y()">Copiar asunto</button>
+      </div>
+      <div class="asunto-vista-label-v119z">Texto generado</div>
+      <div id="asuntoVistaTextV119Z" class="asunto-vista-text-v119z">${escapeV119Y(asuntoTextV119Y(true))}</div>`;
+    positionVistaBlocksV119Z();
+  };
+
+  const renderReportBaseV119Z=typeof renderReport==='function'?renderReport:null;
+  if(renderReportBaseV119Z){
+    renderReport=function(){
+      const out=renderReportBaseV119Z.apply(this,arguments);
+      setTimeout(()=>{ renderAsuntoVistaV119Z(); positionVistaBlocksV119Z(); },0);
+      return out;
+    };
+  }
 
   const renderAprobatorioBaseV119Y=typeof renderAprobatorioForm==='function'?renderAprobatorioForm:null;
   if(renderAprobatorioBaseV119Y){
     renderAprobatorioForm=function(){
       const out=renderAprobatorioBaseV119Y.apply(this,arguments);
-      setTimeout(renderAsuntoAprobatorioV119Y,15);
+      setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },15);
       return out;
     };
   }
@@ -32661,7 +32755,7 @@ window.addEventListener('load',()=>{
     applyStateToUI=function(){
       ensureAsuntoStateV119Y();
       const out=applyStateBaseV119Y.apply(this,arguments);
-      setTimeout(renderAsuntoAprobatorioV119Y,20);
+      setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },20);
       return out;
     };
   }
@@ -32670,7 +32764,7 @@ window.addEventListener('load',()=>{
     nuevoFormulario=function(){
       const out=nuevoBaseV119Y.apply(this,arguments);
       ensureAsuntoStateV119Y();
-      setTimeout(renderAsuntoAprobatorioV119Y,20);
+      setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },20);
       return out;
     };
   }
@@ -32678,12 +32772,14 @@ window.addEventListener('load',()=>{
     if(event.target?.id==='egob') setTimeout(refreshAsuntoPreviewV119Y,0);
   });
   document.addEventListener('change',event=>{
-    if(event.target?.id==='tipoInforme') setTimeout(renderAsuntoAprobatorioV119Y,0);
+    if(event.target?.id==='tipoInforme') setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },0);
   });
   window.addEventListener('load',()=>{
     setTimeout(()=>{
       ensureAsuntoStateV119Y();
       renderAsuntoAprobatorioV119Y();
+      renderAsuntoVistaV119Z();
+      positionVistaBlocksV119Z();
       loadAsuntoTemplateV119Y();
     },1250);
   });
