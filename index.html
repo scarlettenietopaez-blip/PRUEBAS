@@ -31447,6 +31447,12 @@ window.addEventListener('load',()=>{
 </script>
 
 <!-- ==========================================================
+     VERSIÓN 1 - NUEVA NUMERACIÓN
+     Mejora: cantidad de planos por carpeta en ANEXOS.
+     Base oficial: archivo index(19).html cargado por el usuario.
+     ========================================================== -->
+
+<!-- ==========================================================
      V163 SOBRE V162
      ANEXOS para Informes Técnicos Aprobatorios:
      - Sección independiente al final de la pestaña APROBATORIO.
@@ -31527,6 +31533,25 @@ window.addEventListener('load',()=>{
   font-size:11px;
   font-weight:800;
   text-transform:none;
+}
+.anexos-planos-line-v1{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  color:#17324d;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.anexos-planos-line-v1 .anexos-check-v163{
+  flex:0 0 auto;
+}
+.anexos-table-v163 input.anexos-planos-count-v1{
+  width:58px;
+  flex:0 0 58px;
+  padding:6px 5px;
+  text-align:center;
 }
 .anexos-actions-v163{
   display:flex;
@@ -31619,12 +31644,13 @@ window.addEventListener('load',()=>{
     if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
     if(!Array.isArray(state.aprobatorio.anexos)) state.aprobatorio.anexos=[];
     if(!state.aprobatorio.anexos.length){
-      state.aprobatorio.anexos.push({tipo:'folder',fojas:'',incluyePlanos:false,incluyeCds:false,cds:''});
+      state.aprobatorio.anexos.push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});
     }
     state.aprobatorio.anexos=state.aprobatorio.anexos.map(row=>({
       tipo:String(row?.tipo||'folder').toLowerCase()==='expediente'?'expediente':'folder',
       fojas:row?.fojas==null?'':String(row.fojas),
       incluyePlanos:!!row?.incluyePlanos,
+      planos:row?.planos==null?'':String(row.planos),
       incluyeCds:!!row?.incluyeCds,
       cds:row?.cds==null?'':String(row.cds)
     }));
@@ -31634,9 +31660,10 @@ window.addEventListener('load',()=>{
   function annexLineV163(row,index,placeholder=false){
     const tipo=row.tipo==='expediente'?'expediente':'folder';
     const fojas=String(row.fojas||'').trim() || (placeholder?'…':'');
+    const planos=String(row.planos||'').trim() || (placeholder?'…':'');
     const cds=String(row.cds||'').trim() || (placeholder?'…':'');
     let line=`Carpeta ${index+1} (${tipo}): ${fojas} fojas`;
-    if(row.incluyePlanos) line+=' incluido planos';
+    if(row.incluyePlanos) line+=` incluido ${planos} planos`;
     line+=' en su foliado';
     if(row.incluyeCds) line+=` + ${cds} CDs`;
     return line;
@@ -31656,6 +31683,7 @@ window.addEventListener('load',()=>{
     const rows=ensureAnexosDataV163();
     for(let i=0;i<rows.length;i++){
       if(!String(rows[i].fojas||'').trim()) return `Complete el número de fojas de la Carpeta ${i+1}.`;
+      if(rows[i].incluyePlanos && !String(rows[i].planos||'').trim()) return `Complete el número de planos de la Carpeta ${i+1}.`;
       if(rows[i].incluyeCds && !String(rows[i].cds||'').trim()) return `Complete el número de CDs de la Carpeta ${i+1}.`;
     }
     return '';
@@ -31674,13 +31702,14 @@ window.addEventListener('load',()=>{
     if(!rows[index]) return;
     if(field==='incluyePlanos' || field==='incluyeCds') rows[index][field]=!!value;
     else rows[index][field]=String(value??'');
+    if(field==='incluyePlanos' && !value) rows[index].planos='';
     if(field==='incluyeCds' && !value) rows[index].cds='';
-    if(field==='fojas' || field==='cds') refreshAnexosPreviewV163();
+    if(field==='fojas' || field==='planos' || field==='cds') refreshAnexosPreviewV163();
     else renderAnexosV163();
   };
 
   window.addAnexoV163=function(){
-    ensureAnexosDataV163().push({tipo:'folder',fojas:'',incluyePlanos:false,incluyeCds:false,cds:''});
+    ensureAnexosDataV163().push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});
     renderAnexosV163();
   };
 
@@ -31767,7 +31796,7 @@ window.addEventListener('load',()=>{
             <option value="expediente" ${row.tipo==='expediente'?'selected':''}>expediente</option>
           </select></td>
           <td><input type="number" min="0" step="1" inputmode="numeric" value="${typeof esc==='function'?esc(row.fojas):row.fojas}" placeholder="Fojas" oninput="updateAnexoV163(${i},'fojas',this.value)"></td>
-          <td><label class="anexos-check-v163"><input type="checkbox" ${row.incluyePlanos?'checked':''} onchange="updateAnexoV163(${i},'incluyePlanos',this.checked)"> incluido planos</label></td>
+          <td><div class="anexos-planos-line-v1"><label class="anexos-check-v163"><input type="checkbox" ${row.incluyePlanos?'checked':''} onchange="updateAnexoV163(${i},'incluyePlanos',this.checked)"> incluido</label><input class="anexos-planos-count-v1" type="number" min="0" step="1" inputmode="numeric" value="${typeof esc==='function'?esc(row.planos):row.planos}" placeholder="N.º" ${row.incluyePlanos?'':'disabled'} oninput="updateAnexoV163(${i},'planos',this.value)"><span>planos</span></div></td>
           <td><label class="anexos-check-v163"><input type="checkbox" ${row.incluyeCds?'checked':''} onchange="updateAnexoV163(${i},'incluyeCds',this.checked)"> + CDs</label></td>
           <td><input type="number" min="0" step="1" inputmode="numeric" value="${typeof esc==='function'?esc(row.cds):row.cds}" placeholder="CDs" ${row.incluyeCds?'':'disabled'} oninput="updateAnexoV163(${i},'cds',this.value)"></td>
           <td style="text-align:center"><button type="button" class="danger mini-btn" onclick="removeAnexoV163(${i})" ${rows.length<=1?'disabled':''}>Quitar</button></td>
