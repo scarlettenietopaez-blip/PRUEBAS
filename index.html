@@ -32815,5 +32815,688 @@ window.addEventListener('load',()=>{
 })();
 </script>
 
+
+<style>
+/* ==========================================================
+   VERSIÓN 2
+   Subdivisión de REQUISITOS:
+   - Requisitos Documentales.
+   - Requisitos Propuesta Arquitectónica.
+   ========================================================== */
+.req-subtabs-v2{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:4px 0 14px;
+  padding:7px;
+  border:1px solid var(--linea);
+  border-radius:12px;
+  background:#f8fafc;
+}
+.req-subtab-btn-v2{
+  background:#e8eef5;
+  color:var(--azul);
+  border:1px solid #cbd5e1;
+  padding:9px 14px;
+  border-radius:9px;
+}
+.req-subtab-btn-v2.active{
+  background:var(--azul);
+  color:#fff;
+  border-color:var(--azul);
+}
+.req-subpane-v2{display:none}
+.req-subpane-v2.active{display:block}
+.req-propuesta-intro-v2{
+  margin:0 0 12px;
+  padding:10px 12px;
+  border:1px solid #b9c8d8;
+  border-radius:10px;
+  background:#f4f8fc;
+  color:#344054;
+  font-size:12.5px;
+}
+.req-propuesta-summary-v2{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:0 0 10px;
+}
+.req-propuesta-summary-v2 span{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 8px;
+  border-radius:999px;
+  background:#eef2f6;
+  color:#344054;
+  font-size:11.5px;
+  font-weight:800;
+}
+.req-propuesta-scroll-v2{
+  width:100%;
+  overflow:auto;
+  border:1px solid var(--linea);
+  border-radius:12px;
+  background:#fff;
+}
+.req-propuesta-table-v2{
+  min-width:1480px;
+  table-layout:fixed;
+  margin:0;
+}
+.req-propuesta-table-v2 th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  text-align:center;
+  vertical-align:middle;
+}
+.req-propuesta-table-v2 th.req-num-v2{width:54px}
+.req-propuesta-table-v2 th.req-text-v2{width:390px;text-align:left}
+.req-propuesta-table-v2 th.req-norma-v2{width:245px;text-align:left}
+.req-propuesta-table-v2 th.req-check-v2{width:78px}
+.req-propuesta-table-v2 th.req-obs-v2{width:340px;text-align:left}
+.req-propuesta-table-v2 th.req-img-v2{width:285px;text-align:left}
+.req-propuesta-table-v2 td{vertical-align:top}
+.req-propuesta-table-v2 td.center-v2{text-align:center;vertical-align:middle}
+.req-propuesta-table-v2 input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  cursor:pointer;
+}
+.req-propuesta-table-v2 textarea{
+  min-height:92px;
+  resize:vertical;
+  line-height:1.35;
+}
+.req-propuesta-table-v2 textarea:disabled{
+  background:#f2f4f7;
+  color:#98a2b3;
+}
+.req-propuesta-group-v2 td{
+  background:#dfe8f1;
+  color:#0b2b4c;
+  font-weight:900;
+  text-transform:uppercase;
+  padding:7px 9px;
+}
+.req-propuesta-id-v2{
+  display:block;
+  margin-top:5px;
+  color:#667085;
+  font-size:10px;
+}
+.req-propuesta-image-tools-v2{
+  display:grid;
+  gap:7px;
+}
+.req-propuesta-paste-v2{
+  min-height:42px;
+  border:1px dashed #8fa7bf;
+  border-radius:8px;
+  background:#f8fbff;
+  padding:8px;
+  color:#52657a;
+  font-size:11px;
+}
+.req-propuesta-gallery-v2{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.req-propuesta-thumb-v2{
+  border:1px solid #d8dee8;
+  border-radius:8px;
+  padding:5px;
+  background:#fff;
+}
+.req-propuesta-thumb-v2 img{
+  display:block;
+  width:100%;
+  max-height:115px;
+  object-fit:contain;
+  border-radius:5px;
+  background:#f8fafc;
+}
+.req-propuesta-thumb-v2 button{
+  width:100%;
+  margin-top:5px;
+  padding:4px 6px;
+  font-size:9.5px;
+}
+.req-propuesta-disabled-v2{
+  color:#98a2b3;
+  font-size:11px;
+  padding:8px 0;
+}
+.obs-propuesta-tools-v2{display:grid;gap:7px}
+.obs-propuesta-tools-v2 .req-propuesta-gallery-v2{grid-template-columns:repeat(2,minmax(85px,1fr))}
+@media(max-width:900px){
+  .req-subtabs-v2{display:grid;grid-template-columns:1fr}
+  .req-propuesta-table-v2{min-width:1320px}
+}
+@media print{
+  .req-subtabs-v2,
+  #reqDocumentalesPaneV2,
+  #reqPropuestaPaneV2{display:none!important}
+}
+</style>
+<script>
+(function(){
+  'use strict';
+
+  const FALLBACK_PROPUESTA_V2 = {"obra_mayor_definitivo":[{"id":"OM_PROP_001","grupo":"Proyecto técnico y suscripción","texto":"El Proyecto Técnico está suscrito por el propietario del predio.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":1},{"id":"OM_PROP_002","grupo":"Proyecto técnico y suscripción","texto":"El Proyecto Técnico está suscrito por el promotor, cuando corresponda.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":2},{"id":"OM_PROP_003","grupo":"Proyecto técnico y suscripción","texto":"El Proyecto Técnico está suscrito por los profesionales técnicos respectivos.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":3},{"id":"OM_PROP_004","grupo":"1. Formato y entrega de planos","texto":"Los planos se presentan en formato A1 o A0 conforme a normas INEN.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":4},{"id":"OM_PROP_005","grupo":"1. Formato y entrega de planos","texto":"Se entrega el archivo digital del Proyecto Técnico.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":5},{"id":"OM_PROP_006","grupo":"1.1. Ubicación","texto":"La ubicación abarca una zona de 300 m de radio.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":6},{"id":"OM_PROP_007","grupo":"1.1. Ubicación","texto":"La ubicación contiene la orientación correcta y los nombres de las calles.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":7},{"id":"OM_PROP_008","grupo":"1.1. Ubicación","texto":"La ubicación está georreferenciada.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":8},{"id":"OM_PROP_009","grupo":"1.1. Ubicación","texto":"Se identifica claramente el predio donde se implantará el proyecto, sin escala.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":9},{"id":"OM_PROP_010","grupo":"1.2. Levantamiento planimétrico y/o topográfico","texto":"El levantamiento está georreferenciado en el sistema oficial UTM, WGS 84, zona 17, latitud Sur.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":10},{"id":"OM_PROP_011","grupo":"1.2. Levantamiento planimétrico y/o topográfico","texto":"Se identifican las construcciones existentes, cuando corresponda.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":11},{"id":"OM_PROP_012","grupo":"1.2. Levantamiento planimétrico y/o topográfico","texto":"Se identifican líneas de alta tensión, acequias, canales de riego y quebradas, con sus respectivos márgenes de protección, cuando corresponda.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":12},{"id":"OM_PROP_013","grupo":"1.2. Levantamiento planimétrico y/o topográfico","texto":"Se indican las dimensiones de los linderos.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":13},{"id":"OM_PROP_014","grupo":"1.2. Levantamiento planimétrico y/o topográfico","texto":"En construcciones adosadas, se identifica el nivel natural del terreno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":14},{"id":"OM_PROP_015","grupo":"1.3. Implantación","texto":"El plano de implantación indica claramente las medidas y los ángulos del terreno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":15},{"id":"OM_PROP_016","grupo":"1.3. Implantación","texto":"El plano de implantación identifica retiros y afectaciones.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":16},{"id":"OM_PROP_017","grupo":"1.3. Implantación","texto":"El plano de implantación identifica el nivel o altura de los colindantes y el eje vial.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":17},{"id":"OM_PROP_018","grupo":"1.4.1. Plantas","texto":"Las plantas están dimensionadas al exterior.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":18},{"id":"OM_PROP_019","grupo":"1.4.1. Plantas","texto":"Las plantas indican las medidas parciales y totales de los locales.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":19},{"id":"OM_PROP_020","grupo":"1.4.1. Plantas","texto":"Las plantas indican los espesores de muros.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":20},{"id":"OM_PROP_021","grupo":"1.4.1. Plantas","texto":"Las plantas representan la apertura de puertas y ventanas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":21},{"id":"OM_PROP_022","grupo":"1.4.1. Plantas","texto":"Se toma como cota de referencia el nivel de la acera.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":22},{"id":"OM_PROP_023","grupo":"1.4.2. Plantas","texto":"Cuando no es posible dimensionar hacia las cotas exteriores, las medidas interiores se acotan conforme a las particularidades del proyecto, incluidos patios de iluminación y ventilación.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":23},{"id":"OM_PROP_024","grupo":"1.4.3. Cubierta","texto":"En la planta de cubierta inclinada se indican las pendientes expresadas en porcentaje.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":24},{"id":"OM_PROP_025","grupo":"1.4.4. Plantas","texto":"Dentro de cada local se identifica su designación.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.4","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":25},{"id":"OM_PROP_026","grupo":"1.4.4. Plantas","texto":"Se colocan cotas de nivel en los sitios necesarios para comprender el proyecto.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.4.4","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":26},{"id":"OM_PROP_027","grupo":"1.5.1. Cortes","texto":"Los cortes se presentan en la misma escala adoptada para las plantas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.5.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":27},{"id":"OM_PROP_028","grupo":"1.5.1. Cortes","texto":"Se presenta el número de cortes necesario para la claridad del proyecto.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.5.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":28},{"id":"OM_PROP_029","grupo":"1.5.1. Cortes","texto":"Se presentan como mínimo dos cortes: uno en cada sentido.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.5.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":29},{"id":"OM_PROP_030","grupo":"1.5.1. Cortes","texto":"Por lo menos un corte contempla el desarrollo de una grada, cuando exista.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.5.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":30},{"id":"OM_PROP_031","grupo":"1.5.2. Cortes","texto":"Los cortes están dimensionados e identifican los niveles de cada una de las plantas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.5.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":31},{"id":"OM_PROP_032","grupo":"1.5.2. Cortes","texto":"Los cortes identifican el nivel actual del terreno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.5.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":32},{"id":"OM_PROP_033","grupo":"1.6.1. Fachadas","texto":"Se representan todas las fachadas del edificio o edificios.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.6.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":33},{"id":"OM_PROP_034","grupo":"1.6.1. Fachadas","texto":"Las fachadas se presentan en la misma escala adoptada para plantas y cortes.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.6.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":34},{"id":"OM_PROP_035","grupo":"1.7. Cuadro de datos","texto":"El cuadro de datos indica el área total del predio.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.7","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":35},{"id":"OM_PROP_036","grupo":"1.7. Cuadro de datos","texto":"El cuadro de datos indica el área de afectación.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.7","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":36},{"id":"OM_PROP_037","grupo":"1.7. Cuadro de datos","texto":"El cuadro de datos indica el área de construcción.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.7","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":37},{"id":"OM_PROP_038","grupo":"1.7. Cuadro de datos","texto":"El cuadro de datos indica las unidades de edificación por uso.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.7","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":38},{"id":"OM_PROP_039","grupo":"1.7. Cuadro de datos","texto":"El cuadro de datos diferencia áreas computables y no computables.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.7","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":39},{"id":"OM_PROP_040","grupo":"1.7. Cuadro de datos","texto":"El cuadro de datos diferencia áreas abiertas y cerradas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.7","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":40},{"id":"OM_PROP_041","grupo":"1.7. Cuadro de datos","texto":"El cuadro de datos incluye COS PB y COS total según el formato establecido.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.7","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":41},{"id":"OM_PROP_042","grupo":"1.8. Propiedad horizontal","texto":"Cuando el proyecto se declarará bajo régimen de propiedad horizontal, el cuadro incluye el área comunal.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.8","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":42},{"id":"OM_PROP_043","grupo":"1.8. Propiedad horizontal","texto":"Cuando el proyecto se declarará bajo régimen de propiedad horizontal, el cuadro incluye el área verde.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.8","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":43},{"id":"OM_PROP_044","grupo":"1.8. Propiedad horizontal","texto":"Cuando el proyecto se declarará bajo régimen de propiedad horizontal, el cuadro incluye los equipamientos.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.8","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":44},{"id":"OM_PROP_045","grupo":"1.9.1. Planos estructurales","texto":"En proyectos de más de dos pisos o 400 m² de área bruta, los planos representan el diseño de la estructura del edificio.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.9.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":45},{"id":"OM_PROP_046","grupo":"1.9.1. Planos estructurales","texto":"Los planos estructurales representan el armado de sus elementos.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.9.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":46},{"id":"OM_PROP_047","grupo":"1.9.1. Planos estructurales","texto":"Los planos estructurales incluyen detalles y especificaciones debidamente acotados.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.9.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":47},{"id":"OM_PROP_048","grupo":"1.9.1. Planos estructurales","texto":"Se acompaña el Estudio de Suelo.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.9.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":48},{"id":"OM_PROP_049","grupo":"1.9.1. Planos estructurales","texto":"Se acompaña la Memoria de Cálculo Estructural.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.9.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":49},{"id":"OM_PROP_050","grupo":"1.9.1. Planos estructurales","texto":"El diseño estructural observa las disposiciones de la Norma Ecuatoriana de la Construcción (NEC).","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.9.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":50},{"id":"OM_PROP_051","grupo":"1.10. Ampliación o modificación","texto":"En ampliaciones o modificaciones se presentan planos de las secciones nuevas y de las escalas en la edificación para verificar las condiciones de seguridad.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.10","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":51},{"id":"OM_PROP_052","grupo":"1.10. Ampliación o modificación","texto":"Las demoliciones se identifican en color amarillo.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.10","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":52},{"id":"OM_PROP_053","grupo":"1.10. Ampliación o modificación","texto":"La construcción nueva se identifica en color rojo.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.10","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":53},{"id":"OM_PROP_054","grupo":"1.10. Ampliación o modificación","texto":"La construcción sin demoler se identifica en color negro.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 1.10","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":54},{"id":"OM_PROP_055","grupo":"2. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar la vista frontal del lote a edificar.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":55},{"id":"OM_PROP_056","grupo":"2. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar el entorno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":56},{"id":"OM_PROP_057","grupo":"2. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar los accesos.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":57},{"id":"OM_PROP_058","grupo":"2. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar las obras instaladas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":58},{"id":"OM_PROP_059","grupo":"2. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar los colindantes.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":59},{"id":"OM_PROP_060","grupo":"2. Memoria fotográfica","texto":"Cada fotografía contiene la descripción de lo mostrado.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":60},{"id":"OM_PROP_061","grupo":"2. Memoria fotográfica","texto":"La memoria fotográfica se presenta en una hoja formato A4 y en formato digital.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":61},{"id":"OM_PROP_062","grupo":"3. Memoria técnica","texto":"Presenta la Memoria Técnica del Proyecto Técnico de Edificación de Obra Mayor.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":62}],"anteproyecto_edificacion":[{"id":"AP_PROP_001","grupo":"1. Memoria técnica justificativa","texto":"Presenta memoria técnica justificativa, salvo que corresponda a una edificación unifamiliar menor a 400 m² de área bruta.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":1},{"id":"AP_PROP_002","grupo":"2. Formato y entrega de planos","texto":"Los planos se presentan en formato A1 o A0 conforme a normas INEN.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":2},{"id":"AP_PROP_003","grupo":"2. Formato y entrega de planos","texto":"Se entrega el archivo digital de la propuesta técnica.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":3},{"id":"AP_PROP_004","grupo":"2.1. Ubicación","texto":"La ubicación abarca una zona de 300 m de radio.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":4},{"id":"AP_PROP_005","grupo":"2.1. Ubicación","texto":"La ubicación contiene la orientación correcta y los nombres de las calles.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":5},{"id":"AP_PROP_006","grupo":"2.1. Ubicación","texto":"En áreas rurales, la ubicación está georreferenciada.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":6},{"id":"AP_PROP_007","grupo":"2.1. Ubicación","texto":"Se identifica claramente el predio donde se implantará el proyecto, sin escala.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":7},{"id":"AP_PROP_008","grupo":"2.2. Levantamiento planimétrico y/o topográfico","texto":"El levantamiento está georreferenciado en el sistema oficial UTM, WGS 84, zona 17, latitud Sur.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":8},{"id":"AP_PROP_009","grupo":"2.2. Levantamiento planimétrico y/o topográfico","texto":"Se identifican las construcciones existentes, cuando corresponda.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":9},{"id":"AP_PROP_010","grupo":"2.2. Levantamiento planimétrico y/o topográfico","texto":"Se identifican líneas de alta tensión, acequias, canales de riego y quebradas, con sus respectivos márgenes de protección, cuando corresponda.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":10},{"id":"AP_PROP_011","grupo":"2.2. Levantamiento planimétrico y/o topográfico","texto":"Se indican las dimensiones de los linderos.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":11},{"id":"AP_PROP_012","grupo":"2.2. Levantamiento planimétrico y/o topográfico","texto":"En construcciones adosadas, se identifica el nivel de los terrenos colindantes.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":12},{"id":"AP_PROP_013","grupo":"2.3. Implantación","texto":"El plano de implantación indica claramente las medidas generales y los ángulos del terreno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":13},{"id":"AP_PROP_014","grupo":"2.3. Implantación","texto":"El plano de implantación identifica retiros, afectaciones, colindantes y eje vial.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":14},{"id":"AP_PROP_015","grupo":"2.4.1. Propuesta arquitectónica","texto":"Presenta la implantación general.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":15},{"id":"AP_PROP_016","grupo":"2.4.1. Propuesta arquitectónica","texto":"Presenta las plantas arquitectónicas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":16},{"id":"AP_PROP_017","grupo":"2.4.1. Propuesta arquitectónica","texto":"Presenta las fachadas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":17},{"id":"AP_PROP_018","grupo":"2.4.1. Propuesta arquitectónica","texto":"Presenta los cortes.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.1","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":18},{"id":"AP_PROP_019","grupo":"2.4.2. Cuadro de datos","texto":"El cuadro de datos indica el área total del predio.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":19},{"id":"AP_PROP_020","grupo":"2.4.2. Cuadro de datos","texto":"El cuadro de datos indica el área de afectación.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":20},{"id":"AP_PROP_021","grupo":"2.4.2. Cuadro de datos","texto":"El cuadro de datos indica el área de construcción.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":21},{"id":"AP_PROP_022","grupo":"2.4.2. Cuadro de datos","texto":"El cuadro de datos indica las unidades de edificación por uso.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":22},{"id":"AP_PROP_023","grupo":"2.4.2. Cuadro de datos","texto":"El cuadro de datos diferencia áreas computables y no computables.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":23},{"id":"AP_PROP_024","grupo":"2.4.2. Cuadro de datos","texto":"El cuadro de datos diferencia áreas abiertas y cerradas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":24},{"id":"AP_PROP_025","grupo":"2.4.2. Cuadro de datos","texto":"El cuadro de datos incluye COS PB y COS total en el formato establecido.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.2","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":25},{"id":"AP_PROP_026","grupo":"2.4.3. Propiedad horizontal","texto":"Cuando el proyecto se declarará bajo régimen de propiedad horizontal, el cuadro incluye el área comunal y el área verde.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":26},{"id":"AP_PROP_027","grupo":"2.4.4. Ampliación o modificación","texto":"En ampliaciones o modificaciones, se presentan planos del estado actual y de las secciones nuevas de la edificación para verificar las condiciones de seguridad.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.4","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":27},{"id":"AP_PROP_028","grupo":"2.4.4. Ampliación o modificación","texto":"Las demoliciones se identifican en color amarillo.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.4","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":28},{"id":"AP_PROP_029","grupo":"2.4.4. Ampliación o modificación","texto":"La construcción nueva se identifica en color rojo.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.4","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":29},{"id":"AP_PROP_030","grupo":"2.4.4. Ampliación o modificación","texto":"La construcción sin demoler se identifica en color negro.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 2.4.4","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":30},{"id":"AP_PROP_031","grupo":"3. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar la vista frontal del lote a edificar.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":31},{"id":"AP_PROP_032","grupo":"3. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar el entorno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":32},{"id":"AP_PROP_033","grupo":"3. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar los accesos.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":33},{"id":"AP_PROP_034","grupo":"3. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar las obras instaladas.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":34},{"id":"AP_PROP_035","grupo":"3. Memoria fotográfica","texto":"La memoria fotográfica permite apreciar los colindantes.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":35},{"id":"AP_PROP_036","grupo":"3. Memoria fotográfica","texto":"Cada fotografía contiene la descripción de lo mostrado.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":36},{"id":"AP_PROP_037","grupo":"3. Memoria fotográfica","texto":"La memoria fotográfica se presenta en una hoja formato A4 y en formato digital.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84, numeral 3","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":37}]};
+  const PROPUESTA_SECTION_V2='PROPUESTA_ARQUITECTONICA';
+  const REQ_PATHS_V2={
+    obra_mayor_definitivo:'data/requisitos.csv',
+    anteproyecto_edificacion:'data/requisitos_anteproyecto_edificacion.csv'
+  };
+  const PROPUESTA_V2={
+    obra_mayor_definitivo:[...(FALLBACK_PROPUESTA_V2.obra_mayor_definitivo||[])],
+    anteproyecto_edificacion:[...(FALLBACK_PROPUESTA_V2.anteproyecto_edificacion||[])]
+  };
+  let activeReqSubtabV2='documentales';
+  let requirementsLoadPromiseV2=null;
+
+  function normV2(v){
+    return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase();
+  }
+  function escV2(v){
+    if(typeof esc==='function') return esc(String(v??''));
+    return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function isProposalRowV2(r){
+    return normV2(r?.seccion||r?.Seccion||r?.Sección)===PROPUESTA_SECTION_V2 ||
+      /^((AP|OM)_)?PROP_/i.test(String(r?.id||r?.ID||''));
+  }
+  function projectV2(){
+    try{
+      if(typeof projectTypeV123==='function') return projectTypeV123()||state?.projectType||'obra_mayor_definitivo';
+    }catch(_e){}
+    return state?.projectType||'obra_mayor_definitivo';
+  }
+  function ensurePropStateV2(){
+    if(typeof state==='undefined') return {};
+    if(!state.requisitosPropuesta || typeof state.requisitosPropuesta!=='object'){
+      state.requisitosPropuesta={};
+    }
+    return state.requisitosPropuesta;
+  }
+  function propObjV2(id){
+    const all=ensurePropStateV2();
+    if(!all[id] || typeof all[id]!=='object'){
+      all[id]={estado:'',observacion:'',imagenes:[]};
+    }
+    all[id].estado=String(all[id].estado||'');
+    all[id].observacion=String(all[id].observacion||'');
+    if(!Array.isArray(all[id].imagenes)){
+      all[id].imagenes=all[id].imagen?[all[id].imagen]:[];
+    }
+    all[id].imagenes=[...new Set(all[id].imagenes.filter(x=>String(x||'').trim()))];
+    all[id].imagen=all[id].imagenes[0]||'';
+    return all[id];
+  }
+  function proposalRowsV2(){
+    const rows=PROPUESTA_V2[projectV2()]||[];
+    return [...rows].sort((a,b)=>(Number(a.orden)||0)-(Number(b.orden)||0));
+  }
+  function splitOptionsV2(v){
+    if(Array.isArray(v)) return v;
+    return String(v||'').split(/[|;,]/).map(x=>x.trim()).filter(Boolean);
+  }
+  function mapDocRowsV2(rows){
+    return (rows||[])
+      .filter(r=>(r.id||r.ID) && !isProposalRowV2(r))
+      .map(r=>({
+        id:r.id||r.ID||'',
+        grupo:r.grupo||r.Grupo||'',
+        texto:r.texto||r.Requisito||r.requisito||'',
+        opciones:splitOptionsV2(r.opciones||r.Opciones||''),
+        normaDefault:r.normaDefault||r.Norma||r.norma||'',
+        correccionDefault:r.correccionDefault||r.Correccion||r.correccion||''
+      }));
+  }
+  function mapProposalRowsV2(rows){
+    return (rows||[])
+      .filter(r=>(r.id||r.ID) && isProposalRowV2(r))
+      .map((r,i)=>({
+        id:r.id||r.ID||'',
+        grupo:r.grupo||r.Grupo||'Propuesta arquitectónica',
+        texto:r.texto||r.Requisito||r.requisito||'',
+        opciones:splitOptionsV2(r.opciones||r.Opciones||'Cumple|No Cumple|No Aplica'),
+        normaDefault:r.normaDefault||r.Norma||r.norma||'Ordenanza No. 016-2023',
+        correccionDefault:r.correccionDefault||r.Correccion||r.correccion||'',
+        seccion:PROPUESTA_SECTION_V2,
+        orden:Number(r.orden||r.Orden)||i+1
+      }));
+  }
+  async function fetchReqRowsV2(path){
+    try{
+      const text=typeof fetchCSVTextV32==='function'
+        ? await fetchCSVTextV32(path)
+        : await (await fetch(path,{cache:'no-store'})).text();
+      return typeof parseCSVV32==='function' ? parseCSVV32(text) : [];
+    }catch(err){
+      console.warn('VERSIÓN 2: no se pudo cargar '+path+'. Se usa la base interna.',err);
+      return [];
+    }
+  }
+  async function loadRequirementsV2(){
+    if(requirementsLoadPromiseV2) return requirementsLoadPromiseV2;
+    requirementsLoadPromiseV2=(async()=>{
+      const [omRows,apRows]=await Promise.all([
+        fetchReqRowsV2(REQ_PATHS_V2.obra_mayor_definitivo),
+        fetchReqRowsV2(REQ_PATHS_V2.anteproyecto_edificacion)
+      ]);
+
+      const omProp=mapProposalRowsV2(omRows);
+      const apProp=mapProposalRowsV2(apRows);
+      if(omProp.length) PROPUESTA_V2.obra_mayor_definitivo=omProp;
+      if(apProp.length) PROPUESTA_V2.anteproyecto_edificacion=apProp;
+
+      const omDocs=mapDocRowsV2(omRows);
+      const apDocs=mapDocRowsV2(apRows);
+
+      try{
+        if(omDocs.length && typeof REQUISITOS_OBRA_MAYOR_V128!=='undefined' && Array.isArray(REQUISITOS_OBRA_MAYOR_V128)){
+          REQUISITOS_OBRA_MAYOR_V128.splice(0,REQUISITOS_OBRA_MAYOR_V128.length,...omDocs);
+        }
+        if(apDocs.length && typeof REQUISITOS_ANTEPROYECTO_V128!=='undefined' && Array.isArray(REQUISITOS_ANTEPROYECTO_V128)){
+          REQUISITOS_ANTEPROYECTO_V128.splice(0,REQUISITOS_ANTEPROYECTO_V128.length,...apDocs);
+        }
+        if(typeof applyProjectRequirementsV128==='function'){
+          applyProjectRequirementsV128(projectV2(),false);
+        }
+      }catch(err){
+        console.warn('VERSIÓN 2: no se pudo actualizar la base documental.',err);
+      }
+
+      renderReqSubtabsV2();
+      renderPropuestaV2();
+      if(typeof renderObsSeleccionadas==='function') renderObsSeleccionadas();
+      if(typeof renderReport==='function') renderReport();
+      if(typeof renderPreview==='function') renderPreview();
+    })();
+    return requirementsLoadPromiseV2;
+  }
+
+  /* Evita que las filas de propuesta arquitectónica aparezcan también
+     dentro de Requisitos Documentales cuando se carga el mismo CSV. */
+  if(typeof mapReqCSVV128==='function'){
+    const mapReqBaseV2=mapReqCSVV128;
+    mapReqCSVV128=function(rows){
+      return mapReqBaseV2((rows||[]).filter(r=>!isProposalRowV2(r)));
+    };
+  }
+
+  if(typeof loadExternalCSVsV32==='function'){
+    const loadExternalBaseV2=loadExternalCSVsV32;
+    loadExternalCSVsV32=async function(){
+      const out=await loadExternalBaseV2.apply(this,arguments);
+      await loadRequirementsV2();
+      return out;
+    };
+  }
+
+  function setupReqSubtabsV2(){
+    const tab=document.getElementById('tab-req');
+    const form=document.getElementById('requisitosForm');
+    if(!tab || !form) return;
+
+    let nav=document.getElementById('reqSubtabsV2');
+    let docPane=document.getElementById('reqDocumentalesPaneV2');
+    let propPane=document.getElementById('reqPropuestaPaneV2');
+    const title=tab.querySelector(':scope > h2')||tab.querySelector('h2');
+    const actions=tab.querySelector(':scope > .buttons')||[...tab.querySelectorAll('.buttons')].pop();
+
+    if(!nav){
+      nav=document.createElement('div');
+      nav.id='reqSubtabsV2';
+      nav.className='req-subtabs-v2';
+      nav.innerHTML=`
+        <button type="button" id="reqDocBtnV2" class="req-subtab-btn-v2" onclick="showReqSubtabV2('documentales')">Requisitos Documentales</button>
+        <button type="button" id="reqPropBtnV2" class="req-subtab-btn-v2" onclick="showReqSubtabV2('propuesta')">Requisitos Propuesta Arquitectónica</button>`;
+
+      docPane=document.createElement('div');
+      docPane.id='reqDocumentalesPaneV2';
+      docPane.className='req-subpane-v2';
+
+      propPane=document.createElement('div');
+      propPane.id='reqPropuestaPaneV2';
+      propPane.className='req-subpane-v2';
+      propPane.innerHTML='<div id="reqPropuestaContentV2"></div>';
+
+      if(title?.nextSibling) tab.insertBefore(nav,title.nextSibling);
+      else tab.insertBefore(nav,tab.firstChild);
+      tab.insertBefore(docPane,actions||null);
+      tab.insertBefore(propPane,actions||null);
+
+      const note=[...tab.children].find(el=>el.classList?.contains('note-box') && el.parentNode===tab);
+      if(note) docPane.appendChild(note);
+      docPane.appendChild(form);
+    }else{
+      if(form.parentNode!==docPane) docPane.appendChild(form);
+    }
+
+    showReqSubtabV2(activeReqSubtabV2,false);
+  }
+
+  window.showReqSubtabV2=function(which,rerender=true){
+    activeReqSubtabV2=which==='propuesta'?'propuesta':'documentales';
+    const docPane=document.getElementById('reqDocumentalesPaneV2');
+    const propPane=document.getElementById('reqPropuestaPaneV2');
+    const docBtn=document.getElementById('reqDocBtnV2');
+    const propBtn=document.getElementById('reqPropBtnV2');
+    docPane?.classList.toggle('active',activeReqSubtabV2==='documentales');
+    propPane?.classList.toggle('active',activeReqSubtabV2==='propuesta');
+    docBtn?.classList.toggle('active',activeReqSubtabV2==='documentales');
+    propBtn?.classList.toggle('active',activeReqSubtabV2==='propuesta');
+    if(rerender && activeReqSubtabV2==='propuesta') renderPropuestaV2();
+  };
+
+  function summaryV2(rows){
+    const count=estado=>rows.filter(r=>propObjV2(r.id).estado===estado).length;
+    const pending=rows.filter(r=>!propObjV2(r.id).estado).length;
+    return `<div class="req-propuesta-summary-v2">
+      <span>Total: ${rows.length}</span>
+      <span>Cumple: ${count('Cumple')}</span>
+      <span>No cumple: ${count('No Cumple')}</span>
+      <span>No aplica: ${count('No Aplica')}</span>
+      <span>Pendientes: ${pending}</span>
+    </div>`;
+  }
+  function imageGalleryV2(id,imgs,context='table'){
+    if(!imgs.length) return '';
+    return `<div class="req-propuesta-gallery-v2">${imgs.map((src,i)=>`
+      <div class="req-propuesta-thumb-v2">
+        <img src="${escV2(src)}" alt="Imagen ${i+1}">
+        <button type="button" class="secondary" onclick="removePropImageV2('${id}',${i},'${context}')">Quitar ${i+1}</button>
+      </div>`).join('')}</div>
+      <button type="button" class="secondary mini-btn" onclick="clearPropImagesV2('${id}','${context}')">Quitar todas</button>`;
+  }
+  function imageToolsV2(id,obj,context='table'){
+    if(obj.estado!=='No Cumple'){
+      return '<div class="req-propuesta-disabled-v2">Disponible al marcar No Cumple.</div>';
+    }
+    const imgs=obj.imagenes||[];
+    return `<div class="${context==='obs'?'obs-propuesta-tools-v2':'req-propuesta-image-tools-v2'}">
+      <input type="file" accept="image/*" multiple onchange="addPropImagesV2('${id}',this.files,'${context}');this.value=''">
+      <div class="req-propuesta-paste-v2" contenteditable="true" onpaste="pastePropImagesV2('${id}',event,'${context}')">Pegar una o varias capturas aquí</div>
+      ${imgs.length?`<span class="mini">${imgs.length} imagen(es)</span>`:''}
+      ${imageGalleryV2(id,imgs,context)}
+    </div>`;
+  }
+
+  window.renderPropuestaV2=function(){
+    setupReqSubtabsV2();
+    const box=document.getElementById('reqPropuestaContentV2');
+    if(!box) return;
+    const rows=proposalRowsV2();
+    const article=projectV2()==='anteproyecto_edificacion'?'Artículo 84':'Artículo 95';
+    const project=projectV2()==='anteproyecto_edificacion'?'ANTEPROYECTO DE EDIFICACIÓN':'OBRA MAYOR - PROYECTO DEFINITIVO';
+
+    let lastGroup='';
+    const body=rows.map((req,index)=>{
+      const obj=propObjV2(req.id);
+      const group=String(req.grupo||'').trim();
+      const groupRow=group!==lastGroup
+        ? `<tr class="req-propuesta-group-v2"><td colspan="8">${escV2(group)}</td></tr>`
+        : '';
+      lastGroup=group;
+      return `${groupRow}<tr>
+        <td class="center-v2">${index+1}<span class="req-propuesta-id-v2">${escV2(req.id)}</span></td>
+        <td>${escV2(req.texto)}</td>
+        <td>${escV2(req.normaDefault||'')}</td>
+        ${['Cumple','No Cumple','No Aplica'].map(status=>`<td class="center-v2"><input type="checkbox" aria-label="${status}" ${obj.estado===status?'checked':''} onchange="setPropStatusV2('${req.id}','${status}',this.checked)"></td>`).join('')}
+        <td><textarea id="propObs_${req.id}" placeholder="Escriba la observación para el usuario" ${obj.estado==='No Cumple'?'':'disabled'} oninput="updatePropObsV2('${req.id}',this.value)">${escV2(obj.observacion)}</textarea></td>
+        <td>${imageToolsV2(req.id,obj,'table')}</td>
+      </tr>`;
+    }).join('');
+
+    box.innerHTML=`
+      <div class="req-propuesta-intro-v2"><strong>${project}</strong><br>
+      Verificación subdividida conforme al ${article} de la Ordenanza No. 016-2023. La observación y las imágenes se habilitan al marcar <strong>No Cumple</strong>; esos registros se incorporan automáticamente a la tabla de observaciones del informe.</div>
+      ${summaryV2(rows)}
+      <div class="req-propuesta-scroll-v2">
+        <table class="req-propuesta-table-v2">
+          <thead><tr>
+            <th class="req-num-v2">Nro.</th>
+            <th class="req-text-v2">Requisito</th>
+            <th class="req-norma-v2">Artículo / Norma</th>
+            <th class="req-check-v2">Cumple</th>
+            <th class="req-check-v2">No Cumple</th>
+            <th class="req-check-v2">No Aplica</th>
+            <th class="req-obs-v2">Observación para el usuario</th>
+            <th class="req-img-v2">Imágenes</th>
+          </tr></thead>
+          <tbody>${body||'<tr><td colspan="8">No existen requisitos configurados.</td></tr>'}</tbody>
+        </table>
+      </div>`;
+  };
+
+  window.setPropStatusV2=function(id,status,checked){
+    const obj=propObjV2(id);
+    obj.estado=checked?status:'';
+    renderPropuestaV2();
+    if(typeof renderObsSeleccionadas==='function') renderObsSeleccionadas();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  };
+  window.updatePropObsV2=function(id,value){
+    const obj=propObjV2(id);
+    obj.observacion=typeof smartInputCase==='function'?smartInputCase(value):String(value||'');
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  };
+  async function imageDataV2(file){
+    if(typeof fileToImageDataV113==='function') return fileToImageDataV113(file);
+    return new Promise((resolve,reject)=>{
+      const r=new FileReader();
+      r.onload=()=>resolve(r.result||'');
+      r.onerror=()=>reject(r.error||new Error('No se pudo leer la imagen.'));
+      r.readAsDataURL(file);
+    });
+  }
+  function refreshImagesV2(context){
+    if(context==='obs' && typeof renderObsSeleccionadas==='function') renderObsSeleccionadas();
+    else renderPropuestaV2();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  }
+  window.addPropImagesV2=async function(id,fileList,context='table'){
+    const obj=propObjV2(id);
+    const files=[...(fileList||[])].filter(f=>f?.type?.startsWith('image/'));
+    const loaded=[];
+    for(const file of files){
+      try{
+        const data=await imageDataV2(file);
+        if(data) loaded.push(data);
+      }catch(err){console.warn('VERSIÓN 2: imagen no cargada',err);}
+    }
+    obj.imagenes=[...new Set([...(obj.imagenes||[]),...loaded])];
+    obj.imagen=obj.imagenes[0]||'';
+    refreshImagesV2(context);
+    if(loaded.length && typeof msg==='function') msg(`${loaded.length} imagen(es) agregada(s) al requisito.`,true);
+  };
+  window.pastePropImagesV2=function(id,event,context='table'){
+    const files=[...(event.clipboardData?.items||[])]
+      .filter(item=>item.kind==='file' && item.type?.startsWith('image/'))
+      .map(item=>item.getAsFile()).filter(Boolean);
+    if(files.length){
+      event.preventDefault();
+      addPropImagesV2(id,files,context);
+    }
+  };
+  window.removePropImageV2=function(id,index,context='table'){
+    const obj=propObjV2(id);
+    obj.imagenes.splice(index,1);
+    obj.imagen=obj.imagenes[0]||'';
+    refreshImagesV2(context);
+  };
+  window.clearPropImagesV2=function(id,context='table'){
+    const obj=propObjV2(id);
+    obj.imagenes=[];
+    obj.imagen='';
+    refreshImagesV2(context);
+  };
+
+  function proposalObsRowsV2(){
+    return proposalRowsV2()
+      .filter(req=>propObjV2(req.id).estado==='No Cumple')
+      .map(req=>{
+        const obj=propObjV2(req.id);
+        return {
+          id:req.id,
+          codigo:req.id,
+          componente:'Propuesta Arquitectónica',
+          tema:req.grupo||'Requisito de propuesta arquitectónica',
+          articulo:req.normaDefault||'Ordenanza No. 016-2023',
+          norma:req.normaDefault||'Ordenanza No. 016-2023',
+          observacion:obj.observacion||req.correccionDefault||'',
+          correccion:obj.observacion||req.correccionDefault||'',
+          texto:req.texto||'',
+          source:'prop_req',
+          imagenes:[...(obj.imagenes||[])],
+          imagen:(obj.imagenes||[])[0]||''
+        };
+      });
+  }
+
+  if(typeof combinedObsRows==='function'){
+    const combinedBaseV2=combinedObsRows;
+    combinedObsRows=function(){
+      const base=combinedBaseV2.apply(this,arguments)||[];
+      const extra=proposalObsRowsV2();
+      const ids=new Set(base.map(x=>`${x.source||''}:${x.id||''}`));
+      return [...base,...extra.filter(x=>!ids.has(`${x.source}:${x.id}`))];
+    };
+  }
+
+  if(typeof updObsNota==='function'){
+    const updObsBaseV2=updObsNota;
+    updObsNota=function(id,source,value){
+      if(source==='prop_req'){
+        const obj=propObjV2(id);
+        obj.observacion=typeof smartInputCase==='function'?smartInputCase(value):String(value||'');
+        const el=document.getElementById('propObs_'+id);
+        if(el && el.value!==obj.observacion) el.value=obj.observacion;
+        if(typeof renderReport==='function') renderReport();
+        if(typeof renderPreview==='function') renderPreview();
+        return;
+      }
+      return updObsBaseV2.apply(this,arguments);
+    };
+  }
+
+  if(typeof articleCellForObsV68==='function'){
+    const articleCellBaseV2=articleCellForObsV68;
+    articleCellForObsV68=function(o){
+      if(o?.source==='prop_req') return escV2(o.articulo||o.norma||'');
+      return articleCellBaseV2.apply(this,arguments);
+    };
+  }
+
+  if(typeof obsImageToolsHtmlV113==='function'){
+    const obsImageToolsBaseV2=obsImageToolsHtmlV113;
+    obsImageToolsHtmlV113=function(o){
+      if(o?.source==='prop_req') return imageToolsV2(o.id,propObjV2(o.id),'obs');
+      return obsImageToolsBaseV2.apply(this,arguments);
+    };
+  }
+
+  if(typeof renderRequisitosForm==='function'){
+    const renderReqBaseV2=renderRequisitosForm;
+    renderRequisitosForm=function(){
+      const out=renderReqBaseV2.apply(this,arguments);
+      setTimeout(()=>{
+        setupReqSubtabsV2();
+        if(activeReqSubtabV2==='propuesta') renderPropuestaV2();
+      },0);
+      return out;
+    };
+  }
+  if(typeof showTab==='function'){
+    const showTabBaseV2=showTab;
+    showTab=function(id){
+      const out=showTabBaseV2.apply(this,arguments);
+      if(id==='tab-req') setTimeout(()=>{
+        setupReqSubtabsV2();
+        showReqSubtabV2(activeReqSubtabV2,true);
+      },0);
+      return out;
+    };
+  }
+  if(typeof applyStateToUI==='function'){
+    const applyStateBaseV2=applyStateToUI;
+    applyStateToUI=function(){
+      ensurePropStateV2();
+      const out=applyStateBaseV2.apply(this,arguments);
+      setTimeout(()=>{setupReqSubtabsV2();renderPropuestaV2();},20);
+      return out;
+    };
+  }
+  if(typeof nuevoFormulario==='function'){
+    const nuevoBaseV2=nuevoFormulario;
+    nuevoFormulario=function(){
+      const out=nuevoBaseV2.apply(this,arguments);
+      activeReqSubtabV2='documentales';
+      ensurePropStateV2();
+      setTimeout(()=>{setupReqSubtabsV2();showReqSubtabV2('documentales',false);renderPropuestaV2();},20);
+      return out;
+    };
+  }
+  if(typeof selectProjectV123==='function'){
+    const selectProjectBaseV2=selectProjectV123;
+    selectProjectV123=function(){
+      const out=selectProjectBaseV2.apply(this,arguments);
+      setTimeout(()=>{setupReqSubtabsV2();renderPropuestaV2();if(typeof renderObsSeleccionadas==='function')renderObsSeleccionadas();},40);
+      return out;
+    };
+  }
+  if(typeof applyProjectRequirementsV128==='function'){
+    const applyProjectBaseV2=applyProjectRequirementsV128;
+    applyProjectRequirementsV128=function(){
+      const out=applyProjectBaseV2.apply(this,arguments);
+      setTimeout(()=>{setupReqSubtabsV2();renderPropuestaV2();},20);
+      return out;
+    };
+  }
+
+  if(typeof guardarYSeguir==='function'){
+    const guardarSeguirBaseV2=guardarYSeguir;
+    guardarYSeguir=async function(){
+      const current=document.querySelector('.tab.active')?.id;
+      if(current==='tab-req' && activeReqSubtabV2==='documentales'){
+        const ok=typeof guardarFormulario==='function' ? await guardarFormulario(false) : true;
+        if(ok) showReqSubtabV2('propuesta',true);
+        return;
+      }
+      return guardarSeguirBaseV2.apply(this,arguments);
+    };
+  }
+  if(typeof tabAnterior==='function'){
+    const tabAnteriorBaseV2=tabAnterior;
+    tabAnterior=function(){
+      const current=document.querySelector('.tab.active')?.id;
+      if(current==='tab-req' && activeReqSubtabV2==='propuesta'){
+        showReqSubtabV2('documentales',false);
+        return;
+      }
+      return tabAnteriorBaseV2.apply(this,arguments);
+    };
+  }
+
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      ensurePropStateV2();
+      setupReqSubtabsV2();
+      renderPropuestaV2();
+      loadRequirementsV2();
+    },1450);
+  });
+})();
+</script>
+
 </body>
 </html>
