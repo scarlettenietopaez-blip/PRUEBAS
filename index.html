@@ -5646,8 +5646,14 @@ renderInformeObservaciones = function(){
  const t=DATA.plantillaObservaciones; const title=(tmplRow(t,'ENC_002').Título||'INFORME TÉCNICO DE OBSERVACIONES OBRA MAYOR');
  const ant=replaceTemplateHtml(tmplRow(t,'ANT_001').Texto_Base||''); const base=t.filter(r=>String(r.ID_Bloque||'').startsWith('BLG_') && cleanMostrar(r.Mostrar)==='sí');
  const con=replaceTemplate(tmplRow(t,'CON_001').Texto_Base||'');
+ const apodActivo=!!(state.apoderado&&state.apoderado.activo);
+ const apodNombre=String(state.apoderado?.nombre||'').trim();
+ const apodCi=String(state.apoderado?.ci||'').trim();
+ const apodDetalle=apodActivo&&(apodNombre||apodCi)
+   ? ` Adicionalmente, actúa como apoderado(a) ${apodNombre?`el/la Sr(a). <strong>${esc(apodNombre)}</strong>`:'la persona registrada'}${apodCi?`, con número de identificación <strong>${esc(apodCi)}</strong>`:''}.`
+   : '';
  const nota=(state.notaPreConclusiones&&state.notaPreConclusiones.activo&&state.notaPreConclusiones.texto)?`<h2>Nota</h2><p>${nl2br(state.notaPreConclusiones.texto)}</p>`:'';
- return `${reportHeader(title)}<h2>Antecedentes</h2><p>${ant}</p><h2>Criterio técnico</h2>${selectedObsTable()}<h2>Base legal</h2>${base.map(b=>`<h3>${esc(b.Título)}</h3><p class="legal-text">${formatLegalText(b.Texto_Base)}</p>`).join('')}${textosTecnicosSection()}${nota}<h2>Conclusiones</h2>${formatConclusionText(con)}${firmaTecnicoSection()}`;
+ return `${reportHeader(title)}<h2>Antecedentes</h2><p>${ant}${apodDetalle}</p><h2>Criterio técnico</h2>${selectedObsTable()}<h2>Base legal</h2>${base.map(b=>`<h3>${esc(b.Título)}</h3><p class="legal-text">${formatLegalText(b.Texto_Base)}</p>`).join('')}${textosTecnicosSection()}${nota}<h2>Conclusiones</h2>${formatConclusionText(con)}${firmaTecnicoSection()}`;
 };
 
 const _aprobatorioInfoTableFromTemplateV35_V36 = aprobatorioInfoTableFromTemplate;
@@ -27047,6 +27053,14 @@ function buildClipboardPayloadV154(){
   `;
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${clone.outerHTML}
 <!-- VERSIÓN 5: No Aplica selectivo en Requisitos Propuesta Arquitectónica. -->
+
+<!-- ==========================================================
+     VERSIÓN 8
+     - Cumple / No Cumple / No Aplica para todos los requisitos
+       complementarios y de Propuesta Arquitectónica.
+     - REQ_043 Estudio Morfológico registrado oficialmente en requisitos.csv.
+     - No modifica Resultado / detalle.
+     ========================================================== -->
 </body></html>`;
   const plain=(clone.innerText||clone.textContent||'').trim();
   return {html,plain};
@@ -28418,7 +28432,11 @@ function ensureReq043EstudioMorfologicoV119L(){
     id:'REQ_043',
     grupo:'Requisitos complementarios',
     texto:'6. Estudio Morfológico',
-    opciones:['Cumple','No Cumple','No Aplica']
+    opciones:['Cumple','No Cumple','No Aplica'],
+    normaDefault:'Ordenanza 016-2023, Artículo 98',
+    correccionDefault:'Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.',
+    seccion:'DOCUMENTAL',
+    orden:19
   });
 }
 
@@ -31875,7 +31893,7 @@ window.addEventListener('load',()=>{
 
 
 <!-- ==========================================================
-     V119X - NOTIFICAR / SIENTO RAZÓN eGOB
+     V119X / VERSIÓN 10 - NOTIFICAR / SIENTO RAZÓN eGOB CON MÚLTIPLES CORREOS Y PDF
      Base: versión oficial 119W con ANEXOS en Vista del Informe.
      Este módulo se añade sin reemplazar las funciones existentes.
      Textos configurables:
@@ -31909,7 +31927,7 @@ window.addEventListener('load',()=>{
   let notificationTemplatesV119X=[...DEFAULT_NOTIFICATION_TEMPLATES_V119X];
   let sientoTemplatesV119X=[...DEFAULT_SIENTO_TEMPLATES_V119X];
   let professionalEmailsV119X=[];
-  let respaldoPdfV119X=null;
+  let respaldoPdfsV119X=[];
   let templatesPromiseV119X=null;
   let professionalsPromiseV119X=null;
 
@@ -31924,16 +31942,28 @@ window.addEventListener('load',()=>{
     return typeof state!=='undefined' && state?.tipoInforme==='Informe con Observaciones';
   }
   function ensureNotificationStateV119X(){
-    if(typeof state==='undefined') return {correo:'',correoAuto:'',correoManual:false,respaldoNombre:''};
+    if(typeof state==='undefined') return {correo:'',correoAuto:'',correoManual:false,correosAdicionales:[],respaldoNombre:'',respaldoNombres:[]};
     if(!state.notificacionEgob || typeof state.notificacionEgob!=='object'){
-      state.notificacionEgob={correo:'',correoAuto:'',correoManual:false,respaldoNombre:''};
+      state.notificacionEgob={correo:'',correoAuto:'',correoManual:false,correosAdicionales:[],respaldoNombre:'',respaldoNombres:[]};
     }
     const n=state.notificacionEgob;
     n.correo=String(n.correo||'');
     n.correoAuto=String(n.correoAuto||'');
     n.correoManual=!!n.correoManual;
+    if(!Array.isArray(n.correosAdicionales)){
+      n.correosAdicionales=String(n.correosAdicionales||'').split(/[;,\n]+/).map(v=>v.trim()).filter(Boolean);
+    }
+    n.correosAdicionales=n.correosAdicionales.map(v=>String(v||'').trim());
     n.respaldoNombre=String(n.respaldoNombre||'');
+    if(!Array.isArray(n.respaldoNombres)) n.respaldoNombres=n.respaldoNombre?[n.respaldoNombre]:[];
+    n.respaldoNombres=n.respaldoNombres.map(v=>String(v||'').trim()).filter(Boolean);
+    if(!n.respaldoNombre && n.respaldoNombres.length) n.respaldoNombre=n.respaldoNombres[0];
     return n;
+  }
+  function allNotificationEmailsV119X(){
+    const n=ensureNotificationStateV119X();
+    const values=[n.correo,...(n.correosAdicionales||[])].map(v=>String(v||'').trim()).filter(Boolean);
+    return [...new Map(values.map(v=>[v.toLowerCase(),v])).values()];
   }
 
   function parseCsvFallbackV119X(text){
@@ -32099,7 +32129,7 @@ window.addEventListener('load',()=>{
       '{{Nombre del Técnico Revisor}}':String(tech?.nombre||state?.tecnico||''),
       '{{Cargo del Técnico Revisor}}':String(tech?.cargo||'TÉCNICO REVISOR'),
       '{{Fecha de hoy}}':longDateV119X(new Date(),true,true),
-      '{{correo para notificar}}':String(n.correo||'')
+      '{{correo para notificar}}':allNotificationEmailsV119X().join(', ')
     };
   }
   function replacePlaceholdersV119X(text){
@@ -32121,9 +32151,13 @@ window.addEventListener('load',()=>{
   }
   function sientoDataV119X(){
     const row=templateForV119X(sientoTemplatesV119X);
+    let text=replacePlaceholdersV119X(row.Texto_Base||row.Texto||row.texto||'');
+    if(allNotificationEmailsV119X().length>1){
+      text=text.replace(/al correo electrónico registrado/gi,'a los correos electrónicos registrados');
+    }
     return {
       title:replacePlaceholdersV119X(row.Titulo||row.titulo||'SIENTO RAZÓN'),
-      text:replacePlaceholdersV119X(row.Texto_Base||row.Texto||row.texto||'')
+      text
     };
   }
   function eV119X(v){ return typeof esc==='function'?esc(v):String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
@@ -32144,7 +32178,12 @@ window.addEventListener('load',()=>{
       .noti-note-v119x{font-size:12px;color:#667085;margin-top:6px}
       .noti-action-primary-v119x{background:#087443!important;color:#fff!important}
       .noti-action-pdf-v119x{background:#0b4e78!important;color:#fff!important}
-      @media(max-width:720px){.noti-toolbar-v119x{justify-content:stretch}.noti-toolbar-v119x button{flex:1}}
+      .extra-email-list-v119x{display:grid;gap:8px;margin:8px 0}
+      .extra-email-row-v119x{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+      .extra-email-row-v119x button{padding:8px 10px;white-space:nowrap}
+      .selected-pdfs-v119x{margin:7px 0 0;padding-left:20px;color:#344054}
+      .selected-pdfs-v119x li{margin:3px 0}
+      @media(max-width:720px){.noti-toolbar-v119x{justify-content:stretch}.noti-toolbar-v119x button{flex:1}.extra-email-row-v119x{grid-template-columns:1fr}.extra-email-row-v119x button{width:100%}}
     `;
     document.head.appendChild(style);
   }
@@ -32194,6 +32233,23 @@ window.addEventListener('load',()=>{
     renderEmailPreviewV119X();
     renderSientoPreviewV119X();
   };
+  window.updateAdditionalEmailV119X=function(index,value){
+    const n=ensureNotificationStateV119X();
+    while(n.correosAdicionales.length<=index) n.correosAdicionales.push('');
+    n.correosAdicionales[index]=String(value||'').trim();
+    renderSientoPreviewV119X();
+  };
+  window.addAdditionalEmailV119X=function(){
+    const n=ensureNotificationStateV119X();
+    n.correosAdicionales.push('');
+    renderNotificationTabV119X();
+    setTimeout(()=>document.querySelector('.extra-email-row-v119x:last-child input')?.focus(),0);
+  };
+  window.removeAdditionalEmailV119X=function(index){
+    const n=ensureNotificationStateV119X();
+    n.correosAdicionales.splice(index,1);
+    renderNotificationTabV119X();
+  };
   window.useRegisteredEmailV119X=function(){
     const n=ensureNotificationStateV119X();
     n.correoManual=false;
@@ -32203,17 +32259,23 @@ window.addEventListener('load',()=>{
     if(!n.correo && typeof msg==='function') msg('No se encontró un correo para el proyectista en el registro de profesionales. Puede escribirlo manualmente.');
   };
   window.selectNotificationBackupV119X=function(input){
-    const file=input?.files?.[0]||null;
-    if(file && !(file.type==='application/pdf'||/\.pdf$/i.test(file.name))){
-      input.value=''; respaldoPdfV119X=null;
-      if(typeof msg==='function') msg('Seleccione únicamente un archivo PDF como respaldo de la notificación.');
+    const files=[...(input?.files||[])];
+    const invalid=files.find(file=>!(file.type==='application/pdf'||/\.pdf$/i.test(file.name)));
+    if(invalid){
+      input.value=''; respaldoPdfsV119X=[];
+      if(typeof msg==='function') msg('Seleccione únicamente archivos PDF como respaldo de la notificación.');
       return;
     }
-    respaldoPdfV119X=file;
+    respaldoPdfsV119X=files;
     const n=ensureNotificationStateV119X();
-    n.respaldoNombre=file?.name||'';
+    n.respaldoNombres=files.map(file=>file.name);
+    n.respaldoNombre=n.respaldoNombres[0]||'';
     const status=document.getElementById('backupStatusV119X');
-    if(status) status.textContent=file?`Archivo seleccionado: ${file.name}`:'No se ha seleccionado un PDF.';
+    if(status){
+      status.innerHTML=files.length
+        ? `${files.length} PDF seleccionado(s):<ul class="selected-pdfs-v119x">${files.map(file=>`<li>${eV119X(file.name)}</li>`).join('')}</ul>`
+        : 'No se han seleccionado archivos PDF.';
+    }
   };
 
   async function copyTextV119X(text,success){
@@ -32236,14 +32298,21 @@ window.addEventListener('load',()=>{
   window.openInstitutionalMailV119X=function(){
     if(!eligibleV119X()) return;
     if(typeof collectTop==='function') collectTop();
-    const n=ensureNotificationStateV119X();
-    if(!validateEmailV119X(n.correo)){
-      if(typeof msg==='function') msg('Complete un correo electrónico válido antes de notificar.');
+    const emails=allNotificationEmailsV119X();
+    if(!emails.length || emails.some(email=>!validateEmailV119X(email))){
+      if(typeof msg==='function') msg('Revise que el correo principal y todos los correos adicionales sean válidos antes de notificar.');
       document.getElementById('correoNotificacionV119X')?.focus(); return;
     }
     const data=emailDataV119X();
-    const href=`mailto:${encodeURIComponent(n.correo)}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.body.replace(/\n/g,'\r\n'))}`;
-    window.location.href=href;
+    const recipients=emails.join(';');
+    const params=new URLSearchParams({
+      to:recipients,
+      subject:data.subject,
+      body:data.body.replace(/\n/g,'\r\n')
+    });
+    const href=`https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
+    const outlookWindow=window.open(href,'_blank','noopener,noreferrer');
+    if(!outlookWindow) window.location.href=href;
   };
 
   async function loadScriptV119X(url){
@@ -32291,11 +32360,12 @@ window.addEventListener('load',()=>{
   window.generateSientoRazonPdfV119X=async function(){
     if(!eligibleV119X()) return;
     const n=ensureNotificationStateV119X();
-    if(!validateEmailV119X(n.correo)){
-      if(typeof msg==='function') msg('Complete un correo electrónico válido para generar el Siento Razón.'); return;
+    const emails=allNotificationEmailsV119X();
+    if(!emails.length || emails.some(email=>!validateEmailV119X(email))){
+      if(typeof msg==='function') msg('Revise que el correo principal y todos los correos adicionales sean válidos para generar el Siento Razón.'); return;
     }
-    if(!respaldoPdfV119X){
-      if(typeof msg==='function') msg('Seleccione el PDF de respaldo de la notificación por correo.'); return;
+    if(!respaldoPdfsV119X.length){
+      if(typeof msg==='function') msg('Seleccione uno o varios PDF de respaldo de la notificación por correo.'); return;
     }
     const btn=document.getElementById('generateSientoBtnV119X');
     if(btn){btn.disabled=true;btn.textContent='Generando…';}
@@ -32326,10 +32396,12 @@ window.addEventListener('load',()=>{
       const cargoW=font.widthOfTextAtSize(techCargo,9);
       page.drawText(techName,{x:(width-nameW)/2,y:signatureY-17,size:10,font:bold,color:rgb(0,0,0)});
       page.drawText(techCargo,{x:(width-cargoW)/2,y:signatureY-31,size:9,font,color:rgb(0,0,0)});
-      const evidenceBytes=await respaldoPdfV119X.arrayBuffer();
-      const evidence=await PDFDocument.load(evidenceBytes,{ignoreEncryption:false});
-      const copied=await pdf.copyPages(evidence,evidence.getPageIndices());
-      copied.forEach(p=>pdf.addPage(p));
+      for(const evidenceFile of respaldoPdfsV119X){
+        const evidenceBytes=await evidenceFile.arrayBuffer();
+        const evidence=await PDFDocument.load(evidenceBytes,{ignoreEncryption:false});
+        const copied=await pdf.copyPages(evidence,evidence.getPageIndices());
+        copied.forEach(p=>pdf.addPage(p));
+      }
       pdf.setTitle(`Siento Razón eGOB ${state?.egob||''}`);
       pdf.setSubject('Respaldo de notificación electrónica');
       pdf.setCreator('Generador Local de Informes GADMR');
@@ -32365,9 +32437,17 @@ window.addEventListener('load',()=>{
         <section class="noti-card-v119x">
           <div class="noti-title-v119x">1. Notificar</div>
           <div class="field">
-            <label>Correo electrónico *</label>
+            <label>Correo electrónico principal *</label>
             <input id="correoNotificacionV119X" type="email" autocomplete="email" value="${eV119X(n.correo)}" placeholder="correo@dominio.com" oninput="updateNotificationEmailV119X(this.value)">
             <div class="noti-note-v119x">Se autocompleta con el correo del proyectista registrado. Puede corregirlo o escribirlo manualmente.</div>
+          </div>
+          <div class="field">
+            <label>Correos electrónicos adicionales</label>
+            <div class="extra-email-list-v119x">
+              ${(n.correosAdicionales||[]).map((correo,index)=>`<div class="extra-email-row-v119x"><input type="email" value="${eV119X(correo)}" placeholder="correo adicional" oninput="updateAdditionalEmailV119X(${index},this.value)"><button type="button" class="danger" onclick="removeAdditionalEmailV119X(${index})">Quitar</button></div>`).join('')}
+            </div>
+            <button type="button" class="secondary" onclick="addAdditionalEmailV119X()">+ Agregar correo</button>
+            <div class="noti-note-v119x">Todos los correos registrados se abrirán como destinatarios del mensaje al presionar NOTIFICAR.</div>
           </div>
           <div class="noti-toolbar-v119x">
             <button type="button" class="secondary" onclick="useRegisteredEmailV119X()">Autocompletar desde registro</button>
@@ -32380,11 +32460,12 @@ window.addEventListener('load',()=>{
         <section class="noti-card-v119x">
           <div class="noti-title-v119x">2. Siento Razón eGOB</div>
           <div class="field">
-            <label>Respaldo Notificación Correo (PDF) *</label>
-            <input id="respaldoNotificacionV119X" type="file" accept="application/pdf,.pdf" onchange="selectNotificationBackupV119X(this)">
-            <div id="backupStatusV119X" class="file-status-v119x">${n.respaldoNombre?'El registro conserva el nombre «'+eV119X(n.respaldoNombre)+'», pero debe seleccionar nuevamente el PDF para generar el documento.':'No se ha seleccionado un PDF.'}</div>
+            <label>Respaldos de Notificación por Correo (PDF) *</label>
+            <input id="respaldoNotificacionV119X" type="file" accept="application/pdf,.pdf" multiple onchange="selectNotificationBackupV119X(this)">
+            <div class="noti-note-v119x">Puede seleccionar varios PDF en una sola carga. Se anexarán en el mismo orden en que aparecen seleccionados.</div>
+            <div id="backupStatusV119X" class="file-status-v119x">${n.respaldoNombres.length?'El registro conserva los nombres de '+n.respaldoNombres.length+' archivo(s), pero debe seleccionarlos nuevamente para generar el documento.<ul class="selected-pdfs-v119x">'+n.respaldoNombres.map(nombre=>'<li>'+eV119X(nombre)+'</li>').join('')+'</ul>':'No se han seleccionado archivos PDF.'}</div>
           </div>
-          <div class="siento-preview-v119x"><strong id="sientoTitlePreviewV119X">${eV119X(siento.title)}</strong><br><br><span id="sientoTextPreviewV119X">${eV119X(siento.text)}</span><br><br><em>El documento añadirá un espacio para la firma física y, a continuación, todas las páginas del PDF de respaldo.</em></div>
+          <div class="siento-preview-v119x"><strong id="sientoTitlePreviewV119X">${eV119X(siento.title)}</strong><br><br><span id="sientoTextPreviewV119X">${eV119X(siento.text)}</span><br><br><em>El documento añadirá un espacio para la firma física y, a continuación, todas las páginas de todos los PDF de respaldo seleccionados.</em></div>
           <div class="noti-toolbar-v119x"><button id="generateSientoBtnV119X" type="button" class="noti-action-pdf-v119x" onclick="generateSientoRazonPdfV119X()">Generar PDF</button></div>
         </section>
       </div>`;
@@ -32430,7 +32511,7 @@ window.addEventListener('load',()=>{
   const applyStateBaseV119X=typeof applyStateToUI==='function'?applyStateToUI:null;
   if(applyStateBaseV119X){
     applyStateToUI=function(){
-      ensureNotificationStateV119X(); respaldoPdfV119X=null;
+      ensureNotificationStateV119X(); respaldoPdfsV119X=[];
       const out=applyStateBaseV119X.apply(this,arguments);
       setTimeout(()=>{setupNotificationTabV119X();renderNotificationTabV119X();},0);
       return out;
@@ -32440,7 +32521,7 @@ window.addEventListener('load',()=>{
   if(newFormBaseV119X){
     nuevoFormulario=function(){
       const out=newFormBaseV119X.apply(this,arguments);
-      respaldoPdfV119X=null; ensureNotificationStateV119X();
+      respaldoPdfsV119X=[]; ensureNotificationStateV119X();
       setTimeout(renderNotificationTabV119X,0); return out;
     };
   }
@@ -33026,7 +33107,7 @@ window.addEventListener('load',()=>{
 (function(){
   'use strict';
 
-  const FALLBACK_PROPUESTA_V2 = {"obra_mayor_definitivo":[{"id":"REQ_024","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"1. Solicitud en formulario normalizado dirigida al Director de Gestión de Planificación, Hábitat y Desarrollo Urbanístico y suscrito por el propietario y los profesionales responsables de los planos y de la construcción","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":1},{"id":"REQ_025","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"2. Informe Predial de Regulaciones de Uso de Suelo (IPRUS vigente)","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":2},{"id":"REQ_026","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"3. Copia simple de escritura o título de propiedad del inmueble inscrita en el Registro de la Propiedad","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":3},{"id":"REQ_027","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"4. Certificado de Gravámenes Actualizado.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":4},{"id":"REQ_028","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"5. Un original en físico y digital del proyecto Técnico de Edificación de Obra Mayor para efecto de revisión de la propuesta, una vez que la misma sea aprobada deberá presentarse 2 originales adicionales.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":5},{"id":"REQ_029","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"6. Estudio estructural que incluya diseño estructural con memoria de cálculo.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":6},{"id":"REQ_030","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"7. Copia del RUC y patente del profesional responsable","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":7},{"id":"REQ_031","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"8. Formulario de encuesta de edificaciones (permisos de construcción) proporcionado por el INEC","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":8},{"id":"REQ_032","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"9. Certificado de aprobación de planos y factibilidad de los sistemas públicos de soporte emitidos por las dependencias competentes.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":9},{"id":"REQ_033","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"1. Aprobación del Anteproyecto de Edificación con sus respectivos habilitantes.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":10},{"id":"REQ_034","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"2. Estudios de ingeniería respectivos aprobados por las dependencias competentes.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":11},{"id":"REQ_035","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"3. Plano contra incendios aprobado por el Cuerpo de Bomberos.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":12},{"id":"REQ_036","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"4. Estudio geotécnico y/o mecánica de suelos conforme a la Norma Ecuatoriana de la Construcción.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":13},{"id":"REQ_038","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"1. Cronograma de ejecución de obra, con base al cual se programarán las inspecciones de control de obra.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":14},{"id":"REQ_039","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"2. Certificado, registro o licencia ambiental emitido por el ente competente.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":15},{"id":"REQ_040","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"3. En caso de copropiedad la designación de un representante común, que podrá realizarse en el formulario normalizado, mediante autorización con reconocimiento de firma y rúbrica o mediante poder.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":16},{"id":"REQ_041","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"4. En el caso edificaciones declaradas en propiedad horizontal se requerirá la autorización de al menos el 75% de los copropietarios.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":17},{"id":"REQ_042","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"5. En proyectos hoteleros y de servicios turísticos, Certificado de calificación hotelera por parte del Ministerio de Turismo.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":18},{"id":"OM_PTA_T01","numero":"1.","tipo":"TITULO","nivel":1,"grupo":"1. Planos","texto":"Planos en formato A1 o A0 según normas INEN, y archivo digital con lo siguiente:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":1},{"id":"OM_PTA_011","numero":"1.1.","tipo":"REQUISITO","nivel":2,"grupo":"1.1. Ubicación","texto":"Ubicación que debe abarcar una zona de 300 m. de radio, con su correcta orientación y nombres de calles, esta ubicación deberá ser georreferenciada, en la que se identifique claramente el predio donde se implantará el proyecto (Sin escala);","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":2},{"id":"OM_PTA_012","numero":"1.2.","tipo":"REQUISITO","nivel":2,"grupo":"1.2. Levantamiento planimétrico y/o topográfico","texto":"Levantamiento planimétrico y/o topográfico georreferenciado del terreno en el sistema de coordenadas oficial UTM, WGS 84, zona 17, latitud Sur, en el que se indiquen de ser el caso las construcciones existentes, líneas de alta tensión, acequias, canales de riego y quebradas, con sus respectivos márgenes de protección, en el que se hará constar las dimensiones de los linderos. En el caso de construcciones adosadas se deberá identificar el nivel natural del terreno.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":3},{"id":"OM_PTA_013","numero":"1.3.","tipo":"REQUISITO","nivel":2,"grupo":"1.3. Plano de Implantación","texto":"Plano de Implantación en el que anotará claramente las medidas, los ángulos del terreno, retiros, afectaciones, el nivel altura de los colindantes y eje vial.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":4},{"id":"OM_PTA_S14","numero":"1.4.","tipo":"SUBTITULO","nivel":2,"grupo":"1.4. Plantas","texto":"Plantas:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":5},{"id":"OM_PTA_141","numero":"1.4.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.1. Plantas","texto":"Deberán ser dimensionadas al exterior, haciendo constar las medidas parciales y totales de los locales, espesores de muros, apertura de puertas y ventanas. Se tomará como cota de referencia la del nivel de la acera.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":6},{"id":"OM_PTA_142","numero":"1.4.2.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.2. Plantas","texto":"Si existe la imposibilidad de dimensionar las medidas interiores hacia las cotas exteriores del dibujo, se lo hará de acuerdo a las particularidades del proyecto hacia el interior del mismo. (Patios de iluminación y ventilación)","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":7},{"id":"OM_PTA_143","numero":"1.4.3.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.3. Cubierta inclinada","texto":"En la planta de cubierta inclinada se indicarán las pendientes expresadas en porcentaje.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":8},{"id":"OM_PTA_144","numero":"1.4.4.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.4. Plantas","texto":"Dentro de cada local se identificará su designación y se colocará cotas de nivel en los sitios que fueran necesarios para la comprensión del proyecto.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":9},{"id":"OM_PTA_S15","numero":"1.5.","tipo":"SUBTITULO","nivel":2,"grupo":"1.5. Cortes","texto":"Cortes:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":10},{"id":"OM_PTA_151","numero":"1.5.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.5.1. Cortes","texto":"Serán presentados en la misma escala adoptada para las plantas y en número necesario para la claridad del proyecto, mínimo dos: uno en cada sentido y por lo menos uno deberá contemplar el desarrollo de una grada si la hubiera.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":11},{"id":"OM_PTA_152","numero":"1.5.2.","tipo":"REQUISITO","nivel":3,"grupo":"1.5.2. Cortes","texto":"Deberán estar dimensionados e identificarán los niveles de cada una de las plantas, así como el nivel actual del terreno.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":12},{"id":"OM_PTA_S16","numero":"1.6.","tipo":"SUBTITULO","nivel":2,"grupo":"1.6. Fachadas","texto":"Fachadas:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":13},{"id":"OM_PTA_161","numero":"1.6.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.6.1. Fachadas","texto":"Deberán representarse todas las fachadas del edificio o edificios en la misma escala adoptada para las plantas y cortes.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":14},{"id":"OM_PTA_017","numero":"1.7.","tipo":"REQUISITO","nivel":2,"grupo":"1.7. Cuadro de Datos","texto":"Cuadro de Datos que contenga: área total del predio, área de afectación, área de construcción, unidades de edificación por uso, áreas computables y no computables, áreas abiertas y cerradas, COS PB y COS total, según formato establecido.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":15},{"id":"OM_PTA_018","numero":"1.8.","tipo":"REQUISITO","nivel":2,"grupo":"1.8. Propiedad horizontal","texto":"En caso que la edificación se proyecte declarar bajo régimen de propiedad horizontal, el cuadro que incluirá: área comunal, área verde y equipamientos","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":16},{"id":"OM_PTA_S19","numero":"1.9.","tipo":"SUBTITULO","nivel":2,"grupo":"1.9. Planos estructurales","texto":"Planos estructurales en proyectos de edificación de más de dos pisos o 400 m2 de área bruta:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":17},{"id":"OM_PTA_191","numero":"1.9.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.9.1. Planos estructurales","texto":"Deberán representar el diseño de la estructura del edificio, el armado de sus elementos, detalles y especificaciones, debidamente acotados. Se acompañará de Estudios de Suelo y Memoria de Cálculo Estructural y observará las disposiciones de las NEC.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":18},{"id":"OM_PTA_110","numero":"1.10.","tipo":"REQUISITO","nivel":2,"grupo":"1.10. Ampliación o modificación","texto":"Para los proyectos de ampliación o modificación a construcciones existentes, se presentarán planos de las secciones nuevas y de las escalas en la edificación, a fin de verificar las condiciones de seguridad. Se identificará de la siguiente manera: Demoliciones: color amarillo; Construcción nueva: color rojo; Construcción sin demoler: color negro.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":19},{"id":"OM_PTA_002","numero":"2.","tipo":"REQUISITO","nivel":1,"grupo":"2. Memoria Fotográfica","texto":"Memoria Fotográfica: contendrá fotografías donde se debe apreciar la vista frontal, el entorno, los accesos, obras instaladas y colindantes del lote a edificar; cada una de las fotografías deberá contener la descripción de lo mostrado. (deberá ser presentada en una hoja formato A4 y en formato digital).","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":20},{"id":"OM_PTA_003","numero":"3.","tipo":"REQUISITO","nivel":1,"grupo":"3. Memoria Técnica","texto":"Memoria Técnica","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":21}],"anteproyecto_edificacion":[{"id":"AP_REQ_001","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"1. Solicitud en formulario normalizado, dirigida al Director de Gestión de Ordenamiento Territorial o Patrimonio, según corresponda, suscrita por el o los propietarios y el profesional responsable. Cuando el propietario sea una persona jurídica, deberá estar suscrita por el representante legal.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":1},{"id":"AP_REQ_002","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"2. Informe Predial de Regulaciones de Uso de Suelo (IPRUS vigente).","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":2},{"id":"AP_REQ_003","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"3. Copia simple de la escritura del inmueble inscrita en el Registro de la Propiedad.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":3},{"id":"AP_REQ_004","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"4. Certificado de gravamen actualizado.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":4},{"id":"AP_REQ_005","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"5. Para edificaciones de hasta 2 pisos o 400 m² de área bruta, se deberá adjuntar la disponibilidad de servicios o la carta de pago correspondiente de agua potable, empresa eléctrica y telecomunicaciones.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":5},{"id":"AP_REQ_006","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"6. Un original físico y digital de la Propuesta Técnica del Anteproyecto de Edificación para la revisión de la propuesta. Una vez aprobada, deberán presentarse 2 originales adicionales.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":6},{"id":"AP_REQ_007","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"7. Comprobante del pago de la tasa administrativa.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":7},{"id":"AP_REQ_008","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"8. Copia del RUC y patente del profesional responsable.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":8},{"id":"AP_REQ_009","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"1. Para edificaciones mayores a 2 pisos o 400 m² de área bruta, se deberán adjuntar las factibilidades de servicios o los respectivos pagos de agua potable, empresa eléctrica y telecomunicaciones.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":9},{"id":"AP_REQ_010","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"1. Para edificaciones en zonas rurales se podrán plantear sistemas alternos, los cuales deberán ser aprobados previamente por la empresa correspondiente.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":10},{"id":"AP_REQ_011","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"2. En caso de copropiedad, designación de un representante común, que podrá realizarse en el formulario normalizado, mediante autorización con reconocimiento de firma y rúbrica o mediante poder.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":11},{"id":"AP_REQ_012","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"3. Para proyectos de ampliación o modificación de construcciones existentes: a) original o copia certificada de los planos arquitectónicos aprobados, o licencia urbanística con el plano arquitectónico habilitante; y b) memoria técnica justificativa de las modificaciones o ampliaciones y planos de la propuesta, conforme al artículo correspondiente.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":12},{"id":"AP_REQ_013","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"4. En el caso de edificaciones declaradas en propiedad horizontal, autorización de al menos el 75 % de los copropietarios.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":13},{"id":"AP_PTA_001","numero":"1.","tipo":"REQUISITO","nivel":1,"grupo":"1. Memoria técnica justificativa","texto":"Memoria técnica justificativa, excepto para edificaciones unifamiliares menores a 400m2 de área bruta.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":1},{"id":"AP_PTA_T02","numero":"2.","tipo":"TITULO","nivel":1,"grupo":"2. Planos","texto":"Planos en formato A1 o A0 según normas INEN, y archivo digital con lo siguiente:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":2},{"id":"AP_PTA_021","numero":"2.1.","tipo":"REQUISITO","nivel":2,"grupo":"2.1. Ubicación","texto":"Ubicación que debe abarcar una zona de 300 m. de radio, con su correcta orientación y nombres de calles, en áreas rurales esta ubicación deberá ser georreferenciada, donde se identifique claramente el predio donde se implantará el proyecto (Sin escala);","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":3},{"id":"AP_PTA_022","numero":"2.2.","tipo":"REQUISITO","nivel":2,"grupo":"2.2. Levantamiento planimétrico y/o topográfico","texto":"Levantamiento planimétrico y/o topográfico georreferenciado del terreno en el sistema de coordenadas oficial UTM, WGS 84, zona 17, latitud Sur, en el que se indiquen de ser el caso las construcciones existentes, líneas de alta tensión, acequias, canales de riego y quebradas, con sus respectivos márgenes de protección, en el que se hará constar las dimensiones de los linderos. En el caso de construcciones adosadas se deberá identificar el nivel de los terrenos colindantes","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":4},{"id":"AP_PTA_023","numero":"2.3.","tipo":"REQUISITO","nivel":2,"grupo":"2.3. Plano de Implantación","texto":"Plano de Implantación en el que anotará claramente las medidas generales, los ángulos del terreno, retiros, afectaciones, colindantes y eje vial.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":5},{"id":"AP_PTA_S24","numero":"2.4.","tipo":"SUBTITULO","nivel":2,"grupo":"2.4. Propuesta de diseño","texto":"Propuesta de diseño:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":6},{"id":"AP_PTA_241","numero":"2.4.1.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.1. Arquitectónica","texto":"Arquitectónica: implantación general plantas, fachadas y cortes;","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":7},{"id":"AP_PTA_242","numero":"2.4.2.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.2. Cuadro de Datos","texto":"Cuadro de Datos que contenga: área total del predio, área de afectación, área de construcción, unidades de edificación por uso, áreas computables y no computables, áreas abiertas y cerradas, COS PB y COS total, en el formato establecido.","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":8},{"id":"AP_PTA_243","numero":"2.4.3.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.3. Propiedad horizontal","texto":"En caso que la edificación se proyecte declarar bajo régimen de propiedad horizontal, cuadro que incluirá: área comunal y área verde","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":9},{"id":"AP_PTA_244","numero":"2.4.4.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.4. Ampliación o modificación","texto":"Para los proyectos de ampliación o modificación a construcciones existentes, se presentarán planos del estado actual y de las secciones nuevas de la edificación, a fin de verificar las condiciones de seguridad, se identificará de la siguiente manera: Demoliciones: color amarillo; Construcción nueva: color rojo; Construcción sin demoler: color negro.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":10},{"id":"AP_PTA_003","numero":"3.","tipo":"REQUISITO","nivel":1,"grupo":"3. Memoria Fotográfica","texto":"Memoria Fotográfica: contendrá fotografías donde se debe apreciar la vista frontal, el entorno, los accesos, obras instaladas y colindantes del lote a edificar; cada una de las fotografías deberá contener la descripción de lo mostrado. (deberá ser presentada en una hoja formato A4 y en formato digital).","opciones":["Cumple","No Cumple"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":11}]};
+  const FALLBACK_PROPUESTA_V2 = {"obra_mayor_definitivo":[{"id":"REQ_024","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"1. Solicitud en formulario normalizado dirigida al Director de Gestión de Planificación, Hábitat y Desarrollo Urbanístico y suscrito por el propietario y los profesionales responsables de los planos y de la construcción","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":1},{"id":"REQ_025","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"2. Informe Predial de Regulaciones de Uso de Suelo (IPRUS vigente)","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":2},{"id":"REQ_026","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"3. Copia simple de escritura o título de propiedad del inmueble inscrita en el Registro de la Propiedad","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":3},{"id":"REQ_027","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"4. Certificado de Gravámenes Actualizado.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":4},{"id":"REQ_028","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"5. Un original en físico y digital del proyecto Técnico de Edificación de Obra Mayor para efecto de revisión de la propuesta, una vez que la misma sea aprobada deberá presentarse 2 originales adicionales.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":5},{"id":"REQ_029","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"6. Estudio estructural que incluya diseño estructural con memoria de cálculo.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":6},{"id":"REQ_030","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"7. Copia del RUC y patente del profesional responsable","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":7},{"id":"REQ_031","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"8. Formulario de encuesta de edificaciones (permisos de construcción) proporcionado por el INEC","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":8},{"id":"REQ_032","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"9. Certificado de aprobación de planos y factibilidad de los sistemas públicos de soporte emitidos por las dependencias competentes.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":9},{"id":"REQ_033","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"1. Aprobación del Anteproyecto de Edificación con sus respectivos habilitantes.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":10},{"id":"REQ_034","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"2. Estudios de ingeniería respectivos aprobados por las dependencias competentes.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":11},{"id":"REQ_035","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"3. Plano contra incendios aprobado por el Cuerpo de Bomberos.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":12},{"id":"REQ_036","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"4. Estudio geotécnico y/o mecánica de suelos conforme a la Norma Ecuatoriana de la Construcción.","opciones":[],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":13},{"id":"REQ_038","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"1. Cronograma de ejecución de obra, con base al cual se programarán las inspecciones de control de obra.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":14},{"id":"REQ_039","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"2. Certificado, registro o licencia ambiental emitido por el ente competente.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":15},{"id":"REQ_040","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"3. En caso de copropiedad la designación de un representante común, que podrá realizarse en el formulario normalizado, mediante autorización con reconocimiento de firma y rúbrica o mediante poder.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":16},{"id":"REQ_041","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"4. En el caso edificaciones declaradas en propiedad horizontal se requerirá la autorización de al menos el 75% de los copropietarios.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":17},{"id":"REQ_042","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"5. En proyectos hoteleros y de servicios turísticos, Certificado de calificación hotelera por parte del Ministerio de Turismo.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":18},{"id":"REQ_043","numero":"","tipo":"","nivel":"","grupo":"Requisitos complementarios","texto":"6. Estudio Morfológico","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, Artículo 98","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":19},{"id":"OM_PTA_T01","numero":"1.","tipo":"TITULO","nivel":1,"grupo":"1. Planos","texto":"Planos en formato A1 o A0 según normas INEN, y archivo digital con lo siguiente:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":1},{"id":"OM_PTA_011","numero":"1.1.","tipo":"REQUISITO","nivel":2,"grupo":"1.1. Ubicación","texto":"Ubicación que debe abarcar una zona de 300 m. de radio, con su correcta orientación y nombres de calles, esta ubicación deberá ser georreferenciada, en la que se identifique claramente el predio donde se implantará el proyecto (Sin escala);","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":2},{"id":"OM_PTA_012","numero":"1.2.","tipo":"REQUISITO","nivel":2,"grupo":"1.2. Levantamiento planimétrico y/o topográfico","texto":"Levantamiento planimétrico y/o topográfico georreferenciado del terreno en el sistema de coordenadas oficial UTM, WGS 84, zona 17, latitud Sur, en el que se indiquen de ser el caso las construcciones existentes, líneas de alta tensión, acequias, canales de riego y quebradas, con sus respectivos márgenes de protección, en el que se hará constar las dimensiones de los linderos. En el caso de construcciones adosadas se deberá identificar el nivel natural del terreno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":3},{"id":"OM_PTA_013","numero":"1.3.","tipo":"REQUISITO","nivel":2,"grupo":"1.3. Plano de Implantación","texto":"Plano de Implantación en el que anotará claramente las medidas, los ángulos del terreno, retiros, afectaciones, el nivel altura de los colindantes y eje vial.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":4},{"id":"OM_PTA_S14","numero":"1.4.","tipo":"SUBTITULO","nivel":2,"grupo":"1.4. Plantas","texto":"Plantas:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":5},{"id":"OM_PTA_141","numero":"1.4.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.1. Plantas","texto":"Deberán ser dimensionadas al exterior, haciendo constar las medidas parciales y totales de los locales, espesores de muros, apertura de puertas y ventanas. Se tomará como cota de referencia la del nivel de la acera.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":6},{"id":"OM_PTA_142","numero":"1.4.2.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.2. Plantas","texto":"Si existe la imposibilidad de dimensionar las medidas interiores hacia las cotas exteriores del dibujo, se lo hará de acuerdo a las particularidades del proyecto hacia el interior del mismo. (Patios de iluminación y ventilación)","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":7},{"id":"OM_PTA_143","numero":"1.4.3.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.3. Cubierta inclinada","texto":"En la planta de cubierta inclinada se indicarán las pendientes expresadas en porcentaje.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":8},{"id":"OM_PTA_144","numero":"1.4.4.","tipo":"REQUISITO","nivel":3,"grupo":"1.4.4. Plantas","texto":"Dentro de cada local se identificará su designación y se colocará cotas de nivel en los sitios que fueran necesarios para la comprensión del proyecto.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":9},{"id":"OM_PTA_S15","numero":"1.5.","tipo":"SUBTITULO","nivel":2,"grupo":"1.5. Cortes","texto":"Cortes:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":10},{"id":"OM_PTA_151","numero":"1.5.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.5.1. Cortes","texto":"Serán presentados en la misma escala adoptada para las plantas y en número necesario para la claridad del proyecto, mínimo dos: uno en cada sentido y por lo menos uno deberá contemplar el desarrollo de una grada si la hubiera.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":11},{"id":"OM_PTA_152","numero":"1.5.2.","tipo":"REQUISITO","nivel":3,"grupo":"1.5.2. Cortes","texto":"Deberán estar dimensionados e identificarán los niveles de cada una de las plantas, así como el nivel actual del terreno.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":12},{"id":"OM_PTA_S16","numero":"1.6.","tipo":"SUBTITULO","nivel":2,"grupo":"1.6. Fachadas","texto":"Fachadas:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":13},{"id":"OM_PTA_161","numero":"1.6.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.6.1. Fachadas","texto":"Deberán representarse todas las fachadas del edificio o edificios en la misma escala adoptada para las plantas y cortes.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":14},{"id":"OM_PTA_017","numero":"1.7.","tipo":"REQUISITO","nivel":2,"grupo":"1.7. Cuadro de Datos","texto":"Cuadro de Datos que contenga: área total del predio, área de afectación, área de construcción, unidades de edificación por uso, áreas computables y no computables, áreas abiertas y cerradas, COS PB y COS total, según formato establecido.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":15},{"id":"OM_PTA_018","numero":"1.8.","tipo":"REQUISITO","nivel":2,"grupo":"1.8. Propiedad horizontal","texto":"En caso que la edificación se proyecte declarar bajo régimen de propiedad horizontal, el cuadro que incluirá: área comunal, área verde y equipamientos","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":16},{"id":"OM_PTA_S19","numero":"1.9.","tipo":"SUBTITULO","nivel":2,"grupo":"1.9. Planos estructurales","texto":"Planos estructurales en proyectos de edificación de más de dos pisos o 400 m2 de área bruta:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":17},{"id":"OM_PTA_191","numero":"1.9.1.","tipo":"REQUISITO","nivel":3,"grupo":"1.9.1. Planos estructurales","texto":"Deberán representar el diseño de la estructura del edificio, el armado de sus elementos, detalles y especificaciones, debidamente acotados. Se acompañará de Estudios de Suelo y Memoria de Cálculo Estructural y observará las disposiciones de las NEC.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":18},{"id":"OM_PTA_110","numero":"1.10.","tipo":"REQUISITO","nivel":2,"grupo":"1.10. Ampliación o modificación","texto":"Para los proyectos de ampliación o modificación a construcciones existentes, se presentarán planos de las secciones nuevas y de las escalas en la edificación, a fin de verificar las condiciones de seguridad. Se identificará de la siguiente manera: Demoliciones: color amarillo; Construcción nueva: color rojo; Construcción sin demoler: color negro.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":19},{"id":"OM_PTA_002","numero":"2.","tipo":"REQUISITO","nivel":1,"grupo":"2. Memoria Fotográfica","texto":"Memoria Fotográfica: contendrá fotografías donde se debe apreciar la vista frontal, el entorno, los accesos, obras instaladas y colindantes del lote a edificar; cada una de las fotografías deberá contener la descripción de lo mostrado. (deberá ser presentada en una hoja formato A4 y en formato digital).","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":20},{"id":"OM_PTA_003","numero":"3.","tipo":"REQUISITO","nivel":1,"grupo":"3. Memoria Técnica","texto":"Memoria Técnica","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":21}],"anteproyecto_edificacion":[{"id":"AP_REQ_001","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"1. Solicitud en formulario normalizado, dirigida al Director de Gestión de Ordenamiento Territorial o Patrimonio, según corresponda, suscrita por el o los propietarios y el profesional responsable. Cuando el propietario sea una persona jurídica, deberá estar suscrita por el representante legal.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":1},{"id":"AP_REQ_002","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"2. Informe Predial de Regulaciones de Uso de Suelo (IPRUS vigente).","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":2},{"id":"AP_REQ_003","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"3. Copia simple de la escritura del inmueble inscrita en el Registro de la Propiedad.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":3},{"id":"AP_REQ_004","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"4. Certificado de gravamen actualizado.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":4},{"id":"AP_REQ_005","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"5. Para edificaciones de hasta 2 pisos o 400 m² de área bruta, se deberá adjuntar la disponibilidad de servicios o la carta de pago correspondiente de agua potable, empresa eléctrica y telecomunicaciones.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":5},{"id":"AP_REQ_006","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"6. Un original físico y digital de la Propuesta Técnica del Anteproyecto de Edificación para la revisión de la propuesta. Una vez aprobada, deberán presentarse 2 originales adicionales.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":6},{"id":"AP_REQ_007","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"7. Comprobante del pago de la tasa administrativa.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":7},{"id":"AP_REQ_008","numero":"","tipo":"","nivel":"","grupo":"Requisitos Generales:","texto":"8. Copia del RUC y patente del profesional responsable.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":8},{"id":"AP_REQ_009","numero":"","tipo":"","nivel":"","grupo":"Requisitos más de 2 pisos o 400 m2","texto":"1. Para edificaciones mayores a 2 pisos o 400 m² de área bruta, se deberán adjuntar las factibilidades de servicios o los respectivos pagos de agua potable, empresa eléctrica y telecomunicaciones.","opciones":[],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":9},{"id":"AP_REQ_010","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"1. Para edificaciones en zonas rurales se podrán plantear sistemas alternos, los cuales deberán ser aprobados previamente por la empresa correspondiente.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":10},{"id":"AP_REQ_011","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"2. En caso de copropiedad, designación de un representante común, que podrá realizarse en el formulario normalizado, mediante autorización con reconocimiento de firma y rúbrica o mediante poder.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":11},{"id":"AP_REQ_012","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"3. Para proyectos de ampliación o modificación de construcciones existentes: a) original o copia certificada de los planos arquitectónicos aprobados, o licencia urbanística con el plano arquitectónico habilitante; y b) memoria técnica justificativa de las modificaciones o ampliaciones y planos de la propuesta, conforme al artículo correspondiente.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":12},{"id":"AP_REQ_013","numero":"","tipo":"","nivel":"","grupo":"Requisitos Complementarios:","texto":"4. En el caso de edificaciones declaradas en propiedad horizontal, autorización de al menos el 75 % de los copropietarios.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación","correccionDefault":"Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.","seccion":"DOCUMENTAL","orden":13},{"id":"AP_PTA_001","numero":"1.","tipo":"REQUISITO","nivel":1,"grupo":"1. Memoria técnica justificativa","texto":"Memoria técnica justificativa, excepto para edificaciones unifamiliares menores a 400m2 de área bruta.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":1},{"id":"AP_PTA_T02","numero":"2.","tipo":"TITULO","nivel":1,"grupo":"2. Planos","texto":"Planos en formato A1 o A0 según normas INEN, y archivo digital con lo siguiente:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":2},{"id":"AP_PTA_021","numero":"2.1.","tipo":"REQUISITO","nivel":2,"grupo":"2.1. Ubicación","texto":"Ubicación que debe abarcar una zona de 300 m. de radio, con su correcta orientación y nombres de calles, en áreas rurales esta ubicación deberá ser georreferenciada, donde se identifique claramente el predio donde se implantará el proyecto (Sin escala);","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":3},{"id":"AP_PTA_022","numero":"2.2.","tipo":"REQUISITO","nivel":2,"grupo":"2.2. Levantamiento planimétrico y/o topográfico","texto":"Levantamiento planimétrico y/o topográfico georreferenciado del terreno en el sistema de coordenadas oficial UTM, WGS 84, zona 17, latitud Sur, en el que se indiquen de ser el caso las construcciones existentes, líneas de alta tensión, acequias, canales de riego y quebradas, con sus respectivos márgenes de protección, en el que se hará constar las dimensiones de los linderos. En el caso de construcciones adosadas se deberá identificar el nivel de los terrenos colindantes","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":4},{"id":"AP_PTA_023","numero":"2.3.","tipo":"REQUISITO","nivel":2,"grupo":"2.3. Plano de Implantación","texto":"Plano de Implantación en el que anotará claramente las medidas generales, los ángulos del terreno, retiros, afectaciones, colindantes y eje vial.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":5},{"id":"AP_PTA_S24","numero":"2.4.","tipo":"SUBTITULO","nivel":2,"grupo":"2.4. Propuesta de diseño","texto":"Propuesta de diseño:","opciones":[],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":6},{"id":"AP_PTA_241","numero":"2.4.1.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.1. Arquitectónica","texto":"Arquitectónica: implantación general plantas, fachadas y cortes;","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":7},{"id":"AP_PTA_242","numero":"2.4.2.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.2. Cuadro de Datos","texto":"Cuadro de Datos que contenga: área total del predio, área de afectación, área de construcción, unidades de edificación por uso, áreas computables y no computables, áreas abiertas y cerradas, COS PB y COS total, en el formato establecido.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":8},{"id":"AP_PTA_243","numero":"2.4.3.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.3. Propiedad horizontal","texto":"En caso que la edificación se proyecte declarar bajo régimen de propiedad horizontal, cuadro que incluirá: área comunal y área verde","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":9},{"id":"AP_PTA_244","numero":"2.4.4.","tipo":"REQUISITO","nivel":3,"grupo":"2.4.4. Ampliación o modificación","texto":"Para los proyectos de ampliación o modificación a construcciones existentes, se presentarán planos del estado actual y de las secciones nuevas de la edificación, a fin de verificar las condiciones de seguridad, se identificará de la siguiente manera: Demoliciones: color amarillo; Construcción nueva: color rojo; Construcción sin demoler: color negro.","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":10},{"id":"AP_PTA_003","numero":"3.","tipo":"REQUISITO","nivel":1,"grupo":"3. Memoria Fotográfica","texto":"Memoria Fotográfica: contendrá fotografías donde se debe apreciar la vista frontal, el entorno, los accesos, obras instaladas y colindantes del lote a edificar; cada una de las fotografías deberá contener la descripción de lo mostrado. (deberá ser presentada en una hoja formato A4 y en formato digital).","opciones":["Cumple","No Cumple","No Aplica"],"normaDefault":"Ordenanza No. 016-2023, Artículo 84. Contenido de la Propuesta Técnica de Anteproyectos de Edificación.","correccionDefault":"","seccion":"PROPUESTA_ARQUITECTONICA","orden":11}]};
   const PROPUESTA_SECTION_V2='PROPUESTA_ARQUITECTONICA';
   const REQ_PATHS_V2={
     obra_mayor_definitivo:'data/requisitos.csv',
@@ -33047,8 +33128,10 @@ window.addEventListener('load',()=>{
     return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
   function isProposalRowV2(r){
-    return normV2(r?.seccion||r?.Seccion||r?.Sección)===PROPUESTA_SECTION_V2 ||
-      /^((AP|OM)_)?PROP_/i.test(String(r?.id||r?.ID||''));
+    const section=normV2(r?.seccion||r?.Seccion||r?.Sección);
+    const id=String(r?.id||r?.ID||'').trim();
+    return section===PROPUESTA_SECTION_V2 ||
+      /^(?:(?:AP|OM)_(?:PROP|PTA)_|PROP_)/i.test(id);
   }
   function projectV2(){
     try{
@@ -33078,7 +33161,9 @@ window.addEventListener('load',()=>{
     return all[id];
   }
   function proposalRowsV2(){
-    const rows=PROPUESTA_V2[projectV2()]||[];
+    /* VERSIÓN 7: la tabla técnica nunca puede mostrar filas documentales,
+       incluso cuando se utilice la base interna por una falla de carga del CSV. */
+    const rows=(PROPUESTA_V2[projectV2()]||[]).filter(isProposalRowV2);
     return [...rows].sort((a,b)=>(Number(a.orden)||0)-(Number(b.orden)||0));
   }
   function splitOptionsV2(v){
@@ -33088,14 +33173,19 @@ window.addEventListener('load',()=>{
   function mapDocRowsV2(rows){
     return (rows||[])
       .filter(r=>(r.id||r.ID) && !isProposalRowV2(r))
-      .map(r=>({
-        id:r.id||r.ID||'',
-        grupo:r.grupo||r.Grupo||'',
-        texto:r.texto||r.Requisito||r.requisito||'',
-        opciones:splitOptionsV2(r.opciones||r.Opciones||''),
-        normaDefault:r.normaDefault||r.Norma||r.norma||'',
-        correccionDefault:r.correccionDefault||r.Correccion||r.correccion||''
-      }));
+      .map(r=>{
+        const grupo=r.grupo||r.Grupo||'';
+        const opcionesCSV=splitOptionsV2(r.opciones||r.Opciones||'');
+        const esComplementario=normV2(grupo).includes('REQUISITOS COMPLEMENTARIOS');
+        return {
+          id:r.id||r.ID||'',
+          grupo,
+          texto:r.texto||r.Requisito||r.requisito||'',
+          opciones:esComplementario?['Cumple','No Cumple','No Aplica']:opcionesCSV,
+          normaDefault:r.normaDefault||r.Norma||r.norma||'',
+          correccionDefault:r.correccionDefault||r.Correccion||r.correccion||''
+        };
+      });
   }
   function mapProposalRowsV2(rows){
     return (rows||[])
@@ -33111,7 +33201,7 @@ window.addEventListener('load',()=>{
           nivel:Number(r.nivel||r.Nivel)||1,
           grupo:r.grupo||r.Grupo||'Propuesta arquitectónica',
           texto:r.texto||r.Requisito||r.requisito||'',
-          opciones:isHeading?[]:splitOptionsV2(rawOptions||'Cumple|No Cumple|No Aplica'),
+          opciones:isHeading?[]:['Cumple','No Cumple','No Aplica'],
           normaDefault:r.normaDefault||r.Norma||r.norma||'Ordenanza No. 016-2023',
           correccionDefault:r.correccionDefault||r.Correccion||r.correccion||'',
           seccion:PROPUESTA_SECTION_V2,
@@ -33554,5 +33644,81 @@ window.addEventListener('load',()=>{
 })();
 </script>
 
+<!-- VERSIÓN 6: autoexpansión de notas antes/después de conclusiones -->
+<style>
+  #notaPreConclusionesText,
+  #notaAprobatorioTextoV56,
+  .note-check-v37 textarea,
+  .optional-note-panel textarea{
+    overflow-y:hidden !important;
+    resize:none !important;
+    min-height:72px;
+  }
+</style>
+<script>
+(function(){
+  'use strict';
+  const NOTE_SELECTOR = '#notaPreConclusionesText, #notaAprobatorioTextoV56, .note-check-v37 textarea, .optional-note-panel textarea';
+
+  function autoGrowNoteV6(el){
+    if(!el || el.tagName !== 'TEXTAREA') return;
+    el.style.overflowY='hidden';
+    el.style.height='auto';
+    const minHeight=parseFloat(window.getComputedStyle(el).minHeight)||72;
+    el.style.height=Math.max(el.scrollHeight,minHeight)+'px';
+  }
+
+  function resizeAllNotesV6(root=document){
+    if(root.matches && root.matches(NOTE_SELECTOR)) autoGrowNoteV6(root);
+    if(root.querySelectorAll) root.querySelectorAll(NOTE_SELECTOR).forEach(autoGrowNoteV6);
+  }
+
+  document.addEventListener('input',function(ev){
+    if(ev.target && ev.target.matches && ev.target.matches(NOTE_SELECTOR)){
+      autoGrowNoteV6(ev.target);
+    }
+  },true);
+
+  document.addEventListener('change',function(ev){
+    if(ev.target && ev.target.matches && ev.target.matches(NOTE_SELECTOR)){
+      autoGrowNoteV6(ev.target);
+    }
+  },true);
+
+  document.addEventListener('click',function(){
+    window.setTimeout(()=>resizeAllNotesV6(),40);
+  },true);
+
+  const observer=new MutationObserver(function(mutations){
+    mutations.forEach(function(mutation){
+      mutation.addedNodes.forEach(function(node){
+        if(node && node.nodeType===1) resizeAllNotesV6(node);
+      });
+    });
+  });
+
+  function startV6(){
+    resizeAllNotesV6();
+    observer.observe(document.body,{childList:true,subtree:true});
+    window.setTimeout(()=>resizeAllNotesV6(),250);
+    window.setTimeout(()=>resizeAllNotesV6(),1000);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',startV6,{once:true});
+  else startV6();
+
+  window.addEventListener('resize',()=>resizeAllNotesV6());
+  window.autoGrowNoteV6=autoGrowNoteV6;
+})();
+</script>
+
+
+<!-- VERSIÓN 7: separación estricta entre Requisitos Documentales y Requisitos Propuesta Arquitectónica. -->
+
+<script>
+/* ==========================================================
+   VERSION 9 - Apoderado en Antecedentes de Informes de Observaciones
+   ========================================================== */
+</script>
 </body>
 </html>
