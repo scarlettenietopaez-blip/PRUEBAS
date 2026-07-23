@@ -32078,15 +32078,36 @@ window.addEventListener('load',()=>{
   function isSecondObservationV119X(){
     const raw=String(state?.egob||state?.egobBaseV119||state?.egobBaseV116||'');
     const checkbox=document.getElementById('calc5DiasSubsanacionV55');
-    const activeByForm=typeof obsSegundoActivoV119==='function'
-      ? !!obsSegundoActivoV119()
-      : !!checkbox?.checked;
-    return state?.tipoInforme==='Informe con Observaciones' && (
-      activeByForm ||
-      !!state?.segundaObservacionV116 ||
+    if(state?.tipoInforme!=='Informe con Observaciones') return false;
+    if(checkbox) return !!checkbox.checked;
+    return !!state?.segundaObservacionV116 ||
       !!state?.fechaSubsanacionCincoDias ||
-      /2do\s+Informe\s+(de|con)\s+Observaciones/i.test(raw)
-    );
+      /2do\s+Informe\s+(de|con)\s+Observaciones/i.test(raw);
+  }
+  function syncSecondObservationDeadlineV119X(){
+    if(!isSecondObservationV119X()) return String(state?.fechaSubsanacion||'');
+    const base=String(state?.fechaRevision||document.getElementById('fechaRevision')?.value||'').trim();
+    if(!base || typeof addBusinessDays!=='function') return String(state?.fechaSubsanacion||'');
+    const value=addBusinessDays(base,5);
+    state.fechaSubsanacion=value;
+    state.fechaSubsanacionCincoDias=true;
+    state.fechaSubsanacionManual=false;
+    const input=document.getElementById('fechaSubsanacion');
+    if(input) input.value=value;
+    return value;
+  }
+  function applySecondObservationTermV119X(text){
+    let out=String(text||'');
+    if(!isSecondObservationV119X()) return out;
+    return out
+      .replace(/diez\s*\(\s*10\s*\)\s*d[ií]as\s*h[aá]biles/gi,'cinco (5) días hábiles')
+      .replace(/diez\s*\(\s*10\s*\)\s*d[ií]as\s*laborables/gi,'cinco (5) días laborables')
+      .replace(/diez\s+d[ií]as\s*h[aá]biles/gi,'cinco días hábiles')
+      .replace(/diez\s+d[ií]as\s*laborables/gi,'cinco días laborables')
+      .replace(/10\s*d[ií]as\s*h[aá]biles/gi,'5 días hábiles')
+      .replace(/10\s*d[ií]as\s*laborables/gi,'5 días laborables')
+      .replace(/t[eé]rmino\s+de\s+10\s+d[ií]as/gi,'término de 5 días')
+      .replace(/plazo\s+no\s+mayor\s+a\s+10\s+d[ií]as/gi,'plazo no mayor a 5 días');
   }
   function reportLabelV119X(){
     if(state?.tipoInforme==='Informe de Desistimiento') return 'Informe Técnico de Desistimiento';
@@ -32120,12 +32141,15 @@ window.addEventListener('load',()=>{
   function placeholderDataV119X(){
     const tech=technicianV119X();
     const n=ensureNotificationStateV119X();
+    const deadline=isSecondObservationV119X()
+      ? syncSecondObservationDeadlineV119X()
+      : String(state?.fechaSubsanacion||document.getElementById('fechaSubsanacion')?.value||'');
     return {
       '{{Tipo de Informe}}':reportLabelV119X(),
       '{{Número de EGOB}}':String(state?.egob||''),
       '{{Tipo de Proyecto}}':projectLabelV119X(),
       '{{Propietarios}}':ownersV119X(),
-      '{{Fecha Subsanación}}':longDateV119X(state?.fechaSubsanacion||'',false,false),
+      '{{Fecha Subsanación}}':longDateV119X(deadline,false,false),
       '{{Nombre del Técnico Revisor}}':String(tech?.nombre||state?.tecnico||''),
       '{{Cargo del Técnico Revisor}}':String(tech?.cargo||'TÉCNICO REVISOR'),
       '{{Fecha de hoy}}':longDateV119X(new Date(),true,true),
@@ -32146,12 +32170,12 @@ window.addEventListener('load',()=>{
     const row=templateForV119X(notificationTemplatesV119X);
     return {
       subject:replacePlaceholdersV119X(row.Asunto||row.asunto||''),
-      body:replacePlaceholdersV119X(row.Cuerpo||row.cuerpo||row.Texto_Base||'')
+      body:applySecondObservationTermV119X(replacePlaceholdersV119X(row.Cuerpo||row.cuerpo||row.Texto_Base||''))
     };
   }
   function sientoDataV119X(){
     const row=templateForV119X(sientoTemplatesV119X);
-    let text=replacePlaceholdersV119X(row.Texto_Base||row.Texto||row.texto||'');
+    let text=applySecondObservationTermV119X(replacePlaceholdersV119X(row.Texto_Base||row.Texto||row.texto||''));
     if(allNotificationEmailsV119X().length>1){
       text=text.replace(/al correo electrónico registrado/gi,'a los correos electrónicos registrados');
     }
@@ -32304,15 +32328,9 @@ window.addEventListener('load',()=>{
       document.getElementById('correoNotificacionV119X')?.focus(); return;
     }
     const data=emailDataV119X();
-    const recipients=emails.join(';');
-    const params=new URLSearchParams({
-      to:recipients,
-      subject:data.subject,
-      body:data.body.replace(/\n/g,'\r\n')
-    });
-    const href=`https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
-    const outlookWindow=window.open(href,'_blank','noopener,noreferrer');
-    if(!outlookWindow) window.location.href=href;
+    const recipients=emails.map(email=>encodeURIComponent(email)).join(',');
+    const href=`mailto:${recipients}?subject=${encodeURIComponent(data.subject)}&body=${encodeURIComponent(data.body.replace(/\n/g,'\r\n'))}`;
+    window.location.href=href;
   };
 
   async function loadScriptV119X(url){
@@ -33720,5 +33738,771 @@ window.addEventListener('load',()=>{
    VERSION 9 - Apoderado en Antecedentes de Informes de Observaciones
    ========================================================== */
 </script>
+
+
+<!-- ==========================================================
+     VERSIÓN 12 - SEGUNDA OBSERVACIÓN: PLAZO ÚNICO DE 5 DÍAS LABORABLES
+     Base: VERSIÓN 10.
+     - Fuerza el cálculo de 5 días laborables desde la fecha de revisión.
+     - Sustituye el plazo de 10 por 5 días en Informe, correo y Siento Razón.
+     - Mantiene 10 días cuando Segunda observación está desactivada.
+     ========================================================== -->
+<script>
+(function(){
+  'use strict';
+
+  function isSecondObservationV12(){
+    const cb=document.getElementById('calc5DiasSubsanacionV55');
+    const raw=String(state?.egob||state?.egobBaseV119||state?.egobBaseV116||'');
+    if(state?.tipoInforme!=='Informe con Observaciones') return false;
+    if(cb) return !!cb.checked;
+    return !!state?.segundaObservacionV116 ||
+      !!state?.fechaSubsanacionCincoDias ||
+      /2do\s+Informe\s+(de|con)\s+Observaciones/i.test(raw);
+  }
+
+  function deadlineV12(){
+    const second=isSecondObservationV12();
+    const days=second?5:10;
+    const base=String(state?.fechaRevision||document.getElementById('fechaRevision')?.value||'').trim();
+    if(!base || typeof addBusinessDays!=='function') return String(state?.fechaSubsanacion||'');
+    const value=addBusinessDays(base,days);
+    state.fechaSubsanacion=value;
+    state.fechaSubsanacionCincoDias=second;
+    state.fechaSubsanacionManual=false;
+    state.segundaObservacionV116=second;
+    state.primeraObservacionV119=!second;
+    const input=document.getElementById('fechaSubsanacion');
+    if(input) input.value=value;
+    const help=document.querySelector('#fechaSubsanacionWrap .mini');
+    if(help) help.textContent=`Calcula automáticamente ${days} días laborables`;
+    return value;
+  }
+
+  function replaceSecondObservationTermV12(value){
+    let out=String(value??'');
+    if(!isSecondObservationV12()) return out;
+    return out
+      .replace(/diez\s*\(\s*10\s*\)\s*d[ií]as\s*h[aá]biles/gi,'cinco (5) días hábiles')
+      .replace(/diez\s*\(\s*10\s*\)\s*d[ií]as\s*laborables/gi,'cinco (5) días laborables')
+      .replace(/diez\s+d[ií]as\s*h[aá]biles/gi,'cinco días hábiles')
+      .replace(/diez\s+d[ií]as\s*laborables/gi,'cinco días laborables')
+      .replace(/10\s*d[ií]as\s*h[aá]biles/gi,'5 días hábiles')
+      .replace(/10\s*d[ií]as\s*laborables/gi,'5 días laborables')
+      .replace(/t[eé]rmino\s+de\s+10\s+d[ií]as/gi,'término de 5 días')
+      .replace(/plazo\s+no\s+mayor\s+a\s+10\s+d[ií]as/gi,'plazo no mayor a 5 días');
+  }
+
+  function refreshSecondObservationV12(){
+    deadlineV12();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+    if(typeof window.renderNotificationTabV119X==='function') window.renderNotificationTabV119X();
+  }
+
+  const formatConclusionBaseV12=typeof formatConclusionText==='function'?formatConclusionText:null;
+  if(formatConclusionBaseV12){
+    formatConclusionText=function(text){
+      if(isSecondObservationV12()) deadlineV12();
+      return replaceSecondObservationTermV12(formatConclusionBaseV12.call(this,text));
+    };
+  }
+
+  const replaceTemplateBaseV12=typeof replaceTemplate==='function'?replaceTemplate:null;
+  if(replaceTemplateBaseV12){
+    replaceTemplate=function(text){
+      if(isSecondObservationV12()) deadlineV12();
+      return replaceSecondObservationTermV12(replaceTemplateBaseV12.call(this,text));
+    };
+  }
+
+  const replaceTemplateHtmlBaseV12=typeof replaceTemplateHtml==='function'?replaceTemplateHtml:null;
+  if(replaceTemplateHtmlBaseV12){
+    replaceTemplateHtml=function(text){
+      if(isSecondObservationV12()) deadlineV12();
+      return replaceSecondObservationTermV12(replaceTemplateHtmlBaseV12.call(this,text));
+    };
+  }
+
+  const renderReportBaseV12=typeof renderReport==='function'?renderReport:null;
+  if(renderReportBaseV12){
+    renderReport=function(){
+      if(isSecondObservationV12()) deadlineV12();
+      const result=renderReportBaseV12.apply(this,arguments);
+      const report=document.getElementById('report');
+      if(report && isSecondObservationV12()) report.innerHTML=replaceSecondObservationTermV12(report.innerHTML);
+      return typeof result==='string'?replaceSecondObservationTermV12(result):result;
+    };
+  }
+
+  const applyStateBaseV12=typeof applyStateToUI==='function'?applyStateToUI:null;
+  if(applyStateBaseV12){
+    applyStateToUI=function(){
+      const result=applyStateBaseV12.apply(this,arguments);
+      setTimeout(()=>{
+        if(state?.tipoInforme==='Informe con Observaciones' && isSecondObservationV12()) {
+          refreshSecondObservationV12();
+        }
+      },60);
+      return result;
+    };
+  }
+
+  document.addEventListener('change',function(event){
+    if(event.target?.id==='calc5DiasSubsanacionV55'){
+      setTimeout(refreshSecondObservationV12,0);
+    }
+  },true);
+
+  document.addEventListener('input',function(event){
+    if(event.target?.id==='fechaRevision' && isSecondObservationV12()){
+      setTimeout(refreshSecondObservationV12,0);
+    }
+  },true);
+
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      const cb=document.getElementById('calc5DiasSubsanacionV55');
+      if(cb?.checked || state?.segundaObservacionV116 || state?.fechaSubsanacionCincoDias){
+        refreshSecondObservationV12();
+      }
+    },1700);
+  });
+
+  window.isSecondObservationV12=isSecondObservationV12;
+  window.deadlineV12=deadlineV12;
+})();
+</script>
+
+
+<!-- ==========================================================
+     VERSIÓN 13 - ACTUALIZACIONES INTEGRALES
+     Base funcional: VERSIÓN 12 + apertura de Outlook Web.
+     ========================================================== -->
+<style id="patch-version-13-css">
+/* 1. Conclusión técnica: columna de intervención */
+.editable-conclusion-v13 .tipo-area-v13 select{width:100%;min-width:150px}
+.editable-conclusion-v13 .tipo-area-v13-empty{color:#789;text-align:center;font-size:10px}
+.editable-conclusion-v13 tr.area-total-ampliacion-v13 td{background:#eef5fb;font-weight:800}
+.editable-conclusion-v13 tr.area-total-ampliacion-v13 input,
+.editable-conclusion-v13 tr.area-total-ampliacion-v13 textarea{font-weight:800;background:#f7fbfe!important}
+
+/* 2 y 5. Estudios y factibilidades con evidencia en fila inferior */
+.service-edit-v13{width:100%;border-collapse:collapse;table-layout:fixed}
+.service-edit-v13 th,.service-edit-v13 td{border:1px solid #cbd8e5;padding:6px;vertical-align:top}
+.service-edit-v13 th{background:#e6eef6;color:#0b2b4c;font-size:10px;text-transform:uppercase}
+.service-edit-v13 input,.service-edit-v13 textarea{width:100%;box-sizing:border-box;margin:0}
+.service-edit-v13 .service-evidence-row-v13 td{padding:7px 9px 10px;background:#fbfdff}
+.service-edit-v13 .service-evidence-row-v13 label{display:block;margin:0 0 5px;color:#35516d;font-size:10px;font-weight:800;text-transform:uppercase}
+.service-edit-v13 .service-evidence-row-v13 textarea{min-height:72px;resize:vertical}
+.combined-studies-v13{width:100%;border-collapse:collapse;table-layout:fixed}
+.combined-studies-v13 th,.combined-studies-v13 td{border:1px solid #1f2937;padding:4px 6px;vertical-align:top}
+.combined-studies-v13 th{background:#d9d9d9;color:#111;font-weight:800}
+.combined-studies-v13 .entity-v13{background:#d9d9d9;font-weight:800;vertical-align:middle}
+.combined-studies-v13 .type-v13{font-weight:800}
+.combined-studies-v13 .detail-v13{min-height:22px;white-space:pre-wrap}
+
+/* 3. Búsqueda inversa por Registro Municipal */
+.rm-lookup-v13{margin-top:7px;padding-top:7px;border-top:1px dashed #bed0df}
+.rm-lookup-actions-v13{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.rm-lookup-actions-v13 button{padding:6px 9px;min-height:30px;font-size:10px}
+.rm-lookup-status-v13{font-size:10px;color:#52697e}
+.rm-detail-v13{margin-top:8px;padding:8px 10px;border:1px solid #cbd8e5;border-radius:9px;background:#f8fbfd;font-size:10.5px;line-height:1.4}
+.rm-detail-v13 dl{display:grid;grid-template-columns:minmax(125px,34%) 1fr;gap:4px 8px;margin:0}
+.rm-detail-v13 dt{font-weight:800;color:#183b59}.rm-detail-v13 dd{margin:0;word-break:break-word}
+
+/* 8. Edición de observaciones manuales */
+.manual-edit-v13{display:grid;gap:5px}
+.manual-edit-v13 label{font-size:9px;font-weight:800;color:#486077;text-transform:uppercase}
+.manual-edit-v13 input,.manual-edit-v13 textarea{width:100%;box-sizing:border-box}
+.manual-edit-v13 textarea{min-height:82px;resize:vertical}
+
+/* 10 y 11. Asunto y anexos del desistimiento */
+.asunto-desistimiento-v13,.asunto-desistimiento-vista-v13{display:none;border:1px solid #bdd0e0;border-radius:11px;background:#f7fbfe;padding:11px;margin:12px 0}
+.asunto-desistimiento-v13.visible,.asunto-desistimiento-vista-v13.visible{display:block}
+.asunto-des-title-v13{font-size:12px;font-weight:900;color:#0b2b4c;text-transform:uppercase;margin-bottom:7px}
+.asunto-des-text-v13{padding:9px 10px;border:1px dashed #9bb3ca;border-radius:8px;background:#fff;color:#0b2b4c;font-size:11px;font-weight:800;line-height:1.45;text-transform:uppercase;word-break:break-word}
+.asunto-des-actions-v13{display:flex;justify-content:flex-end;margin-top:8px}
+.asunto-des-vista-head-v13{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
+.asunto-des-vista-head-v13 button{min-height:30px;padding:6px 10px;font-size:10.5px;background:#fff;color:#0b2b4c;border:1px solid #0b2b4c}
+@media(max-width:760px){.service-edit-v13{table-layout:auto}.service-edit-v13{min-width:680px}.rm-detail-v13 dl{grid-template-columns:1fr}.asunto-des-vista-head-v13{align-items:flex-start;flex-direction:column}}
+@media print{.asunto-desistimiento-v13,.asunto-desistimiento-vista-v13{display:none!important}}
+</style>
+
+<script id="patch-version-13-js">
+(function(){
+  'use strict';
+
+  function normV13(value){
+    return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+  }
+  function escV13(value){ return typeof esc==='function'?esc(String(value??'')):String(value??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function rowV13(raw){
+    if(typeof rowConclV108==='function') return rowConclV108(raw||{});
+    if(typeof rowConclV87==='function') return rowConclV87(raw||{});
+    if(typeof normalizeConclusionRow==='function') return normalizeConclusionRow(raw||{});
+    return raw||{};
+  }
+  function syncRowV13(i,row){
+    const old=state.aprobatorio?.conclusion?.[i]||{};
+    const merged={...old,...row};
+    ['_baseKeyV108','_originV108','_baseOrderV108','_roleV108','_roleV104','_userRowV108','_fixedAreaAmpliacionV13','tipoAreaV13'].forEach(k=>{
+      if(old[k]!==undefined && merged[k]===undefined) merged[k]=old[k];
+    });
+    if(typeof syncConclV87==='function') syncConclV87(i,merged);
+    else state.aprobatorio.conclusion[i]=merged;
+  }
+  function projectDefV13(){
+    try{return String(typeof infoValue==='function'?infoValue('PROYECTO DEFINITIVO'):'');}catch(_e){return '';}
+  }
+  function modoAmpModV13(){
+    const value=normV13(projectDefV13());
+    return value.includes('AMPLIACION') || value.includes('MODIFICATORIO') || value.includes('MODIFICATIORIO');
+  }
+  function roleV13(raw,i){
+    const row=rowV13(raw);
+    const d=normV13(row.descripcion||raw?.descripcion||'');
+    if(raw?._fixedAreaAmpliacionV13 || d.includes('AREA TOTAL DE AMPLIACION')) return 'areaAmpliacionTotal';
+    if(typeof roleConclV108==='function'){
+      const role=roleConclV108(raw,i);
+      if(role) return role;
+    }
+    if(typeof conclusionRoleV119N==='function'){
+      const role=conclusionRoleV119N(raw,i);
+      if(role) return role;
+    }
+    if(d.includes('AREA')&&d.includes('BRUTA')&&d.includes('TOTAL')) return 'brutaTotal';
+    if(d.includes('AREA')&&d.includes('BRUTA')) return 'bruta';
+    if(d.includes('AREA')&&d.includes('PREDIO')) return 'predio';
+    if(d.includes('AREA')&&d.includes('UTIL')&&d.includes('PLANTA BAJA')) return 'utilPB';
+    if(d.includes('AREA')&&d.includes('UTIL')&&d.includes('TOTAL')) return 'utilTotal';
+    if(d.includes('COS PB')) return 'cosPB';
+    if(d.includes('COS TOTAL')) return 'cosTotal';
+    return '';
+  }
+  function parseQtyV13(value){
+    if(typeof parseNumeroV119N==='function'){
+      const n=parseNumeroV119N(value); return Number.isFinite(n)?n:0;
+    }
+    return parseFloat(String(value||'').replace(',','.'))||0;
+  }
+  function fmtQtyV13(value){
+    if(!Number.isFinite(value)) return '';
+    return (Math.round(value*100)/100).toFixed(2);
+  }
+  function canLevelsV13(raw,i){
+    if(roleV13(raw,i)!=='bruta') return false;
+    if(typeof canLevelConclV87==='function') return !!canLevelConclV87(i);
+    const row=rowV13(raw);
+    return !!row.allowLevels || Array.isArray(row.levels);
+  }
+  function normalizeAreaTypeV13(value){
+    const v=normV13(value);
+    if(v.includes('AMPLIACION')) return 'Ampliación';
+    if(v.includes('MODIFICACION')) return 'Modificación';
+    return 'Aprobada (Existente)';
+  }
+  function ensureAreaTotalV13(){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+    const arr=state.aprobatorio.conclusion;
+    const indexes=[];
+    arr.forEach((raw,i)=>{if(roleV13(raw,i)==='areaAmpliacionTotal') indexes.push(i);});
+    if(!modoAmpModV13()){
+      for(let j=indexes.length-1;j>=0;j--) arr.splice(indexes[j],1);
+      return;
+    }
+    let idx=indexes[0]??-1;
+    for(let j=indexes.length-1;j>=1;j--) arr.splice(indexes[j],1);
+    if(idx<0){
+      const totalIndex=arr.findIndex((raw,i)=>roleV13(raw,i)==='brutaTotal');
+      const row={descripcion:'ÁREA TOTAL DE AMPLIACIÓN',levels:[],cantidad:'',unidad:'m2',allowLevels:false,_fixedAreaAmpliacionV13:true,_originV108:'custom',_userRowV108:false,_roleV13:'areaAmpliacionTotal'};
+      const at=totalIndex>=0?totalIndex+1:arr.length;
+      arr.splice(at,0,row);
+      idx=at;
+    }
+    arr.forEach((raw,i)=>{
+      if(roleV13(raw,i)==='bruta' && !raw.tipoAreaV13) raw.tipoAreaV13='Aprobada (Existente)';
+    });
+  }
+  function calculateAreasV13(){
+    ensureAreaTotalV13();
+    if(!modoAmpModV13()) return;
+    const arr=state.aprobatorio?.conclusion||[];
+    let brutaTotal=0, areaAmpliacion=0;
+    arr.forEach((raw,i)=>{
+      if(roleV13(raw,i)!=='bruta') return;
+      const row=rowV13(raw);
+      const qty=parseQtyV13(row.cantidad);
+      const type=normalizeAreaTypeV13(raw.tipoAreaV13);
+      raw.tipoAreaV13=type;
+      if(type!=='Modificación') brutaTotal+=qty;
+      if(type==='Ampliación' || type==='Modificación') areaAmpliacion+=qty;
+    });
+    arr.forEach((raw,i)=>{
+      const role=roleV13(raw,i);
+      if(role==='brutaTotal' || role==='areaAmpliacionTotal'){
+        const row=rowV13(raw);
+        row.cantidad=fmtQtyV13(role==='brutaTotal'?brutaTotal:areaAmpliacion);
+        row.unidad=row.unidad||'m2';
+        syncRowV13(i,row);
+        if(role==='areaAmpliacionTotal'){
+          state.aprobatorio.conclusion[i]._fixedAreaAmpliacionV13=true;
+          state.aprobatorio.conclusion[i]._roleV13='areaAmpliacionTotal';
+        }
+      }
+    });
+  }
+  const recalcBaseV13=typeof recalcAreasCOSV36==='function'?recalcAreasCOSV36:null;
+  recalcAreasCOSV36=function(){
+    if(recalcBaseV13) recalcBaseV13.apply(this,arguments);
+    calculateAreasV13();
+  };
+  const syncAutoBaseV13=typeof syncConclusionAutoV145==='function'?syncConclusionAutoV145:null;
+  if(syncAutoBaseV13){
+    syncConclusionAutoV145=function(){
+      const out=syncAutoBaseV13.apply(this,arguments);
+      calculateAreasV13();
+      return out;
+    };
+  }
+  window.updateAreaTypeV13=function(index,value){
+    if(typeof commitAllConclusionInputsV87==='function') try{commitAllConclusionInputsV87();}catch(_e){}
+    const raw=state.aprobatorio?.conclusion?.[index];
+    if(!raw) return;
+    raw.tipoAreaV13=normalizeAreaTypeV13(value);
+    calculateAreasV13();
+    if(typeof renderConclusionTabla==='function') renderConclusionTabla();
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  };
+  function typeCellV13(raw,i,mode){
+    if(!mode) return '';
+    if(!canLevelsV13(raw,i)) return '<td class="tipo-area-v13-empty">—</td>';
+    const selected=normalizeAreaTypeV13(raw.tipoAreaV13);
+    raw.tipoAreaV13=selected;
+    return `<td class="tipo-area-v13"><select onchange="updateAreaTypeV13(${i},this.value)">
+      <option ${selected==='Aprobada (Existente)'?'selected':''}>Aprobada (Existente)</option>
+      <option ${selected==='Ampliación'?'selected':''}>Ampliación</option>
+      <option ${selected==='Modificación'?'selected':''}>Modificación</option>
+    </select></td>`;
+  }
+  renderConclusionTabla=function(){
+    if(window.__CONCLUSION_EDITING_V87__) return;
+    if(typeof prepareRowsConclV108==='function') prepareRowsConclV108();
+    if(typeof ensureAreaUtilTotalConclusionV119N==='function') ensureAreaUtilTotalConclusionV119N();
+    ensureAreaTotalV13();
+    if(typeof syncConclusionAutoV145==='function') syncConclusionAutoV145();
+    if(typeof recalcAreasCOSV36==='function') recalcAreasCOSV36();
+    calculateAreasV13();
+    const cont=document.getElementById('conclusionTabla'); if(!cont) return;
+    const arr=state.aprobatorio?.conclusion||[];
+    const mode=modoAmpModV13();
+    cont.innerHTML=`<div class="conclusion-help-v73">El botón + está en la fila Área Bruta total de construcción y agrega filas arriba de esta.${mode?' Seleccione el tipo de intervención en cada fila de área bruta.':''}</div>
+      <table class="editable-conclusion editable-conclusion-v13 ${mode?'descripcion-editable-v104':''}">
+        <thead><tr><th>Descripción</th><th style="width:17%">Niveles</th>${mode?'<th style="width:19%">Tipo de intervención</th>':''}<th style="width:15%">Cantidad</th><th style="width:11%">Unidad</th><th style="width:14%">Acciones</th></tr></thead>
+        <tbody>${arr.map((raw,i)=>{
+          const row=rowV13(raw); const role=roleV13(raw,i);
+          const fixed=role==='areaAmpliacionTotal';
+          const calculated=fixed || (typeof isCalculatedConclV108==='function'&&isCalculatedConclV108(raw,i));
+          const descReadonly=fixed || (calculated && !mode);
+          const qtyReadonly=calculated;
+          const levels=(!fixed && typeof renderLevelsV87==='function')?renderLevelsV87(row,i):'<td class="levels-edit"></td>';
+          let actions='<td class="row-actions"><span class="no-row-action-v73">—</span></td>';
+          if(!fixed && typeof renderActionsConclV108==='function') actions=renderActionsConclV108(raw,i);
+          const cls=[calculated?'calc-readonly-v37':'',canLevelsV13(raw,i)?'bruta-editable-v73':'',fixed?'area-total-ampliacion-v13':''].filter(Boolean).join(' ');
+          return `<tr class="${cls}"><td><textarea class="concl-edit-v87" data-i="${i}" data-field="descripcion" id="conc_desc_${i}" placeholder="Descripción" ${descReadonly?'readonly':''}>${escV13(row.descripcion)}</textarea></td>${levels}${typeCellV13(raw,i,mode)}<td><input class="concl-edit-v87" data-i="${i}" data-field="cantidad" id="conc_qty_${i}" value="${escV13(row.cantidad)}" placeholder="Cantidad" ${qtyReadonly?'readonly':''}></td><td><input class="concl-edit-v87" data-i="${i}" data-field="unidad" id="conc_unit_${i}" value="${escV13(row.unidad)}" placeholder="Unidad" ${fixed?'readonly':''}></td>${actions}</tr>`;
+        }).join('')}</tbody>
+      </table>
+      <div class="calc-note">${mode?'Área Bruta total suma las áreas brutas excepto las marcadas como Modificación. Área Total de Ampliación suma las filas marcadas como Ampliación o Modificación.':'Área Bruta total = suma de filas con “Bruta”.'}</div>`;
+    if(typeof bindConclusionInputsV87==='function') bindConclusionInputsV87();
+  };
+  const reportRowsBaseV13=typeof conclusionRowsForReportV81==='function'?conclusionRowsForReportV81:null;
+  if(reportRowsBaseV13){
+    conclusionRowsForReportV81=function(){
+      ensureAreaTotalV13(); calculateAreasV13();
+      let rows=reportRowsBaseV13.apply(this,arguments)||[];
+      if(modoAmpModV13() && !rows.some((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal')){
+        const source=(state.aprobatorio?.conclusion||[]).find((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal');
+        if(source){
+          rows=rows.slice();
+          const idx=rows.findIndex((raw,i)=>roleV13(raw,i)==='brutaTotal');
+          rows.splice(idx>=0?idx+1:rows.length,0,source);
+        }
+      }
+      return rows;
+    };
+  }
+  if(typeof sumaAreasBrutasConclusionV119N==='function'){
+    sumaAreasBrutasConclusionV119N=function(){
+      if(typeof commitAllConclusionInputsV87==='function') try{commitAllConclusionInputsV87();}catch(_e){}
+      const rows=state.aprobatorio?.conclusion||[]; let sum=0,count=0;
+      rows.forEach((raw,i)=>{
+        if(roleV13(raw,i)!=='bruta') return;
+        if(modoAmpModV13() && normalizeAreaTypeV13(raw.tipoAreaV13)==='Modificación') return;
+        const n=parseQtyV13(rowV13(raw).cantidad); sum+=n; count++;
+      });
+      return {sum,count};
+    };
+  }
+  function areaAmpliacionV13(){
+    calculateAreasV13();
+    const row=(state.aprobatorio?.conclusion||[]).find((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal');
+    return row?String(rowV13(row).cantidad||''):'';
+  }
+  function replaceAreaConstruirV13(html){
+    if(!modoAmpModV13()) return html;
+    const qty=areaAmpliacionV13(); if(!qty) return html;
+    return String(html||'').replace(/(tiene\s+un\s+área\s+a\s+construir\s+de\s*)(?:<[^>]+>\s*)*[\d.,]+/gi,`$1${escV13(qty)}`);
+  }
+
+  /* 2 y 5. Nombres canónicos y nuevo formato de tablas */
+  function serviceKeyV13(name){
+    const n=normV13(name);
+    if(n.includes('RIOBAMBA')||n.includes('EMAPAR')||n.includes('AGUA POTABLE')) return 'RIOBAMBA-EP';
+    if(n.includes('EERSA')||n.includes('ELECTRICA')) return 'EERSA';
+    if(n.includes('CNT')||n.includes('TELECOMUNIC')) return 'CNT';
+    if(n.includes('BOMBER')) return 'BOMBEROS';
+    return n;
+  }
+  function canonicalRowsV13(source,names){
+    const rows=Array.isArray(source)?source:[];
+    return names.map(name=>{
+      const key=serviceKeyV13(name);
+      const found=rows.find(row=>serviceKeyV13(row?.estudio||row?.empresa||row?.entidad||'')===key);
+      return found?{...found,estudio:name}:{estudio:name,documento:'',fecha:'',evidencia:''};
+    });
+  }
+  ensureEstudiosOMV145=function(){
+    if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();
+    if(!state.aprobatorio) state.aprobatorio={};
+    const current=Array.isArray(state.aprobatorio.estudios)?state.aprobatorio.estudios:[];
+    const extra=Array.isArray(DATA?.estudios)?DATA.estudios.map(r=>({estudio:r.Estudio||r.estudio||r.Entidad||'',documento:r.Documento||r.documento||'',fecha:r.Fecha||r.fecha||'',evidencia:r.Evidencia||r.evidencia||''})):[];
+    state.aprobatorio.estudios=canonicalRowsV13([...current,...extra],['RIOBAMBA-EP','EERSA','CNT','BOMBEROS']);
+    return state.aprobatorio.estudios;
+  };
+  ensureFactibilidadesOMV145=function(){
+    if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();
+    if(!state.aprobatorio) state.aprobatorio={};
+    state.aprobatorio.factibilidadesOMV145=canonicalRowsV13(state.aprobatorio.factibilidadesOMV145||[],['RIOBAMBA-EP','EERSA','CNT']);
+    return state.aprobatorio.factibilidadesOMV145;
+  };
+  ensureAnteFactibilidadesV134=function(){
+    if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();
+    if(!state.aprobatorio) state.aprobatorio={};
+    state.aprobatorio.estudios=canonicalRowsV13(state.aprobatorio.estudios||[],['RIOBAMBA-EP','EERSA','CNT']);
+    return state.aprobatorio.estudios;
+  };
+  function serviceEditTableV13(rows,kind){
+    const updater=kind==='factOM'?'updateFactibilidadOMV145':'updEstudio';
+    return `<div class="service-edit-wrap-v13"><table class="service-edit-v13"><thead><tr><th style="width:22%">ENTIDAD</th><th>DOCUMENTO / TRÁMITE</th><th style="width:18%">FECHA</th></tr></thead><tbody>${rows.map((row,i)=>`<tr><td><input value="${escV13(row.estudio||'')}" readonly></td><td><input value="${escV13(row.documento||'')}" oninput="${updater}(${i},'documento',this)"></td><td><input type="date" value="${escV13(row.fecha||'')}" oninput="${updater}(${i},'fecha',this)"></td></tr><tr class="service-evidence-row-v13"><td colspan="3"><label>Evidencia / detalle</label><textarea oninput="${updater}(${i},'evidencia',this)">${escV13(row.evidencia||'')}</textarea></td></tr>`).join('')}</tbody></table></div>`;
+  }
+  renderEstudiosOMV145=function(){return `<div class="req-estudios-wrapper-v111"><div class="mini">Complete los estudios de ingeniería aprobados por las dependencias competentes.</div>${serviceEditTableV13(ensureEstudiosOMV145(),'study')}</div>`;};
+  renderFactibilidadesOMV145=function(){return `<div class="req-factibilidades-v134"><div class="mini">Registre la factibilidad o el pago correspondiente de cada empresa prestadora del servicio.</div>${serviceEditTableV13(ensureFactibilidadesOMV145(),'factOM')}</div>`;};
+  renderAnteFactibilidadesTableV134=function(){return `<div class="req-factibilidades-v134"><div class="mini">Registre la factibilidad o el pago correspondiente de cada empresa prestadora del servicio.</div>${serviceEditTableV13(ensureAnteFactibilidadesV134(),'factAnte')}</div>`;};
+  renderEstudiosTabla=function(){
+    const box=document.getElementById('estudiosTabla'); if(!box) return;
+    const ante=typeof isAnteproyectoV123==='function'&&isAnteproyectoV123();
+    box.innerHTML=serviceEditTableV13(ante?ensureAnteFactibilidadesV134():ensureEstudiosOMV145(),ante?'factAnte':'study');
+  };
+  function hasServiceDataV13(row){return ['documento','fecha','evidencia'].some(k=>String(row?.[k]||'').trim());}
+  function combinedServiceReportV13(facts,studies,includeStudies=true){
+    const entities=['RIOBAMBA-EP','EERSA','CNT',...(includeStudies?['BOMBEROS']:[])];
+    const groups=[];
+    entities.forEach(entity=>{
+      const entries=[];
+      const fact=(facts||[]).find(r=>serviceKeyV13(r.estudio)===entity); if(fact&&hasServiceDataV13(fact)) entries.push({type:'Factibilidad',row:fact});
+      if(includeStudies){const study=(studies||[]).find(r=>serviceKeyV13(r.estudio)===entity); if(study&&hasServiceDataV13(study)) entries.push({type:'Estudio',row:study});}
+      if(entries.length) groups.push({entity,entries});
+    });
+    if(!groups.length) return '<p>No se registran estudios complementarios ni factibilidades.</p>';
+    return `<table class="informe-table estudios-table combined-studies-v13"><thead><tr><th style="width:23%">ENTIDAD</th><th style="width:18%">TIPO</th><th>DOCUMENTO / TRÁMITE</th><th style="width:18%">FECHA</th></tr></thead><tbody>${groups.map(group=>group.entries.map((entry,j)=>{
+      const entityCell=j===0?`<td class="entity-v13" rowspan="${group.entries.length*2}">${escV13(group.entity)}</td>`:'';
+      const date=entry.row.fecha?(typeof fmtDate==='function'?fmtDate(entry.row.fecha):entry.row.fecha):'';
+      return `<tr>${entityCell}<td class="type-v13">${escV13(entry.type)}</td><td>${escV13(entry.row.documento||'')}</td><td>${escV13(date)}</td></tr><tr><td colspan="3" class="detail-v13">${typeof nl2br==='function'?nl2br(entry.row.evidencia||''):escV13(entry.row.evidencia||'')}</td></tr>`;
+    }).join('')).join('')}</tbody></table>`;
+  }
+  combinedStudiesReportV145=function(){return combinedServiceReportV13(ensureFactibilidadesOMV145(),ensureEstudiosOMV145(),true);};
+  estudiosReport=function(){
+    const ante=typeof isAnteproyectoV123==='function'&&isAnteproyectoV123();
+    return ante?combinedServiceReportV13(ensureAnteFactibilidadesV134(),[],false):combinedStudiesReportV145();
+  };
+  factibilidadesReportV134=function(){return combinedServiceReportV13(ensureAnteFactibilidadesV134(),[],false);};
+
+  /* 3. Búsqueda inversa por Registro Municipal */
+  window.__PROF_RAW_V13__=window.__PROF_RAW_V13__||[];
+  async function loadProfessionalDetailsV13(){
+    try{
+      const text=typeof fetchCSVTextV32==='function'?await fetchCSVTextV32('data/profesionales.csv'):await (await fetch('data/profesionales.csv',{cache:'no-store'})).text();
+      const rows=typeof parseCSVV32==='function'?parseCSVV32(text):[];
+      window.__PROF_RAW_V13__=(rows||[]).filter(r=>typeof activeV32==='function'?activeV32(r):true);
+      (DATA.profesionales||[]).forEach(p=>{
+        const found=window.__PROF_RAW_V13__.find(r=>normV13(r.Nombre||r.Profesional||r.Proyectista||'')===normV13(p.nombre));
+        if(found) p._rawV13=found;
+      });
+    }catch(error){console.warn('V13: no se pudo cargar el detalle de profesionales.',error);}
+  }
+  const loadCSVBaseV13=typeof loadExternalCSVsV32==='function'?loadExternalCSVsV32:null;
+  if(loadCSVBaseV13){loadExternalCSVsV32=async function(){const out=await loadCSVBaseV13.apply(this,arguments);await loadProfessionalDetailsV13();return out;};}
+  function rmKeyV13(value){const digits=String(value||'').replace(/\D/g,'');return digits||normV13(value);}
+  function professionalByRMV13(value){
+    const key=rmKeyV13(value); if(!key) return null;
+    return (DATA.profesionales||[]).find(p=>rmKeyV13(p.registroMunicipal)===key)||null;
+  }
+  function professionalRawV13(p){
+    if(p?._rawV13) return p._rawV13;
+    return (window.__PROF_RAW_V13__||[]).find(r=>normV13(r.Nombre||r.Profesional||r.Proyectista||'')===normV13(p?.nombre||''))||{};
+  }
+  function detailPairsV13(p){
+    if(!p) return [];
+    const raw=professionalRawV13(p); const pairs=[]; const used=new Set();
+    const add=(label,value)=>{const v=String(value??'').trim();const k=normV13(label);if(v&&!used.has(k)){used.add(k);pairs.push([label,v]);}};
+    add('Nombre',p.nombre); add('Registro Municipal',p.registroMunicipal); add('Registro SENESCYT',p.registroSenescyt); add('Título',p.titulo);
+    Object.entries(raw||{}).forEach(([key,value])=>{if(!['ACTIVO','MOSTRAR','ESTADO'].includes(normV13(key))) add(key,value);});
+    return pairs;
+  }
+  function setProfessionalFromRMV13(value,notify=false){
+    const p=professionalByRMV13(value);
+    state.profesionalLookupV13=state.profesionalLookupV13||{visible:false,nombre:''};
+    if(!p){state.profesionalLookupV13.nombre='';renderRMDetailV13();return null;}
+    state.profesionalLookupV13.nombre=p.nombre||'';
+    if(typeof setInfoByLabelV36==='function'){
+      setInfoByLabelV36('PROYECTISTA',p.nombre||'');
+      if(p.registroSenescyt) setInfoByLabelV36('REGISTRO SENESCYT',typeof formatSenescyt==='function'?formatSenescyt(p.registroSenescyt):p.registroSenescyt);
+      if(p.registroMunicipal) setInfoByLabelV36('REGISTRO MUNICIPAL',p.registroMunicipal);
+    }
+    renderRMDetailV13();
+    if(typeof renderReport==='function') renderReport(); if(typeof renderPreview==='function') renderPreview();
+    if(notify&&typeof msg==='function') msg('Registro Municipal encontrado. Se completó el nombre del proyectista.',true);
+    return p;
+  }
+  function renderRMDetailV13(){
+    const wrap=document.getElementById('rmLookupV13'); if(!wrap) return;
+    const field=(DATA.infoFields||[]).find(f=>typeof fieldMeta==='function'&&fieldMeta(f).isRegMun);
+    const input=field?document.getElementById('info_'+field.key):null;
+    const p=professionalByRMV13(input?.value||field&&state.info?.[field.key]||'');
+    const status=wrap.querySelector('.rm-lookup-status-v13'); if(status) status.textContent=p?`Asociado a: ${p.nombre}`:'Sin coincidencia exacta en la base.';
+    const panel=wrap.querySelector('.rm-detail-v13');
+    const visible=!!state.profesionalLookupV13?.visible;
+    if(panel){panel.hidden=!visible;panel.innerHTML=p?`<dl>${detailPairsV13(p).map(([k,v])=>`<dt>${escV13(k)}</dt><dd>${escV13(v)}</dd>`).join('')}</dl>`:'No existe información asociada al número ingresado.';}
+    const btn=wrap.querySelector('button'); if(btn) btn.textContent=visible?'Ocultar información':'Mostrar información';
+  }
+  window.toggleRMDetailV13=function(){state.profesionalLookupV13=state.profesionalLookupV13||{};state.profesionalLookupV13.visible=!state.profesionalLookupV13.visible;renderRMDetailV13();};
+  function enhanceRMFieldV13(){
+    const field=(DATA.infoFields||[]).find(f=>typeof fieldMeta==='function'&&fieldMeta(f).isRegMun); if(!field) return;
+    const input=document.getElementById('info_'+field.key); if(!input) return;
+    const host=input.closest('.field'); if(!host) return;
+    let wrap=document.getElementById('rmLookupV13');
+    if(!wrap){wrap=document.createElement('div');wrap.id='rmLookupV13';wrap.className='rm-lookup-v13';wrap.innerHTML='<div class="rm-lookup-actions-v13"><button type="button" class="secondary" onclick="toggleRMDetailV13()">Mostrar información</button><span class="rm-lookup-status-v13"></span></div><div class="rm-detail-v13" hidden></div>';host.appendChild(wrap);}
+    if(input.dataset.rmBoundV13!=='1'){
+      input.dataset.rmBoundV13='1';
+      input.addEventListener('input',()=>setProfessionalFromRMV13(input.value,false));
+      input.addEventListener('change',()=>setProfessionalFromRMV13(input.value,true));
+      input.addEventListener('blur',()=>setProfessionalFromRMV13(input.value,false));
+    }
+    renderRMDetailV13();
+  }
+  const renderInfoBaseV13=typeof renderInfoForm==='function'?renderInfoForm:null;
+  if(renderInfoBaseV13){renderInfoForm=function(){const out=renderInfoBaseV13.apply(this,arguments);setTimeout(enhanceRMFieldV13,0);return out;};}
+  const handleInfoBaseV13=typeof handleInfoInput==='function'?handleInfoInput:null;
+  if(handleInfoBaseV13){handleInfoInput=function(f,el,meta){const out=handleInfoBaseV13.apply(this,arguments);if(meta?.isProyectista){const p=typeof findProfesionalV36==='function'?findProfesionalV36(el.value):null;if(p){state.profesionalLookupV13={...(state.profesionalLookupV13||{}),nombre:p.nombre};setTimeout(renderRMDetailV13,0);}}if(normV13(f?.label).includes('PROYECTO DEFINITIVO'))setTimeout(()=>{ensureAreaTotalV13();renderConclusionTabla();renderReport();renderPreview();},0);return out;};}
+
+  /* 4. Quitar título del Informe Técnico Aprobatorio */
+  if(typeof reportHeaderAprobatorioV55==='function') reportHeaderAprobatorioV55=function(){return '';};
+  const renderAprBaseV13=typeof renderInformeAprobatorio==='function'?renderInformeAprobatorio:null;
+  if(renderAprBaseV13){
+    renderInformeAprobatorio=function(){
+      calculateAreasV13();
+      let out=renderAprBaseV13.apply(this,arguments);
+      out=String(out||'').replace(/<div class="head">\s*<div class="sub">[^<]*INFORME\s+T[ÉE]CNICO\s+APROBATORIO\s+DE\s+OBRA\s+MAYOR[^<]*<\/div>\s*<\/div>/gi,'');
+      return replaceAreaConstruirV13(out);
+    };
+  }
+
+  /* 6. Bloqueo adicional al copiar asunto sin número */
+  if(typeof window.copiarAsuntoV119Y==='function'){
+    const copySubjectBaseV13=window.copiarAsuntoV119Y;
+    window.copiarAsuntoV119Y=async function(){
+      const value=String(state?.aprobatorio?.asunto?.numero||document.getElementById('numeroAsuntoV119Y')?.value||'').trim();
+      if(!value){if(typeof msg==='function')msg('Complete el Nro. del Informe antes de copiar el asunto.');document.getElementById('numeroAsuntoV119Y')?.focus();return;}
+      return copySubjectBaseV13.apply(this,arguments);
+    };
+  }
+
+  /* 7. Parroquia: usar siempre la opción seleccionada */
+  function parroquiaFieldV13(){return (DATA.infoFields||[]).find(f=>typeof fieldMeta==='function'&&fieldMeta(f).isParroquia)||(DATA.infoFields||[]).find(f=>normV13(f.label)==='PARROQUIA');}
+  function parroquiaValueV13(){const f=parroquiaFieldV13();if(!f)return '';const el=document.getElementById('info_'+f.key);const visible=el&&String(el.value||'').trim();return visible?String(el.value).trim():String(state.info?.[f.key]||'').trim();}
+  const infoValueBaseV13=typeof infoValue==='function'?infoValue:null;
+  if(infoValueBaseV13){infoValue=function(label){if(normV13(label)==='PARROQUIA')return parroquiaValueV13();return infoValueBaseV13.apply(this,arguments);};}
+  const tokenBaseV13=typeof infoValueFromToken==='function'?infoValueFromToken:null;
+  if(tokenBaseV13){infoValueFromToken=function(token){if(normV13(token).includes('PARROQUIA'))return parroquiaValueV13();return tokenBaseV13.apply(this,arguments);};}
+  const placeholderBaseV13=typeof placeholderMap==='function'?placeholderMap:null;
+  if(placeholderBaseV13){placeholderMap=function(){const map=placeholderBaseV13.apply(this,arguments)||{};map.Parroquia=parroquiaValueV13();return map;};}
+
+  /* 8. Observaciones manuales editables */
+  const manualSaveTimersV13=new Map();
+  window.updateManualObservationV13=function(id,field,value){
+    const target=(state.obsSeleccionadas||[]).find(o=>String(o.id)===String(id)); if(!target||!target.manual)return;
+    let val=String(value??''); if(typeof smartInputCase==='function')val=smartInputCase(val);
+    target[field]=val;target.updatedAt=new Date().toISOString();
+    clearTimeout(manualSaveTimersV13.get(id));
+    manualSaveTimersV13.set(id,setTimeout(()=>{if(typeof manualObsPut==='function'&&db)manualObsPut({...target});},450));
+    if(typeof renderReport==='function')renderReport();if(typeof renderPreview==='function')renderPreview();
+  };
+  renderObsSeleccionadas=function(){
+    const box=document.getElementById('obsSeleccionadas');if(!box)return;
+    const rows=typeof combinedObsRows==='function'?combinedObsRows():[];
+    if(!rows.length){box.innerHTML='<p class="mini">Aún no se han seleccionado observaciones y no existen requisitos marcados como No Cumple.</p>';return;}
+    box.innerHTML=`<div class="obs-selected-note-v54">Complete la Observación Específica y agregue una o varias imágenes si aplica. Las observaciones manuales permiten editar también el artículo y su texto.</div><table><thead><tr><th>Nro.</th><th>Artículo</th><th>Texto del artículo</th><th>Observación específica</th><th>Imágenes</th><th>Acciones</th></tr></thead><tbody>${rows.map((o,idx)=>{
+      const obs=typeof obsSpecificV55==='function'?obsSpecificV55(o):(o.observacion||o.correccion||'');
+      const manual=o.source==='obs'&&o.manual;
+      const article=manual?`<div class="manual-edit-v13"><label>Artículo / norma</label><input value="${escV13(o.norma||o.articulo||'')}" oninput="updateManualObservationV13('${escV13(o.id)}','norma',this.value)"></div>`:(typeof articleCellForObsV68==='function'?articleCellForObsV68(o):escV13(o.articulo||o.norma||''));
+      const text=manual?`<div class="manual-edit-v13"><label>Texto del artículo</label><textarea oninput="updateManualObservationV13('${escV13(o.id)}','texto',this.value)">${escV13(o.texto||'')}</textarea></div>`:`<div class="article-preview-v55">${escV13(typeof formatArticleTextV55==='function'?formatArticleTextV55(o.texto||''):o.texto||'')}</div>`;
+      const obsCell=manual?`<div class="manual-edit-v13"><label>Observación específica</label><textarea oninput="updateManualObservationV13('${escV13(o.id)}','observacion',this.value)">${escV13(obs)}</textarea></div>`:(o.source==='req'?`<div class="article-preview-v55">${typeof reqObservationHtmlV62==='function'?reqObservationHtmlV62(obs):escV13(obs)}</div>`:`<textarea placeholder="Escriba la observación específica" oninput="updObsNota('${escV13(o.id)}','${escV13(o.source)}',this.value)">${escV13(obs)}</textarea>`);
+      const images=typeof obsImageToolsHtmlV113==='function'?obsImageToolsHtmlV113(o):'';
+      const actions=o.source==='obs'?`${typeof starSelectedV59==='function'?starSelectedV59(o):''}<button class="danger" onclick="quitarObs('${escV13(o.id)}')">Quitar</button>`:'<span class="mini">Requisito</span>';
+      return `<tr><td>${idx+1}</td><td>${article}</td><td>${text}</td><td>${obsCell}</td><td class="obs-image-cell-v55">${images}</td><td><div class="obs-action-stack-v59">${actions}</div></td></tr>`;
+    }).join('')}</tbody></table>`;
+  };
+
+  /* 9. Comillas en notas */
+  function fixQuotesV13(value){return String(value??'').replace(/\$quot;?/gi,'"').replace(/&quot;/gi,'"').replace(/&#0*34;/gi,'"');}
+  function sanitizeNotesV13(){
+    if(state.notaPreConclusiones)state.notaPreConclusiones.texto=fixQuotesV13(state.notaPreConclusiones.texto);
+    if(state.aprobatorio?.notaPreConclusiones)state.aprobatorio.notaPreConclusiones.texto=fixQuotesV13(state.aprobatorio.notaPreConclusiones.texto);
+  }
+  if(typeof notaAprobatorioReportV66==='function'){
+    notaAprobatorioReportV66=function(){
+      sanitizeNotesV13();const n=state.aprobatorio?.notaPreConclusiones;
+      if(!n||!n.activo||!String(n.texto||'').trim())return '';
+      return `<h2>Nota</h2><p>${typeof nl2br==='function'?nl2br(n.texto):escV13(n.texto)}</p>`;
+    };
+  }
+  document.addEventListener('input',event=>{
+    if(event.target?.id==='notaPreConclusionesText'){
+      const val=fixQuotesV13(event.target.value);if(val!==event.target.value)event.target.value=val;
+      state.notaPreConclusiones.texto=typeof smartInputCase==='function'?smartInputCase(val):val;
+    }
+    if(event.target?.id==='notaAprobatorioTextoV56'){
+      const val=fixQuotesV13(event.target.value);if(val!==event.target.value)event.target.value=val;
+      if(state.aprobatorio?.notaPreConclusiones)state.aprobatorio.notaPreConclusiones.texto=typeof smartInputCase==='function'?smartInputCase(val):val;
+    }
+  },true);
+
+  /* 10. Anexos también en Desistimiento */
+  function isDesV13(){return state?.tipoInforme==='Informe de Desistimiento';}
+  const renderAnexosBaseV13=typeof window.renderAnexosV163==='function'?window.renderAnexosV163:null;
+  if(renderAnexosBaseV13){
+    window.renderAnexosV163=function(){
+      const out=renderAnexosBaseV13.apply(this,arguments);
+      const box=document.getElementById('anexosBoxV163');
+      const target=isDesV13()?document.getElementById('desistimientoForm'):document.getElementById('aprobatorioForm');
+      if(box&&target&&box.parentNode!==target)target.appendChild(box);
+      if(box){
+        const visible=isDesV13()||state?.tipoInforme==='Informe Técnico Aprobatorio';
+        box.style.display=visible?'':'none';
+        const help=box.querySelector('.anexos-help-v163');if(help)help.textContent='Esta información no forma parte del cuerpo del informe. El resultado y el botón “Copiar anexos” se encuentran en Vista del Informe.';
+      }
+      return out;
+    };
+  }
+  const renderAnexosVistaBaseV13=typeof window.renderAnexosVistaV163==='function'?window.renderAnexosVistaV163:null;
+  if(renderAnexosVistaBaseV13){
+    window.renderAnexosVistaV163=function(){
+      if(!isDesV13())return renderAnexosVistaBaseV13.apply(this,arguments);
+      const real=state.tipoInforme;state.tipoInforme='Informe Técnico Aprobatorio';
+      try{return renderAnexosVistaBaseV13.apply(this,arguments);}finally{state.tipoInforme=real;setTimeout(positionDesistimientoBlocksV13,0);}
+    };
+  }
+
+  /* 11. Asunto para Desistimiento */
+  function projectLabelDesV13(){return typeof isAnteproyectoV123==='function'&&isAnteproyectoV123()?'ANTEPROYECTO DE EDIFICACIÓN':'OBRA MAYOR - PROYECTO DEFINITIVO';}
+  function subjectDesV13(placeholder=false){const egob=String(state?.egob||document.getElementById('egob')?.value||'').trim()||(placeholder?'…':'');return `INFORME TÉCNICO DE DESISTIMIENTO DE ${projectLabelDesV13()} EGOB NRO. ${egob}`.toUpperCase();}
+  async function copyTextV13(text){
+    try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);else throw new Error();}
+    catch(_e){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(_e2){}ta.remove();}
+  }
+  window.copyDesistimientoSubjectV13=async function(){
+    const egob=String(state?.egob||'').trim();if(!egob){if(typeof msg==='function')msg('Complete el Nro. eGOB antes de copiar el asunto.');document.getElementById('egob')?.focus();return;}
+    await copyTextV13(subjectDesV13(false));if(typeof msg==='function')msg('Asunto de desistimiento copiado.',true);
+  };
+  window.renderDesistimientoSubjectV13=function(){
+    const form=document.getElementById('desistimientoForm');if(!form)return;
+    let box=document.getElementById('asuntoDesistimientoV13');
+    if(!box){box=document.createElement('section');box.id='asuntoDesistimientoV13';box.className='asunto-desistimiento-v13 no-print';}
+    box.classList.toggle('visible',isDesV13());
+    box.innerHTML=`<div class="asunto-des-title-v13">ASUNTO</div><div class="asunto-des-text-v13">${escV13(subjectDesV13(true))}</div><div class="asunto-des-actions-v13"><button type="button" onclick="copyDesistimientoSubjectV13()">Copiar asunto</button></div>`;
+    const anexos=document.getElementById('anexosBoxV163');if(anexos&&anexos.parentNode===form)form.insertBefore(box,anexos);else form.appendChild(box);
+  };
+  window.renderDesistimientoSubjectVistaV13=function(){
+    const tab=document.getElementById('tab-vista');if(!tab)return;
+    let box=document.getElementById('asuntoDesistimientoVistaV13');
+    if(!box){box=document.createElement('section');box.id='asuntoDesistimientoVistaV13';box.className='asunto-desistimiento-vista-v13 no-print';tab.appendChild(box);}
+    box.classList.toggle('visible',isDesV13());
+    box.innerHTML=isDesV13()?`<div class="asunto-des-vista-head-v13"><div class="asunto-des-title-v13">ASUNTO</div><button type="button" onclick="copyDesistimientoSubjectV13()">Copiar asunto</button></div><div class="asunto-des-text-v13">${escV13(subjectDesV13(true))}</div>`:'';
+    positionDesistimientoBlocksV13();
+  };
+  window.positionDesistimientoBlocksV13=function(){
+    if(!isDesV13())return;
+    const tab=document.getElementById('tab-vista');if(!tab)return;
+    const subject=document.getElementById('asuntoDesistimientoVistaV13');const annex=document.getElementById('anexosVistaV163');const panel=document.getElementById('copyPanelAprobatorio');const report=tab.querySelector('.report-wrap');
+    if(subject){if(annex&&annex.parentNode===tab)tab.insertBefore(subject,annex);else if(report)tab.insertBefore(subject,report);}
+    if(annex&&report&&annex.parentNode===tab)tab.insertBefore(annex,report);
+    if(panel&&annex&&annex.parentNode===tab){const next=annex.nextSibling;if(next!==panel)tab.insertBefore(panel,next);}
+  };
+  const renderDesBaseV13=typeof renderDesistimientoFormV69==='function'?renderDesistimientoFormV69:null;
+  if(renderDesBaseV13){renderDesistimientoFormV69=function(){const out=renderDesBaseV13.apply(this,arguments);setTimeout(()=>{renderDesistimientoSubjectV13();if(typeof window.renderAnexosV163==='function')window.renderAnexosV163();},0);return out;};}
+
+  /* 12. Abrir Outlook en el navegador */
+  function validEmailV13(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email||'').trim());}
+  window.openInstitutionalMailV119X=function(){
+    if(typeof eligibleV119X==='function'&&!eligibleV119X())return;
+    if(typeof collectTop==='function')collectTop();
+    const emails=typeof allNotificationEmailsV119X==='function'?allNotificationEmailsV119X():[];
+    if(!emails.length||emails.some(e=>!validEmailV13(e))){if(typeof msg==='function')msg('Revise que el correo principal y todos los correos adicionales sean válidos antes de notificar.');document.getElementById('correoNotificacionV119X')?.focus();return;}
+    const data=typeof emailDataV119X==='function'?emailDataV119X():{subject:'',body:''};
+    const params=new URLSearchParams({to:emails.join(';'),subject:data.subject,body:String(data.body||'').replace(/\n/g,'\r\n')});
+    const href=`https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
+    const win=window.open(href,'_blank','noopener,noreferrer');if(!win)window.location.href=href;
+  };
+
+  /* Refuerzos de renderizado y carga */
+  const renderReportBaseFinalV13=typeof renderReport==='function'?renderReport:null;
+  if(renderReportBaseFinalV13){
+    renderReport=function(){
+      sanitizeNotesV13();ensureAreaTotalV13();calculateAreasV13();
+      const out=renderReportBaseFinalV13.apply(this,arguments);
+      const report=document.getElementById('report');if(report&&state?.tipoInforme==='Informe Técnico Aprobatorio')report.innerHTML=replaceAreaConstruirV13(report.innerHTML);
+      setTimeout(()=>{if(typeof window.renderAnexosVistaV163==='function')window.renderAnexosVistaV163();renderDesistimientoSubjectVistaV13();positionDesistimientoBlocksV13();},0);
+      return typeof out==='string'?replaceAreaConstruirV13(out):out;
+    };
+  }
+  const applyStateBaseFinalV13=typeof applyStateToUI==='function'?applyStateToUI:null;
+  if(applyStateBaseFinalV13){applyStateToUI=function(){const out=applyStateBaseFinalV13.apply(this,arguments);setTimeout(()=>{enhanceRMFieldV13();ensureAreaTotalV13();if(typeof renderConclusionTabla==='function')renderConclusionTabla();if(typeof renderDesistimientoFormV69==='function')renderDesistimientoFormV69();renderDesistimientoSubjectVistaV13();},80);return out;};}
+
+  document.addEventListener('change',event=>{
+    const f=(DATA.infoFields||[]).find(x=>normV13(x.label).includes('PROYECTO DEFINITIVO'));
+    if(f&&event.target?.id==='info_'+f.key)setTimeout(()=>{ensureAreaTotalV13();renderConclusionTabla();renderReport();renderPreview();},0);
+  },true);
+
+  window.addEventListener('load',()=>{
+    setTimeout(async()=>{
+      await loadProfessionalDetailsV13();
+      sanitizeNotesV13();ensureAreaTotalV13();calculateAreasV13();enhanceRMFieldV13();
+      if(typeof renderConclusionTabla==='function')renderConclusionTabla();
+      if(typeof renderRequisitosForm==='function')renderRequisitosForm(false);
+      if(typeof renderDesistimientoFormV69==='function')renderDesistimientoFormV69();
+      if(typeof window.renderAnexosV163==='function')window.renderAnexosV163();
+      if(typeof window.renderAnexosVistaV163==='function')window.renderAnexosVistaV163();
+      renderDesistimientoSubjectVistaV13();
+      if(typeof renderReport==='function')renderReport();if(typeof renderPreview==='function')renderPreview();
+    },2100);
+  });
+
+  window.modoAmpModV13=modoAmpModV13;
+  window.calculateAreasV13=calculateAreasV13;
+})();
+</script>
+
 </body>
 </html>
