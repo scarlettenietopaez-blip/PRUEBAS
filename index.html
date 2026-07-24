@@ -32488,7 +32488,7 @@ window.addEventListener('load',()=>{
             <button type="button" class="noti-action-primary-v119x" onclick="openInstitutionalMailV119X()">Notificar</button>
           </div>
           <div class="noti-preview-v119x"><div id="emailSubjectPreviewV119X" class="noti-subject-v119x">Asunto: ${eV119X(email.subject)}</div><div id="emailBodyPreviewV119X">${eV119X(email.body)}</div></div>
-          <div class="noti-note-v119x">El botón NOTIFICAR abre el correo institucional del Municipio en el navegador. Los destinatarios, el asunto y el cuerpo se cargarán automáticamente. Cuando el mensaje sea demasiado extenso para la dirección web, el cuerpo se copiará para pegarlo con Ctrl + V. Adjunte manualmente el informe firmado antes de enviar.</div>
+          <div class="noti-note-v119x">El botón NOTIFICAR abre el correo institucional del Municipio en el navegador con los destinatarios, el asunto y el cuerpo precargados. Como respaldo, el cuerpo también se copia al portapapeles. Adjunte manualmente el informe firmado antes de enviar.</div>
         </section>
         <section class="noti-card-v119x">
           <div class="noti-title-v119x">2. Siento Razón eGOB</div>
@@ -34632,6 +34632,106 @@ window.addEventListener('load',()=>{
 
   window.modoAmpModV13=modoAmpModV13;
   window.calculateAreasV13=calculateAreasV13;
+})();
+</script>
+
+
+<!-- VERSIÓN 17: Cuerpo de la notificación precargado mediante parámetros directos de OWA institucional. -->
+<script>
+(function(){
+  'use strict';
+
+  function cleanMailValueV17(value){
+    return String(value || '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+  }
+  function validMailV17(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanMailValueV17(value));
+  }
+  function notificationEmailsV17(){
+    const values=[];
+    const main=document.getElementById('correoNotificacionV119X');
+    if(main) values.push(main.value);
+    document.querySelectorAll('.extra-email-row-v119x input').forEach(input=>values.push(input.value));
+    const clean=values.map(cleanMailValueV17).filter(Boolean);
+    return [...new Map(clean.map(email=>[email.toLowerCase(),email])).values()];
+  }
+  function notificationContentV17(){
+    const subjectNode=document.getElementById('emailSubjectPreviewV119X');
+    const bodyNode=document.getElementById('emailBodyPreviewV119X');
+    const subject=String(subjectNode?.textContent||'').replace(/^\s*Asunto\s*:\s*/i,'').trim();
+    const body=String(bodyNode?.textContent||'').replace(/\r\n?/g,'\n').trim();
+    return {subject,body};
+  }
+  function copyNotificationBodyV17(text){
+    const value=String(text||'');
+    let copied=false;
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=value;
+      ta.setAttribute('readonly','');
+      ta.style.position='fixed';
+      ta.style.left='-9999px';
+      ta.style.top='0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      copied=!!document.execCommand('copy');
+      ta.remove();
+    }catch(_e){}
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        navigator.clipboard.writeText(value).catch(()=>{});
+        copied=true;
+      }
+    }catch(_e){}
+    return copied;
+  }
+  function institutionalOwaComposeUrlV17(emails,subject,body,includeBody){
+    const owa=new URL('https://maile.gadmriobamba.gob.ec/');
+    owa.searchParams.set('path','/mail/action/compose');
+    owa.searchParams.set('to',emails.join(';'));
+    if(subject)owa.searchParams.set('subject',String(subject));
+    if(includeBody&&body)owa.searchParams.set('body',String(body).replace(/\r?\n/g,'\n'));
+    return owa.toString();
+  }
+
+  window.openInstitutionalMailV119X=function(){
+    if(typeof state!=='undefined'&&state?.tipoInforme!=='Informe con Observaciones')return;
+    const emails=notificationEmailsV17();
+    const invalid=emails.find(email=>!validMailV17(email));
+    if(!emails.length||invalid){
+      if(typeof msg==='function'){
+        msg(invalid?`El correo “${invalid}” no tiene un formato válido.`:'Ingrese al menos un correo electrónico antes de notificar.');
+      }
+      document.getElementById('correoNotificacionV119X')?.focus();
+      return;
+    }
+    const data=notificationContentV17();
+    if(!data.body){
+      if(typeof msg==='function')msg('No se pudo obtener el cuerpo de la notificación. Revise la vista previa del correo.');
+      return;
+    }
+
+    const copied=copyNotificationBodyV17(data.body);
+    const fullHref=institutionalOwaComposeUrlV17(emails,data.subject,data.body,true);
+    const shortHref=institutionalOwaComposeUrlV17(emails,data.subject,'',false);
+    const href=fullHref.length<=3900?fullHref:shortHref;
+    const popup=window.open(href,'_blank');
+    if(popup){try{popup.opener=null;}catch(_e){}}
+    else window.location.href=href;
+
+    if(typeof msg==='function'){
+      if(href===fullHref){
+        msg(copied
+          ?'El correo institucional se abrió con destinatarios, asunto y cuerpo precargados. El cuerpo también quedó copiado como respaldo.'
+          :'El correo institucional se abrió con destinatarios, asunto y cuerpo precargados.',true);
+      }else{
+        msg(copied
+          ?'El mensaje es demasiado extenso para precargarlo de forma segura. El cuerpo fue copiado: péguelo con Ctrl + V.'
+          :'El mensaje es demasiado extenso. Copie el cuerpo desde la vista previa del correo.',true);
+      }
+    }
+  };
 })();
 </script>
 
