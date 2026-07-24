@@ -27070,6 +27070,11 @@ function buildClipboardPayloadV154(){
      3) Copiar asunto de desistimiento solo en Vista del Informe.
      4) Validación de correos desde los campos visibles y Outlook Web.
      ========================================================== -->
+<!-- ==========================================================
+     VERSIÓN 15 - ASUNTO DE DESISTIMIENTO SOLO EN VISTA,
+     OUTLOOK WEB SIN URL EXCESIVA Y NUEVO RÓTULO DE ÁREA.
+     ========================================================== -->
+
 </body></html>`;
   const plain=(clone.innerText||clone.textContent||'').trim();
   return {html,plain};
@@ -32482,7 +32487,7 @@ window.addEventListener('load',()=>{
             <button type="button" class="noti-action-primary-v119x" onclick="openInstitutionalMailV119X()">Notificar</button>
           </div>
           <div class="noti-preview-v119x"><div id="emailSubjectPreviewV119X" class="noti-subject-v119x">Asunto: ${eV119X(email.subject)}</div><div id="emailBodyPreviewV119X">${eV119X(email.body)}</div></div>
-          <div class="noti-note-v119x">El botón NOTIFICAR abre el programa de correo configurado en el equipo. El técnico debe adjuntar manualmente el informe firmado antes de enviar.</div>
+          <div class="noti-note-v119x">El botón NOTIFICAR abre Outlook Web en el navegador. Cuando el mensaje sea muy extenso, el cuerpo se copiará automáticamente para pegarlo con Ctrl + V. Adjunte manualmente el informe firmado antes de enviar.</div>
         </section>
         <section class="noti-card-v119x">
           <div class="noti-title-v119x">2. Siento Razón eGOB</div>
@@ -33927,6 +33932,7 @@ window.addEventListener('load',()=>{
 .manual-edit-v13 textarea{min-height:82px;resize:vertical}
 
 /* 10 y 11. Asunto y anexos del desistimiento */
+.asunto-desistimiento-v13{display:none!important}
 .asunto-desistimiento-v13,.asunto-desistimiento-vista-v13{display:none;border:1px solid #bdd0e0;border-radius:11px;background:#f7fbfe;padding:11px;margin:12px 0}
 .asunto-desistimiento-v13.visible,.asunto-desistimiento-vista-v13.visible{display:block}
 .asunto-des-title-v13{font-size:12px;font-weight:900;color:#0b2b4c;text-transform:uppercase;margin-bottom:7px}
@@ -34028,7 +34034,7 @@ window.addEventListener('load',()=>{
     for(let j=indexes.length-1;j>=0;j--) arr.splice(indexes[j],1);
     const row={
       ...(existing||{}),
-      descripcion:'ÁREA TOTAL DE AMPLIACIÓN',
+      descripcion:'Área Total de Ampliación/Modificación',
       levels:[],
       cantidad:String(existing?.cantidad||''),
       unidad:'m2',
@@ -34137,7 +34143,7 @@ window.addEventListener('load',()=>{
           return `<tr class="${cls}"><td><textarea class="concl-edit-v87" data-i="${i}" data-field="descripcion" id="conc_desc_${i}" placeholder="Descripción" ${descReadonly?'readonly':''}>${escV13(row.descripcion)}</textarea></td>${levels}${typeCellV13(raw,i,mode)}<td><input class="concl-edit-v87" data-i="${i}" data-field="cantidad" id="conc_qty_${i}" value="${escV13(row.cantidad)}" placeholder="Cantidad" ${qtyReadonly?'readonly':''}></td><td><input class="concl-edit-v87" data-i="${i}" data-field="unidad" id="conc_unit_${i}" value="${escV13(row.unidad)}" placeholder="Unidad" ${fixed?'readonly':''}></td>${actions}</tr>`;
         }).join('')}</tbody>
       </table>
-      <div class="calc-note">${mode?'Área Bruta total suma las áreas brutas excepto las marcadas como Modificación. Área Total de Ampliación suma las filas marcadas como Ampliación o Modificación.':'Área Bruta total = suma de filas con “Bruta”.'}</div>`;
+      <div class="calc-note">${mode?'Área Bruta total suma las áreas brutas excepto las marcadas como Modificación. Área Total de Ampliación/Modificación suma las filas marcadas como Ampliación o Modificación.':'Área Bruta total = suma de filas con “Bruta”.'}</div>`;
     if(typeof bindConclusionInputsV87==='function') bindConclusionInputsV87();
   };
   const reportRowsBaseV13=typeof conclusionRowsForReportV81==='function'?conclusionRowsForReportV81:null;
@@ -34458,15 +34464,11 @@ window.addEventListener('load',()=>{
     await copyTextV13(subjectDesV13(false));if(typeof msg==='function')msg('Asunto de desistimiento copiado.',true);
   };
   window.renderDesistimientoSubjectV13=function(){
-    const form=document.getElementById('desistimientoForm');if(!form)return;
-    let box=document.getElementById('asuntoDesistimientoV13');
-    if(!box){box=document.createElement('section');box.id='asuntoDesistimientoV13';box.className='asunto-desistimiento-v13 no-print';}
-    box.classList.toggle('visible',isDesV13());
-    /* V14: en la pestaña Desistimiento se visualiza el asunto, pero el botón
-       para copiar queda exclusivamente en Vista del Informe. */
-    box.innerHTML=`<div class="asunto-des-title-v13">ASUNTO</div><div class="asunto-des-text-v13">${escV13(subjectDesV13(true))}</div>`;
-    const anexos=document.getElementById('anexosBoxV163');if(anexos&&anexos.parentNode===form)form.insertBefore(box,anexos);else form.appendChild(box);
+    /* V15: el Asunto de Desistimiento existe únicamente en Vista del Informe. */
+    const box=document.getElementById('asuntoDesistimientoV13');
+    if(box) box.remove();
   };
+
   window.renderDesistimientoSubjectVistaV13=function(){
     const tab=document.getElementById('tab-vista');if(!tab)return;
     let box=document.getElementById('asuntoDesistimientoVistaV13');
@@ -34517,6 +34519,37 @@ window.addEventListener('load',()=>{
       body:String(bodyNode?.textContent||'').trim()
     };
   }
+  function copyNotificationBodyV15(text){
+    const value=String(text||'');
+    let copied=false;
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=value;
+      ta.setAttribute('readonly','');
+      ta.style.position='fixed';
+      ta.style.left='-9999px';
+      ta.style.top='0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      copied=!!document.execCommand('copy');
+      ta.remove();
+    }catch(_e){}
+    try{
+      if(navigator.clipboard&&window.isSecureContext){
+        navigator.clipboard.writeText(value).catch(()=>{});
+        copied=true;
+      }
+    }catch(_e){}
+    return copied;
+  }
+  function openOutlookUrlV15(href,popup){
+    if(popup){
+      try{popup.opener=null;}catch(_e){}
+      try{popup.location.replace(href);return;}catch(_e){}
+    }
+    window.location.href=href;
+  }
   window.openInstitutionalMailV119X=function(){
     if(state?.tipoInforme!=='Informe con Observaciones')return;
     const emails=emailsFromNotificationUIV14();
@@ -34527,10 +34560,31 @@ window.addEventListener('load',()=>{
       return;
     }
     const data=notificationContentFromUIV14();
-    const params=new URLSearchParams({to:emails.join(';'),subject:data.subject,body:String(data.body||'').replace(/\n/g,'\r\n')});
-    const href=`https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
-    const win=window.open(href,'_blank','noopener,noreferrer');
-    if(!win)window.location.href=href;
+    const base='https://outlook.office.com/mail/deeplink/compose?';
+    const shortParams=new URLSearchParams({to:emails.join(';'),subject:data.subject});
+    const fullParams=new URLSearchParams({to:emails.join(';'),subject:data.subject,body:String(data.body||'').replace(/\n/g,'\r\n')});
+    const shortHref=base+shortParams.toString();
+    const fullHref=base+fullParams.toString();
+
+    /* Microsoft puede rechazar el inicio de sesión cuando la cadena de consulta
+       contiene el cuerpo completo y supera su límite. En ese caso se abre una
+       redacción corta y se copia el cuerpo para pegarlo con Ctrl+V. */
+    if(fullHref.length<=1800){
+      const popup=window.open(fullHref,'_blank');
+      if(popup){try{popup.opener=null;}catch(_e){}}
+      else window.location.href=fullHref;
+      return;
+    }
+
+    const popup=window.open('about:blank','_blank');
+    const copied=copyNotificationBodyV15(data.body);
+    openOutlookUrlV15(shortHref,popup);
+    if(typeof msg==='function'){
+      msg(copied
+        ?'Outlook Web se abrió con destinatarios y asunto. El cuerpo de la notificación fue copiado: péguelo con Ctrl + V y adjunte el informe firmado.'
+        :'Outlook Web se abrió con destinatarios y asunto. Copie el cuerpo desde la vista previa y adjunte el informe firmado.',
+        true);
+    }
   };
 
   /* Refuerzos de renderizado y carga */
