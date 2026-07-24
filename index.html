@@ -27075,6 +27075,7 @@ function buildClipboardPayloadV154(){
      OUTLOOK WEB SIN URL EXCESIVA Y NUEVO RÓTULO DE ÁREA.
      ========================================================== -->
 
+<!-- VERSIÓN 16: Notificación mediante Outlook Web institucional de Exchange Server local. -->
 </body></html>`;
   const plain=(clone.innerText||clone.textContent||'').trim();
   return {html,plain};
@@ -32487,7 +32488,7 @@ window.addEventListener('load',()=>{
             <button type="button" class="noti-action-primary-v119x" onclick="openInstitutionalMailV119X()">Notificar</button>
           </div>
           <div class="noti-preview-v119x"><div id="emailSubjectPreviewV119X" class="noti-subject-v119x">Asunto: ${eV119X(email.subject)}</div><div id="emailBodyPreviewV119X">${eV119X(email.body)}</div></div>
-          <div class="noti-note-v119x">El botón NOTIFICAR abre Outlook Web en el navegador. Cuando el mensaje sea muy extenso, el cuerpo se copiará automáticamente para pegarlo con Ctrl + V. Adjunte manualmente el informe firmado antes de enviar.</div>
+          <div class="noti-note-v119x">El botón NOTIFICAR abre el correo institucional del Municipio en el navegador. Los destinatarios, el asunto y el cuerpo se cargarán automáticamente. Cuando el mensaje sea demasiado extenso para la dirección web, el cuerpo se copiará para pegarlo con Ctrl + V. Adjunte manualmente el informe firmado antes de enviar.</div>
         </section>
         <section class="noti-card-v119x">
           <div class="noti-title-v119x">2. Siento Razón eGOB</div>
@@ -34488,7 +34489,7 @@ window.addEventListener('load',()=>{
   const renderDesBaseV13=typeof renderDesistimientoFormV69==='function'?renderDesistimientoFormV69:null;
   if(renderDesBaseV13){renderDesistimientoFormV69=function(){const out=renderDesBaseV13.apply(this,arguments);setTimeout(()=>{renderDesistimientoSubjectV13();if(typeof window.renderAnexosV163==='function')window.renderAnexosV163();},0);return out;};}
 
-  /* 12. Abrir Outlook en el navegador */
+  /* 12. Abrir el correo institucional del Municipio en el navegador */
   function cleanEmailV14(email){
     return String(email||'')
       .replace(/^mailto:/i,'')
@@ -34543,12 +34544,24 @@ window.addEventListener('load',()=>{
     }catch(_e){}
     return copied;
   }
-  function openOutlookUrlV15(href,popup){
+  function openInstitutionalOwaUrlV16(href,popup){
     if(popup){
       try{popup.opener=null;}catch(_e){}
       try{popup.location.replace(href);return;}catch(_e){}
     }
     window.location.href=href;
+  }
+  function institutionalOwaComposeUrlV16(emails,subject,body,includeBody=true){
+    /* Microsoft documenta para Exchange Server local el endpoint:
+       https://servidor/?path=/mail/action/compose&mailtouri=<mailto> */
+    const mailtoParams=new URLSearchParams();
+    if(subject) mailtoParams.set('subject',String(subject));
+    if(includeBody&&body) mailtoParams.set('body',String(body).replace(/\r?\n/g,'\r\n'));
+    const mailto=`mailto:${emails.join(';')}${mailtoParams.toString()?`?${mailtoParams.toString()}`:''}`;
+    const owa=new URL('https://maile.gadmriobamba.gob.ec/');
+    owa.searchParams.set('path','/mail/action/compose');
+    owa.searchParams.set('mailtouri',mailto);
+    return owa.toString();
   }
   window.openInstitutionalMailV119X=function(){
     if(state?.tipoInforme!=='Informe con Observaciones')return;
@@ -34560,16 +34573,13 @@ window.addEventListener('load',()=>{
       return;
     }
     const data=notificationContentFromUIV14();
-    const base='https://outlook.office.com/mail/deeplink/compose?';
-    const shortParams=new URLSearchParams({to:emails.join(';'),subject:data.subject});
-    const fullParams=new URLSearchParams({to:emails.join(';'),subject:data.subject,body:String(data.body||'').replace(/\n/g,'\r\n')});
-    const shortHref=base+shortParams.toString();
-    const fullHref=base+fullParams.toString();
+    const fullHref=institutionalOwaComposeUrlV16(emails,data.subject,data.body,true);
+    const shortHref=institutionalOwaComposeUrlV16(emails,data.subject,'',false);
 
-    /* Microsoft puede rechazar el inicio de sesión cuando la cadena de consulta
-       contiene el cuerpo completo y supera su límite. En ese caso se abre una
-       redacción corta y se copia el cuerpo para pegarlo con Ctrl+V. */
-    if(fullHref.length<=1800){
+    /* Se intenta precargar el cuerpo completo. Para mensajes cuyo enlace
+       supere un tamaño seguro, se abre la redacción con destinatarios y asunto
+       y se copia el cuerpo para evitar errores del servidor al iniciar sesión. */
+    if(fullHref.length<=1900){
       const popup=window.open(fullHref,'_blank');
       if(popup){try{popup.opener=null;}catch(_e){}}
       else window.location.href=fullHref;
@@ -34578,11 +34588,11 @@ window.addEventListener('load',()=>{
 
     const popup=window.open('about:blank','_blank');
     const copied=copyNotificationBodyV15(data.body);
-    openOutlookUrlV15(shortHref,popup);
+    openInstitutionalOwaUrlV16(shortHref,popup);
     if(typeof msg==='function'){
       msg(copied
-        ?'Outlook Web se abrió con destinatarios y asunto. El cuerpo de la notificación fue copiado: péguelo con Ctrl + V y adjunte el informe firmado.'
-        :'Outlook Web se abrió con destinatarios y asunto. Copie el cuerpo desde la vista previa y adjunte el informe firmado.',
+        ?'El correo institucional se abrió con destinatarios y asunto. El cuerpo de la notificación fue copiado: péguelo con Ctrl + V y adjunte el informe firmado.'
+        :'El correo institucional se abrió con destinatarios y asunto. Copie el cuerpo desde la vista previa y adjunte el informe firmado.',
         true);
     }
   };
