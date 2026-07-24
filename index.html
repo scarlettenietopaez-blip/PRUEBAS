@@ -27061,6 +27061,15 @@ function buildClipboardPayloadV154(){
      - REQ_043 Estudio Morfológico registrado oficialmente en requisitos.csv.
      - No modifica Resultado / detalle.
      ========================================================== -->
+
+
+<!-- ==========================================================
+     VERSIÓN 14 - AJUSTES DE ÁREA, ASUNTO Y NOTIFICACIÓN
+     1) Área Total de Ampliación después de Área Bruta total.
+     2) Unidad m2 en el texto del área a construir.
+     3) Copiar asunto de desistimiento solo en Vista del Informe.
+     4) Validación de correos desde los campos visibles y Outlook Web.
+     ========================================================== -->
 </body></html>`;
   const plain=(clone.innerText||clone.textContent||'').trim();
   return {html,plain};
@@ -34012,15 +34021,27 @@ window.addEventListener('load',()=>{
       for(let j=indexes.length-1;j>=0;j--) arr.splice(indexes[j],1);
       return;
     }
-    let idx=indexes[0]??-1;
-    for(let j=indexes.length-1;j>=1;j--) arr.splice(indexes[j],1);
-    if(idx<0){
-      const totalIndex=arr.findIndex((raw,i)=>roleV13(raw,i)==='brutaTotal');
-      const row={descripcion:'ÁREA TOTAL DE AMPLIACIÓN',levels:[],cantidad:'',unidad:'m2',allowLevels:false,_fixedAreaAmpliacionV13:true,_originV108:'custom',_userRowV108:false,_roleV13:'areaAmpliacionTotal'};
-      const at=totalIndex>=0?totalIndex+1:arr.length;
-      arr.splice(at,0,row);
-      idx=at;
-    }
+
+    /* V14: conservar una sola fila y ubicarla SIEMPRE inmediatamente
+       después de Área Bruta total de construcción. */
+    const existing=indexes.length?arr[indexes[0]]:null;
+    for(let j=indexes.length-1;j>=0;j--) arr.splice(indexes[j],1);
+    const row={
+      ...(existing||{}),
+      descripcion:'ÁREA TOTAL DE AMPLIACIÓN',
+      levels:[],
+      cantidad:String(existing?.cantidad||''),
+      unidad:'m2',
+      allowLevels:false,
+      _fixedAreaAmpliacionV13:true,
+      _originV108:'custom',
+      _userRowV108:false,
+      _roleV13:'areaAmpliacionTotal'
+    };
+    const totalIndex=arr.findIndex((raw,i)=>roleV13(raw,i)==='brutaTotal');
+    const at=totalIndex>=0?totalIndex+1:arr.length;
+    arr.splice(at,0,row);
+
     arr.forEach((raw,i)=>{
       if(roleV13(raw,i)==='bruta' && !raw.tipoAreaV13) raw.tipoAreaV13='Aprobada (Existente)';
     });
@@ -34110,7 +34131,9 @@ window.addEventListener('load',()=>{
           const levels=(!fixed && typeof renderLevelsV87==='function')?renderLevelsV87(row,i):'<td class="levels-edit"></td>';
           let actions='<td class="row-actions"><span class="no-row-action-v73">—</span></td>';
           if(!fixed && typeof renderActionsConclV108==='function') actions=renderActionsConclV108(raw,i);
-          const cls=[calculated?'calc-readonly-v37':'',canLevelsV13(raw,i)?'bruta-editable-v73':'',fixed?'area-total-ampliacion-v13':''].filter(Boolean).join(' ');
+          /* V14: la fila Área Total de Ampliación usa el mismo formato visual
+             de las demás filas totales calculadas. */
+          const cls=[calculated?'calc-readonly-v37':'',canLevelsV13(raw,i)?'bruta-editable-v73':''].filter(Boolean).join(' ');
           return `<tr class="${cls}"><td><textarea class="concl-edit-v87" data-i="${i}" data-field="descripcion" id="conc_desc_${i}" placeholder="Descripción" ${descReadonly?'readonly':''}>${escV13(row.descripcion)}</textarea></td>${levels}${typeCellV13(raw,i,mode)}<td><input class="concl-edit-v87" data-i="${i}" data-field="cantidad" id="conc_qty_${i}" value="${escV13(row.cantidad)}" placeholder="Cantidad" ${qtyReadonly?'readonly':''}></td><td><input class="concl-edit-v87" data-i="${i}" data-field="unidad" id="conc_unit_${i}" value="${escV13(row.unidad)}" placeholder="Unidad" ${fixed?'readonly':''}></td>${actions}</tr>`;
         }).join('')}</tbody>
       </table>
@@ -34121,14 +34144,15 @@ window.addEventListener('load',()=>{
   if(reportRowsBaseV13){
     conclusionRowsForReportV81=function(){
       ensureAreaTotalV13(); calculateAreasV13();
-      let rows=reportRowsBaseV13.apply(this,arguments)||[];
-      if(modoAmpModV13() && !rows.some((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal')){
-        const source=(state.aprobatorio?.conclusion||[]).find((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal');
-        if(source){
-          rows=rows.slice();
-          const idx=rows.findIndex((raw,i)=>roleV13(raw,i)==='brutaTotal');
-          rows.splice(idx>=0?idx+1:rows.length,0,source);
-        }
+      let rows=(reportRowsBaseV13.apply(this,arguments)||[]).slice();
+      /* V14: evitar que rutinas anteriores reubiquen la fila calculada. */
+      const fromRows=rows.find((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal');
+      const fromState=(state.aprobatorio?.conclusion||[]).find((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal');
+      const source=fromRows||fromState;
+      rows=rows.filter((raw,i)=>roleV13(raw,i)!=='areaAmpliacionTotal');
+      if(modoAmpModV13()&&source){
+        const idx=rows.findIndex((raw,i)=>roleV13(raw,i)==='brutaTotal');
+        rows.splice(idx>=0?idx+1:rows.length,0,source);
       }
       return rows;
     };
@@ -34151,9 +34175,16 @@ window.addEventListener('load',()=>{
     return row?String(rowV13(row).cantidad||''):'';
   }
   function replaceAreaConstruirV13(html){
-    if(!modoAmpModV13()) return html;
-    const qty=areaAmpliacionV13(); if(!qty) return html;
-    return String(html||'').replace(/(tiene\s+un\s+área\s+a\s+construir\s+de\s*)(?:<[^>]+>\s*)*[\d.,]+/gi,`$1${escV13(qty)}`);
+    let result=String(html||'');
+    if(modoAmpModV13()){
+      const qty=areaAmpliacionV13();
+      if(qty){
+        result=result.replace(/(tiene\s+un\s+área\s+a\s+construir\s+de\s*)(?:<[^>]+>\s*)*[\d.,]+/gi,`$1${escV13(qty)}`);
+      }
+    }
+    /* V14: en la conclusión aprobatoria el área siempre debe mostrar su unidad. */
+    result=result.replace(/(tiene\s+un\s+área\s+a\s+construir\s+de\s*(?:<[^>]+>\s*)*[\d.,]+(?=\s|<|,|;|$))(?!\s*(?:m2|m²))/gi,'$1 m2');
+    return result;
   }
 
   /* 2 y 5. Nombres canónicos y nuevo formato de tablas */
@@ -34431,7 +34462,9 @@ window.addEventListener('load',()=>{
     let box=document.getElementById('asuntoDesistimientoV13');
     if(!box){box=document.createElement('section');box.id='asuntoDesistimientoV13';box.className='asunto-desistimiento-v13 no-print';}
     box.classList.toggle('visible',isDesV13());
-    box.innerHTML=`<div class="asunto-des-title-v13">ASUNTO</div><div class="asunto-des-text-v13">${escV13(subjectDesV13(true))}</div><div class="asunto-des-actions-v13"><button type="button" onclick="copyDesistimientoSubjectV13()">Copiar asunto</button></div>`;
+    /* V14: en la pestaña Desistimiento se visualiza el asunto, pero el botón
+       para copiar queda exclusivamente en Vista del Informe. */
+    box.innerHTML=`<div class="asunto-des-title-v13">ASUNTO</div><div class="asunto-des-text-v13">${escV13(subjectDesV13(true))}</div>`;
     const anexos=document.getElementById('anexosBoxV163');if(anexos&&anexos.parentNode===form)form.insertBefore(box,anexos);else form.appendChild(box);
   };
   window.renderDesistimientoSubjectVistaV13=function(){
@@ -34454,16 +34487,50 @@ window.addEventListener('load',()=>{
   if(renderDesBaseV13){renderDesistimientoFormV69=function(){const out=renderDesBaseV13.apply(this,arguments);setTimeout(()=>{renderDesistimientoSubjectV13();if(typeof window.renderAnexosV163==='function')window.renderAnexosV163();},0);return out;};}
 
   /* 12. Abrir Outlook en el navegador */
-  function validEmailV13(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email||'').trim());}
+  function cleanEmailV14(email){
+    return String(email||'')
+      .replace(/^mailto:/i,'')
+      .replace(/[\u200B-\u200D\u2060\uFEFF]/g,'')
+      .replace(/\s+/g,'')
+      .trim();
+  }
+  function validEmailV13(email){return /^[^@<>(),;:\s]+@[^@<>(),;:\s]+\.[^@<>(),;:\s]+$/.test(cleanEmailV14(email));}
+  function emailsFromNotificationUIV14(){
+    const inputs=[
+      document.getElementById('correoNotificacionV119X'),
+      ...document.querySelectorAll('.extra-email-row-v119x input[type="email"], .extra-email-row-v119x input')
+    ].filter(Boolean);
+    const values=inputs.flatMap(input=>String(input.value||'').split(/[;,\n]+/)).map(cleanEmailV14).filter(Boolean);
+    const unique=[...new Map(values.map(value=>[value.toLowerCase(),value])).values()];
+    if(state?.notificacionEgob){
+      state.notificacionEgob.correo=unique[0]||'';
+      state.notificacionEgob.correoManual=!!unique[0];
+      state.notificacionEgob.correosAdicionales=unique.slice(1);
+    }
+    return unique;
+  }
+  function notificationContentFromUIV14(){
+    const subjectNode=document.getElementById('emailSubjectPreviewV119X');
+    const bodyNode=document.getElementById('emailBodyPreviewV119X');
+    return {
+      subject:String(subjectNode?.textContent||'').replace(/^\s*Asunto\s*:\s*/i,'').trim(),
+      body:String(bodyNode?.textContent||'').trim()
+    };
+  }
   window.openInstitutionalMailV119X=function(){
-    if(typeof eligibleV119X==='function'&&!eligibleV119X())return;
-    if(typeof collectTop==='function')collectTop();
-    const emails=typeof allNotificationEmailsV119X==='function'?allNotificationEmailsV119X():[];
-    if(!emails.length||emails.some(e=>!validEmailV13(e))){if(typeof msg==='function')msg('Revise que el correo principal y todos los correos adicionales sean válidos antes de notificar.');document.getElementById('correoNotificacionV119X')?.focus();return;}
-    const data=typeof emailDataV119X==='function'?emailDataV119X():{subject:'',body:''};
+    if(state?.tipoInforme!=='Informe con Observaciones')return;
+    const emails=emailsFromNotificationUIV14();
+    const invalid=emails.find(email=>!validEmailV13(email));
+    if(!emails.length||invalid){
+      if(typeof msg==='function')msg(invalid?`El correo “${invalid}” no tiene un formato válido.`:'Ingrese al menos un correo electrónico antes de notificar.');
+      document.getElementById('correoNotificacionV119X')?.focus();
+      return;
+    }
+    const data=notificationContentFromUIV14();
     const params=new URLSearchParams({to:emails.join(';'),subject:data.subject,body:String(data.body||'').replace(/\n/g,'\r\n')});
     const href=`https://outlook.office.com/mail/deeplink/compose?${params.toString()}`;
-    const win=window.open(href,'_blank','noopener,noreferrer');if(!win)window.location.href=href;
+    const win=window.open(href,'_blank','noopener,noreferrer');
+    if(!win)window.location.href=href;
   };
 
   /* Refuerzos de renderizado y carga */
