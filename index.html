@@ -36076,5 +36076,103 @@ textarea.evidencia-text,
 })();
 </script>
 
+
+
+<style>
+/* V53: Factibilidades de Anteproyecto con el mismo formato de Obra Mayor. */
+.report .combined-studies-v13 td.entity-v13{
+  vertical-align:middle !important;
+  text-align:center !important;
+  font-weight:900;
+}
+.report .combined-studies-v13 td.detail-v13{
+  text-align:justify;
+  white-space:pre-wrap;
+}
+</style>
+<script>
+/* ==========================================================
+   VERSIÓN 53
+   1. El tipo de intervención se muestra seguido de la descripción,
+      sin la leyenda "Tipo de intervención:".
+   2. Factibilidades de Anteproyecto usa exactamente la tabla
+      combinada de Obra Mayor: ENTIDAD, TIPO, DOCUMENTO/TRÁMITE,
+      FECHA y evidencia en una fila inferior.
+   ========================================================== */
+(function(){
+  function escV53(value){
+    return typeof esc==='function' ? esc(value) : String(value??'')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function normV53(value){
+    return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+  }
+  function rowV53(raw){
+    return typeof rowV13==='function' ? rowV13(raw) : (raw||{});
+  }
+  function roleV53(raw,index){
+    if(typeof roleV13==='function') return roleV13(raw,index);
+    const d=normV53(rowV53(raw).descripcion||'');
+    if(d.includes('AREA BRUTA TOTAL')) return 'brutaTotal';
+    if(d.includes('AREA TOTAL DE AMPLIACION')||d.includes('AREA TOTAL DE MODIFICACION')) return 'areaAmpliacionTotal';
+    return d.includes('AREA BRUTA') ? 'bruta' : '';
+  }
+  function typeV53(raw){
+    if(typeof normalizeAreaTypeV13==='function') return normalizeAreaTypeV13(raw?.tipoAreaV13);
+    return String(raw?.tipoAreaV13||'').trim();
+  }
+  function modeV53(){
+    return typeof modoAmpModV13==='function' ? modoAmpModV13() : true;
+  }
+
+  window.conclusionReport=function(){
+    if(typeof recalcAreasALLPAV52==='function') recalcAreasALLPAV52();
+    const arr=typeof conclusionRowsForReportV81==='function'
+      ? (conclusionRowsForReportV81()||[])
+      : (window.state?.aprobatorio?.conclusion||[]);
+    if(!arr.length) return '<p>No se registran datos de conclusión técnica.</p>';
+
+    const body=arr.map(function(raw,index){
+      const r=rowV53(raw);
+      const levels=(r.levels||[]).filter(Boolean).map(escV53).join('<br>');
+      const descClass=/TOTAL|NÚMERO DE PISOS|NUMERO DE PISOS|UNIDADES|COS/.test(normV53(r.descripcion||''))?'desc-bold':'';
+      let descripcion=String(r.descripcion||'').trim();
+      if(modeV53() && roleV53(raw,index)==='bruta'){
+        const tipo=typeV53(raw);
+        if(tipo && !normV53(descripcion).endsWith(normV53(tipo))){
+          descripcion=(descripcion+' '+tipo).trim();
+        }
+      }
+      const desc=escV53(descripcion);
+      if(levels){
+        return '<tr><td class="'+descClass+'">'+desc+'</td><td class="level-cell">'+levels+'</td><td class="right">'+escV53(r.cantidad||'')+'</td><td>'+escV53(r.unidad||'')+'</td></tr>';
+      }
+      return '<tr><td colspan="2" class="'+descClass+'">'+desc+'</td><td class="right">'+escV53(r.cantidad||'')+'</td><td>'+escV53(r.unidad||'')+'</td></tr>';
+    }).join('');
+
+    return '<table class="informe-table conclusion-report"><thead><tr><th colspan="2">DESCRIPCIÓN</th><th>CANTIDAD</th><th>UNIDAD</th></tr></thead><tbody>'+body+'</tbody></table>';
+  };
+  try{ conclusionReport=window.conclusionReport; }catch(_e){}
+
+  window.factibilidadesReportV134=function(){
+    const rows=typeof ensureAnteFactibilidadesV134==='function' ? ensureAnteFactibilidadesV134() : [];
+    if(typeof combinedServiceReportV13==='function'){
+      return combinedServiceReportV13(rows,[],false);
+    }
+    return '<p>No se registran factibilidades.</p>';
+  };
+  try{ factibilidadesReportV134=window.factibilidadesReportV134; }catch(_e){}
+
+  /* Refuerzo: algunas versiones llaman estudiosReport() en Anteproyecto. */
+  const estudiosBaseV53=typeof window.estudiosReport==='function' ? window.estudiosReport : null;
+  window.estudiosReport=function(){
+    const ante=typeof isAnteproyectoV123==='function' && isAnteproyectoV123();
+    if(ante) return window.factibilidadesReportV134();
+    return estudiosBaseV53 ? estudiosBaseV53.apply(this,arguments) : '<p>No se registran estudios complementarios.</p>';
+  };
+  try{ estudiosReport=window.estudiosReport; }catch(_e){}
+})();
+</script>
 </body>
 </html>
