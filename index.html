@@ -36245,5 +36245,188 @@ textarea.evidencia-text,
     word-break: normal;
   }
 </style>
+
+
+<!-- ==========================================================
+     ALLPA V56 - Restauración de formatos de tablas del informe
+     Mantiene exclusivamente la alineación izquierda de la tabla
+     2. DETALLE DEL ANTEPROYECTO incorporada en V55.
+     ========================================================== -->
+<style id="allpa-v56-formatos-tablas-css">
+/* 1. INFORMACIÓN GENERAL / RESOLUCIÓN DE ANTEPROYECTO */
+.report.report-aprobatorio table.apr-info-table th,
+.report.report-aprobatorio table.apr-info-table td{
+  text-align:center !important;
+  vertical-align:middle !important;
+  line-height:1.12 !important;
+}
+.report.report-aprobatorio table.apr-info-table .apr-info-label,
+.report.report-aprobatorio table.apr-info-table .apr-info-section{
+  font-weight:900 !important;
+  text-transform:uppercase !important;
+}
+
+/* CONCLUSIÓN TÉCNICA */
+.report.report-aprobatorio table.conclusion-report th,
+.report.report-aprobatorio table.conclusion-report td{
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+.report.report-aprobatorio table.conclusion-report .right,
+.report.report-aprobatorio table.conclusion-report .level-cell{
+  text-align:center !important;
+}
+
+/* RESOLUCIÓN DE ANTEPROYECTO Y CONSIDERACIONES ESTRUCTURALES */
+.report.report-aprobatorio table.ante-resolution-report-v56 th,
+.report.report-aprobatorio table.ante-resolution-report-v56 td,
+.report.report-aprobatorio table.structural-report-v56 th,
+.report.report-aprobatorio table.structural-report-v56 td{
+  text-align:center !important;
+  vertical-align:middle !important;
+  line-height:1.12 !important;
+}
+.report.report-aprobatorio table.ante-resolution-report-v56 .label-cell,
+.report.report-aprobatorio table.structural-report-v56 .label-cell{
+  font-weight:900 !important;
+  text-transform:uppercase !important;
+}
+
+/* FACTIBILIDADES Y ESTUDIOS COMPLEMENTARIOS */
+.report.report-aprobatorio table.combined-studies-v13 th,
+.report.report-aprobatorio table.combined-studies-v13 td{
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+.report.report-aprobatorio table.combined-studies-v13 td.entity-v13{
+  text-align:center !important;
+  vertical-align:top !important;
+  font-weight:400 !important;
+  padding-top:7px !important;
+}
+.report.report-aprobatorio table.combined-studies-v13 td.type-v13{
+  font-weight:900 !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+.report.report-aprobatorio table.combined-studies-v13 td.detail-v13{
+  text-align:center !important;
+  vertical-align:middle !important;
+  white-space:normal !important;
+}
+
+/* Excepción solicitada: solo esta tabla conserva contenido a la izquierda. */
+.report.report-aprobatorio table.ante-req-report-v52 tbody td{
+  text-align:left !important;
+  vertical-align:top !important;
+}
+.report.report-aprobatorio table.ante-req-report-v52 thead th{
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+</style>
+
+<script id="allpa-v56-formatos-tablas-js">
+(function(){
+  function addClassToFirstTable(html, className){
+    html=String(html||'');
+    if(!html) return html;
+    if(/<table\b[^>]*class=["'][^"']*\b/.test(html)){
+      return html.replace(/<table\b([^>]*?)class=(["'])([^"']*)\2/i,
+        function(_m,before,q,classes){
+          if(new RegExp('(?:^|\\s)'+className+'(?:\\s|$)').test(classes)) return _m;
+          return '<table'+before+'class='+q+(classes+' '+className).trim()+q;
+        });
+    }
+    return html.replace(/<table\b/i,'<table class="'+className+'"');
+  }
+
+  /* Añade clases semánticas sin cambiar la información ni la estructura. */
+  if(typeof window.aprobatorioStructuralTable==='function' && !window.aprobatorioStructuralTable.__v56){
+    const base=window.aprobatorioStructuralTable;
+    const wrapped=function(){ return addClassToFirstTable(base.apply(this,arguments),'structural-report-v56'); };
+    wrapped.__v56=true;
+    window.aprobatorioStructuralTable=wrapped;
+    try{ aprobatorioStructuralTable=wrapped; }catch(_e){}
+  }
+
+  /* La tabla de Resolución de Anteproyecto usa la misma estructura de informe. */
+  ['anteproyectoReportTable','anteproyectoResolutionTable','aprobatorioAnteproyectoTable'].forEach(function(name){
+    const fn=window[name];
+    if(typeof fn==='function' && !fn.__v56){
+      const wrapped=function(){ return addClassToFirstTable(fn.apply(this,arguments),'ante-resolution-report-v56'); };
+      wrapped.__v56=true;
+      window[name]=wrapped;
+      try{ eval(name+'=wrapped'); }catch(_e){}
+    }
+  });
+
+  function styleCell(el, obj){
+    Object.keys(obj).forEach(function(k){ el.style.setProperty(k,obj[k],'important'); });
+  }
+
+  function inlineReportTableFormatsV56(root){
+    if(!root || !root.querySelectorAll) return root;
+    const common={
+      'border':'1px solid #000','padding':'4px 5px','font-family':'Arial,Helvetica,sans-serif',
+      'font-size':'8.5pt','line-height':'1.12','color':'#111'
+    };
+    root.querySelectorAll('table').forEach(function(tbl){
+      tbl.style.setProperty('border-collapse','collapse','important');
+      tbl.style.setProperty('width','100%','important');
+      tbl.style.setProperty('border','1px solid #000','important');
+      tbl.querySelectorAll('th,td').forEach(function(cell){ styleCell(cell,common); });
+
+      if(tbl.classList.contains('apr-info-table') || tbl.classList.contains('conclusion-report') ||
+         tbl.classList.contains('structural-report-v56') || tbl.classList.contains('ante-resolution-report-v56')){
+        tbl.querySelectorAll('th,td').forEach(function(cell){
+          styleCell(cell,{'text-align':'center','vertical-align':'middle'});
+        });
+      }
+
+      if(tbl.classList.contains('combined-studies-v13')){
+        tbl.querySelectorAll('th,td').forEach(function(cell){
+          styleCell(cell,{'text-align':'center','vertical-align':'middle'});
+        });
+        tbl.querySelectorAll('td.type-v13').forEach(function(cell){
+          styleCell(cell,{'font-weight':'900','text-align':'center','vertical-align':'middle'});
+        });
+        tbl.querySelectorAll('td.entity-v13').forEach(function(cell){
+          styleCell(cell,{'text-align':'center','vertical-align':'top','padding-top':'7px'});
+        });
+      }
+
+      if(tbl.classList.contains('ante-req-report-v52')){
+        tbl.querySelectorAll('thead th').forEach(function(cell){
+          styleCell(cell,{'text-align':'center','vertical-align':'middle'});
+        });
+        tbl.querySelectorAll('tbody td').forEach(function(cell){
+          styleCell(cell,{'text-align':'left','vertical-align':'top'});
+        });
+      }
+    });
+    return root;
+  }
+  window.inlineReportTableFormatsV56=inlineReportTableFormatsV56;
+
+  /* Conserva bordes, centrados, anchos y negritas al usar COPIAR. */
+  if(typeof window.buildClipboardPayloadV154==='function' && !window.buildClipboardPayloadV154.__v56){
+    const base=window.buildClipboardPayloadV154;
+    const wrapped=function(){
+      const payload=base.apply(this,arguments);
+      if(!payload || !payload.html) return payload;
+      try{
+        const doc=new DOMParser().parseFromString(payload.html,'text/html');
+        inlineReportTableFormatsV56(doc.body);
+        payload.html='<!DOCTYPE html>'+doc.documentElement.outerHTML;
+      }catch(_e){}
+      return payload;
+    };
+    wrapped.__v56=true;
+    window.buildClipboardPayloadV154=wrapped;
+    try{ buildClipboardPayloadV154=wrapped; }catch(_e){}
+  }
+})();
+</script>
 </body>
 </html>
