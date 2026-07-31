@@ -18097,16 +18097,41 @@ function prepareRowsConclV108(){
   }
 
   const bases=baseRowsV108();
+
+  /* ALLPA V54: una fila de área bruta se identifica por la combinación
+     Descripción + Tipo de intervención. De esta forma pueden coexistir dos
+     filas con la misma descripción cuando una es Aprobada (Existente) y la
+     otra es Ampliación o Modificación. */
+  const typedBaseKeyV54=function(raw){
+    const row=rowConclV108(raw||{});
+    const descKey=normConclV108(row.descripcion || raw?.descripcion || '');
+    const role=roleFromDescV108(row.descripcion || raw?.descripcion || '');
+    if(role==='bruta'){
+      const tipo=typeof normalizeAreaTypeV13==='function'
+        ? normalizeAreaTypeV13(raw?.tipoAreaV13 || row?.tipoAreaV13 || '')
+        : String(raw?.tipoAreaV13 || row?.tipoAreaV13 || '').trim();
+      return descKey+'||TIPO:'+normConclV108(tipo || 'APROBADA (EXISTENTE)');
+    }
+    return descKey;
+  };
+
+  bases.forEach(function(base){
+    base._baseKeyV108=typedBaseKeyV54(base);
+  });
   const baseKeySet=new Set(bases.map(r=>r._baseKeyV108));
   const deleted=deletedKeysAllV108();
 
   // Etiqueta filas actuales. Si ya tenían metadata, se conserva aunque cambie descripción.
   state.aprobatorio.conclusion.forEach((raw,i)=>{
     const row=rowConclV108(raw);
-    if(!raw._baseKeyV108){
-      const key=normConclV108(row.descripcion || raw.descripcion || '');
-      if(baseKeySet.has(key)){
-        raw._baseKeyV108=key;
+    {
+      const typedKey=typedBaseKeyV54(raw);
+      const plainKey=normConclV108(row.descripcion || raw.descripcion || '');
+      if(baseKeySet.has(typedKey)){
+        raw._baseKeyV108=typedKey;
+        raw._originV108='base';
+      }else if(!raw._baseKeyV108 && baseKeySet.has(plainKey)){
+        raw._baseKeyV108=plainKey;
         raw._originV108='base';
       }
     }
@@ -18334,7 +18359,11 @@ if(typeof conclusionRowsForReportV81 === 'function'){
 
     return arr.filter(raw=>{
       if(raw._originV108==='custom') return true;
-      if(raw._baseKeyV108) return activeKeys.has(raw._baseKeyV108);
+      if(raw._baseKeyV108){
+        const fullKey=String(raw._baseKeyV108);
+        const plainKey=fullKey.split('||TIPO:')[0];
+        return activeKeys.has(fullKey) || activeKeys.has(plainKey);
+      }
       const key=normConclV108(rowConclV108(raw).descripcion || '');
       return activeKeys.has(key);
     });
@@ -27090,6 +27119,8 @@ function buildClipboardPayloadV154(){
 <!-- VERSIÓN 19: eliminado el botón Actualizar del buscador de informes guardados. -->
 
 <!-- VERSIÓN 20: eliminado el espacio, línea, nombre y cargo de firma del PDF Siento Razón eGOB. -->
+
+<!-- ALLPA V54: permite descripciones repetidas cuando cambia el Tipo de intervención. -->
 </body></html>`;
   const plain=(clone.innerText||clone.textContent||'').trim();
   return {html,plain};
