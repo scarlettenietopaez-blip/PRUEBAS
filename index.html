@@ -37687,5 +37687,77 @@ textarea.evidencia-text,
 }
 </style>
 
+
+<script id="allpa-dep03-c02-evidencia-persistencia">
+
+(function(){
+  /* DEPURACIÓN 03 CORREGIDA 02
+     Corrige la persistencia de EVIDENCIA / DETALLE en
+     Estudios Complementarios de Obra Mayor. */
+
+  var _updEstudioAntesDep03C02 =
+    (typeof window.updEstudio === 'function')
+      ? window.updEstudio
+      : (typeof updEstudio === 'function' ? updEstudio : null);
+
+  window.updEstudio = function(i, k, elOrValue){
+    /* Documento, fecha y demás campos mantienen la lógica existente. */
+    if(k !== 'evidencia'){
+      if(_updEstudioAntesDep03C02){
+        return _updEstudioAntesDep03C02.apply(this, arguments);
+      }
+      return;
+    }
+
+    var rows = null;
+
+    /* Fuente principal utilizada por la versión actual de Obra Mayor. */
+    if(typeof ensureEstudiosOMV145 === 'function'){
+      try{ rows = ensureEstudiosOMV145(); }catch(_e){}
+    }
+
+    /* Respaldo directo al estado principal. */
+    if(!rows && typeof state !== 'undefined' &&
+       state && state.aprobatorio && Array.isArray(state.aprobatorio.estudios)){
+      rows = state.aprobatorio.estudios;
+    }
+
+    if(!rows || !rows[i]) return;
+
+    var value =
+      (elOrValue && typeof elOrValue === 'object' && 'value' in elOrValue)
+        ? elOrValue.value
+        : String(elOrValue == null ? '' : elOrValue);
+
+    /* MUY IMPORTANTE:
+       se conserva exactamente Mayúsculas/minúsculas y saltos de línea. */
+    rows[i].evidencia = value;
+
+    /* Asegurar que el arreglo utilizado quede enlazado al state real. */
+    if(typeof state !== 'undefined' && state && state.aprobatorio){
+      if(!Array.isArray(state.aprobatorio.estudios)){
+        state.aprobatorio.estudios = rows;
+      }
+      if(state.aprobatorio.estudios[i]){
+        state.aprobatorio.estudios[i].evidencia = value;
+      }
+    }
+
+    /* Actualizar Vista del Informe sin modificar el texto escrito. */
+    if(typeof scheduleReportUpdate === 'function'){
+      try{ scheduleReportUpdate(); }catch(_e){}
+    }else{
+      try{ if(typeof renderReport === 'function') renderReport(); }catch(_e){}
+      try{ if(typeof renderPreview === 'function') renderPreview(); }catch(_e){}
+    }
+
+    return value;
+  };
+
+  /* Mantener también el identificador global histórico si existe. */
+  try{ updEstudio = window.updEstudio; }catch(_e){}
+})();
+
+</script>
 </body>
 </html>
