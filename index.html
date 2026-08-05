@@ -3570,17 +3570,25 @@ main{
 
 
 <style id="allpa-dep03-case-policy">
-/* DEPURACIÓN 03 — Política de mayúsculas por ubicación, no por tipo de informe.
-   Solo estas tablas se presentan en MAYÚSCULAS, incluso con datos antiguos. */
-.report .apr-info-table .apr-info-value,
-.report table.structural-table td,
-.report table.anteproyecto-table td{
+/* DEPURACIÓN 03 CORREGIDA:
+   formulario = conserva texto;
+   Vista/Impresión = MAYÚSCULAS solo en las cuatro tablas autorizadas.
+*/
+.report table.apr-info-table .apr-info-value,
+.report table.apr-info-table .apr-owner-value-v119w,
+#report table.apr-info-table .apr-info-value,
+#report table.apr-info-table .apr-owner-value-v119w,
+#preview table.apr-info-table .apr-info-value,
+#preview table.apr-info-table .apr-owner-value-v119w,
+.report table.structural-table td.data-cell,
+#report table.structural-table td.data-cell,
+#preview table.structural-table td.data-cell{
   text-transform:uppercase!important;
 }
 @media print{
-  .report .apr-info-table .apr-info-value,
-  .report table.structural-table td,
-  .report table.anteproyecto-table td{
+  .report table.apr-info-table .apr-info-value,
+  .report table.apr-info-table .apr-owner-value-v119w,
+  .report table.structural-table td.data-cell{
     text-transform:uppercase!important;
   }
 }
@@ -4602,9 +4610,7 @@ function smartInputCase(v){ return preserveInputCase(v); }
 function normalizeUpperInput(el){ return el; }
 /* Regla nueva: solo las tablas autorizadas transforman el valor a MAYÚSCULAS. */
 function normalizeTableUpperInput(el){
- const pos=typeof el.selectionStart==='number' ? el.selectionStart : null;
- el.value=tableUpper(el.value);
- if(pos!==null){ try{el.setSelectionRange(pos,pos)}catch(e){} }
+ /* Depuración 03 corregida: durante el llenado no se modifica el caso. */
  return el;
 }
 function onlyDigits(v,max=null){ let s=String(v||'').replace(/\D/g,''); if(max) s=s.slice(0,max); return s; }
@@ -5401,7 +5407,7 @@ function findInfoFieldV36(label){
 function setInfoByLabelV36(label,value){
   const f=findInfoFieldV36(label);
   if(!f) return;
-  const normalized=tableUpper(value||'');
+  const normalized=preserveInputCase(value||'');
   state.info[f.key]=normalized;
   const el=document.getElementById('info_'+f.key);
   if(el) el.value=normalized;
@@ -7181,7 +7187,7 @@ function setInfoByFieldLabelV46(label,value,overwrite=true){
   const f=DATA.infoFields.find(x=>{const lab=normTxtV46(x.label||'');return lab===key || lab.includes(key) || key.includes(lab);});
   if(!f) return false;
   if(!overwrite && String(state.info[f.key]||'').trim()) return false;
-  const normalized=tableUpper(value||'');
+  const normalized=preserveInputCase(value||'');
   state.info[f.key]=normalized;
   const el=document.getElementById('info_'+f.key); if(el) el.value=normalized;
   return true;
@@ -37497,5 +37503,189 @@ textarea.evidencia-text,
   }
 }
 </style>
+
+<script id="allpa-dep03-correccion-estudios">
+
+(function(){
+  function dep03Text(v){ return String(v == null ? '' : v).trim(); }
+
+  function dep03Esc(v){
+    if(typeof esc === 'function') return esc(v);
+    return String(v == null ? '' : v).replace(/[&<>"']/g,function(ch){
+      var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+      return map[ch];
+    });
+  }
+
+  function dep03ServiceKey(v){
+    var n=dep03Text(v).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(n.indexOf('EMAPAR')>=0 || n.indexOf('RIOBAMBA')>=0) return 'RIOBAMBA-EP';
+    if(n.indexOf('EERSA')>=0 || n.indexOf('ELECTRICA')>=0) return 'EERSA';
+    if(n.indexOf('CNT')>=0 || n.indexOf('TELECOMUNIC')>=0) return 'CNT';
+    if(n.indexOf('BOMBER')>=0) return 'BOMBEROS';
+    return n.trim();
+  }
+
+  function dep03HasData(row){
+    return ['documento','fecha','evidencia'].some(function(k){
+      return dep03Text(row && row[k]);
+    });
+  }
+
+  function dep03EvidenceHtml(value){
+    var raw=String(value == null ? '' : value);
+    if(!raw.trim()) return '';
+    return dep03Esc(raw).replace(/\r?\n/g,'<br>');
+  }
+
+  window.combinedServiceReportV13=function(facts,studies,includeStudies){
+    if(includeStudies === undefined) includeStudies=true;
+
+    var entities=['RIOBAMBA-EP','EERSA','CNT'];
+    if(includeStudies) entities.push('BOMBEROS');
+
+    var groups=[];
+
+    entities.forEach(function(entity){
+      var entries=[];
+
+      var fact=(facts||[]).find(function(row){
+        return dep03ServiceKey(row && (row.estudio||row.empresa||row.entidad))===entity;
+      });
+      if(fact && dep03HasData(fact)){
+        entries.push({type:'Factibilidad',row:fact});
+      }
+
+      if(includeStudies){
+        var study=(studies||[]).find(function(row){
+          return dep03ServiceKey(row && (row.estudio||row.empresa||row.entidad))===entity;
+        });
+        if(study && dep03HasData(study)){
+          entries.push({type:'Estudio',row:study});
+        }
+      }
+
+      if(entries.length) groups.push({entity:entity,entries:entries});
+    });
+
+    if(!groups.length){
+      return '<p>No se registran estudios complementarios ni factibilidades.</p>';
+    }
+
+    var body=groups.map(function(group){
+      var totalRows=group.entries.reduce(function(sum,entry){
+        var hasEvidence=!!dep03Text(entry.row && entry.row.evidencia);
+        return sum + 1 + (hasEvidence ? 1 : 0);
+      },0);
+
+      var entityPrinted=false;
+
+      return group.entries.map(function(entry){
+        var evidence=dep03Text(entry.row && entry.row.evidencia);
+        var date=(entry.row && entry.row.fecha)
+          ? (typeof fmtDate==='function' ? fmtDate(entry.row.fecha) : entry.row.fecha)
+          : '';
+
+        var entityCell='';
+        if(!entityPrinted){
+          entityCell='<td class="entity-v13" rowspan="'+totalRows+'">'+dep03Esc(group.entity)+'</td>';
+          entityPrinted=true;
+        }
+
+        var main='<tr>'+
+          entityCell+
+          '<td class="type-v13">'+dep03Esc(entry.type)+'</td>'+
+          '<td>'+dep03Esc((entry.row && entry.row.documento)||'')+'</td>'+
+          '<td>'+dep03Esc(date)+'</td>'+
+          '</tr>';
+
+        var detail='';
+        if(evidence){
+          detail='<tr class="service-evidence-report-v03">'+
+            '<td class="detail-label-v03">Evidencia / detalle</td>'+
+            '<td colspan="2" class="detail-v13">'+dep03EvidenceHtml(entry.row.evidencia)+'</td>'+
+            '</tr>';
+        }
+
+        return main+detail;
+      }).join('');
+    }).join('');
+
+    return '<table class="informe-table estudios-table combined-studies-v13">'+
+      '<thead><tr>'+
+      '<th style="width:23%">ENTIDAD</th>'+
+      '<th style="width:18%">TIPO</th>'+
+      '<th>DOCUMENTO / TRÁMITE</th>'+
+      '<th style="width:18%">FECHA</th>'+
+      '</tr></thead><tbody>'+body+'</tbody></table>';
+  };
+
+  window.combinedStudiesReportV145=function(){
+    if(typeof ensureFactibilidadesOMV145!=='function' || typeof ensureEstudiosOMV145!=='function'){
+      return '<p>No se registran estudios complementarios ni factibilidades.</p>';
+    }
+
+    return window.combinedServiceReportV13(
+      ensureFactibilidadesOMV145(),
+      ensureEstudiosOMV145(),
+      true
+    );
+  };
+  try{ combinedStudiesReportV145=window.combinedStudiesReportV145; }catch(_e){}
+
+  window.estudiosReport=function(){
+    var ante=typeof isAnteproyectoV123==='function' && isAnteproyectoV123();
+
+    if(ante && typeof ensureAnteFactibilidadesV134==='function'){
+      return window.combinedServiceReportV13(
+        ensureAnteFactibilidadesV134(),
+        [],
+        false
+      );
+    }
+
+    return window.combinedStudiesReportV145();
+  };
+  try{ estudiosReport=window.estudiosReport; }catch(_e){}
+
+  window.factibilidadesReportV134=function(){
+    if(typeof ensureAnteFactibilidadesV134==='function'){
+      return window.combinedServiceReportV13(
+        ensureAnteFactibilidadesV134(),
+        [],
+        false
+      );
+    }
+    return '<p>No se registran factibilidades.</p>';
+  };
+  try{ factibilidadesReportV134=window.factibilidadesReportV134; }catch(_e){}
+})();
+
+</script>
+
+<style id="allpa-dep03-correccion-estudios-css">
+.report table.combined-studies-v13 td.detail-label-v03,
+#report table.combined-studies-v13 td.detail-label-v03,
+#preview table.combined-studies-v13 td.detail-label-v03{
+  font-weight:700;
+  vertical-align:top;
+}
+.report table.combined-studies-v13 td.detail-v13,
+#report table.combined-studies-v13 td.detail-v13,
+#preview table.combined-studies-v13 td.detail-v13{
+  white-space:normal;
+  text-align:justify;
+  vertical-align:top;
+  text-transform:none!important;
+}
+@media print{
+  .report table.combined-studies-v13 td.detail-v13{
+    white-space:normal;
+    text-align:justify;
+    text-transform:none!important;
+  }
+}
+</style>
+
 </body>
 </html>
