@@ -10453,31 +10453,6 @@ function favoritesForArticleV61(articulo){
   return (getFavoritesV55()||[]).filter(f => favSameArticleV59(f, art));
 }
 
-function useFirstFavoriteByArticleV61(articulo){
-  const favs = favoritesForArticleV61(articulo);
-  if(!favs.length){
-    msg('Este artículo todavía no tiene observaciones favoritas guardadas.');
-    return;
-  }
-  const f = favs[0];
-  const art = findArticleByRefV55(f.articulo);
-  state.obsSeleccionadas.push({
-    id: crypto.randomUUID(),
-    articulo: articleNormLabelV57(art?.Articulo || f.articulo || articulo || ''),
-    texto: formatArticleTextV55(art?.Texto_Articulo || f.texto || ''),
-    observacion: fixTextV58(f.observacion || ''),
-    norma: articleNormLabelV57(art?.Articulo || f.articulo || articulo || ''),
-    source: 'obs',
-    ordenanza: !!art,
-    imagen: ''
-  });
-  renderObsSeleccionadas();
-  renderReport();
-  renderPreview();
-  msg('Observación favorita agregada al informe.', true);
-  const target=document.getElementById('obsSeleccionadas');
-  if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
-}
 
 function useFavoriteV55(id){
   const f=(getFavoritesV55()||[]).find(x=>x.id===id);
