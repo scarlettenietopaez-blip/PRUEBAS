@@ -3568,6 +3568,24 @@ main{
 }
 </style>
 
+
+<style id="allpa-dep03-case-policy">
+/* DEPURACIÓN 03 — Política de mayúsculas por ubicación, no por tipo de informe.
+   Solo estas tablas se presentan en MAYÚSCULAS, incluso con datos antiguos. */
+.report .apr-info-table .apr-info-value,
+.report table.structural-table td,
+.report table.anteproyecto-table td{
+  text-transform:uppercase!important;
+}
+@media print{
+  .report .apr-info-table .apr-info-value,
+  .report table.structural-table td,
+  .report table.anteproyecto-table td{
+    text-transform:uppercase!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -4577,9 +4595,18 @@ function msg(text, ok=false){ const m=document.getElementById('msg'); m.textCont
 function tmplRow(template, id){ return template.find(r=>String(r.ID_Bloque||'').trim()===id) || {}; }
 function cleanMostrar(v){ return String(v||'').trim().toLowerCase(); }
 function upper(v){ return String(v||'').toUpperCase(); }
-function shouldForceUpper(){ return state.tipoInforme!=='Informe Técnico Aprobatorio'; }
-function smartInputCase(v){ return shouldForceUpper()?upper(v):String(v||''); }
-function normalizeUpperInput(el){ if(!shouldForceUpper()) return; const pos=el.selectionStart; el.value=upper(el.value); try{el.setSelectionRange(pos,pos)}catch(e){} }
+function preserveInputCase(v){ return String(v ?? ''); }
+function tableUpper(v){ return upper(String(v ?? '')); }
+function smartInputCase(v){ return preserveInputCase(v); }
+/* Compatibilidad con llamadas históricas: ya NO transforma texto libre. */
+function normalizeUpperInput(el){ return el; }
+/* Regla nueva: solo las tablas autorizadas transforman el valor a MAYÚSCULAS. */
+function normalizeTableUpperInput(el){
+ const pos=typeof el.selectionStart==='number' ? el.selectionStart : null;
+ el.value=tableUpper(el.value);
+ if(pos!==null){ try{el.setSelectionRange(pos,pos)}catch(e){} }
+ return el;
+}
 function onlyDigits(v,max=null){ let s=String(v||'').replace(/\D/g,''); if(max) s=s.slice(0,max); return s; }
 function numVal(v){ return parseFloat(String(v||'').replace(',','.')) || 0; }
 function addBusinessDays(dateStr, days){ if(!dateStr) return ''; const d=new Date(dateStr+'T00:00:00'); let added=0; while(added<days){ d.setDate(d.getDate()+1); const day=d.getDay(); if(day!==0 && day!==6) added++; } return d.toISOString().slice(0,10); }
@@ -4754,8 +4781,8 @@ function handleInfoInput(f,el,meta){
   else if(meta.isX||meta.isY) el.value=formatCoordinate(el.value, meta.isX?6:7);
   else if(meta.isAltura) el.value=onlyDigits(el.value);
   else if(meta.isArea) el.value=formatDecimalFlexible(el.value);
-  else normalizeUpperInput(el);
-  state.info[f.key]=smartInputCase(el.value);
+  else normalizeTableUpperInput(el);
+  state.info[f.key]=el.value;
   if(f.label.toUpperCase().includes('TRÁMITE EGOB')){ state.egob=onlyDigits(el.value); document.getElementById('egob').value=state.egob; state.info[f.key]=state.egob; }
   validateInfoField(f,false); updateAll();
 }
@@ -4843,7 +4870,7 @@ function renderRequisitosForm(rebuild=true){
  document.getElementById('toggleComplementarios').addEventListener('change',e=>{ state.mostrarComplementarios=e.target.checked; renderRequisitosForm(); renderObsSeleccionadas(); renderReport(); renderPreview(); });
  reqs.forEach(req=>{
   const obs=document.getElementById(`req_obs_${req.id}`);
-  obs.addEventListener('input',()=>{ if(shouldForceUpper()) normalizeUpperInput(obs); if(!state.requisitos[req.id]) state.requisitos[req.id]={}; state.requisitos[req.id].observacion=obs.value; renderObsSeleccionadas(); renderReport(); renderPreview(); });
+  obs.addEventListener('input',()=>{ if(!state.requisitos[req.id]) state.requisitos[req.id]={}; state.requisitos[req.id].observacion=obs.value; renderObsSeleccionadas(); renderReport(); renderPreview(); });
  });
 }
 function setReqEstado(id,value,checked){
@@ -5057,7 +5084,7 @@ function renderAprobatorioForm(){
  if(!state.aprobatorio.estudios.length) state.aprobatorio.estudios=(DATA.estudios&&DATA.estudios.length?DATA.estudios.map(r=>({estudio:r.Estudio||r.estudio||'',documento:r.Documento||'',fecha:r.Fecha||'',evidencia:r.Evidencia||''})):['EP-EMAPAR','EERSA','CNT','BOMBEROS'].map(x=>({estudio:x,documento:'',fecha:'',evidencia:''})));
  box.innerHTML=`${anteproyectoPanelHtml()}<div class="section-title">Consideraciones estructurales</div><table class="form-report-table"><tbody><tr><td class="label-cell">DOCUMENTO:</td><td colspan="2"><input id="estDocumento"></td><td class="label-cell center">EGOB</td><td><input id="estEgob"></td></tr><tr><td class="label-cell">TÉCNICO REVISOR:</td><td colspan="4"><input id="estTecnico" list="listaTecnicosEstructurales"></td></tr><tr><td class="label-cell">CRITERIO TÉCNICO:</td><td colspan="4"><select id="estCriterio"><option></option><option>FAVORABLE</option><option>NO FAVORABLE</option></select></td></tr><tr><td class="label-cell">ING. CALCULISTA:</td><td colspan="4"><input id="estCalculista"></td></tr><tr><td class="label-cell">REG. SENESCYT:</td><td colspan="4"><input id="estSenescyt" placeholder="1041-2026-3296002"></td></tr></tbody></table><div class="section-title">Estudios complementarios</div><div id="estudiosTabla"></div><div class="section-title">Conclusión técnica</div><div class="mini">Use el botón + para insertar una fila debajo. En la columna NIVELES, puede agregar niveles específicos solo en esa fila.</div><div id="conclusionTabla"></div><datalist id="listaTecnicosEstructurales">${TECNICOS_ESTRUCTURALES.map(t=>`<option value="${esc(t.trim())}"></option>`).join("")}</datalist>`;
  bindAnteproyectoFields();
- ['Documento','Egob','Tecnico','Criterio','Calculista','Senescyt'].forEach(k=>{ const id='est'+k; const el=document.getElementById(id); if(!el) return; el.value=state.aprobatorio.estructural[k.toLowerCase()]||''; el.addEventListener('input',()=>{ if(k==='Senescyt') el.value=formatSenescyt(el.value); else normalizeUpperInput(el); state.aprobatorio.estructural[k.toLowerCase()]=el.value;  scheduleReportUpdate();}); }); const no=document.getElementById('estCriterioNo'); if(no){ no.value=upper(state.aprobatorio.estructural.criterio||'')==='NO FAVORABLE'?'NO FAVORABLE':''; no.addEventListener('input',()=>{ state.aprobatorio.estructural.criterio=no.value; const fav=document.getElementById('estCriterio'); if(fav && no.value) fav.value=''; scheduleReportUpdate(); }); }
+ ['Documento','Egob','Tecnico','Criterio','Calculista','Senescyt'].forEach(k=>{ const id='est'+k; const el=document.getElementById(id); if(!el) return; el.value=state.aprobatorio.estructural[k.toLowerCase()]||''; el.addEventListener('input',()=>{ if(k==='Senescyt') el.value=formatSenescyt(el.value); else normalizeTableUpperInput(el); state.aprobatorio.estructural[k.toLowerCase()]=el.value;  scheduleReportUpdate();}); }); const no=document.getElementById('estCriterioNo'); if(no){ no.value=upper(state.aprobatorio.estructural.criterio||'')==='NO FAVORABLE'?'NO FAVORABLE':''; no.addEventListener('input',()=>{ state.aprobatorio.estructural.criterio=no.value; const fav=document.getElementById('estCriterio'); if(fav && no.value) fav.value=''; scheduleReportUpdate(); }); }
  renderEstudiosTabla(); renderConclusionTabla();
 }
 function renderEstudiosTabla(){
@@ -5374,9 +5401,10 @@ function findInfoFieldV36(label){
 function setInfoByLabelV36(label,value){
   const f=findInfoFieldV36(label);
   if(!f) return;
-  state.info[f.key]=value||'';
+  const normalized=tableUpper(value||'');
+  state.info[f.key]=normalized;
   const el=document.getElementById('info_'+f.key);
-  if(el) el.value=value||'';
+  if(el) el.value=normalized;
 }
 function getInfoByLabelV36(label){ const f=findInfoFieldV36(label); return f?(state.info[f.key]||''):''; }
 
@@ -7153,8 +7181,9 @@ function setInfoByFieldLabelV46(label,value,overwrite=true){
   const f=DATA.infoFields.find(x=>{const lab=normTxtV46(x.label||'');return lab===key || lab.includes(key) || key.includes(lab);});
   if(!f) return false;
   if(!overwrite && String(state.info[f.key]||'').trim()) return false;
-  state.info[f.key]=value||'';
-  const el=document.getElementById('info_'+f.key); if(el) el.value=value||'';
+  const normalized=tableUpper(value||'');
+  state.info[f.key]=normalized;
+  const el=document.getElementById('info_'+f.key); if(el) el.value=normalized;
   return true;
 }
 function getInfoFieldLabelV46(label){
@@ -8211,7 +8240,7 @@ renderRequisitosForm = function(rebuild=true){
  document.getElementById('toggleComplementarios').addEventListener('change',e=>{ state.mostrarComplementarios=e.target.checked; renderRequisitosForm(); renderObsSeleccionadas(); renderReport(); renderPreview(); });
  reqs.forEach(req=>{
   const obs=document.getElementById(`req_obs_${req.id}`);
-  if(obs) obs.addEventListener('input',()=>{ if(shouldForceUpper()) normalizeUpperInput(obs); if(!state.requisitos[req.id]) state.requisitos[req.id]={}; state.requisitos[req.id].observacion=obs.value; renderObsSeleccionadas(); renderReport(); renderPreview(); });
+  if(obs) obs.addEventListener('input',()=>{ if(!state.requisitos[req.id]) state.requisitos[req.id]={}; state.requisitos[req.id].observacion=obs.value; renderObsSeleccionadas(); renderReport(); renderPreview(); });
  });
 };
 </script>
@@ -9274,7 +9303,7 @@ function renderRequisitosForm(rebuild=true){
  if(tog) tog.addEventListener('change',e=>{ state.mostrarComplementarios=e.target.checked; renderRequisitosForm(); renderObsSeleccionadas(); renderReport(); renderPreview(); });
  reqs.forEach(req=>{
   const obs=document.getElementById(`req_obs_${req.id}`);
-  if(obs) obs.addEventListener('input',()=>{ if(shouldForceUpper()) normalizeUpperInput(obs); if(!state.requisitos[req.id]) state.requisitos[req.id]={}; state.requisitos[req.id].observacion=obs.value; renderObsSeleccionadas(); renderReport(); renderPreview(); });
+  if(obs) obs.addEventListener('input',()=>{ if(!state.requisitos[req.id]) state.requisitos[req.id]={}; state.requisitos[req.id].observacion=obs.value; renderObsSeleccionadas(); renderReport(); renderPreview(); });
  });
 }
 
@@ -11492,7 +11521,6 @@ function renderDesistimientoFormV69(){
   });
   const con=document.getElementById('desConclusionesV69');
   if(con) con.addEventListener('input',()=>{
-    if(shouldForceUpper()) normalizeUpperInput(con);
     state.desistimiento.conclusiones=con.value;
     renderReport(); renderPreview();
   });
@@ -11533,10 +11561,7 @@ updateTabsForType = function(){
 };
 
 /* Fechas y mayúsculas */
-const _shouldForceUpper_base_V69 = typeof shouldForceUpper === 'function' ? shouldForceUpper : null;
-shouldForceUpper = function(){
-  return state.tipoInforme !== 'Informe Técnico Aprobatorio';
-};
+
 
 const _updateSideActions_base_V69 = typeof updateSideActions === 'function' ? updateSideActions : null;
 updateSideActions = function(){
@@ -13758,7 +13783,7 @@ updConclusionField = function(i,field,v){
     row.cantidad = raw.trim() === '' ? '' : formatDecimalFlexible(raw);
   }else if(field === 'descripcion'){
     // No redibujar la tabla aquí. Eso causaba que se pierda el foco cada tecla.
-    row.descripcion = (typeof shouldForceUpper === 'function' && shouldForceUpper()) ? raw.toUpperCase() : raw;
+    row.descripcion = raw;
   }else if(field === 'unidad'){
     row.unidad = raw.trim() === '' ? '' : raw;
   }else{
@@ -13879,7 +13904,7 @@ updConclusionField = function(i,field,v){
     // Permite borrar completamente. Si hay valor, mantiene formato flexible.
     row.cantidad = raw.trim() === "" ? "" : formatDecimalFlexible(raw);
   }else if(field === "descripcion"){
-    row.descripcion = (typeof shouldForceUpper === "function" && shouldForceUpper()) ? raw.toUpperCase() : raw;
+    row.descripcion = raw;
   }else if(field === "unidad"){
     row.unidad = raw;
   }else{
@@ -13905,7 +13930,7 @@ updConclusionLevel = function(i,j,v){
 
   const row = normalizeConclusionRowV85(state.aprobatorio.conclusion[i] || {});
   if(!Array.isArray(row.levels)) row.levels = [];
-  row.levels[j] = (typeof shouldForceUpper === "function" && shouldForceUpper()) ? String(v||"").toUpperCase() : String(v||"");
+  row.levels[j] = String(v||"");
   syncConclusionRowV85(i,row);
 };
 
@@ -14110,7 +14135,7 @@ function bindConclusionInputsV86(){
       if(field==='cantidad' && computed) return;
 
       if(field==='descripcion'){
-        row.descripcion = (typeof shouldForceUpper === 'function' && shouldForceUpper()) ? input.value.toUpperCase() : input.value;
+        row.descripcion = input.value;
         if(row.descripcion !== input.value) input.value=row.descripcion;
       }else if(field==='cantidad'){
         row.cantidad = input.value; // sin formatear mientras escribe para permitir borrar y editar libremente
@@ -14119,7 +14144,7 @@ function bindConclusionInputsV86(){
       }else if(field==='level'){
         const j=Number(input.dataset.j);
         if(!Array.isArray(row.levels)) row.levels=[];
-        row.levels[j]=(typeof shouldForceUpper === 'function' && shouldForceUpper()) ? input.value.toUpperCase() : input.value;
+        row.levels[j]=input.value;
         if(row.levels[j] !== input.value) input.value=row.levels[j];
       }
 
@@ -14366,7 +14391,7 @@ function commitConclusionInputV87(input){
   if(computed && (field==='descripcion' || field==='cantidad')) return;
 
   if(field==='descripcion'){
-    val=(typeof shouldForceUpper==='function' && shouldForceUpper()) ? val.toUpperCase() : val;
+    val=val;
     row.descripcion=val;
     input.value=val;
   }else if(field==='cantidad'){
@@ -14377,7 +14402,7 @@ function commitConclusionInputV87(input){
   }else if(field==='level'){
     const j=Number(input.dataset.j);
     if(!Array.isArray(row.levels)) row.levels=[];
-    val=(typeof shouldForceUpper==='function' && shouldForceUpper()) ? val.toUpperCase() : val;
+    val=val;
     row.levels[j]=val;
     input.value=val;
   }
@@ -15869,7 +15894,6 @@ renderRequisitosForm = function(rebuild=true){
   reqs.forEach(req=>{
     const obs=document.getElementById(`req_obs_${req.id}`);
     if(obs) obs.addEventListener('input',()=>{
-      if(shouldForceUpper()) normalizeUpperInput(obs);
       if(!state.requisitos[req.id]) state.requisitos[req.id]={};
       state.requisitos[req.id].observacion=obs.value;
       renderObsSeleccionadas();
@@ -17164,7 +17188,7 @@ commitConclusionInputV87 = function(input){
     const role=conclusionRoleV104(i,row);
     if(role && raw) raw._roleV104=role;
 
-    val=(typeof shouldForceUpper==='function' && shouldForceUpper()) ? val.toUpperCase() : val;
+    val=val;
     row.descripcion=val;
     input.value=val;
   }else if(field==='cantidad'){
@@ -17175,7 +17199,7 @@ commitConclusionInputV87 = function(input){
   }else if(field==='level'){
     const j=Number(input.dataset.j);
     if(!Array.isArray(row.levels)) row.levels=[];
-    val=(typeof shouldForceUpper==='function' && shouldForceUpper()) ? val.toUpperCase() : val;
+    val=val;
     row.levels[j]=val;
     input.value=val;
   }
@@ -18674,7 +18698,6 @@ function bindReqObsV112(reqs){
     if(obs && obs.dataset.boundV112!=='1'){
       obs.dataset.boundV112='1';
       obs.addEventListener('input',()=>{
-        if(typeof shouldForceUpper === 'function' && shouldForceUpper()) normalizeUpperInput(obs);
         if(!state.requisitos[req.id]) state.requisitos[req.id]={};
         state.requisitos[req.id].observacion=obs.value;
         if(typeof renderObsSeleccionadas === 'function') renderObsSeleccionadas();
@@ -25147,7 +25170,6 @@ renderDesistimientoFormV69=function(){
   });
   const con=document.getElementById('desConclusionesV69');
   if(con) con.addEventListener('input',()=>{
-    if(typeof shouldForceUpper==='function' && shouldForceUpper()) normalizeUpperInput(con);
     state.desistimiento.conclusiones=con.value; renderReport(); renderPreview();
   });
 };
@@ -25600,7 +25622,7 @@ bindAnteproyectoFields=function(){
     const el=document.getElementById('ant'+idKey); if(!el) return;
     el.addEventListener('input',()=>{
       if(idKey==='Senescyt') el.value=formatSenescyt(el.value);
-      else normalizeUpperInput(el);
+      else normalizeTableUpperInput(el);
       state.aprobatorio.anteproyecto[stateKey]=el.value;
       renderReport(); renderPreview();
     });
