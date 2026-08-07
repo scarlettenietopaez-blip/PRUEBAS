@@ -3,18 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="./assets/logo-allpa-20264.png?v=1" />
-
-<link rel="shortcut icon"
-      type="image/png"
-      href="./assets/logo-allpa-20264.png?v=1" />
-
-<link rel="apple-touch-icon"
-      href="./assets/logo-allpa-20264.png?v=1" />
-<title>ALLPA - Obras Mayores</title>
+  <title>Generador PHDU · Pruebas Supabase 2099</title>
   <style>
     :root {
       --azul:#17324d; --azul2:#24445f; --rojo:#a71930; --gris:#f3f5f8; --linea:#d8dee8;
@@ -3568,22 +3557,122 @@ main{
 }
 </style>
 
+
+<style id="phdu-asunto-boton-unico-v27">
+/* ASUNTO aprobatorio: únicamente botón de numeración automática. */
+#asuntoAprobatorioV119Y{
+  display:block!important;
+}
+
+#phduNumeroAsuntoHostV26{
+  margin:0;
+  padding:0;
+}
+
+#phduConexionAprobatorioV26{
+  display:block;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+#phduConexionAprobatorioV26 #phduNumberStatus{
+  display:none!important;
+}
+
+#phduConexionAprobatorioV26 #phduTestNumberBtn{
+  display:block;
+  width:100%;
+  min-height:44px;
+  margin:0!important;
+  padding:10px 14px;
+}
+
+#numeroAsuntoV119Y{
+  display:none!important;
+  pointer-events:none!important;
+}
+
+@media print{
+  #phduConexionAprobatorioV26{
+    display:none!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
 <div id="passwordOverlay" class="password-overlay">
-  <div class="password-box">
-    <h2>Bienvenido a ALLPA</h2>
-    <p>Ingrese la contraseña para continuar.</p>
-    <input id="appPasswordInput" type="password" placeholder="Contraseña" autocomplete="current-password">
-    <button class="success" style="width:100%;margin-top:12px" onclick="unlockAppV36()">Ingresar</button>
-    <div id="passwordErrorV36" class="password-error">Contraseña incorrecta.</div>
+  <div class="password-box phdu-login-box">
+    <div class="phdu-login-kicker">GADMR · PHDU · SUPABASE</div>
+    <h2>Acceso institucional al Generador</h2>
+    <p>
+      Inicie sesión con el usuario PHDU autorizado. La numeración oficial de 2026
+      permanece bloqueada en esta versión.
+    </p>
+
+    <div class="field">
+      <label for="phduEmail">Correo</label>
+      <input id="phduEmail" type="email" autocomplete="username"
+             placeholder="correo@ejemplo.com">
+    </div>
+
+    <div class="field">
+      <label for="phduPassword">Contraseña</label>
+      <input id="phduPassword" type="password" autocomplete="current-password"
+             placeholder="Contraseña">
+    </div>
+
+    <button id="phduLoginBtn" class="success" style="width:100%;margin-top:6px"
+            type="button" onclick="loginSupabasePHDU()">
+      Iniciar sesión
+    </button>
+
+    <div id="phduLoginStatus" class="phdu-login-status">
+      Pendiente de iniciar sesión.
+    </div>
+
+    <div class="phdu-login-safety">
+      Prueba segura: solo puede asignar números del año ficticio 2099.
+    </div>
   </div>
 </div>
 
 <header class="no-print">
-  <h1>ALLPA</h1>
+  <h1>GENERADOR LOCAL DE INFORMES</h1>
   <p><br><span id="dataSourceStatus">Fuente de datos: verificando CSV...</span></p>
+  <div style="
+      display:inline-flex;
+      margin-top:10px;
+      padding:5px 10px;
+      border-radius:999px;
+      background:#fff3cd;
+      color:#664d03;
+      border:1px solid #ffda6a;
+      font-size:11px;
+      font-weight:900;
+      letter-spacing:.04em;">
+    PÁGINA DE PRUEBAS · NUMERACIÓN BLOQUEADA A 2099
+  </div>
+
+
+  <div id="phduSessionBar" class="phdu-session-bar">
+    <div>
+      <strong id="phduSessionName">Supabase: sesión no iniciada</strong>
+      <span id="phduSessionMeta">La numeración oficial está bloqueada.</span>
+    </div>
+    <div class="phdu-session-actions">
+      <span id="phduOfficialSequences">2026: pendiente de consulta</span>
+      <button id="phduLogoutBtn" type="button" class="secondary"
+              onclick="logoutSupabasePHDU()" disabled>
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
 </header>
 
 
@@ -18097,41 +18186,16 @@ function prepareRowsConclV108(){
   }
 
   const bases=baseRowsV108();
-
-  /* ALLPA V54: una fila de área bruta se identifica por la combinación
-     Descripción + Tipo de intervención. De esta forma pueden coexistir dos
-     filas con la misma descripción cuando una es Aprobada (Existente) y la
-     otra es Ampliación o Modificación. */
-  const typedBaseKeyV54=function(raw){
-    const row=rowConclV108(raw||{});
-    const descKey=normConclV108(row.descripcion || raw?.descripcion || '');
-    const role=roleFromDescV108(row.descripcion || raw?.descripcion || '');
-    if(role==='bruta'){
-      const tipo=typeof normalizeAreaTypeV13==='function'
-        ? normalizeAreaTypeV13(raw?.tipoAreaV13 || row?.tipoAreaV13 || '')
-        : String(raw?.tipoAreaV13 || row?.tipoAreaV13 || '').trim();
-      return descKey+'||TIPO:'+normConclV108(tipo || 'APROBADA (EXISTENTE)');
-    }
-    return descKey;
-  };
-
-  bases.forEach(function(base){
-    base._baseKeyV108=typedBaseKeyV54(base);
-  });
   const baseKeySet=new Set(bases.map(r=>r._baseKeyV108));
   const deleted=deletedKeysAllV108();
 
   // Etiqueta filas actuales. Si ya tenían metadata, se conserva aunque cambie descripción.
   state.aprobatorio.conclusion.forEach((raw,i)=>{
     const row=rowConclV108(raw);
-    {
-      const typedKey=typedBaseKeyV54(raw);
-      const plainKey=normConclV108(row.descripcion || raw.descripcion || '');
-      if(baseKeySet.has(typedKey)){
-        raw._baseKeyV108=typedKey;
-        raw._originV108='base';
-      }else if(!raw._baseKeyV108 && baseKeySet.has(plainKey)){
-        raw._baseKeyV108=plainKey;
+    if(!raw._baseKeyV108){
+      const key=normConclV108(row.descripcion || raw.descripcion || '');
+      if(baseKeySet.has(key)){
+        raw._baseKeyV108=key;
         raw._originV108='base';
       }
     }
@@ -18359,11 +18423,7 @@ if(typeof conclusionRowsForReportV81 === 'function'){
 
     return arr.filter(raw=>{
       if(raw._originV108==='custom') return true;
-      if(raw._baseKeyV108){
-        const fullKey=String(raw._baseKeyV108);
-        const plainKey=fullKey.split('||TIPO:')[0];
-        return activeKeys.has(fullKey) || activeKeys.has(plainKey);
-      }
+      if(raw._baseKeyV108) return activeKeys.has(raw._baseKeyV108);
       const key=normConclV108(rowConclV108(raw).descripcion || '');
       return activeKeys.has(key);
     });
@@ -27119,8 +27179,6 @@ function buildClipboardPayloadV154(){
 <!-- VERSIÓN 19: eliminado el botón Actualizar del buscador de informes guardados. -->
 
 <!-- VERSIÓN 20: eliminado el espacio, línea, nombre y cargo de firma del PDF Siento Razón eGOB. -->
-
-<!-- ALLPA V54: permite descripciones repetidas cuando cambia el Tipo de intervención. -->
 </body></html>`;
   const plain=(clone.innerText||clone.textContent||'').trim();
   return {html,plain};
@@ -27825,7 +27883,281 @@ function buildClipboardPayloadV154(){
     th,.apr-info-label,.apr-info-section,.label-cell,.study-cell{font-weight:900!important;}
     span,b,strong,p,div,li{background:transparent!important;text-shadow:none!important;box-shadow:none!important;}
   `;
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style></head><body>${clone.outerHTML}
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}</style>
+
+<!-- PHDU · SUPABASE 2099 · PÁGINA DE PRUEBAS -->
+<style id="phdu-supabase-integration-styles">
+.phdu-login-box{
+  border-top-color:#18794e!important;
+}
+.phdu-login-kicker{
+  color:#0b4f78;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+  margin-bottom:8px;
+}
+.phdu-login-status{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:#eaf4fb;
+  color:#17324a;
+  font-size:12px;
+  line-height:1.4;
+}
+.phdu-login-status.ok{
+  background:#e8f7ef;
+  color:#18794e;
+}
+.phdu-login-status.error{
+  background:#fff0f2;
+  color:#9b1c31;
+}
+.phdu-login-safety{
+  margin-top:10px;
+  padding:9px 10px;
+  border-left:4px solid #d79b00;
+  background:#fff7dc;
+  color:#654400;
+  font-size:11px;
+  line-height:1.35;
+}
+.phdu-session-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:14px;
+  padding:10px 12px;
+  border:1px solid rgba(255,255,255,.26);
+  border-radius:12px;
+  background:rgba(255,255,255,.09);
+}
+.phdu-session-bar>div:first-child{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.phdu-session-bar strong{
+  font-size:12px;
+}
+.phdu-session-bar span{
+  color:#dbe7f2;
+  font-size:11px;
+}
+.phdu-session-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.phdu-session-actions button{
+  font-size:10px;
+  padding:6px 9px;
+}
+.phdu-number-card{
+  border-top:4px solid #18794e;
+}
+.phdu-number-status{
+  border-radius:10px;
+  padding:10px;
+  background:#eef4fa;
+  color:#17324a;
+  font-size:12px;
+  line-height:1.4;
+}
+.phdu-number-status.ok{
+  background:#e8f7ef;
+  color:#18794e;
+}
+.phdu-number-status.error{
+  background:#fff0f2;
+  color:#9b1c31;
+}
+.phdu-number-status.warning{
+  background:#fff7dc;
+  color:#654400;
+}
+.phdu-number-safety{
+  margin-top:9px;
+  color:#667085;
+  font-size:10.5px;
+  line-height:1.35;
+}
+#phduTestNumberBtn:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+@media(max-width:780px){
+  .phdu-session-bar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .phdu-session-actions{
+    justify-content:flex-start;
+  }
+}
+@media print{
+  #phduSessionBar,
+  #supabaseNumberPanelPHDU,
+  #passwordOverlay{
+    display:none!important;
+  }
+}
+</style>
+<style>
+/* ==========================================================
+   PHDU · BOTÓN DE PRUEBA SIEMPRE VISIBLE
+   El panel se coloca fuera del carrusel lateral para evitar
+   que las reglas overflow:hidden lo oculten.
+   ========================================================== */
+#supabaseNumberPanelPHDU.phdu-number-floating{
+  position:fixed!important;
+  right:18px!important;
+  bottom:18px!important;
+  z-index:9000!important;
+  width:min(390px,calc(100vw - 36px))!important;
+  margin:0!important;
+  padding:14px!important;
+  border:1px solid #9fc8b5!important;
+  border-top:5px solid #18794e!important;
+  border-radius:16px!important;
+  background:rgba(255,255,255,.98)!important;
+  box-shadow:0 18px 42px rgba(11,43,76,.24)!important;
+  backdrop-filter:blur(10px);
+}
+#supabaseNumberPanelPHDU.phdu-number-floating h2{
+  display:block!important;
+  margin:0 0 8px!important;
+  padding:0!important;
+  border:0!important;
+  color:#0b2b4c!important;
+  font-size:13px!important;
+  text-transform:uppercase!important;
+}
+#supabaseNumberPanelPHDU.phdu-number-floating h2::before{
+  display:none!important;
+}
+#supabaseNumberPanelPHDU.phdu-number-floating #phduTestNumberBtn{
+  display:block!important;
+  width:100%!important;
+  min-height:40px!important;
+  margin-top:10px!important;
+  font-size:11px!important;
+}
+#supabaseNumberPanelPHDU.phdu-number-floating .phdu-number-status{
+  display:block!important;
+  max-height:110px;
+  overflow:auto;
+}
+@media(max-width:700px){
+  #supabaseNumberPanelPHDU.phdu-number-floating{
+    right:10px!important;
+    bottom:10px!important;
+    width:calc(100vw - 20px)!important;
+  }
+}
+@media print{
+  #supabaseNumberPanelPHDU{
+    display:none!important;
+  }
+}
+</style>
+<style id="phdu-v26-solo-conexion-css">
+/* PHDU V26 · SOLO CONEXIÓN SUPABASE
+   No modifica cálculos, tablas ni validaciones del Generador. */
+
+#asuntoAprobatorioV119Y{
+  display:block!important;
+}
+
+#phduConexionAprobatorioV26{
+  margin:18px 0 14px;
+  padding:18px;
+  border:1px solid #91c7aa;
+  border-top:5px solid #18794e;
+  border-radius:14px;
+  background:#f4fbf7;
+  box-shadow:0 8px 20px rgba(24,96,68,.10);
+}
+
+#phduConexionAprobatorioV26 .phdu-v26-title{
+  margin:0 0 8px;
+  padding:10px 12px;
+  border-left:4px solid #18794e;
+  background:#e8f6ee;
+  color:#0b2b4c;
+  font-size:15px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+#phduConexionAprobatorioV26 .phdu-v26-help{
+  margin:0 0 12px;
+  color:#536779;
+  font-size:12px;
+  line-height:1.5;
+}
+
+#phduConexionAprobatorioV26 .phdu-number-status{
+  min-height:48px;
+  margin:0;
+  padding:11px 12px;
+  border-radius:10px;
+  background:#eef4fa;
+  color:#17324d;
+  font-size:12px;
+  line-height:1.45;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+#phduConexionAprobatorioV26 .phdu-number-status.ok{
+  background:#e8f7ef;
+  border:1px solid #91d0ae;
+  color:#12603d;
+  font-weight:800;
+}
+
+#phduConexionAprobatorioV26 .phdu-number-status.error{
+  background:#fff0f2;
+  border:1px solid #ef9aaa;
+  color:#8f1730;
+  font-weight:800;
+}
+
+#phduConexionAprobatorioV26 .phdu-number-status.warning{
+  background:#fff7dc;
+  border:1px solid #e8c76a;
+  color:#725000;
+  font-weight:800;
+}
+
+#phduConexionAprobatorioV26 #phduTestNumberBtn{
+  display:block;
+  width:100%;
+  min-height:46px;
+  margin-top:12px;
+  font-size:12px;
+}
+
+#phduConexionAprobatorioV26 .phdu-v26-note{
+  margin-top:10px;
+  color:#5d6e7d;
+  font-size:11px;
+  line-height:1.45;
+}
+
+@media print{
+  #phduConexionAprobatorioV26{
+    display:none!important;
+  }
+}
+</style>
+
+</head><body>${clone.outerHTML}
 <!-- VERSIÓN 19: eliminado el botón Actualizar del buscador de informes guardados. -->
 </body></html>`;
   const plain=(clone.innerText||clone.textContent||'').trim();
@@ -32835,7 +33167,15 @@ window.addEventListener('load',()=>{
     if(!state.aprobatorio.asunto || typeof state.aprobatorio.asunto!=='object'){
       state.aprobatorio.asunto={numero:''};
     }
-    state.aprobatorio.asunto.numero=String(state.aprobatorio.asunto.numero||'');
+
+    const resultado=state?.supabasePrueba2099?.resultado;
+    const numeroAsignado=
+      resultado && Number(resultado.anio)===2099
+        ? String(resultado.numeroFormateado||resultado.numero||'').padStart(3,'0')
+        : '';
+
+    /* El número ya no puede escribirse manualmente. */
+    state.aprobatorio.asunto.numero=numeroAsignado;
     return state.aprobatorio.asunto;
   }
   function projectIdV119Y(){
@@ -32915,11 +33255,9 @@ window.addEventListener('load',()=>{
     }
   }
 
-  window.updateAsuntoNumeroV119Y=function(value,finalize=false){
-    const data=ensureAsuntoStateV119Y();
-    data.numero=normalizeNumeroV119Y(value,finalize);
-    const input=document.getElementById('numeroAsuntoV119Y');
-    if(input && input.value!==data.numero) input.value=data.numero;
+  window.updateAsuntoNumeroV119Y=function(){
+    /* Compatibilidad: ignora escrituras manuales y conserva el número de Supabase. */
+    ensureAsuntoStateV119Y();
     refreshAsuntoPreviewV119Y();
   };
   window.refreshAsuntoPreviewV119Y=function(){
@@ -32935,10 +33273,10 @@ window.addEventListener('load',()=>{
     const input=document.getElementById('numeroAsuntoV119Y');
     if(input && input.value!==data.numero) input.value=data.numero;
     if(!data.numero){
-      if(typeof msg==='function') msg('Complete el Nro. del Informe antes de copiar el asunto.');
-      else alert('Complete el Nro. del Informe antes de copiar el asunto.');
+      if(typeof msg==='function') msg('Primero use el botón «Finalizar y asignar número» para generar el número del informe.');
+      else alert('Primero use el botón «Finalizar y asignar número» para generar el número del informe.');
       if(typeof showTab==='function') showTab('tab-apr');
-      setTimeout(()=>document.getElementById('numeroAsuntoV119Y')?.focus(),50);
+      
       return;
     }
     const text=asuntoTextV119Y(false);
@@ -32967,22 +33305,26 @@ window.addEventListener('load',()=>{
       if(box) box.remove();
       return;
     }
-    const data=ensureAsuntoStateV119Y();
+
+    ensureAsuntoStateV119Y();
+
     if(!box){
       box=document.createElement('section');
       box.id='asuntoAprobatorioV119Y';
       box.className='asunto-aprobatorio-v119y no-print';
     }
+
     insertBeforeAnexosV119Y(box,form);
+
     box.innerHTML=`
       <div class="asunto-title-v119y">ASUNTO</div>
-      <p class="asunto-help-v119y">Complete el número del informe. El texto generado y el botón para copiar se muestran en Vista del Informe, antes de ANEXOS.</p>
-      <div class="asunto-grid-v119y">
-        <div class="field" style="margin:0">
-          <label for="numeroAsuntoV119Y">Nro. del Informe *</label>
-          <input id="numeroAsuntoV119Y" type="text" inputmode="numeric" maxlength="12" value="${escapeV119Y(data.numero)}" placeholder="Ej.: 001" oninput="updateAsuntoNumeroV119Y(this.value,false)" onblur="updateAsuntoNumeroV119Y(this.value,true)">
-        </div>
-      </div>`;
+      <div id="phduNumeroAsuntoHostV26"></div>`;
+
+    window.setTimeout(()=>{
+      if(typeof window.mountConnectionPanelV26==='function'){
+        window.mountConnectionPanelV26();
+      }
+    },0);
   };
 
   window.renderAsuntoVistaV119Z=function(){
@@ -34500,7 +34842,7 @@ window.addEventListener('load',()=>{
     const copySubjectBaseV13=window.copiarAsuntoV119Y;
     window.copiarAsuntoV119Y=async function(){
       const value=String(state?.aprobatorio?.asunto?.numero||document.getElementById('numeroAsuntoV119Y')?.value||'').trim();
-      if(!value){if(typeof msg==='function')msg('Complete el Nro. del Informe antes de copiar el asunto.');document.getElementById('numeroAsuntoV119Y')?.focus();return;}
+      if(!value){if(typeof msg==='function')msg('Primero use el botón «Finalizar y asignar número» para generar el número del informe.');document.getElementById('numeroAsuntoV119Y')?.focus();return;}
       return copySubjectBaseV13.apply(this,arguments);
     };
   }
@@ -35655,890 +35997,1419 @@ window.addEventListener('load',()=>{
 
 
 
-<!-- ==========================================================
-     ALLPA V34 - Correcciones puntuales y estables
-     1) Desistimiento: únicamente Fecha de revisión.
-     2) Evidencia/detalle: mayúsculas y minúsculas, saltos visibles
-        y texto justificado en el informe.
-     ========================================================== -->
-<style id="allpa-v34-css">
-/* Hacer visibles los saltos de línea y facilitar la revisión del texto pegado. */
-.service-edit-v13 .service-evidence-row-v13 textarea,
-textarea.evidencia-text,
-.req-factibilidades-table-v134 textarea {
-  min-height: 135px !important;
-  line-height: 1.55 !important;
-  white-space: pre-wrap !important;
-  overflow-wrap: anywhere;
-  text-transform: none !important;
-  font-family: 'Segoe UI', Arial, sans-serif !important;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent calc(1.55em - 1px),
-    rgba(23,50,77,.08) calc(1.55em - 1px),
-    rgba(23,50,77,.08) 1.55em
-  );
-  background-attachment: local;
-}
-/* Justificación y conservación de párrafos/saltos en la vista del informe. */
-.report .combined-studies-v13 .detail-v13,
-.report .estudios-table .detail-v13,
-.report td.service-evidence-report-v34 {
-  text-align: justify !important;
-  white-space: pre-wrap !important;
-  overflow-wrap: anywhere;
-  hyphens: auto;
-}
-</style>
-<script id="allpa-v34-js">
+<!-- PHDU · SUPABASE Y NUMERACIÓN DE PRUEBA 2099 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script id="phdu-supabase-integration">
 (function(){
-  'use strict';
+  "use strict";
 
-  function esDesistimientoV34(){
-    const tipo=document.getElementById('tipoInforme')?.value || window.state?.tipoInforme || '';
-    return tipo==='Informe de Desistimiento';
+  const PHDU_SUPABASE_URL =
+    "https://lfinvpmobnczgtabtwfs.supabase.co";
+
+  const PHDU_SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i";
+
+  const PHDU_OFFICIAL_YEAR = 2026;
+  const PHDU_TEST_YEAR = 2099;
+
+  let phduClient = null;
+  let phduUser = null;
+  let phduProfile = null;
+  let phduOfficialSequences = [];
+  let phduAssigning = false;
+
+  function byIdPHDU(id){
+    return document.getElementById(id);
   }
 
-  function aplicarFechasDesistimientoV34(){
-    const esDes=esDesistimientoV34();
-    const lab=document.getElementById('fechaRevisionLabel');
-    const note=document.getElementById('fechaRevisionNote');
-    const sub=document.getElementById('fechaSubsanacionWrap');
-    const segunda=document.querySelector('label.subsanacion-5dias-v55');
-
-    if(esDes){
-      if(lab) lab.textContent='Fecha de revisión *';
-      if(note) note.textContent='';
-      if(sub) sub.classList.add('hidden');
-      if(segunda) segunda.classList.add('hidden');
-      const cb=document.getElementById('calc5DiasSubsanacionV55');
-      if(cb){ cb.checked=false; cb.disabled=true; }
-    }else{
-      if(segunda) segunda.classList.remove('hidden');
-      const cb=document.getElementById('calc5DiasSubsanacionV55');
-      if(cb) cb.disabled=false;
-    }
+  function normalizeTextPHDU(value){
+    return String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toUpperCase();
   }
 
-  /* Se integra en la actualización normal de la interfaz, sin observadores ni ciclos. */
-  const actualizarAccionesBaseV34=typeof window.updateSideActions==='function' ? window.updateSideActions : null;
-  window.updateSideActions=function(){
-    if(actualizarAccionesBaseV34) actualizarAccionesBaseV34.apply(this,arguments);
-    aplicarFechasDesistimientoV34();
-  };
-  try{ updateSideActions=window.updateSideActions; }catch(_e){}
-
-  /* Evidencia conserva exactamente mayúsculas, minúsculas y saltos pegados. */
-  const updEstudioBaseV34=typeof window.updEstudio==='function' ? window.updEstudio : null;
-  window.updEstudio=function(i,k,elOrValue){
-    if(k!=='evidencia'){
-      if(updEstudioBaseV34) return updEstudioBaseV34.apply(this,arguments);
-      return;
-    }
-    if(!window.state?.aprobatorio?.estudios?.[i]) return;
-    const value=(elOrValue&&typeof elOrValue==='object') ? elOrValue.value : String(elOrValue??'');
-    window.state.aprobatorio.estudios[i][k]=value;
-    if(typeof window.scheduleReportUpdate==='function') window.scheduleReportUpdate();
-  };
-  try{ updEstudio=window.updEstudio; }catch(_e){}
-
-  const updFactBaseV34=typeof window.updateFactibilidadOMV145==='function' ? window.updateFactibilidadOMV145 : null;
-  window.updateFactibilidadOMV145=function(i,field,elOrValue){
-    if(field!=='evidencia'){
-      if(updFactBaseV34) return updFactBaseV34.apply(this,arguments);
-      return;
-    }
-    const rows=typeof window.ensureFactibilidadesOMV145==='function'
-      ? window.ensureFactibilidadesOMV145()
-      : window.state?.aprobatorio?.factibilidadesOMV145;
-    if(!rows?.[i]) return;
-    const value=(elOrValue&&typeof elOrValue==='object') ? elOrValue.value : String(elOrValue??'');
-    rows[i][field]=value;
-    if(typeof window.scheduleReportUpdate==='function') window.scheduleReportUpdate();
-  };
-  try{ updateFactibilidadOMV145=window.updateFactibilidadOMV145; }catch(_e){}
-
-  /* Anteproyecto usa updEstudio para sus factibilidades; queda cubierto por el ajuste anterior. */
-  window.addEventListener('load',function(){
-    aplicarFechasDesistimientoV34();
-    setTimeout(aplicarFechasDesistimientoV34,900);
-  },{once:true});
-})();
-</script>
-
-<script id="allpa-fix-estructural-v1">
-(function(){
-  'use strict';
-
-  function valorCampo(id){
-    var el=document.getElementById(id);
-    return el ? String(el.value || '').trim() : '';
+  function digitsPHDU(value){
+    return String(value ?? "").replace(/\D/g, "");
   }
 
-  function escapar(v){
-    if(typeof window.esc === 'function') return window.esc(v);
-    return String(v == null ? '' : v).replace(/[&<>"']/g,function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];
+  function numericTextPHDU(value){
+    const raw = String(value ?? "").trim();
+    if(!raw) return "";
+    const cleaned = raw
+      .replace(/\s/g, "")
+      .replace(",", ".")
+      .replace(/[^0-9.-]/g, "");
+    return /^-?\d+(\.\d+)?$/.test(cleaned) ? cleaned : "";
+  }
+
+  function integerTextPHDU(value){
+    const match = String(value ?? "").match(/\d+/);
+    return match ? match[0] : "";
+  }
+
+  function uuidPHDU(){
+    if(window.crypto && typeof window.crypto.randomUUID === "function"){
+      return window.crypto.randomUUID();
+    }
+
+    const bytes = new Uint8Array(16);
+    window.crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    const hex = Array.from(bytes, b => b.toString(16).padStart(2, "0"));
+    return [
+      hex.slice(0,4).join(""),
+      hex.slice(4,6).join(""),
+      hex.slice(6,8).join(""),
+      hex.slice(8,10).join(""),
+      hex.slice(10,16).join("")
+    ].join("-");
+  }
+
+  function setLoginStatusPHDU(message, type){
+    const el = byIdPHDU("phduLoginStatus");
+    if(!el) return;
+    el.textContent = message;
+    el.className = "phdu-login-status" + (type ? " " + type : "");
+  }
+
+  function setNumberStatusPHDU(message, type){
+    const el = byIdPHDU("phduNumberStatus");
+    if(!el) return;
+    el.textContent = message;
+    el.className = "phdu-number-status" + (type ? " " + type : "");
+  }
+
+  function setLoginBusyPHDU(busy){
+    const button = byIdPHDU("phduLoginBtn");
+    const email = byIdPHDU("phduEmail");
+    const password = byIdPHDU("phduPassword");
+
+    if(button){
+      button.disabled = !!busy;
+      button.textContent = busy ? "Comprobando…" : "Iniciar sesión";
+    }
+    if(email) email.disabled = !!busy;
+    if(password) password.disabled = !!busy;
+  }
+
+  function showLoginPHDU(message){
+    const overlay = byIdPHDU("passwordOverlay");
+    if(overlay) overlay.style.display = "flex";
+
+    const logout = byIdPHDU("phduLogoutBtn");
+    if(logout) logout.disabled = true;
+
+    const name = byIdPHDU("phduSessionName");
+    const meta = byIdPHDU("phduSessionMeta");
+    const sequences = byIdPHDU("phduOfficialSequences");
+
+    if(name) name.textContent = "Supabase: sesión no iniciada";
+    if(meta) meta.textContent = "La numeración oficial está bloqueada.";
+    if(sequences) sequences.textContent = "2026: pendiente de consulta";
+
+    if(message) setLoginStatusPHDU(message, "");
+    updateNumberPanelPHDU();
+  }
+
+  function hideLoginPHDU(){
+    const overlay = byIdPHDU("passwordOverlay");
+    if(overlay) overlay.style.display = "none";
+  }
+
+  function createClientPHDU(){
+    if(phduClient) return phduClient;
+
+    if(!window.supabase || typeof window.supabase.createClient !== "function"){
+      throw new Error(
+        "No se pudo cargar la biblioteca de Supabase. Revise la conexión a internet."
+      );
+    }
+
+    phduClient = window.supabase.createClient(
+      PHDU_SUPABASE_URL,
+      PHDU_SUPABASE_PUBLISHABLE_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:false
+        }
+      }
+    );
+
+    window.phduSupabaseClient = phduClient;
+    return phduClient;
+  }
+
+  async function loadContextPHDU(user){
+    const client = createClientPHDU();
+
+    const profileResponse = await client
+      .from("phdu_profiles")
+      .select("id, correo, nombre_completo, rol, activo")
+      .eq("id", user.id)
+      .single();
+
+    if(profileResponse.error){
+      throw new Error(
+        "No se pudo consultar el perfil PHDU: " +
+        profileResponse.error.message
+      );
+    }
+
+    if(!profileResponse.data || profileResponse.data.activo !== true){
+      throw new Error("El usuario PHDU está inactivo.");
+    }
+
+    const sequenceResponse = await client
+      .rpc("consultar_estado_numeracion");
+
+    if(sequenceResponse.error){
+      throw new Error(
+        "No se pudo consultar la numeración: " +
+        sequenceResponse.error.message
+      );
+    }
+
+    phduUser = user;
+    phduProfile = profileResponse.data;
+
+    const allSequences = Array.isArray(sequenceResponse.data)
+      ? sequenceResponse.data
+      : [];
+
+    phduOfficialSequences = allSequences.filter(row => {
+      return row.anio == null || Number(row.anio) === PHDU_OFFICIAL_YEAR;
     });
+
+    const name = byIdPHDU("phduSessionName");
+    const meta = byIdPHDU("phduSessionMeta");
+    const logout = byIdPHDU("phduLogoutBtn");
+
+    if(name){
+      name.textContent =
+        (phduProfile.nombre_completo || phduProfile.correo || user.email) +
+        " · " +
+        (phduProfile.rol || "SIN ROL");
+    }
+
+    if(meta){
+      meta.textContent =
+        "Perfil PHDU activo. Prueba 2099 habilitada; producción 2026 bloqueada.";
+    }
+
+    if(logout) logout.disabled = false;
+
+    renderOfficialSequencesPHDU();
+    hideLoginPHDU();
+    updateNumberPanelPHDU();
   }
 
-  function sincronizarEstructuralALLPA(){
+  function renderOfficialSequencesPHDU(){
+    const el = byIdPHDU("phduOfficialSequences");
+    if(!el) return;
+
+    const ante = phduOfficialSequences.find(row =>
+      normalizeTextPHDU(row.tipo_proyecto) === "ANTEPROYECTO"
+    );
+
+    const obra = phduOfficialSequences.find(row =>
+      normalizeTextPHDU(row.tipo_proyecto) === "OBRA_MAYOR"
+    );
+
+    const anteNext = ante?.proximo_numero ??
+      (Number.isFinite(Number(ante?.ultimo_numero))
+        ? Number(ante.ultimo_numero) + 1
+        : "—");
+
+    const obraNext = obra?.proximo_numero ??
+      (Number.isFinite(Number(obra?.ultimo_numero))
+        ? Number(obra.ultimo_numero) + 1
+        : "—");
+
+    el.textContent =
+      "2026 solo consulta · Anteproyecto: " +
+      anteNext +
+      " · Obra Mayor: " +
+      obraNext;
+  }
+
+  async function loginSupabasePHDU(){
+    const email = String(byIdPHDU("phduEmail")?.value || "").trim();
+    const password = String(byIdPHDU("phduPassword")?.value || "");
+
+    if(!email || !password){
+      setLoginStatusPHDU(
+        "Escriba el correo y la contraseña del usuario PHDU.",
+        "error"
+      );
+      return;
+    }
+
+    setLoginBusyPHDU(true);
+    setLoginStatusPHDU("Iniciando sesión y validando el perfil…", "");
+
     try{
-      if(typeof window.ensureAprobatorioData === 'function') window.ensureAprobatorioData();
-      if(!window.state) return;
-      if(!state.aprobatorio) state.aprobatorio={};
-      if(!state.aprobatorio.estructural) state.aprobatorio.estructural={};
-      var e=state.aprobatorio.estructural;
-      var mapa={
-        documento:'estDocumento',
-        egob:'estEgob',
-        tecnico:'estTecnico',
-        criterio:'estCriterio',
-        calculista:'estCalculista',
-        senescyt:'estSenescyt'
-      };
-      Object.keys(mapa).forEach(function(k){
-        var el=document.getElementById(mapa[k]);
-        if(el) e[k]=String(el.value || '').trim();
+      const client = createClientPHDU();
+      const response = await client.auth.signInWithPassword({
+        email,
+        password
       });
-    }catch(err){
-      console.error('ALLPA: no se pudo sincronizar Consideraciones Estructurales',err);
+
+      if(response.error) throw response.error;
+      if(!response.data?.user){
+        throw new Error("Supabase no devolvió un usuario válido.");
+      }
+
+      await loadContextPHDU(response.data.user);
+
+      localStorage.setItem("PHDU_LAST_EMAIL", email);
+      const passwordInput = byIdPHDU("phduPassword");
+      if(passwordInput) passwordInput.value = "";
+
+      setLoginStatusPHDU(
+        "Conexión correcta. Perfil PHDU y secuencias verificados.",
+        "ok"
+      );
+    }catch(error){
+      try{
+        if(phduClient) await phduClient.auth.signOut();
+      }catch(_error){}
+
+      phduUser = null;
+      phduProfile = null;
+      phduOfficialSequences = [];
+
+      setLoginStatusPHDU(
+        error?.message || String(error),
+        "error"
+      );
+    }finally{
+      setLoginBusyPHDU(false);
     }
   }
 
-  function tablaEstructuralALLPA(){
-    sincronizarEstructuralALLPA();
-    var e=(window.state && state.aprobatorio && state.aprobatorio.estructural) ? state.aprobatorio.estructural : {};
-    var documento=valorCampo('estDocumento') || e.documento || '';
-    var egob=valorCampo('estEgob') || e.egob || (window.state ? state.egob : '') || '';
-    var tecnico=valorCampo('estTecnico') || e.tecnico || (window.state ? state.tecnico : '') || '';
-    var criterio=valorCampo('estCriterio') || e.criterio || 'FAVORABLE';
-    var calculista=valorCampo('estCalculista') || e.calculista || '';
-    var senescyt=valorCampo('estSenescyt') || e.senescyt || '';
-
-    return '<table class="informe-table structural-table"><tbody>'+
-      '<tr><td class="label-cell">DOCUMENTO:</td><td class="data-cell highlight" colspan="2">'+escapar(documento)+'</td><td class="label-cell center">EGOB</td><td class="data-cell highlight">'+escapar(egob)+'</td></tr>'+
-      '<tr><td class="label-cell">TÉCNICO REVISOR:</td><td class="data-cell" colspan="4">'+escapar(tecnico)+'</td></tr>'+
-      '<tr><td class="label-cell">CRITERIO TÉCNICO:</td><td class="data-cell bold" colspan="4">'+escapar(String(criterio).toUpperCase())+'</td></tr>'+
-      '<tr><td class="label-cell">ING. CALCULISTA:</td><td class="data-cell" colspan="4">'+escapar(calculista)+'</td></tr>'+
-      '<tr><td class="label-cell">REG. SENESCYT:</td><td class="data-cell" colspan="4">'+escapar(senescyt)+'</td></tr>'+
-      '</tbody></table>';
-  }
-
-  function instalarALLPA(){
-    window.aprobatorioStructuralTable=tablaEstructuralALLPA;
-    try{ aprobatorioStructuralTable=tablaEstructuralALLPA; }catch(_e){}
-  }
-
-  document.addEventListener('input',function(ev){
-    if(ev.target && /^(estDocumento|estEgob|estTecnico|estCriterio|estCalculista|estSenescyt)$/.test(ev.target.id)){
-      sincronizarEstructuralALLPA();
-      if(typeof window.scheduleReportUpdate === 'function') window.scheduleReportUpdate();
+  async function logoutSupabasePHDU(){
+    try{
+      if(phduClient) await phduClient.auth.signOut();
+    }catch(error){
+      console.warn("No se pudo cerrar completamente la sesión:", error);
     }
-  });
-  document.addEventListener('change',function(ev){
-    if(ev.target && /^(estDocumento|estEgob|estTecnico|estCriterio|estCalculista|estSenescyt)$/.test(ev.target.id)){
-      sincronizarEstructuralALLPA();
-      if(typeof window.scheduleReportUpdate === 'function') window.scheduleReportUpdate();
+
+    phduUser = null;
+    phduProfile = null;
+    phduOfficialSequences = [];
+
+    const password = byIdPHDU("phduPassword");
+    if(password) password.value = "";
+
+    showLoginPHDU("Sesión cerrada. Inicie sesión para continuar.");
+  }
+
+  function infoValuePHDU(){
+    const wanted = Array.from(arguments)
+      .map(normalizeTextPHDU)
+      .filter(Boolean);
+
+    try{
+      const fields = Array.isArray(DATA?.infoFields) ? DATA.infoFields : [];
+
+      for(const field of fields){
+        const label = normalizeTextPHDU(field?.label);
+        if(wanted.some(term => label.includes(term))){
+          const value = state?.info?.[field.key];
+          if(value != null && String(value).trim() !== ""){
+            return String(value).trim();
+          }
+        }
+      }
+    }catch(_error){}
+
+    return "";
+  }
+
+  function claveCatastralPHDU(){
+    const candidates = [];
+
+    // 1. Valor que el usuario ve y edita en pantalla.
+    const preview = byIdPHDU("catClavePreview");
+    if(preview?.value){
+      candidates.push(preview.value);
     }
-  });
 
-  // Se instala al final de todo el código para prevalecer sobre versiones anteriores.
-  instalarALLPA();
-  window.addEventListener('load',function(){
-    instalarALLPA();
-    sincronizarEstructuralALLPA();
-    setTimeout(instalarALLPA,500);
-    setTimeout(instalarALLPA,1500);
-  });
-})();
-</script>
+    // 2. Versión vigente del Generador, compatible con clave antigua.
+    try{
+      if(typeof buildClaveFromPartsV37 === "function"){
+        candidates.push(buildClaveFromPartsV37());
+      }
+    }catch(_error){}
 
+    // 3. Estado específico de clave antigua.
+    try{
+      if(state?.catastral?.claveAntiguaActiva){
+        candidates.push(state.catastral.claveAntigua || "");
+      }
+    }catch(_error){}
 
-<!-- ==========================================================
-     ALLPA V52 - Ajustes de Conclusión Técnica y Anteproyecto
-     - Suma inmediata de áreas Aprobada (Existente) + Ampliación.
-     - Tipo de intervención visible en el informe.
-     - Requisitos de Anteproyecto alineados a la izquierda.
-     - Factibilidades de Anteproyecto con Evidencia/Detalle en fila nueva.
-     ========================================================== -->
-<style id="allpa-v52-css">
-  .report.report-aprobatorio table.ante-req-report-v52 th {
-    text-align: center !important;
-  }
-  .report.report-aprobatorio table.ante-req-report-v52 td {
-    text-align: left !important;
-  }
-  .report.report-aprobatorio table.ante-req-report-v52 td.center {
-    text-align: left !important;
-  }
-  .report .tipo-intervencion-report-v52 {
-    display: block;
-    margin-top: 3px;
-    font-size: 9.5px;
-    font-weight: 700;
-    color: #334155;
-  }
-  .report .fact-evidencia-label-v52 {
-    width: 22%;
-    background: #eeeeee;
-    font-weight: 900;
-    text-transform: uppercase;
-  }
-  .report .fact-evidencia-v52 {
-    text-align: justify !important;
-    white-space: pre-wrap !important;
-    overflow-wrap: anywhere;
-  }
-</style>
-<script id="allpa-v52-js">
-(function(){
-  'use strict';
+    // 4. Campo general guardado en Información General.
+    candidates.push(infoValuePHDU("CLAVE CATASTRAL"));
 
-  function normV52(value){
-    return String(value == null ? '' : value)
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/\s+/g,' ').trim().toUpperCase();
+    // 5. Compatibilidad con versiones anteriores.
+    try{
+      if(typeof buildClaveFromPartsV36 === "function"){
+        candidates.push(buildClaveFromPartsV36());
+      }
+    }catch(_error){}
+
+    const cleaned = candidates
+      .map(value => digitsPHDU(value))
+      .filter(Boolean);
+
+    // Se prioriza cualquier candidato que tenga exactamente 27 dígitos.
+    const valid = cleaned.find(value => value.length === 27);
+    if(valid) return valid;
+
+    // Si ninguno es válido, se devuelve el más largo para informar la longitud real.
+    return cleaned.sort((a, b) => b.length - a.length)[0] || "";
   }
 
-  function escV52(value){
-    if(typeof window.esc === 'function') return window.esc(String(value == null ? '' : value));
-    return String(value == null ? '' : value).replace(/[&<>"']/g,function(c){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-    });
+  function projectTypePHDU(){
+    try{
+      if(typeof projectTypeV123 === "function"){
+        return projectTypeV123() === "anteproyecto_edificacion"
+          ? "ANTEPROYECTO"
+          : "OBRA_MAYOR";
+      }
+    }catch(_error){}
+
+    return state?.projectType === "anteproyecto_edificacion"
+      ? "ANTEPROYECTO"
+      : "OBRA_MAYOR";
   }
 
-  function rowV52(raw){
-    if(typeof window.rowConclV108 === 'function') return window.rowConclV108(raw || {});
-    if(typeof window.rowConclV87 === 'function') return window.rowConclV87(raw || {});
-    if(typeof window.normalizeConclusionRowSafeV73 === 'function') return window.normalizeConclusionRowSafeV73(raw || {});
-    if(typeof window.normalizeConclusionRow === 'function') return window.normalizeConclusionRow(raw || {});
+  function ownersPHDU(){
+    const rows = Array.isArray(state?.propietarios)
+      ? state.propietarios
+      : [];
+
+    return rows
+      .map(row => {
+        const name = String(row?.nombre || "").trim();
+        const ci = String(row?.ci || "").trim();
+        if(!name && !ci) return "";
+        return ci ? name + " — " + ci : name;
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+
+  function apoderadoPHDU(){
+    if(!state?.apoderado?.activo) return "";
+    const name = String(state.apoderado.nombre || "").trim();
+    const ci = String(state.apoderado.ci || "").trim();
+    return ci ? name + " — " + ci : name;
+  }
+
+  function fakeEgobPHDU(original){
+    // En las pruebas 2099 se conserva exactamente el eGOB escrito
+    // en el Generador. La separación respecto de producción se realiza
+    // únicamente mediante el año ficticio 2099.
+    return digitsPHDU(original);
+  }
+
+  function ensureTestRequestPHDU(tipo, egobOriginal){
+    if(!state.supabasePrueba2099 ||
+       state.supabasePrueba2099.tipoProyecto !== tipo ||
+       state.supabasePrueba2099.egobOriginal !== egobOriginal){
+
+      state.supabasePrueba2099 = {
+        idSolicitud:uuidPHDU(),
+        tipoProyecto:tipo,
+        egobOriginal:egobOriginal,
+        anio:PHDU_TEST_YEAR,
+        resultado:null
+      };
+    }
+
+    return state.supabasePrueba2099;
+  }
+
+  function cleanTextGISPHDU(value){
+    return String(value ?? "").replace(/\s+/g, " ").trim();
+  }
+
+  function conclusionRowGISPHDU(raw){
+    try{
+      if(typeof rowConclV108 === "function"){
+        return rowConclV108(raw || {});
+      }
+    }catch(_error){}
+
+    try{
+      if(typeof rowConclV87 === "function"){
+        return rowConclV87(raw || {});
+      }
+    }catch(_error){}
+
+    try{
+      if(typeof normalizeConclusionRowSafeV73 === "function"){
+        return normalizeConclusionRowSafeV73(raw || {});
+      }
+    }catch(_error){}
+
+    try{
+      if(typeof normalizeConclusionRow === "function"){
+        return normalizeConclusionRow(raw || {});
+      }
+    }catch(_error){}
+
     return raw || {};
   }
 
-  function parseNumV52(value){
-    var txt=String(value == null ? '' : value).trim().replace(/\s/g,'');
-    if(!txt) return 0;
-    if(txt.indexOf(',') >= 0 && txt.indexOf('.') >= 0){
-      if(txt.lastIndexOf(',') > txt.lastIndexOf('.')) txt=txt.replace(/\./g,'').replace(',','.');
-      else txt=txt.replace(/,/g,'');
-    }else{
-      txt=txt.replace(',','.');
+  function inferConclusionRoleGISPHDU(raw, index, row){
+    const description = normalizeTextPHDU(
+      row?.descripcion || raw?.descripcion || ""
+    );
+
+    if(raw?._fixedAreaAmpliacionV13 ||
+       description.includes("AREA TOTAL DE AMPLIACION")){
+      return "areaAmpliacionTotal";
     }
-    var n=Number(txt.replace(/[^0-9.+-]/g,''));
-    return Number.isFinite(n) ? n : 0;
-  }
 
-  function formatNumV52(value){
-    var rounded=Math.round((Number(value)||0)*100)/100;
-    return rounded.toFixed(2).replace(/\.00$/,'').replace(/(\.\d)0$/,'$1');
-  }
-
-  function isBrutaDetailV52(raw){
-    var d=normV52(rowV52(raw).descripcion || raw?.descripcion || '');
-    return d.includes('AREA BRUTA') && !d.includes('TOTAL');
-  }
-
-  function isBrutaTotalV52(raw){
-    var d=normV52(rowV52(raw).descripcion || raw?.descripcion || '');
-    return d.includes('AREA BRUTA') && d.includes('TOTAL') && !d.includes('AMPLIACION');
-  }
-
-  function isAmpliacionTotalV52(raw){
-    var d=normV52(rowV52(raw).descripcion || raw?.descripcion || '');
-    return d.includes('AREA TOTAL') && (d.includes('AMPLIACION') || d.includes('MODIFICACION'));
-  }
-
-  function tipoV52(raw){
-    var t=normV52(raw?.tipoAreaV13 || raw?.tipoIntervencion || raw?.tipo_intervencion || '');
-    if(t.includes('AMPLIACION')) return 'Ampliación';
-    if(t.includes('MODIFICACION')) return 'Modificación';
-    return 'Aprobada (Existente)';
-  }
-
-  function syncVisibleInputsV52(){
-    var arr=window.state?.aprobatorio?.conclusion;
-    if(!Array.isArray(arr)) return;
-    document.querySelectorAll('#conclusionTabla [data-i][data-field]').forEach(function(el){
-      var i=Number(el.dataset.i);
-      var field=el.dataset.field;
-      if(!Number.isInteger(i) || !arr[i] || !field) return;
-      var row=rowV52(arr[i]);
-      row[field]=el.value;
-      arr[i]=Object.assign({},arr[i],row);
-    });
-    document.querySelectorAll('#conclusionTabla select[onchange*="updateAreaTypeV13"]').forEach(function(el){
-      var m=String(el.getAttribute('onchange')||'').match(/updateAreaTypeV13\((\d+)/);
-      if(!m) return;
-      var i=Number(m[1]);
-      if(arr[i]) arr[i].tipoAreaV13=tipoV52({tipoAreaV13:el.value});
-    });
-  }
-
-  function setRowQuantityV52(index,value){
-    var arr=window.state?.aprobatorio?.conclusion;
-    if(!Array.isArray(arr) || !arr[index]) return;
-    var row=rowV52(arr[index]);
-    row.cantidad=value;
-    row.unidad=row.unidad || 'm2';
-    arr[index]=Object.assign({},arr[index],row);
-    var input=document.getElementById('conc_qty_'+index);
-    if(input && input.value !== value) input.value=value;
-  }
-
-  function recalcAreasV52(){
-    var arr=window.state?.aprobatorio?.conclusion;
-    if(!Array.isArray(arr)) return {bruta:0,ampliacion:0};
-    syncVisibleInputsV52();
-    var bruta=0, ampliacion=0;
-    arr.forEach(function(raw){
-      if(!isBrutaDetailV52(raw)) return;
-      var qty=parseNumV52(rowV52(raw).cantidad);
-      var type=tipoV52(raw);
-      raw.tipoAreaV13=type;
-      if(type==='Aprobada (Existente)' || type==='Ampliación') bruta+=qty;
-      if(type==='Ampliación' || type==='Modificación') ampliacion+=qty;
-    });
-    arr.forEach(function(raw,index){
-      if(isBrutaTotalV52(raw)) setRowQuantityV52(index,formatNumV52(bruta));
-      if(isAmpliacionTotalV52(raw)) setRowQuantityV52(index,formatNumV52(ampliacion));
-    });
-    return {bruta:bruta,ampliacion:ampliacion};
-  }
-
-  window.recalcAreasALLPAV52=recalcAreasV52;
-
-  /* La rutina final es autoritativa para evitar que otras versiones vuelvan a
-     colocar el Área Bruta desde un campo general desactualizado. */
-  window.calculateAreasV13=recalcAreasV52;
-  try{ calculateAreasV13=window.calculateAreasV13; }catch(_e){}
-
-  var reportTimerV52=0;
-  function scheduleV52(){
-    cancelAnimationFrame(window.__allpaAreaRafV52 || 0);
-    window.__allpaAreaRafV52=requestAnimationFrame(function(){
-      recalcAreasV52();
-      clearTimeout(reportTimerV52);
-      reportTimerV52=setTimeout(function(){
-        if(typeof window.renderReport==='function') window.renderReport();
-        if(typeof window.renderPreview==='function') window.renderPreview();
-      },45);
-    });
-  }
-
-  document.addEventListener('input',function(event){
-    if(event.target?.closest?.('#conclusionTabla')) scheduleV52();
-  },true);
-  document.addEventListener('change',function(event){
-    if(event.target?.closest?.('#conclusionTabla')) scheduleV52();
-  },true);
-
-  /* Informe de Conclusión Técnica: añade el tipo de intervención junto a la
-     descripción, tanto en Obra Mayor como en Anteproyecto. */
-  window.conclusionReport=function(){
-    recalcAreasV52();
-    var arr=typeof window.conclusionRowsForReportV81==='function'
-      ? (window.conclusionRowsForReportV81() || [])
-      : (window.state?.aprobatorio?.conclusion || []);
-    if(!arr.length) return '<p>No se registran datos de conclusión técnica.</p>';
-    var body=arr.map(function(raw){
-      var r=rowV52(raw);
-      var niveles=(r.levels||[]).filter(Boolean).map(escV52).join('<br>');
-      var descClass=/TOTAL|NÚMERO DE PISOS|UNIDADES|COS/.test(normV52(r.descripcion||''))?'desc-bold':'';
-      var tipoHtml=isBrutaDetailV52(raw)
-        ? '<span class="tipo-intervencion-report-v52">Tipo de intervención: '+escV52(tipoV52(raw))+'</span>'
-        : '';
-      var desc=escV52(r.descripcion||'')+tipoHtml;
-      if(niveles){
-        return '<tr><td class="'+descClass+'">'+desc+'</td><td class="level-cell">'+niveles+'</td><td class="right">'+escV52(r.cantidad||'')+'</td><td>'+escV52(r.unidad||'')+'</td></tr>';
+    try{
+      if(typeof roleV13 === "function"){
+        const role = roleV13(raw, index);
+        if(role) return role;
       }
-      return '<tr><td colspan="2" class="'+descClass+'">'+desc+'</td><td class="right">'+escV52(r.cantidad||'')+'</td><td>'+escV52(r.unidad||'')+'</td></tr>';
-    }).join('');
-    return '<table class="informe-table conclusion-report"><thead><tr><th colspan="2">DESCRIPCIÓN</th><th>CANTIDAD</th><th>UNIDAD</th></tr></thead><tbody>'+body+'</tbody></table>';
-  };
-  try{ conclusionReport=window.conclusionReport; }catch(_e){}
+    }catch(_error){}
 
-  /* Requisitos de Anteproyecto: contenido a la izquierda y encabezados centrados. */
-  if(typeof window.reqTable==='function'){
-    var reqTableBaseV52=window.reqTable;
-    window.reqTable=function(reqs,mode){
-      var html=String(reqTableBaseV52.apply(this,arguments)||'');
-      var isAnte=typeof window.isAnteproyectoV123==='function' && window.isAnteproyectoV123();
-      if(isAnte && mode==='apr' && /^\s*<table/i.test(html)){
-        html=html.replace(/^\s*<table/i,'<table class="ante-req-report-v52"');
+    try{
+      if(typeof roleConclV108 === "function"){
+        const role = roleConclV108(raw, index);
+        if(role) return role;
       }
-      return html;
-    };
-    try{ reqTable=window.reqTable; }catch(_e){}
+    }catch(_error){}
+
+    try{
+      if(typeof conclusionRoleV119N === "function"){
+        const role = conclusionRoleV119N(raw, index);
+        if(role) return role;
+      }
+    }catch(_error){}
+
+    if(description.includes("AREA") &&
+       description.includes("PREDIO")){
+      return "predio";
+    }
+
+    if(description.includes("AREA") &&
+       description.includes("BRUTA") &&
+       description.includes("TOTAL")){
+      return "brutaTotal";
+    }
+
+    if(description.includes("AREA") &&
+       description.includes("BRUTA")){
+      return "bruta";
+    }
+
+    if(description.includes("NUMERO") &&
+       description.includes("PISOS")){
+      return "pisos";
+    }
+
+    if(description.includes("UNIDADES") &&
+       description.includes("HABITACIONALES")){
+      return "unidadesHabitacionales";
+    }
+
+    if(description.includes("UNIDADES") &&
+       description.includes("COMERCIALES")){
+      return "unidadesComerciales";
+    }
+
+    if(description.includes("COS PB")){
+      return "cosPB";
+    }
+
+    if(description.includes("COS TOTAL")){
+      return "cosTotal";
+    }
+
+    return "";
   }
 
-  /* Factibilidades de Anteproyecto: Evidencia/Detalle siempre se imprime en
-     una fila independiente, conservando mayúsculas, minúsculas y saltos. */
-  window.factibilidadesReportV134=function(){
-    var rows=typeof window.ensureAnteFactibilidadesV134==='function'
-      ? (window.ensureAnteFactibilidadesV134() || [])
-      : (window.state?.aprobatorio?.estudios || []);
-    if(!rows.length) return '<p>No se registran factibilidades.</p>';
-    var body=rows.map(function(row){
-      var evidencia=String(row?.evidencia ?? row?.detalle ?? row?.observacion ?? '');
-      var fecha=typeof window.fmtDate==='function' ? window.fmtDate(row?.fecha||'') : String(row?.fecha||'');
-      return '<tr>'+
-        '<td class="study-cell">'+escV52(row?.estudio||row?.empresa||'')+'</td>'+
-        '<td class="doc-title">'+escV52(row?.documento||row?.tramite||'')+'</td>'+
-        '<td class="doc-title center" style="width:16%">'+escV52(fecha)+'</td>'+
-        '</tr>'+
-        '<tr><td class="fact-evidencia-label-v52">Evidencia / detalle</td>'+
-        '<td colspan="2" class="fact-evidencia-v52">'+(evidencia?escV52(evidencia):'—')+'</td></tr>';
-    }).join('');
-    return '<table class="informe-table estudios-table factibilidades-ante-v52">'+
-      '<thead><tr><th>EMPRESA</th><th colspan="2">DOCUMENTO / TRÁMITE</th></tr></thead><tbody>'+body+'</tbody></table>';
-  };
-  try{ factibilidadesReportV134=window.factibilidadesReportV134; }catch(_e){}
+  function conclusionValueGISPHDU(wantedRole){
+    const rows = Array.isArray(state?.aprobatorio?.conclusion)
+      ? state.aprobatorio.conclusion
+      : [];
 
-  /* Refuerzo tras las rutinas de carga y cambios de pestaña. */
-  window.addEventListener('load',function(){
-    setTimeout(scheduleV52,250);
-    setTimeout(scheduleV52,900);
-  },{once:true});
-  document.addEventListener('click',function(event){
-    if(event.target?.closest?.('.tab-btn,[data-tab],#tab-vista')) setTimeout(scheduleV52,0);
-  },true);
-})();
-</script>
+    for(let index = 0; index < rows.length; index += 1){
+      const raw = rows[index] || {};
+      const row = conclusionRowGISPHDU(raw);
+      const role = inferConclusionRoleGISPHDU(raw, index, row);
 
-
-
-<style>
-/* V53: Factibilidades de Anteproyecto con el mismo formato de Obra Mayor. */
-.report .combined-studies-v13 td.entity-v13{
-  vertical-align:middle !important;
-  text-align:center !important;
-  font-weight:900;
-}
-.report .combined-studies-v13 td.detail-v13{
-  text-align:justify;
-  white-space:pre-wrap;
-}
-</style>
-<script>
-/* ==========================================================
-   VERSIÓN 53
-   1. El tipo de intervención se muestra seguido de la descripción,
-      sin la leyenda "Tipo de intervención:".
-   2. Factibilidades de Anteproyecto usa exactamente la tabla
-      combinada de Obra Mayor: ENTIDAD, TIPO, DOCUMENTO/TRÁMITE,
-      FECHA y evidencia en una fila inferior.
-   ========================================================== */
-(function(){
-  function escV53(value){
-    return typeof esc==='function' ? esc(value) : String(value??'')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-  function normV53(value){
-    return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
-  }
-  function rowV53(raw){
-    return typeof rowV13==='function' ? rowV13(raw) : (raw||{});
-  }
-  function roleV53(raw,index){
-    if(typeof roleV13==='function') return roleV13(raw,index);
-    const d=normV53(rowV53(raw).descripcion||'');
-    if(d.includes('AREA BRUTA TOTAL')) return 'brutaTotal';
-    if(d.includes('AREA TOTAL DE AMPLIACION')||d.includes('AREA TOTAL DE MODIFICACION')) return 'areaAmpliacionTotal';
-    return d.includes('AREA BRUTA') ? 'bruta' : '';
-  }
-  function typeV53(raw){
-    if(typeof normalizeAreaTypeV13==='function') return normalizeAreaTypeV13(raw?.tipoAreaV13);
-    return String(raw?.tipoAreaV13||'').trim();
-  }
-  function modeV53(){
-    return typeof modoAmpModV13==='function' ? modoAmpModV13() : true;
-  }
-
-  window.conclusionReport=function(){
-    if(typeof recalcAreasALLPAV52==='function') recalcAreasALLPAV52();
-    const arr=typeof conclusionRowsForReportV81==='function'
-      ? (conclusionRowsForReportV81()||[])
-      : (window.state?.aprobatorio?.conclusion||[]);
-    if(!arr.length) return '<p>No se registran datos de conclusión técnica.</p>';
-
-    const body=arr.map(function(raw,index){
-      const r=rowV53(raw);
-      const levels=(r.levels||[]).filter(Boolean).map(escV53).join('<br>');
-      const descClass=/TOTAL|NÚMERO DE PISOS|NUMERO DE PISOS|UNIDADES|COS/.test(normV53(r.descripcion||''))?'desc-bold':'';
-      let descripcion=String(r.descripcion||'').trim();
-      if(modeV53() && roleV53(raw,index)==='bruta'){
-        const tipo=typeV53(raw);
-        if(tipo && !normV53(descripcion).endsWith(normV53(tipo))){
-          descripcion=(descripcion+' '+tipo).trim();
+      if(role === wantedRole){
+        const value = row?.cantidad;
+        if(value !== null &&
+           value !== undefined &&
+           String(value).trim() !== ""){
+          return String(value).trim();
         }
       }
-      const desc=escV53(descripcion);
-      if(levels){
-        return '<tr><td class="'+descClass+'">'+desc+'</td><td class="level-cell">'+levels+'</td><td class="right">'+escV53(r.cantidad||'')+'</td><td>'+escV53(r.unidad||'')+'</td></tr>';
-      }
-      return '<tr><td colspan="2" class="'+descClass+'">'+desc+'</td><td class="right">'+escV53(r.cantidad||'')+'</td><td>'+escV53(r.unidad||'')+'</td></tr>';
-    }).join('');
-
-    return '<table class="informe-table conclusion-report"><thead><tr><th colspan="2">DESCRIPCIÓN</th><th>CANTIDAD</th><th>UNIDAD</th></tr></thead><tbody>'+body+'</tbody></table>';
-  };
-  try{ conclusionReport=window.conclusionReport; }catch(_e){}
-
-  window.factibilidadesReportV134=function(){
-    const rows=typeof ensureAnteFactibilidadesV134==='function' ? ensureAnteFactibilidadesV134() : [];
-    if(typeof combinedServiceReportV13==='function'){
-      return combinedServiceReportV13(rows,[],false);
     }
-    return '<p>No se registran factibilidades.</p>';
-  };
-  try{ factibilidadesReportV134=window.factibilidadesReportV134; }catch(_e){}
 
-  /* Refuerzo: algunas versiones llaman estudiosReport() en Anteproyecto. */
-  const estudiosBaseV53=typeof window.estudiosReport==='function' ? window.estudiosReport : null;
-  window.estudiosReport=function(){
-    const ante=typeof isAnteproyectoV123==='function' && isAnteproyectoV123();
-    if(ante) return window.factibilidadesReportV134();
-    return estudiosBaseV53 ? estudiosBaseV53.apply(this,arguments) : '<p>No se registran estudios complementarios.</p>';
-  };
-  try{ estudiosReport=window.estudiosReport; }catch(_e){}
-})();
-</script>
-
-
-<!-- ==========================================================
-     ALLPA V55 - Tabla de requisitos de Anteproyecto
-     - Amplía RESULTADO / DETALLE para mejorar la lectura.
-     - La alineación izquierda se limita únicamente a esta tabla.
-     - Las demás tablas conservan sus alineaciones originales.
-     ========================================================== -->
-<style id="allpa-v55-requisitos-anteproyecto-css">
-  /* Solo la tabla de requisitos de la sección 2 del Anteproyecto. */
-  .report.report-aprobatorio table.ante-req-report-v52 {
-    table-layout: fixed !important;
-    width: 100% !important;
+    return "";
   }
 
-  /* REQUISITO: 67 % | RESULTADO / DETALLE: 33 % */
-  .report.report-aprobatorio table.ante-req-report-v52 th:first-child,
-  .report.report-aprobatorio table.ante-req-report-v52 td:first-child {
-    width: 67% !important;
-  }
-  .report.report-aprobatorio table.ante-req-report-v52 th:nth-child(2),
-  .report.report-aprobatorio table.ante-req-report-v52 td:nth-child(2) {
-    width: 33% !important;
-  }
+  function conclusionSnapshotGISPHDU(){
+    const rows = Array.isArray(state?.aprobatorio?.conclusion)
+      ? state.aprobatorio.conclusion
+      : [];
 
-  /* Encabezados centrados; únicamente el contenido de esta tabla a la izquierda. */
-  .report.report-aprobatorio table.ante-req-report-v52 thead th {
-    text-align: center !important;
-    vertical-align: middle !important;
-  }
-  .report.report-aprobatorio table.ante-req-report-v52 tbody td,
-  .report.report-aprobatorio table.ante-req-report-v52 tbody td.center,
-  .report.report-aprobatorio table.ante-req-report-v52 tbody td.right {
-    text-align: left !important;
-    vertical-align: top !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere;
-    word-break: normal;
-  }
-</style>
-
-
-<!-- ==========================================================
-     ALLPA V56 - Restauración de formatos de tablas del informe
-     Mantiene exclusivamente la alineación izquierda de la tabla
-     2. DETALLE DEL ANTEPROYECTO incorporada en V55.
-     ========================================================== -->
-<style id="allpa-v56-formatos-tablas-css">
-/* 1. INFORMACIÓN GENERAL / RESOLUCIÓN DE ANTEPROYECTO */
-.report.report-aprobatorio table.apr-info-table th,
-.report.report-aprobatorio table.apr-info-table td{
-  text-align:center !important;
-  vertical-align:middle !important;
-  line-height:1.12 !important;
-}
-.report.report-aprobatorio table.apr-info-table .apr-info-label,
-.report.report-aprobatorio table.apr-info-table .apr-info-section{
-  font-weight:900 !important;
-  text-transform:uppercase !important;
-}
-
-/* CONCLUSIÓN TÉCNICA */
-.report.report-aprobatorio table.conclusion-report th,
-.report.report-aprobatorio table.conclusion-report td{
-  text-align:center !important;
-  vertical-align:middle !important;
-}
-.report.report-aprobatorio table.conclusion-report .right,
-.report.report-aprobatorio table.conclusion-report .level-cell{
-  text-align:center !important;
-}
-
-/* RESOLUCIÓN DE ANTEPROYECTO Y CONSIDERACIONES ESTRUCTURALES */
-.report.report-aprobatorio table.ante-resolution-report-v56 th,
-.report.report-aprobatorio table.ante-resolution-report-v56 td,
-.report.report-aprobatorio table.structural-report-v56 th,
-.report.report-aprobatorio table.structural-report-v56 td{
-  text-align:center !important;
-  vertical-align:middle !important;
-  line-height:1.12 !important;
-}
-.report.report-aprobatorio table.ante-resolution-report-v56 .label-cell,
-.report.report-aprobatorio table.structural-report-v56 .label-cell{
-  font-weight:900 !important;
-  text-transform:uppercase !important;
-}
-
-/* FACTIBILIDADES Y ESTUDIOS COMPLEMENTARIOS */
-.report.report-aprobatorio table.combined-studies-v13 th,
-.report.report-aprobatorio table.combined-studies-v13 td{
-  text-align:center !important;
-  vertical-align:middle !important;
-}
-.report.report-aprobatorio table.combined-studies-v13 td.entity-v13{
-  text-align:center !important;
-  vertical-align:top !important;
-  font-weight:400 !important;
-  padding-top:7px !important;
-}
-.report.report-aprobatorio table.combined-studies-v13 td.type-v13{
-  font-weight:900 !important;
-  text-align:center !important;
-  vertical-align:middle !important;
-}
-.report.report-aprobatorio table.combined-studies-v13 td.detail-v13{
-  text-align:center !important;
-  vertical-align:middle !important;
-  white-space:normal !important;
-}
-
-/* Excepción solicitada: solo esta tabla conserva contenido a la izquierda. */
-.report.report-aprobatorio table.ante-req-report-v52 tbody td{
-  text-align:left !important;
-  vertical-align:top !important;
-}
-.report.report-aprobatorio table.ante-req-report-v52 thead th{
-  text-align:center !important;
-  vertical-align:middle !important;
-}
-</style>
-
-<script id="allpa-v56-formatos-tablas-js">
-(function(){
-  function addClassToFirstTable(html, className){
-    html=String(html||'');
-    if(!html) return html;
-    if(/<table\b[^>]*class=["'][^"']*\b/.test(html)){
-      return html.replace(/<table\b([^>]*?)class=(["'])([^"']*)\2/i,
-        function(_m,before,q,classes){
-          if(new RegExp('(?:^|\\s)'+className+'(?:\\s|$)').test(classes)) return _m;
-          return '<table'+before+'class='+q+(classes+' '+className).trim()+q;
-        });
-    }
-    return html.replace(/<table\b/i,'<table class="'+className+'"');
-  }
-
-  /* Añade clases semánticas sin cambiar la información ni la estructura. */
-  if(typeof window.aprobatorioStructuralTable==='function' && !window.aprobatorioStructuralTable.__v56){
-    const base=window.aprobatorioStructuralTable;
-    const wrapped=function(){ return addClassToFirstTable(base.apply(this,arguments),'structural-report-v56'); };
-    wrapped.__v56=true;
-    window.aprobatorioStructuralTable=wrapped;
-    try{ aprobatorioStructuralTable=wrapped; }catch(_e){}
-  }
-
-  /* La tabla de Resolución de Anteproyecto usa la misma estructura de informe. */
-  ['anteproyectoReportTable','anteproyectoResolutionTable','aprobatorioAnteproyectoTable'].forEach(function(name){
-    const fn=window[name];
-    if(typeof fn==='function' && !fn.__v56){
-      const wrapped=function(){ return addClassToFirstTable(fn.apply(this,arguments),'ante-resolution-report-v56'); };
-      wrapped.__v56=true;
-      window[name]=wrapped;
-      try{ eval(name+'=wrapped'); }catch(_e){}
-    }
-  });
-
-  function styleCell(el, obj){
-    Object.keys(obj).forEach(function(k){ el.style.setProperty(k,obj[k],'important'); });
-  }
-
-  function inlineReportTableFormatsV56(root){
-    if(!root || !root.querySelectorAll) return root;
-    const common={
-      'border':'1px solid #000','padding':'4px 5px','font-family':'Arial,Helvetica,sans-serif',
-      'font-size':'8.5pt','line-height':'1.12','color':'#111'
-    };
-    root.querySelectorAll('table').forEach(function(tbl){
-      tbl.style.setProperty('border-collapse','collapse','important');
-      tbl.style.setProperty('width','100%','important');
-      tbl.style.setProperty('border','1px solid #000','important');
-      tbl.querySelectorAll('th,td').forEach(function(cell){ styleCell(cell,common); });
-
-      if(tbl.classList.contains('apr-info-table') || tbl.classList.contains('conclusion-report') ||
-         tbl.classList.contains('structural-report-v56') || tbl.classList.contains('ante-resolution-report-v56')){
-        tbl.querySelectorAll('th,td').forEach(function(cell){
-          styleCell(cell,{'text-align':'center','vertical-align':'middle'});
-        });
-      }
-
-      if(tbl.classList.contains('combined-studies-v13')){
-        tbl.querySelectorAll('th,td').forEach(function(cell){
-          styleCell(cell,{'text-align':'center','vertical-align':'middle'});
-        });
-        tbl.querySelectorAll('td.type-v13').forEach(function(cell){
-          styleCell(cell,{'font-weight':'900','text-align':'center','vertical-align':'middle'});
-        });
-        tbl.querySelectorAll('td.entity-v13').forEach(function(cell){
-          styleCell(cell,{'text-align':'center','vertical-align':'top','padding-top':'7px'});
-        });
-      }
-
-      if(tbl.classList.contains('ante-req-report-v52')){
-        tbl.querySelectorAll('thead th').forEach(function(cell){
-          styleCell(cell,{'text-align':'center','vertical-align':'middle'});
-        });
-        tbl.querySelectorAll('tbody td').forEach(function(cell){
-          styleCell(cell,{'text-align':'left','vertical-align':'top'});
-        });
-      }
+    return rows.map((raw, index) => {
+      const row = conclusionRowGISPHDU(raw || {});
+      return {
+        descripcion:cleanTextGISPHDU(row?.descripcion),
+        rol:inferConclusionRoleGISPHDU(raw || {}, index, row),
+        cantidad:cleanTextGISPHDU(row?.cantidad),
+        unidad:cleanTextGISPHDU(row?.unidad),
+        niveles:Array.isArray(row?.levels)
+          ? row.levels.map(cleanTextGISPHDU).filter(Boolean)
+          : [],
+        tipo_intervencion:cleanTextGISPHDU(raw?.tipoAreaV13)
+      };
     });
-    return root;
   }
-  window.inlineReportTableFormatsV56=inlineReportTableFormatsV56;
 
-  /* Conserva bordes, centrados, anchos y negritas al usar COPIAR. */
-  if(typeof window.buildClipboardPayloadV154==='function' && !window.buildClipboardPayloadV154.__v56){
-    const base=window.buildClipboardPayloadV154;
-    const wrapped=function(){
-      const payload=base.apply(this,arguments);
-      if(!payload || !payload.html) return payload;
+  function ownerNamesGISPHDU(){
+    const rows = Array.isArray(state?.propietarios)
+      ? state.propietarios
+      : [];
+
+    return rows
+      .map(row => cleanTextGISPHDU(row?.nombre))
+      .filter(Boolean)
+      .join(" / ");
+  }
+
+  function ownerDetailGISPHDU(){
+    const rows = Array.isArray(state?.propietarios)
+      ? state.propietarios
+      : [];
+
+    return rows
+      .map(row => ({
+        nombre:cleanTextGISPHDU(row?.nombre),
+        identificacion:digitsPHDU(row?.ci)
+      }))
+      .filter(row => row.nombre || row.identificacion);
+  }
+
+  function usoProyectoGISPHDU(){
+    try{
+      if(typeof syncUsoToInfoV63 === "function"){
+        syncUsoToInfoV63();
+      }
+    }catch(_error){}
+
+    try{
+      if(typeof displayUsoValueV63 === "function"){
+        const value = cleanTextGISPHDU(displayUsoValueV63());
+        if(value) return value;
+      }
+    }catch(_error){}
+
+    return cleanTextGISPHDU(
+      infoValuePHDU("USO PRINCIPAL") ||
+      infoValuePHDU("USO DEL PROYECTO")
+    );
+  }
+
+  function proyectoDefinitivoRawGISPHDU(){
+    try{
+      if(typeof proyectoDefinitivoValueV104 === "function"){
+        const value = cleanTextGISPHDU(
+          proyectoDefinitivoValueV104()
+        );
+        if(value) return value;
+      }
+    }catch(_error){}
+
+    return cleanTextGISPHDU(
+      infoValuePHDU("PROYECTO DEFINITIVO")
+    );
+  }
+
+  function tipoObraGISPHDU(){
+    const raw = proyectoDefinitivoRawGISPHDU();
+    if(!raw) return "";
+
+    const tokens = raw
+      .split(/[,;|/]+/)
+      .map(cleanTextGISPHDU)
+      .filter(Boolean);
+
+    const normalized = [];
+
+    for(const token of tokens){
+      const value = normalizeTextPHDU(token);
+      let mapped = token;
+
+      if(value.includes("OBRA NUEVA") || value === "NUEVA"){
+        mapped = "NUEVA";
+      }else if(value.includes("AMPLIACION")){
+        mapped = "AMPLIACIÓN";
+      }else if(value.includes("MODIFICAT")){
+        mapped = "MODIFICATORIO";
+      }else if(value.includes("OTRO")){
+        mapped = "OTRO";
+      }
+
+      if(mapped && !normalized.includes(mapped)){
+        normalized.push(mapped);
+      }
+    }
+
+    return normalized.join(" / ") || raw;
+  }
+
+  function prepareGISPayloadPHDU(){
+    try{
+      if(typeof commitAllConclusionInputsV87 === "function"){
+        commitAllConclusionInputsV87();
+      }
+    }catch(_error){}
+
+    try{
+      if(typeof recalcAreasCOSV36 === "function"){
+        recalcAreasCOSV36();
+      }
+    }catch(_error){}
+
+    const projectRaw = proyectoDefinitivoRawGISPHDU();
+
+    const data = {
+      propietarios:ownerNamesGISPHDU(),
+      propietarios_detalle:ownerDetailGISPHDU(),
+      uso_proyecto:usoProyectoGISPHDU(),
+      tipo_obra:tipoObraGISPHDU(),
+      tipo_obra_detalle:projectRaw,
+
+      area_predio:numericTextPHDU(
+        conclusionValueGISPHDU("predio") ||
+        infoValuePHDU("AREA DEL PREDIO")
+      ),
+
+      area_construccion:numericTextPHDU(
+        conclusionValueGISPHDU("brutaTotal") ||
+        infoValuePHDU("AREA BRUTA")
+      ),
+
+      area_ampliacion_modificacion:numericTextPHDU(
+        conclusionValueGISPHDU("areaAmpliacionTotal")
+      ),
+
+      pisos:integerTextPHDU(
+        conclusionValueGISPHDU("pisos") ||
+        infoValuePHDU("ALTURA EDIFICACION")
+      ),
+
+      unidades_habitacionales:integerTextPHDU(
+        conclusionValueGISPHDU("unidadesHabitacionales")
+      ),
+
+      unidades_comerciales:integerTextPHDU(
+        conclusionValueGISPHDU("unidadesComerciales")
+      ),
+
+      cos:numericTextPHDU(
+        conclusionValueGISPHDU("cosPB")
+      ),
+
+      cus:numericTextPHDU(
+        conclusionValueGISPHDU("cosTotal")
+      ),
+
+      conclusion_tecnica:conclusionSnapshotGISPHDU()
+    };
+
+    const missing = [];
+
+    const required = [
+      ["propietarios", "Nombre del propietario"],
+      ["uso_proyecto", "Uso principal"],
+      ["tipo_obra", "Proyecto definitivo / tipo de obra"],
+      ["area_predio", "Área del predio en Conclusión Técnica"],
+      ["area_construccion", "Área Bruta total de construcción"],
+      ["pisos", "Número de pisos"],
+      ["unidades_habitacionales", "Unidades Habitacionales"],
+      ["unidades_comerciales", "Unidades Comerciales"],
+      ["cos", "COS PB"],
+      ["cus", "COS Total"]
+    ];
+
+    for(const [key, label] of required){
+      const value = data[key];
+      if(value === null ||
+         value === undefined ||
+         String(value).trim() === ""){
+        missing.push(label);
+      }
+    }
+
+    const needsAreaIntervention =
+      normalizeTextPHDU(projectRaw).includes("AMPLIACION") ||
+      normalizeTextPHDU(projectRaw).includes("MODIFICAT");
+
+    if(needsAreaIntervention &&
+       String(data.area_ampliacion_modificacion || "").trim() === ""){
+      missing.push("Área Total de Ampliación/Modificación");
+    }
+
+    if(missing.length){
+      throw new Error(
+        "No se puede numerar todavía. Complete los datos necesarios " +
+        "para el registro GIS: " + missing.join("; ") + "."
+      );
+    }
+
+    return data;
+  }
+
+  function buildTestPayloadPHDU(){
+    if(!phduUser || !phduProfile){
+      throw new Error("Debe iniciar sesión con un usuario PHDU activo.");
+    }
+
+    if(typeof collectTop === "function"){
+      collectTop();
+    }
+
+    if(state?.tipoInforme !== "Informe Técnico Aprobatorio"){
+      throw new Error(
+        "La numeración corresponde únicamente a un Informe Técnico Aprobatorio."
+      );
+    }
+
+    const egobOriginal = digitsPHDU(state?.egob);
+    if(!egobOriginal || egobOriginal.length > 20){
+      throw new Error(
+        "Ingrese un número eGOB válido, compuesto únicamente por números."
+      );
+    }
+
+    const clave = claveCatastralPHDU();
+    if(clave.length !== 27){
+      throw new Error(
+        "Complete una clave catastral válida de exactamente 27 dígitos. " +
+        "El Generador está leyendo " + clave.length + " dígito(s)."
+      );
+    }
+
+    const tipo = projectTypePHDU();
+    const request = ensureTestRequestPHDU(tipo, egobOriginal);
+
+    let asunto = "";
+    try{
+      if(typeof asuntoTextV119Y === "function"){
+        asunto = asuntoTextV119Y(false);
+      }
+    }catch(_error){}
+
+    const gisData = prepareGISPayloadPHDU();
+
+    return {
+      id_solicitud:request.idSolicitud,
+      tipo_proyecto:tipo,
+      anio:PHDU_TEST_YEAR,
+      egob:egobOriginal,
+      clave_catastral:clave,
+      fecha_informe:String(state?.fechaRevision || "").trim() ||
+        new Date().toISOString().slice(0,10),
+
+      propietarios:gisData.propietarios,
+      propietarios_detalle:gisData.propietarios_detalle,
+      apoderado:apoderadoPHDU(),
+      proyectista:infoValuePHDU("PROYECTISTA"),
+      registro_municipal:infoValuePHDU("REGISTRO MUNICIPAL"),
+      uso_proyecto:gisData.uso_proyecto,
+      tipo_obra:gisData.tipo_obra,
+      tipo_obra_detalle:gisData.tipo_obra_detalle,
+
+      area_predio:gisData.area_predio,
+      area_construccion:gisData.area_construccion,
+      area_ampliacion_modificacion:
+        gisData.area_ampliacion_modificacion,
+      pisos:gisData.pisos,
+      unidades_habitacionales:
+        gisData.unidades_habitacionales,
+      unidades_comerciales:
+        gisData.unidades_comerciales,
+      cos:gisData.cos,
+      cus:gisData.cus,
+      conclusion_tecnica:gisData.conclusion_tecnica,
+      fuente_datos_gis:
+        "CONCLUSION_TECNICA_Y_DATOS_GENERALES_V27",
+      asunto:asunto,
+
+      modo_prueba:"GENERADOR_PHDU_V27_HOMOLOGACION_GIS_2099",
+      llave_qgis:"CLAVE_CATASTRAL_27_DIGITOS",
+      egob_original:egobOriginal,
+      tipo_informe:state.tipoInforme
+    };
+  }
+
+  function errorMessagePHDU(error){
+    if(!error) return "Ocurrió un error desconocido.";
+
+    const parts = [];
+    const message = error.message || String(error);
+    if(message) parts.push(message);
+
+    if(error.details && !parts.includes(error.details)){
+      parts.push("Detalle: " + error.details);
+    }
+
+    if(error.hint){
+      parts.push("Sugerencia: " + error.hint);
+    }
+
+    if(error.code){
+      parts.push("Código: " + error.code);
+    }
+
+    return parts.join(" · ");
+  }
+
+  async function verifyRecordPHDU(idSolicitud){
+    const client = createClientPHDU();
+
+    const response = await client
+      .from("phdu_informes_aprobatorios")
+      .select(
+        "id, id_solicitud, tipo_proyecto, anio, numero, " +
+        "numero_formateado, estado_qgis"
+      )
+      .eq("id_solicitud", idSolicitud)
+      .single();
+
+    if(response.error){
+      throw new Error(
+        "El número fue asignado, pero no se pudo confirmar el registro: " +
+        errorMessagePHDU(response.error)
+      );
+    }
+
+    if(!response.data){
+      throw new Error(
+        "Supabase no devolvió el registro recién creado."
+      );
+    }
+
+    return response.data;
+  }
+
+  async function rpcAssignmentPHDU(payload){
+    const client = createClientPHDU();
+    const response = await client.rpc(
+      "asignar_numero_informe",
+      {p_payload:payload}
+    );
+
+    if(response.error) throw response.error;
+
+    const row = Array.isArray(response.data)
+      ? response.data[0]
+      : response.data;
+
+    if(!row){
+      throw new Error(
+        "La función asignar_numero_informe no devolvió un registro."
+      );
+    }
+
+    if(Number(row.anio) !== PHDU_TEST_YEAR){
+      throw new Error(
+        "Protección activada: Supabase devolvió un año distinto de 2099."
+      );
+    }
+
+    return row;
+  }
+
+  function applyNumberToGeneratorPHDU(row){
+    if(!state.aprobatorio || typeof state.aprobatorio !== "object"){
+      state.aprobatorio = {};
+    }
+
+    if(!state.aprobatorio.asunto ||
+       typeof state.aprobatorio.asunto !== "object"){
+      state.aprobatorio.asunto = {numero:""};
+    }
+
+    state.aprobatorio.asunto.numero =
+      String(row.numero_formateado || row.numero || "").padStart(3, "0");
+
+    state.supabasePrueba2099.resultado = {
+      informeId:row.informe_id,
+      numero:Number(row.numero),
+      numeroFormateado:String(row.numero_formateado || ""),
+      tipoProyecto:String(row.tipo_proyecto || ""),
+      anio:Number(row.anio),
+      estadoQgis:String(row.estado_qgis || ""),
+      actualizadoEn:new Date().toISOString()
+    };
+
+    try{
+      if(typeof renderAsuntoAprobatorioV119Y === "function"){
+        renderAsuntoAprobatorioV119Y();
+      }
+      if(typeof renderAsuntoVistaV119Z === "function"){
+        renderAsuntoVistaV119Z();
+      }
+      if(typeof renderAprobatorioForm === "function"){
+        renderAprobatorioForm();
+      }
+      if(typeof renderReport === "function"){
+        renderReport();
+      }
+      if(typeof renderPreview === "function"){
+        renderPreview();
+      }
+    }catch(error){
+      console.warn("El número se asignó, pero una vista no pudo actualizarse:", error);
+    }
+  }
+
+  async function persistStatePHDU(){
+    try{
+      state.updatedAt = new Date().toISOString();
+      if(!state.createdAt) state.createdAt = state.updatedAt;
+
+      if(db && typeof dbPut === "function" && state.egob){
+        await dbPut(JSON.parse(JSON.stringify(state)));
+        if(typeof renderSavedList === "function"){
+          renderSavedList();
+        }
+      }
+    }catch(error){
+      console.warn("No se pudo guardar localmente el estado Supabase:", error);
+    }
+  }
+
+  async function asignarNumeroPruebaPHDU(){
+    if(phduAssigning) return;
+
+    const button = byIdPHDU("phduTestNumberBtn");
+    phduAssigning = true;
+
+    if(button){
+      button.disabled = true;
+      button.textContent = "Registrando prueba 2099…";
+    }
+
+    setNumberStatusPHDU(
+      "El botón respondió. Preparando la solicitud y registrando en Supabase…",
+      ""
+    );
+
+    try{
+      const payload = buildTestPayloadPHDU();
+
+      if(Number(payload.anio) !== PHDU_TEST_YEAR){
+        throw new Error(
+          "Protección activada: esta versión solo admite el año 2099."
+        );
+      }
+
+      setNumberStatusPHDU(
+        "Primera llamada: solicitando un número nuevo para " +
+        payload.tipo_proyecto +
+        "…",
+        ""
+      );
+
+      const first = await rpcAssignmentPHDU(payload);
+
+      setNumberStatusPHDU(
+        "Primera llamada completada con el número " +
+        String(first.numero_formateado || first.numero).padStart(3, "0") +
+        ". Comprobando que una segunda llamada no consuma otro número…",
+        ""
+      );
+
+      const second = await rpcAssignmentPHDU(payload);
+
+      const sameRecord =
+        first.informe_id === second.informe_id &&
+        Number(first.numero) === Number(second.numero) &&
+        String(first.numero_formateado) ===
+          String(second.numero_formateado);
+
+      if(!sameRecord){
+        throw new Error(
+          "La prueba de idempotencia falló: las dos llamadas devolvieron registros distintos."
+        );
+      }
+
+      const confirmed = await verifyRecordPHDU(payload.id_solicitud);
+
+      applyNumberToGeneratorPHDU(second);
+      await persistStatePHDU();
+
+      const firstState = first.ya_existia ? "ya existía" : "nuevo";
+      const secondState = second.ya_existia ? "ya existía" : "nuevo";
+      const formatted = String(
+        confirmed.numero_formateado ||
+        second.numero_formateado ||
+        second.numero
+      ).padStart(3, "0");
+
+      setNumberStatusPHDU(
+        "REGISTRO CONFIRMADO EN SUPABASE · " +
+        String(confirmed.tipo_proyecto || payload.tipo_proyecto) +
+        " · año 2099 · número " +
+        formatted +
+        ". Primera llamada: " +
+        firstState +
+        "; segunda: " +
+        secondState +
+        ". Ambas devolvieron el mismo ID. No se consumió un segundo número.",
+        "ok"
+      );
+    }catch(error){
+      console.error("Error al registrar la prueba PHDU 2099:", error);
+
+      setNumberStatusPHDU(
+        "NO SE PUDO REGISTRAR · " + errorMessagePHDU(error),
+        "error"
+      );
+    }finally{
+      phduAssigning = false;
+
+      if(button){
+        const enabled =
+          !!phduUser &&
+          !!phduProfile &&
+          state?.tipoInforme === "Informe Técnico Aprobatorio";
+
+        button.disabled = !enabled;
+      }
+
+      updateNumberPanelPHDU();
+    }
+  }
+
+  function updateNumberPanelPHDU(){
+    const button = byIdPHDU("phduTestNumberBtn");
+    if(!button) return;
+
+    if(!phduUser || !phduProfile){
+      button.disabled = true;
+      button.textContent = "FINALIZAR Y ASIGNAR NÚMERO DE PRUEBA 2099";
+      setNumberStatusPHDU(
+        "Inicie sesión para habilitar la prueba segura.",
+        ""
+      );
+      return;
+    }
+
+    if(state?.tipoInforme !== "Informe Técnico Aprobatorio"){
+      button.disabled = true;
+      button.textContent = "FINALIZAR Y ASIGNAR NÚMERO DE PRUEBA 2099";
+      setNumberStatusPHDU(
+        "Seleccione «Informe Técnico Aprobatorio» para habilitar la numeración.",
+        "warning"
+      );
+      return;
+    }
+
+    button.disabled = false;
+
+    const result = state?.supabasePrueba2099?.resultado;
+    if(result && Number(result.anio) === PHDU_TEST_YEAR){
+      const numero=String(
+        result.numeroFormateado || result.numero
+      ).padStart(3, "0");
+
+      button.textContent =
+        "NÚMERO " + numero + " ASIGNADO · COMPROBAR";
+
+      setNumberStatusPHDU(
+        "Número " + numero + " confirmado en Supabase.",
+        "ok"
+      );
+    }else{
+      button.textContent =
+        "FINALIZAR Y ASIGNAR NÚMERO DE PRUEBA 2099";
+
+      setNumberStatusPHDU(
+        "Listo para asignar el número de prueba.",
+        ""
+      );
+    }
+  }
+
+  async function restoreSessionPHDU(){
+    try{
+      const client = createClientPHDU();
+      const response = await client.auth.getSession();
+
+      if(response.error) throw response.error;
+
+      const user = response.data?.session?.user;
+      if(user){
+        setLoginStatusPHDU("Restaurando sesión PHDU…", "");
+        await loadContextPHDU(user);
+        setLoginStatusPHDU(
+          "Sesión restaurada correctamente.",
+          "ok"
+        );
+      }else{
+        showLoginPHDU("Ingrese sus credenciales institucionales.");
+      }
+    }catch(error){
       try{
-        const doc=new DOMParser().parseFromString(payload.html,'text/html');
-        inlineReportTableFormatsV56(doc.body);
-        payload.html='<!DOCTYPE html>'+doc.documentElement.outerHTML;
-      }catch(_e){}
-      return payload;
-    };
-    wrapped.__v56=true;
-    window.buildClipboardPayloadV154=wrapped;
-    try{ buildClipboardPayloadV154=wrapped; }catch(_e){}
-  }
-})();
-</script>
+        if(phduClient) await phduClient.auth.signOut();
+      }catch(_error){}
 
+      phduUser = null;
+      phduProfile = null;
+      phduOfficialSequences = [];
 
-<!-- ==========================================================
-     ALLPA V57
-     - Conclusión Técnica: descripción alineada a la izquierda.
-     - Factibilidades / Estudios Complementarios: evidencia justificada,
-       conserva saltos de línea y mayúsculas/minúsculas.
-     - Mantiene estos formatos al copiar el informe.
-     ========================================================== -->
-<style id="allpa-v57-conclusion-evidencia-css">
-/* Solo las celdas de descripción de la Conclusión Técnica. */
-.report.report-aprobatorio table.conclusion-report tbody td:first-child{
-  text-align:left !important;
-  vertical-align:middle !important;
-}
-/* Si la descripción ocupa dos columnas, también permanece a la izquierda. */
-.report.report-aprobatorio table.conclusion-report tbody td[colspan="2"]{
-  text-align:left !important;
-}
-
-/* Formulario: respetar exactamente mayúsculas, minúsculas y saltos pegados. */
-.service-edit-v13 .service-evidence-row-v13 textarea,
-textarea.evidencia-text,
-.req-factibilidades-table-v134 textarea,
-.study-edit-table textarea,
-.form-report-table textarea.evidencia-text{
-  text-transform:none !important;
-  white-space:pre-wrap !important;
-  overflow-wrap:anywhere !important;
-  line-height:1.55 !important;
-  min-height:135px !important;
-}
-
-/* Informe: Evidencia/Detalle justificada y con saltos conservados. */
-.report.report-aprobatorio table.combined-studies-v13 td.detail-v13,
-.report.report-aprobatorio table.estudios-table td.detail-v13,
-.report.report-aprobatorio td.service-evidence-report-v34{
-  text-align:justify !important;
-  vertical-align:top !important;
-  white-space:pre-wrap !important;
-  overflow-wrap:anywhere !important;
-  hyphens:auto !important;
-  text-transform:none !important;
-}
-</style>
-
-<script id="allpa-v57-conclusion-evidencia-js">
-(function(){
-  'use strict';
-
-  function setImportant(el, rules){
-    if(!el) return;
-    Object.keys(rules).forEach(function(key){
-      el.style.setProperty(key, rules[key], 'important');
-    });
+      showLoginPHDU(
+        "No se pudo restaurar la sesión: " +
+        (error?.message || String(error))
+      );
+      setLoginStatusPHDU(
+        "No se pudo restaurar la sesión: " +
+        (error?.message || String(error)),
+        "error"
+      );
+    }
   }
 
-  function applyV57(root){
-    if(!root || !root.querySelectorAll) return root;
+  function patchGeneratorHooksPHDU(){
+    if(typeof applyStateToUI === "function"){
+      const baseApplyState = applyStateToUI;
+      applyStateToUI = function(){
+        const result = baseApplyState.apply(this, arguments);
+        window.setTimeout(updateNumberPanelPHDU, 0);
+        return result;
+      };
+    }
 
-    root.querySelectorAll('table.conclusion-report tbody tr').forEach(function(tr){
-      var first=tr.querySelector('td:first-child');
-      setImportant(first, {'text-align':'left','vertical-align':'middle'});
-    });
+    if(typeof nuevoFormulario === "function"){
+      const baseNuevo = nuevoFormulario;
+      nuevoFormulario = function(){
+        const result = baseNuevo.apply(this, arguments);
+        window.setTimeout(updateNumberPanelPHDU, 0);
+        return result;
+      };
+    }
 
-    root.querySelectorAll('table.combined-studies-v13 td.detail-v13, table.estudios-table td.detail-v13, td.service-evidence-report-v34').forEach(function(cell){
-      setImportant(cell, {
-        'text-align':'justify',
-        'vertical-align':'top',
-        'white-space':'pre-wrap',
-        'overflow-wrap':'anywhere',
-        'hyphens':'auto',
-        'text-transform':'none'
+    if(typeof selectProjectV123 === "function"){
+      const baseSelectProject = selectProjectV123;
+      selectProjectV123 = function(){
+        const result = baseSelectProject.apply(this, arguments);
+        window.setTimeout(updateNumberPanelPHDU, 0);
+        return result;
+      };
+    }
+  }
+
+  function startPHDU(){
+    sessionStorage.removeItem("OM_AUTH_V36");
+
+    const email = byIdPHDU("phduEmail");
+    const password = byIdPHDU("phduPassword");
+    const savedEmail = localStorage.getItem("PHDU_LAST_EMAIL");
+
+    if(email && savedEmail) email.value = savedEmail;
+
+    if(password){
+      password.addEventListener("keydown", event => {
+        if(event.key === "Enter"){
+          event.preventDefault();
+          loginSupabasePHDU();
+        }
       });
-    });
-    return root;
-  }
-  window.applyReportFormatsV57=applyV57;
-
-  /* Reaplicar en vista previa y antes de imprimir. */
-  function applyToVisibleReport(){
-    applyV57(document.getElementById('report') || document.querySelector('.report'));
-  }
-  document.addEventListener('click', function(event){
-    if(event.target && event.target.closest && event.target.closest('.tab-btn,[data-tab="tab-vista"],#tab-vista')){
-      setTimeout(applyToVisibleReport,0);
-      setTimeout(applyToVisibleReport,250);
     }
-  });
-  window.addEventListener('beforeprint', applyToVisibleReport);
-  window.addEventListener('load', function(){ setTimeout(applyToVisibleReport,500); });
 
-  /* Mantener los mismos formatos dentro del HTML copiado. */
-  if(typeof window.buildClipboardPayloadV154==='function' && !window.buildClipboardPayloadV154.__v57){
-    var base=window.buildClipboardPayloadV154;
-    var wrapped=function(){
-      var payload=base.apply(this,arguments);
-      if(!payload || !payload.html) return payload;
-      try{
-        var doc=new DOMParser().parseFromString(payload.html,'text/html');
-        applyV57(doc.body);
-        payload.html='<!DOCTYPE html>'+doc.documentElement.outerHTML;
-        payload.plain=(doc.body.innerText||doc.body.textContent||'').trim();
-      }catch(_e){}
-      return payload;
-    };
-    wrapped.__v57=true;
-    window.buildClipboardPayloadV154=wrapped;
-    try{ buildClipboardPayloadV154=wrapped; }catch(_e){}
+    const numberButton = byIdPHDU("phduTestNumberBtn");
+    if(numberButton && !numberButton.dataset.phduBound){
+      numberButton.dataset.phduBound = "1";
+      numberButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        asignarNumeroPruebaPHDU();
+      });
+    }
+
+    const reportType = byIdPHDU("tipoInforme");
+    if(reportType){
+      reportType.addEventListener("change", () => {
+        window.setTimeout(updateNumberPanelPHDU, 0);
+      });
+    }
+
+    const egob = byIdPHDU("egob");
+    if(egob){
+      egob.addEventListener("input", () => {
+        window.setTimeout(updateNumberPanelPHDU, 0);
+      });
+    }
+
+    patchGeneratorHooksPHDU();
+    showLoginPHDU("Comprobando si existe una sesión PHDU…");
+    restoreSessionPHDU();
+  }
+
+  window.loginSupabasePHDU = loginSupabasePHDU;
+  window.logoutSupabasePHDU = logoutSupabasePHDU;
+  window.asignarNumeroPruebaPHDU = asignarNumeroPruebaPHDU;
+  window.updateNumberPanelPHDU = updateNumberPanelPHDU;
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", startPHDU, {once:true});
+  }else{
+    startPHDU();
   }
 })();
 </script>
+
+<script id="phdu-v26-solo-conexion-js">
+(function(){
+  "use strict";
+
+  let observerV26 = null;
+
+  function byIdV26(id){
+    return document.getElementById(id);
+  }
+
+  function createConnectionPanelV26(){
+    const panel = document.createElement("div");
+    panel.id = "phduConexionAprobatorioV26";
+    panel.className = "no-print";
+
+    panel.innerHTML = `
+      <div id="phduNumberStatus"
+           class="phdu-number-status"
+           aria-live="polite"></div>
+
+      <button id="phduTestNumberBtn"
+              type="button"
+              class="success">
+        FINALIZAR Y ASIGNAR NÚMERO DE PRUEBA 2099
+      </button>
+    `;
+
+    const button = panel.querySelector("#phduTestNumberBtn");
+
+    button?.addEventListener("click", async event => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const confirmed = window.confirm(
+        "PRUEBA SUPABASE ↔ QGIS POR CLAVE CATASTRAL\n\n" +
+        "Se asignará un número ficticio del año 2099 y se registrará la clave " +
+        "catastral como llave de vinculación con QGIS.\n" +
+        "No se modificará la secuencia oficial de 2026.\n\n" +
+        "¿Desea continuar?"
+      );
+
+      if(!confirmed) return;
+
+      if(typeof window.asignarNumeroPruebaPHDU === "function"){
+        await window.asignarNumeroPruebaPHDU();
+      }else{
+        const status = byIdV26("phduNumberStatus");
+
+        if(status){
+          status.textContent =
+            "No se encontró la función de conexión con Supabase.";
+          status.className = "phdu-number-status error";
+        }
+      }
+    });
+
+    return panel;
+  }
+
+  function mountConnectionPanelV26(){
+    const form = byIdV26("aprobatorioForm");
+    if(!form) return;
+
+    if(typeof window.renderAsuntoAprobatorioV119Y === "function" &&
+       !byIdV26("asuntoAprobatorioV119Y")){
+      window.renderAsuntoAprobatorioV119Y();
+    }
+
+    const asunto = byIdV26("asuntoAprobatorioV119Y");
+    const host = byIdV26("phduNumeroAsuntoHostV26");
+
+    if(!asunto || !host) return;
+
+    let panel = byIdV26("phduConexionAprobatorioV26");
+    if(!panel){
+      panel = createConnectionPanelV26();
+    }
+
+    if(panel.parentNode !== host){
+      host.replaceChildren(panel);
+    }
+
+    if(typeof window.updateNumberPanelPHDU === "function"){
+      window.updateNumberPanelPHDU();
+    }
+  }
+
+  window.mountConnectionPanelV26 = mountConnectionPanelV26;
+
+  function startConnectionV26(){
+    mountConnectionPanelV26();
+
+    const form = byIdV26("aprobatorioForm");
+
+    if(form && !observerV26){
+      observerV26 = new MutationObserver(() => {
+        mountConnectionPanelV26();
+      });
+
+      observerV26.observe(form, {
+        childList:true,
+        subtree:false
+      });
+    }
+
+    document.addEventListener("change", event => {
+      if(event.target?.id === "tipoInforme"){
+        window.setTimeout(mountConnectionPanelV26, 0);
+      }
+    });
+
+    window.setTimeout(mountConnectionPanelV26, 300);
+    window.setTimeout(mountConnectionPanelV26, 900);
+    window.setTimeout(mountConnectionPanelV26, 1800);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener(
+      "DOMContentLoaded",
+      startConnectionV26,
+      { once:true }
+    );
+  }else{
+    startConnectionV26();
+  }
+})();
+</script>
+
 </body>
 </html>
