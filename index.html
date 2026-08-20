@@ -36820,11 +36820,34 @@ textarea.evidencia-text,
     const baseQueues=new Map();
     const custom=[];
 
-    current.forEach(raw=>{
-      if(isBase(raw)){
-        const key=baseKey(raw);
-        if(!baseQueues.has(key)) baseQueues.set(key,[]);
-        baseQueues.get(key).push(raw);
+    /* V18D:
+       La clasificación no depende de origin/_userRowV108, porque respaldos
+       antiguos pueden haber sido canonicalizados provisionalmente como custom.
+       Se empareja por clave estructural contra la base real.
+
+       - por cada clave base se reclaman tantas filas actuales como ocurrencias
+         existan en la base;
+       - cualquier coincidencia adicional queda como custom;
+       - filas cuya clave no existe en la base quedan como custom.
+    */
+    const baseCapacity=new Map();
+    bases.forEach((raw,index)=>{
+      const k=baseKey(raw);
+      if(!k) return;
+      baseCapacity.set(k,(baseCapacity.get(k)||0)+1);
+    });
+
+    const claimedCount=new Map();
+
+    current.forEach((raw,index)=>{
+      const k=baseKey(raw);
+      const cap=baseCapacity.get(k)||0;
+      const used=claimedCount.get(k)||0;
+
+      if(k && cap>used){
+        if(!baseQueues.has(k)) baseQueues.set(k,[]);
+        baseQueues.get(k).push(raw);
+        claimedCount.set(k,used+1);
       }else{
         custom.push(raw);
       }
@@ -36960,7 +36983,7 @@ textarea.evidencia-text,
     : null;
 
   window.ConclusionTecnicaPrepareV12=Object.freeze({
-    version:'12.0.0-prepare',
+    version:'12.1.0-prepare',
     baseKey,
     deletionKeys,
     mergeRows,
@@ -37587,35 +37610,8 @@ textarea.evidencia-text,
 
     const deleted=K.getDeletedSet();
 
-    /* V18B: migración de respaldos antiguos sin metadata de origen.
-       Para cada clave base, solo la primera fila coincidente se considera BASE.
-       Coincidencias adicionales se conservan como CUSTOM (p.ej. otra intervención). */
-    const baseKeySet=new Set(bases.map((r,i)=>K.key(r,i)).filter(Boolean));
-    const claimedBaseKeys=new Set();
-
-    state.aprobatorio.conclusion.forEach((raw,index)=>{
-      if(!raw || typeof raw!=='object') return;
-
-      const k=K.key(raw,index);
-
-      /* V18C:
-         La primera coincidencia con una clave CSV se reclama como BASE aunque
-         canonicalizeState() la hubiera marcado provisionalmente como custom.
-         Las coincidencias posteriores con la misma clave sí quedan como CUSTOM. */
-      if(k && baseKeySet.has(k) && !claimedBaseKeys.has(k)){
-        raw.origin='base';
-        raw._originV108='base';
-        raw._userRowV108=false;
-        raw._baseKeyV108=k;
-        raw._baseKeyV107=k;
-        claimedBaseKeys.add(k);
-      }else{
-        raw.origin='custom';
-        raw._originV108='custom';
-        raw._userRowV108=true;
-      }
-    });
-
+    /* V18D: toda la clasificación base/custom vive en PrepareV12.mergeRows().
+       Así el resultado es idéntico tanto en rebuild forzado como en P.prepare(). */
     state.aprobatorio.conclusion=P.mergeRows(
       state.aprobatorio.conclusion,
       bases,
@@ -37640,7 +37636,7 @@ textarea.evidencia-text,
   };
 
   window.ConclusionTecnicaCSVV17=Object.freeze({
-    version:'17.2.0-csv',
+    version:'17.3.0-csv',
     sourceRows,
     normalizeBaseRow,
     baseRows,
@@ -37680,30 +37676,35 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v18c-css">
-#allpaConclusionCoreBtnV18C{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV18C{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1040px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV18C.open{display:block}.corev18c-ok{color:#177245;font-weight:700}.corev18c-fail{color:#b42318;font-weight:700}.corev18c-row{padding:6px 0;border-bottom:1px solid #eee}.corev18c-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV18C,#allpaConclusionCorePanelV18C{display:none!important}}
+<style id="allpa-conclusion-core-v18d-css">
+#allpaConclusionCoreBtnV18D{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV18D{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1060px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV18D.open{display:block}.corev18d-ok{color:#177245;font-weight:700}.corev18d-fail{color:#b42318;font-weight:700}.corev18d-row{padding:6px 0;border-bottom:1px solid #eee}.corev18d-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV18D,#allpaConclusionCorePanelV18D{display:none!important}}
 </style>
 
-<script id="allpa-conclusion-core-v18c-test">
+<script id="allpa-conclusion-core-v18d-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
-function row(role,d,q,x={}){const r={descripcion:d,cantidad:String(q??''),unidad:role.startsWith('cos')?'%':'m2',levels:[],allowLevels:role==='bruta',...x};if(role==='areaAmpliacionTotal')r._roleV13='areaAmpliacionTotal';else r._roleV108=role;return r}
 
 async function run(){
  const R=[],orig=C(state);
  try{
-  const CSV=window.ConclusionTecnicaCSVV17,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,K=window.ConclusionTecnicaKeysV14,Core=window.ConclusionTecnicaCoreV1;
-  A(R,'CSV V17C disponible',!!CSV,CSV?.version||'');
+  const CSV=window.ConclusionTecnicaCSVV17;
+  const P=window.ConclusionTecnicaPrepareV12;
+  const S=window.ConclusionTecnicaStructureV9;
+  const V7=window.ConclusionTecnicaV7;
+  const Core=window.ConclusionTecnicaCoreV1;
+
+  A(R,'Prepare V12D disponible',!!P,P?.version||'');
+  A(R,'CSV V17D disponible',!!CSV,CSV?.version||'');
 
   const bases=CSV.baseRows();
   A(R,'Base CSV',bases.length===10,`${bases.length} fila(s)`);
 
-  /* Construir respaldo legacy realista desde la misma base CSV, SIN metadata de origen. */
+  /* Legacy exacto: copiar la base y quitar TODA metadata moderna. */
   const legacy=bases.map((b,i)=>{
     const r={
       descripcion:b.descripcion,
@@ -37712,7 +37713,6 @@ async function run(){
       unidad:b.unidad||'m2',
       allowLevels:!!b.allowLevels
     };
-
     const role=S.role(b,i);
     if(role==='bruta'){
       r.intervention='Aprobada (Existente)';
@@ -37721,8 +37721,10 @@ async function run(){
     return r;
   });
 
-  /* Dar intervenciones diferentes a dos filas brutas, sin cambiar identidad. */
-  const brutaIdx=legacy.map((r,i)=>({r,i})).filter(x=>S.role(x.r,x.i)==='bruta').map(x=>x.i);
+  const brutaIdx=legacy.map((r,i)=>({r,i}))
+    .filter(x=>S.inferRoleFromDescription(x.r.descripcion)==='bruta')
+    .map(x=>x.i);
+
   if(brutaIdx.length>=2){
     legacy[brutaIdx[0]].intervention='Ampliación';
     legacy[brutaIdx[0]].tipoAreaV13='Ampliación';
@@ -37730,28 +37732,34 @@ async function run(){
     legacy[brutaIdx[1]].tipoAreaV13='Modificación';
   }
 
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:legacy}};
+  /* 1. Probar DIRECTAMENTE mergeRows, sin pasar por CSV.rebuild. */
+  const direct=P.mergeRows(C(legacy),C(bases),[]);
+  A(R,'mergeRows directo 10→10',direct.length===10,`10 → ${direct.length}`);
+
+  const directBase=direct.filter(r=>r._originV108==='base').length;
+  A(R,'mergeRows reclama 10 bases',directBase===10,`${directBase}/10`);
+
+  const directTypes=direct.filter((r,i)=>Core.role(r,i)==='bruta')
+    .map(r=>S.interventionOf(r)).join('|');
+  A(R,'mergeRows conserva tipos',directTypes.includes('Ampliación')&&directTypes.includes('Modificación'),directTypes);
+
+  /* 2. Probar el ATAJO complete→P.prepare() que rompía V18C. */
+  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:C(legacy)}};
   S.canonicalizeState();
 
   const before=state.aprobatorio.conclusion.length;
-  const beforeTypes=state.aprobatorio.conclusion
-    .filter((r,i)=>Core.role(r,i)==='bruta')
-    .map(r=>S.interventionOf(r)).join('|');
-
-  CSV.rebuild(false);
-
+  const rebuilt=CSV.rebuild(false);
   const after=state.aprobatorio.conclusion.length;
+
+  A(R,'Atajo rebuild legacy no duplica',before===10&&after===10,`${before} → ${after}`);
+  A(R,'Atajo puede devolver false sin duplicar',rebuilt===false,'base completa → prepare');
+
   const afterTypes=state.aprobatorio.conclusion
     .filter((r,i)=>Core.role(r,i)==='bruta')
     .map(r=>S.interventionOf(r)).join('|');
+  A(R,'Tipos sobreviven atajo',afterTypes.includes('Ampliación')&&afterTypes.includes('Modificación'),afterTypes);
 
-  A(R,'Legacy 10 no duplica',before===10&&after===10,`${before} → ${after}`);
-  A(R,'Tipos sobreviven rebuild',afterTypes===beforeTypes,`${beforeTypes} → ${afterTypes}`);
-
-  const baseMarked=state.aprobatorio.conclusion.filter(r=>r._originV108==='base').length;
-  A(R,'10 filas reconocidas como base',baseMarked===10,`${baseMarked}/10`);
-
-  /* Caso con una fila extra legítima: debe quedar 11, no 20. */
+  /* 3. Extra legítima */
   const extra={
     descripcion:'Área bruta personalizada',
     levels:[],
@@ -37761,40 +37769,43 @@ async function run(){
     intervention:'Modificación',
     tipoAreaV13:'Modificación'
   };
-  const totalIdx=legacy.findIndex((r,i)=>S.role(r,i)==='brutaTotal');
-  const legacyPlus=legacy.map(C);
+
+  const legacyPlus=C(legacy);
+  const totalIdx=legacyPlus.findIndex((r,i)=>S.inferRoleFromDescription(r.descripcion)==='brutaTotal');
   legacyPlus.splice(totalIdx>=0?totalIdx:legacyPlus.length,0,extra);
 
   state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:legacyPlus}};
   S.canonicalizeState();
   CSV.rebuild(false);
 
-  A(R,'Extra legítima se conserva una sola vez',
-    state.aprobatorio.conclusion.length===11,
-    `${state.aprobatorio.conclusion.length} fila(s)`);
-
-  A(R,'Extra queda custom',
+  A(R,'Extra legítima produce 11',state.aprobatorio.conclusion.length===11,`${state.aprobatorio.conclusion.length} fila(s)`);
+  A(R,'Extra legítima sigue custom',
     state.aprobatorio.conclusion.some(r=>r.descripcion==='Área bruta personalizada'&&r._originV108==='custom'),
     'custom presente');
 
-  /* Estado vacío */
+  /* 4. Estado vacío */
   state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[]}};
-  const rebuilt=CSV.rebuildIfEmpty();
-  A(R,'Reconstrucción desde vacío',rebuilt===true&&state.aprobatorio.conclusion.length===10,`${state.aprobatorio.conclusion.length} fila(s)`);
+  const emptyRebuild=CSV.rebuildIfEmpty();
+  A(R,'Vacío reconstruye 10',emptyRebuild===true&&state.aprobatorio.conclusion.length===10,`${state.aprobatorio.conclusion.length} fila(s)`);
 
-  /* Regresión tabla/informe sobre legacy limpio */
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:legacy.map(C)}};
+  /* 5. Regresión visual/matemática sobre legacy exacto */
+  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:C(legacy)}};
   S.canonicalizeState();
   CSV.rebuild(false);
 
+  const calc=V7.recalcular();
+  A(R,'Área Bruta calculada',Number.isFinite(Number(calc.formatted.areaBrutaTotal)),calc.formatted.areaBrutaTotal);
+  A(R,'Área Amp/Mod calculada',Number.isFinite(Number(calc.formatted.areaAmpMod)),calc.formatted.areaAmpMod);
+
   let cont=document.getElementById('conclusionTabla'),temp=false;
   if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
+
   V7.renderTabla();
   const tr=cont.querySelectorAll('tbody tr').length;
   const reportRows=V7.canonicalRows().length;
 
-  A(R,'Tabla queda en 10 filas',tr===10,`${tr} fila(s)`);
-  A(R,'Informe queda en 10 filas',reportRows===10,`${reportRows} fila(s)`);
+  A(R,'Tabla queda en 10',tr===10,`${tr} fila(s)`);
+  A(R,'Informe queda en 10',reportRows===10,`${reportRows} fila(s)`);
   A(R,'Tabla e informe alineados',tr===reportRows,`tabla ${tr} · informe ${reportRows}`);
 
   const html=V7.renderInforme();
@@ -37802,16 +37813,52 @@ async function run(){
   A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
 
   if(temp)cont.remove();
- }catch(e){A(R,'Banco Core V18C',false,e?.stack||e)}
- finally{state=orig;try{applyStateToUI()}catch(e){}}
+
+ }catch(e){
+  A(R,'Banco Core V18D',false,e?.stack||e);
+ }finally{
+  state=orig;
+  try{applyStateToUI()}catch(e){}
+ }
+
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV18C');
- p.innerHTML=`<h3>🩹 ALLPA CONCLUSIÓN CORE V18C</h3><div class="corev18c-note">Migra correctamente respaldos legacy: primera coincidencia por clave = base; duplicados reales = custom.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev18c-row"><span class="${x.ok?'corev18c-ok':'corev18c-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV18C">Copiar resultado</button> <button id="closeV18C">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV18C').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV18C').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V18C\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length;
+ const fail=R.length-ok;
+ const p=document.getElementById('allpaConclusionCorePanelV18D');
+
+ p.innerHTML=`<h3>🧩 ALLPA CONCLUSIÓN CORE V18D</h3>
+ <div class="corev18d-note">La clasificación base/custom ahora vive dentro de PrepareV12.mergeRows() y funciona también en el atajo complete→prepare.</div>
+ <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="corev18d-row"><span class="${x.ok?'corev18d-ok':'corev18d-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV18D">Copiar resultado</button> <button id="closeV18D">Cerrar</button></p>`;
+
+ p.classList.add('open');
+ document.getElementById('closeV18D').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV18D').onclick=async()=>{
+   const s=`ALLPA-CONCLUSION-CORE-V18D\nOK:${ok} FAIL:${fail}\n`+
+     R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+   try{await navigator.clipboard.writeText(s)}
+   catch(e){
+     const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();
+     try{document.execCommand('copy')}catch(_){}
+     t.remove();
+   }
+ };
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV18C';b.type='button';b.textContent='🩹 CORE CONCLUSIÓN V18C';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV18C';document.body.appendChild(p)},1200));
+
+window.addEventListener('load',()=>setTimeout(()=>{
+ const b=document.createElement('button');
+ b.id='allpaConclusionCoreBtnV18D';
+ b.type='button';
+ b.textContent='🧩 CORE CONCLUSIÓN V18D';
+ b.onclick=run;
+ document.body.appendChild(b);
+
+ const p=document.createElement('div');
+ p.id='allpaConclusionCorePanelV18D';
+ document.body.appendChild(p);
+},1200));
 })();
 </script>
 
