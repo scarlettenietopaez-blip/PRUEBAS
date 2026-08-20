@@ -36970,62 +36970,598 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v8-css">
-#allpaConclusionCoreBtnV8{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV8{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(960px,calc(100vw - 36px));max-height:86vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV8.open{display:block}.corev8-ok{color:#177245;font-weight:700}.corev8-fail{color:#b42318;font-weight:700}.corev8-row{padding:6px 0;border-bottom:1px solid #eee}
-@media print{#allpaConclusionCoreBtnV8,#allpaConclusionCorePanelV8{display:none!important}}
-</style>
-<script id="allpa-conclusion-core-v8-test">
-(function(){
-'use strict';
-function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
-function A(r,n,ok,d){r.push({name:n,ok:!!ok,detail:String(d||'')})}
-function row(role,d,q,x={}){const r={descripcion:d,cantidad:String(q??''),unidad:role.startsWith('cos')?'%':'m2',levels:[],allowLevels:role==='bruta',...x};if(role==='areaAmpliacionTotal')r._roleV13='areaAmpliacionTotal';else r._roleV108=role;return r}
-function fixture(){return{tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[
-row('predio','Área del predio',500),row('utilPB','Área útil planta baja',100),row('utilTotal','Área útil total',200),
-row('bruta','Área bruta planta baja',100,{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
-row('bruta','Área bruta primera planta alta',50,{intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
-row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación'}),
-row('brutaTotal','Área Bruta total de construcción',''),row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
-row('cosPB','COS PB',''),row('cosTotal','COS TOTAL','')]}}}
-async function run(){
- const R=[],orig=C(state);
- try{
-  const V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
-  A(R,'Control Central V7',!!V7,V7?.version||'');
-  A(R,'Renderer histórico V4 ya no requerido',window.__renderConclusionTablaHistoricoV4==null,'fallback nulo');
-  state=fixture();V7.prepare();
-  const calc=V7.recalcular();
-  A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
-  A(R,'Área Amp/Mod',calc.formatted.areaAmpMod==='75.00',calc.formatted.areaAmpMod);
-  A(R,'COS PB',calc.formatted.cosPB==='20.00',calc.formatted.cosPB);
-  A(R,'COS Total',calc.formatted.cosTotal==='40.00',calc.formatted.cosTotal);
-  let cont=document.getElementById('conclusionTabla'),temp=false;
-  if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
-  V7.renderTabla();
-  const tr=cont.querySelectorAll('tbody tr').length;
-  A(R,'Tabla Core sin renderer histórico',!!cont.querySelector('.editable-conclusion-core-v4'),`${tr} fila(s)`);
-  const html=V7.renderInforme();
-  A(R,'Informe Core sin report histórico',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
-  A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
-  const brutas=state.aprobatorio.conclusion.map((r,i)=>({r,i})).filter(x=>Core.role(x.r,x.i)==='bruta');
-  V7.setIntervention(brutas[0].i,'Modificación',{render:false});
-  A(R,'Intervención canónica',state.aprobatorio.conclusion[brutas[0].i].intervention==='Modificación','Modificación');
-  const calc2=V7.recalcular();
-  A(R,'Recálculo tras intervención',calc2.formatted.areaBrutaTotal==='50.00',calc2.formatted.areaBrutaTotal);
-  A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
-  A(R,'Rutas públicas V7',window.renderConclusionTabla.toString().includes('facade.renderTabla')&&window.conclusionReport.toString().includes('facade.renderInforme')&&window.recalcAreasCOSV36.toString().includes('facade.recalcular'),'tabla · informe · cálculo');
-  if(temp)cont.remove();
- }catch(e){A(R,'Banco V8',false,e?.stack||e)}
- finally{state=orig;try{applyStateToUI()}catch(e){}}
- A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV8');
- p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V8</h3><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev8-row"><span class="${x.ok?'corev8-ok':'corev8-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV8">Copiar resultado</button> <button id="closeV8">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV8').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV8').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V8\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+<style id="allpa-conclusion-core-v9-css">
+#allpaConclusionCoreBtnV9{
+ position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
+ padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV8';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V8';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV8';document.body.appendChild(p)},1200));
+#allpaConclusionCorePanelV9{
+ display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
+ width:min(1000px,calc(100vw - 36px));max-height:87vh;overflow:auto;
+ background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
+ box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
+}
+#allpaConclusionCorePanelV9.open{display:block}
+.corev9-ok{color:#177245;font-weight:700}.corev9-fail{color:#b42318;font-weight:700}
+.corev9-row{padding:6px 0;border-bottom:1px solid #eee}
+.corev9-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV9,#allpaConclusionCorePanelV9{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v9">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V9 — ESTRUCTURA / ROLES / IDENTIDAD
+
+   Responsabilidades centralizadas:
+   - normalización estructural;
+   - inferencia de roles;
+   - identidad estable por fila;
+   - origen/base/custom;
+   - Tipo de intervención como propiedad canónica;
+   - compatibilidad temporal con metadata histórica.
+
+   En esta fase prepareRowsConclV108 todavía existe, pero queda envuelto:
+   después de reconstruir, V9 vuelve a canonicalizar la estructura.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const Core=window.ConclusionTecnicaCoreV1;
+  if(!Core) return;
+
+  function clone(v){
+    try{return structuredClone(v)}
+    catch(_e){return JSON.parse(JSON.stringify(v))}
+  }
+
+  function norm(v){
+    return String(v??'')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\s+/g,' ')
+      .trim()
+      .toUpperCase();
+  }
+
+  function cleanBaseKey(value){
+    return String(value||'')
+      .replace(/\|\|TIPO:[^|]+$/i,'')
+      .trim();
+  }
+
+  function descriptionOf(raw){
+    if(!raw) return '';
+    if(raw.descripcion!==undefined) return String(raw.descripcion||'');
+    if(raw.Descripción!==undefined) return String(raw.Descripción||'');
+    if(raw.Descripcion!==undefined) return String(raw.Descripcion||'');
+    if(Array.isArray(raw.cells)) return String(raw.cells[0]||'');
+    return '';
+  }
+
+  function quantityOf(raw){
+    if(!raw) return '';
+    if(raw.cantidad!==undefined) return String(raw.cantidad??'');
+    if(raw.Cantidad!==undefined) return String(raw.Cantidad??'');
+    if(Array.isArray(raw.cells)) return String(raw.cells[1]??'');
+    return '';
+  }
+
+  function unitOf(raw){
+    if(!raw) return 'm2';
+    if(raw.unidad!==undefined) return String(raw.unidad||'m2');
+    if(raw.Unidad!==undefined) return String(raw.Unidad||'m2');
+    if(Array.isArray(raw.cells) && raw.cells.length) return String(raw.cells[raw.cells.length-1]||'m2');
+    return 'm2';
+  }
+
+  function levelsOf(raw){
+    if(Array.isArray(raw?.levels)) return raw.levels.map(v=>String(v??''));
+    if(Array.isArray(raw?.cells)){
+      return raw.cells.slice(2,Math.max(2,raw.cells.length-1))
+        .filter(v=>String(v??'').trim())
+        .map(v=>String(v??''));
+    }
+    return [];
+  }
+
+  function inferRoleFromDescription(value){
+    const d=norm(value);
+
+    if(d.includes('AREA TOTAL DE AMPLIACION') ||
+       (d.includes('AREA') && d.includes('AMPLIACION') && d.includes('MODIFICACION') && d.includes('TOTAL'))){
+      return 'areaAmpliacionTotal';
+    }
+
+    if(d.includes('AREA') && d.includes('BRUTA') && d.includes('TOTAL')) return 'brutaTotal';
+    if(d.includes('AREA') && d.includes('BRUTA')) return 'bruta';
+    if(d.includes('AREA') && d.includes('PREDIO')) return 'predio';
+    if(d.includes('AREA') && d.includes('UTIL') && d.includes('PLANTA BAJA')) return 'utilPB';
+    if(d.includes('AREA') && d.includes('UTIL') && d.includes('TOTAL')) return 'utilTotal';
+    if(d==='COS PB' || d.includes('COS PB')) return 'cosPB';
+    if(d.includes('COS TOTAL')) return 'cosTotal';
+
+    return '';
+  }
+
+  function role(raw,index=null){
+    const source=raw || (
+      Number.isInteger(index)
+        ? state?.aprobatorio?.conclusion?.[index]
+        : null
+    ) || {};
+
+    const explicit=String(
+      source.role ||
+      source._ctRoleV9 ||
+      source._roleV13 ||
+      source._roleV108 ||
+      source._roleV104 ||
+      ''
+    ).trim();
+
+    let result=explicit;
+
+    if(!result && source._fixedAreaAmpliacionV13){
+      result='areaAmpliacionTotal';
+    }
+
+    if(!result){
+      result=inferRoleFromDescription(descriptionOf(source));
+    }
+
+    if(source && typeof source==='object' && result){
+      source._ctRoleV9=result;
+      source.role=result;
+
+      /* Puentes temporales mientras las generaciones V104/V108/V13 existan. */
+      source._roleV108=source._roleV108 || result;
+      source._roleV104=source._roleV104 || result;
+      if(result==='areaAmpliacionTotal') source._roleV13='areaAmpliacionTotal';
+    }
+
+    return result;
+  }
+
+  function interventionOf(raw){
+    const r=role(raw);
+    if(r!=='bruta') return '';
+
+    return Core.normalizeIntervention(
+      raw?.intervention ?? raw?.tipoAreaV13 ?? 'Aprobada (Existente)'
+    );
+  }
+
+  function originOf(raw){
+    const existing=String(raw?.origin || raw?._originV108 || '').trim().toLowerCase();
+    if(existing==='base' || existing==='custom') return existing;
+    if(raw?._userRowV108) return 'custom';
+    if(raw?._baseKeyV108) return 'base';
+    return 'custom';
+  }
+
+  function semanticBase(raw,index=0){
+    const explicit=cleanBaseKey(raw?._baseKeyV108 || raw?.baseKey || '');
+    if(explicit) return `BASE::${explicit}`;
+
+    const r=role(raw,index)||'row';
+    const desc=norm(descriptionOf(raw))||'SIN_DESCRIPCION';
+    const levels=levelsOf(raw).map(norm).join('|');
+
+    return `${r}::${desc}::${levels}`;
+  }
+
+  function normalizeRow(raw,index=0){
+    const source=raw||{};
+    const r=role(source,index);
+    const type=r==='bruta' ? interventionOf(source) : '';
+
+    return {
+      id:String(source._ctIdV9 || source.id || ''),
+      descripcion:descriptionOf(source),
+      levels:levelsOf(source),
+      cantidad:quantityOf(source),
+      unidad:unitOf(source),
+      allowLevels:source.allowLevels!==undefined
+        ? !!source.allowLevels
+        : r==='bruta',
+      role:r,
+      origin:originOf(source),
+      baseOrder:Number.isFinite(Number(source.baseOrder ?? source._baseOrderV108))
+        ? Number(source.baseOrder ?? source._baseOrderV108)
+        : index,
+      intervention:type,
+      calculated:['brutaTotal','areaAmpliacionTotal','cosPB','cosTotal'].includes(r),
+      sourceMeta:{
+        baseKey:cleanBaseKey(source._baseKeyV108||''),
+        userRow:!!source._userRowV108
+      }
+    };
+  }
+
+  function canonicalizeRows(rows){
+    const arr=Array.isArray(rows)?rows:[];
+    const occurrences=new Map();
+
+    arr.forEach((raw,index)=>{
+      if(!raw || typeof raw!=='object') return;
+
+      const r=role(raw,index);
+      const type=r==='bruta' ? interventionOf(raw) : '';
+
+      if(r==='bruta'){
+        raw.intervention=type;
+        raw.tipoAreaV13=type;
+      }
+
+      raw.origin=originOf(raw);
+      raw._originV108=raw.origin;
+      if(raw.origin==='custom') raw._userRowV108=true;
+
+      const base=semanticBase(raw,index);
+      const count=(occurrences.get(base)||0)+1;
+      occurrences.set(base,count);
+
+      if(!raw._ctIdV9){
+        raw._ctIdV9=`${base}#${count}`;
+      }
+
+      raw.role=r;
+      raw._ctRoleV9=r;
+
+      if(!Number.isFinite(Number(raw.baseOrder ?? raw._baseOrderV108))){
+        raw.baseOrder=index;
+      }else{
+        raw.baseOrder=Number(raw.baseOrder ?? raw._baseOrderV108);
+      }
+    });
+
+    return arr;
+  }
+
+  function canonicalizeState(){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+
+    canonicalizeRows(state.aprobatorio.conclusion);
+    return state.aprobatorio.conclusion;
+  }
+
+  function serializeRows(rows){
+    const copy=clone(rows||[]);
+    canonicalizeRows(copy);
+    return JSON.stringify(copy);
+  }
+
+  function deserializeRows(json){
+    const rows=JSON.parse(String(json||'[]'));
+    canonicalizeRows(rows);
+    return rows;
+  }
+
+  /* Capturas para auditoría V9. */
+  const legacy={
+    roleConclV108:typeof window.roleConclV108==='function'?window.roleConclV108:null,
+    conclusionRoleV104:typeof window.conclusionRoleV104==='function'?window.conclusionRoleV104:null,
+    roleFromDescV108:typeof window.roleFromDescV108==='function'?window.roleFromDescV108:null,
+    inferConclusionRoleV104:typeof window.inferConclusionRoleV104==='function'?window.inferConclusionRoleV104:null,
+    prepareRowsConclV108:typeof window.prepareRowsConclV108==='function'?window.prepareRowsConclV108:null
+  };
+
+  const API={
+    version:'9.0.0-structure',
+    norm,
+    cleanBaseKey,
+    inferRoleFromDescription,
+    role,
+    interventionOf,
+    originOf,
+    semanticBase,
+    normalizeRow,
+    canonicalizeRows,
+    canonicalizeState,
+    serializeRows,
+    deserializeRows,
+    legacy
+  };
+
+  window.ConclusionTecnicaStructureV9=Object.freeze(API);
+
+  /* ----------------------------------------------------------
+     CENTRALIZACIÓN DE ROLES PÚBLICOS
+     ---------------------------------------------------------- */
+
+  window.roleFromDescV108=function(desc){
+    return API.inferRoleFromDescription(desc);
+  };
+
+  window.inferConclusionRoleV104=function(desc){
+    return API.inferRoleFromDescription(desc);
+  };
+
+  window.roleConclV108=function(rawOrRow,i=null){
+    const raw=i!==null
+      ? (state?.aprobatorio?.conclusion?.[i] || rawOrRow)
+      : rawOrRow;
+    return API.role(raw,i);
+  };
+
+  window.conclusionRoleV104=function(i,row){
+    const raw=state?.aprobatorio?.conclusion?.[i] || row || {};
+    return API.role(raw,i);
+  };
+
+  try{ roleFromDescV108=window.roleFromDescV108; }catch(_e){}
+  try{ inferConclusionRoleV104=window.inferConclusionRoleV104; }catch(_e){}
+  try{ roleConclV108=window.roleConclV108; }catch(_e){}
+  try{ conclusionRoleV104=window.conclusionRoleV104; }catch(_e){}
+
+  /* ----------------------------------------------------------
+     PREPARACIÓN HISTÓRICA + CANONICALIZACIÓN V9
+     ---------------------------------------------------------- */
+
+  if(legacy.prepareRowsConclV108 && !legacy.prepareRowsConclV108.__ctStructureV9Wrapped){
+    const wrappedPrepare=function(){
+      const out=legacy.prepareRowsConclV108.apply(this,arguments);
+      API.canonicalizeState();
+      return out;
+    };
+
+    wrappedPrepare.__ctStructureV9Wrapped=true;
+    wrappedPrepare.__ctStructureV9Original=legacy.prepareRowsConclV108;
+
+    window.prepareRowsConclV108=wrappedPrepare;
+    try{ prepareRowsConclV108=window.prepareRowsConclV108; }catch(_e){}
+  }
+
+  /* Canonicalizar al cargar sin reconstruir filas. */
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      try{API.canonicalizeState();}catch(_e){}
+    },800);
+  });
+})();
+</script>
+
+<script id="allpa-conclusion-core-v9-test">
+(function(){
+  'use strict';
+
+  function C(v){
+    try{return structuredClone(v)}
+    catch(_e){return JSON.parse(JSON.stringify(v))}
+  }
+
+  function A(R,name,ok,detail){
+    R.push({name,ok:!!ok,detail:String(detail||'')});
+  }
+
+  function row(role,descripcion,cantidad,extra={}){
+    const r={
+      descripcion,
+      cantidad:String(cantidad??''),
+      unidad:role.startsWith('cos')?'%':'m2',
+      levels:[],
+      allowLevels:role==='bruta',
+      ...extra
+    };
+
+    if(role==='areaAmpliacionTotal') r._roleV13='areaAmpliacionTotal';
+    else r._roleV108=role;
+
+    return r;
+  }
+
+  function fixture(){
+    return {
+      tipoInforme:'Informe Técnico Aprobatorio',
+      aprobatorio:{conclusion:[
+        row('predio','Área del predio',500,{_baseKeyV108:'AREA DEL PREDIO'}),
+        row('utilPB','Área útil planta baja',100),
+        row('utilTotal','Área útil total',200),
+        row('bruta','Área bruta planta baja',100,{
+          _baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)',
+          intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'
+        }),
+        row('bruta','Área bruta planta baja',50,{
+          _baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:AMPLIACION',
+          intervention:'Ampliación',tipoAreaV13:'Ampliación'
+        }),
+        row('bruta','Área bruta primera planta alta',25,{
+          intervention:'Modificación',tipoAreaV13:'Modificación'
+        }),
+        row('brutaTotal','Área Bruta total de construcción',''),
+        row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
+        row('cosPB','COS PB',''),
+        row('cosTotal','COS TOTAL','')
+      ]}
+    };
+  }
+
+  async function run(){
+    const R=[];
+    const original=C(state);
+    const S=window.ConclusionTecnicaStructureV9;
+    const Core=window.ConclusionTecnicaCoreV1;
+    const V7=window.ConclusionTecnicaV7;
+
+    try{
+      A(R,'Structure V9 disponible',!!S,S?.version||'');
+      if(!S || !Core || !V7) throw new Error('Structure/Core/V7 no disponible.');
+
+      state=fixture();
+      S.canonicalizeState();
+
+      const rows=state.aprobatorio.conclusion;
+      A(R,'Mismo número de filas',rows.length===10,`${rows.length} fila(s)`);
+
+      const roles=rows.map((r,i)=>S.role(r,i));
+      A(R,'Roles estructurales',
+        ['predio','utilPB','utilTotal','bruta','brutaTotal','areaAmpliacionTotal','cosPB','cosTotal']
+          .every(role=>roles.includes(role)),
+        [...new Set(roles)].join(' · '));
+
+      const coreRoles=rows.map((r,i)=>Core.role(r,i));
+      A(R,'Paridad Roles V9/Core',
+        JSON.stringify(roles)===JSON.stringify(coreRoles),
+        roles.map((r,i)=>`${r}/${coreRoles[i]}`).join(' · '));
+
+      const ids=rows.map(r=>r._ctIdV9);
+      A(R,'IDs V9 completos',
+        ids.every(Boolean),
+        `${ids.filter(Boolean).length}/${ids.length}`);
+
+      A(R,'IDs V9 únicos',
+        new Set(ids).size===ids.length,
+        `${new Set(ids).size}/${ids.length}`);
+
+      const brutas=rows.map((r,i)=>({r,i})).filter(x=>S.role(x.r,x.i)==='bruta');
+      const first=brutas[0];
+      const idBefore=first.r._ctIdV9;
+
+      first.r.intervention='Modificación';
+      first.r.tipoAreaV13='Modificación';
+      S.canonicalizeState();
+
+      A(R,'ID no depende de Tipo de intervención',
+        first.r._ctIdV9===idBefore,
+        first.r._ctIdV9);
+
+      A(R,'Base key sin TIPO',
+        !S.semanticBase(first.r,first.i).includes('||TIPO:'),
+        S.semanticBase(first.r,first.i));
+
+      const json=S.serializeRows(rows);
+      const restored=S.deserializeRows(json);
+
+      A(R,'Serialización conserva IDs',
+        restored.map(r=>r._ctIdV9).join('|')===rows.map(r=>r._ctIdV9).join('|'),
+        `${restored.length} fila(s)`);
+
+      A(R,'Serialización conserva intervenciones',
+        restored.filter((r,i)=>S.role(r,i)==='bruta')
+          .map(r=>S.interventionOf(r)).join('|')===
+        rows.filter((r,i)=>S.role(r,i)==='bruta')
+          .map(r=>S.interventionOf(r)).join('|'),
+        restored.filter((r,i)=>S.role(r,i)==='bruta').map(r=>S.interventionOf(r)).join(' · '));
+
+      A(R,'roleConclV108 ruteado a V9',
+        window.roleConclV108.toString().includes('API.role'),
+        'Structure V9');
+
+      A(R,'conclusionRoleV104 ruteado a V9',
+        window.conclusionRoleV104.toString().includes('API.role'),
+        'Structure V9');
+
+      A(R,'roleFromDescV108 ruteado a V9',
+        window.roleFromDescV108.toString().includes('inferRoleFromDescription'),
+        'Structure V9');
+
+      if(typeof prepareRowsConclV108==='function'){
+        A(R,'prepareRowsConclV108 protegido por V9',
+          !!prepareRowsConclV108.__ctStructureV9Wrapped,
+          'canonicaliza después de reconstruir');
+      }
+
+      /* Regresión del núcleo validado */
+      const calc=V7.recalcular();
+      A(R,'Área Bruta tras V9',
+        calc.formatted.areaBrutaTotal==='75.00',
+        `esperado 75.00 · obtenido ${calc.formatted.areaBrutaTotal}`);
+
+      A(R,'Área Amp/Mod tras V9',
+        calc.formatted.areaAmpMod==='175.00',
+        `esperado 175.00 · obtenido ${calc.formatted.areaAmpMod}`);
+
+      A(R,'COS PB tras V9',
+        calc.formatted.cosPB==='20.00',
+        calc.formatted.cosPB);
+
+      A(R,'COS Total tras V9',
+        calc.formatted.cosTotal==='40.00',
+        calc.formatted.cosTotal);
+
+      let cont=document.getElementById('conclusionTabla'),temp=false;
+      if(!cont){
+        cont=document.createElement('div');
+        cont.id='conclusionTabla';
+        document.body.appendChild(cont);
+        temp=true;
+      }
+
+      V7.renderTabla();
+      const tableRows=cont.querySelectorAll('tbody tr').length;
+      const reportRows=V7.canonicalRows().length;
+
+      A(R,'Tabla e informe siguen alineados',
+        tableRows===reportRows,
+        `tabla ${tableRows} · informe ${reportRows}`);
+
+      const html=V7.renderInforme();
+      A(R,'Informe Core sigue activo',
+        /conclusion-report-core-v6b/.test(html),
+        `${html.length} caracteres`);
+
+      if(temp) cont.remove();
+
+    }catch(e){
+      A(R,'Banco Core V9',false,e?.stack||e);
+    }finally{
+      state=original;
+      try{applyStateToUI()}catch(_e){}
+    }
+
+    A(R,'Formulario original restaurado',true,'state restaurado');
+
+    const ok=R.filter(x=>x.ok).length;
+    const fail=R.length-ok;
+    const p=document.getElementById('allpaConclusionCorePanelV9');
+
+    p.innerHTML=`<h3>🧱 ALLPA CONCLUSIÓN CORE V9</h3>
+      <div class="corev9-note">
+        V9 centraliza estructura, roles e identidad. Los helpers históricos
+        todavía existen físicamente, pero los roles públicos ya entran por V9.
+      </div>
+      <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+      R.map(x=>`<div class="corev9-row">
+        <span class="${x.ok?'corev9-ok':'corev9-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
+        <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
+      </div>`).join('')+
+      `<p><button id="copyCoreV9">Copiar resultado</button>
+      <button id="closeCoreV9">Cerrar</button></p>`;
+
+    p.classList.add('open');
+    document.getElementById('closeCoreV9').onclick=()=>p.classList.remove('open');
+
+    document.getElementById('copyCoreV9').onclick=async()=>{
+      const txt=`ALLPA-CONCLUSION-CORE-V9\nOK:${ok} FAIL:${fail}\n`+
+        R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+
+      try{
+        await navigator.clipboard.writeText(txt);
+      }catch(_e){
+        const ta=document.createElement('textarea');
+        ta.value=txt;
+        ta.style.position='fixed';
+        ta.style.opacity='0';
+        document.body.appendChild(ta);
+        ta.select();
+        try{document.execCommand('copy')}catch(__e){}
+        ta.remove();
+      }
+    };
+  }
+
+  window.addEventListener('load',()=>setTimeout(()=>{
+    const b=document.createElement('button');
+    b.id='allpaConclusionCoreBtnV9';
+    b.type='button';
+    b.textContent='🧱 CORE CONCLUSIÓN V9';
+    b.onclick=run;
+    document.body.appendChild(b);
+
+    const p=document.createElement('div');
+    p.id='allpaConclusionCorePanelV9';
+    document.body.appendChild(p);
+  },1200));
 })();
 </script>
 
