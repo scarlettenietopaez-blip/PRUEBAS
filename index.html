@@ -37036,24 +37036,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v6b-css">
-#allpaConclusionCoreBtnV6B{
- position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
- padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
-}
-#allpaConclusionCorePanelV6B{
- display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
- width:min(980px,calc(100vw - 36px));max-height:86vh;overflow:auto;
- background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
- box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
-}
-#allpaConclusionCorePanelV6B.open{display:block}
-.corev6b-ok{color:#177245;font-weight:700}.corev6b-fail{color:#b42318;font-weight:700}
-.corev6b-row{padding:6px 0;border-bottom:1px solid #eee}
-.corev6b-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV6B,#allpaConclusionCorePanelV6B{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v6b">
 (function(){
   'use strict';
@@ -37221,7 +37203,204 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v6b-test">
+
+<style id="allpa-conclusion-core-v7-css">
+#allpaConclusionCoreBtnV7{
+ position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
+ padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
+}
+#allpaConclusionCorePanelV7{
+ display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
+ width:min(980px,calc(100vw - 36px));max-height:86vh;overflow:auto;
+ background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
+ box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
+}
+#allpaConclusionCorePanelV7.open{display:block}
+.corev7-ok{color:#177245;font-weight:700}.corev7-fail{color:#b42318;font-weight:700}
+.corev7-row{padding:6px 0;border-bottom:1px solid #eee}
+.corev7-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV7,#allpaConclusionCorePanelV7{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v7">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V7 — CONTROL CENTRAL
+
+   Una sola fachada pública:
+     window.ConclusionTecnicaV7
+
+   Todas las entradas activas pasan por esta capa:
+   - renderTabla()
+   - renderInforme()
+   - recalcular()
+   - sumaAreasBrutas()
+   - setIntervention()
+   - addRow()
+   - removeRow()
+   - canonicalRows()
+
+   Las funciones históricas quedan fuera de la ruta activa,
+   pero siguen presentes como fallback durante esta fase.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const Core=window.ConclusionTecnicaCoreV1;
+  const Bridge=window.ConclusionTecnicaBridgeV3;
+  const Renderer=window.ConclusionTecnicaRendererV4;
+  const MathV5=window.ConclusionTecnicaMathV5;
+  const Report=window.ConclusionTecnicaReportV6B;
+
+  if(!Core || !Bridge || !Renderer || !MathV5 || !Report) return;
+
+  function prepare(){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+
+    if(typeof ensureAreaUtilTotalConclusionV119N==='function'){
+      ensureAreaUtilTotalConclusionV119N();
+    }
+    if(typeof ensureAreaTotalV13==='function'){
+      ensureAreaTotalV13();
+    }
+
+    Bridge.canonicalizeState();
+    MathV5.calculateState();
+    Bridge.canonicalizeState();
+
+    return state.aprobatorio.conclusion;
+  }
+
+  function renderTabla(){
+    prepare();
+    return Renderer.render();
+  }
+
+  function renderInforme(){
+    prepare();
+    return Report.reportHtml();
+  }
+
+  function recalcular(){
+    return MathV5.calculateState();
+  }
+
+  function sumaAreasBrutas(){
+    const result=MathV5.calculateState();
+    return {
+      sum:result.values.areaBrutaTotal,
+      count:result.values.brutaCount
+    };
+  }
+
+  function setIntervention(index,value,{render=true}={}){
+    prepare();
+
+    const raw=state.aprobatorio?.conclusion?.[index];
+    if(!raw || Core.role(raw,index)!=='bruta') return false;
+
+    const next=Core.normalizeIntervention(value);
+    raw.intervention=next;
+    raw.tipoAreaV13=next;
+
+    MathV5.calculateState();
+    Bridge.canonicalizeState();
+
+    if(render){
+      renderTabla();
+      try{
+        if(typeof renderReport==='function') renderReport();
+        if(typeof renderPreview==='function') renderPreview();
+      }catch(_e){}
+    }
+
+    return true;
+  }
+
+  function addRow(){
+    prepare();
+    const row=Renderer.addRow();
+    prepare();
+    return row;
+  }
+
+  function removeRow(index){
+    prepare();
+    const ok=Renderer.removeRow(index);
+    prepare();
+    return ok;
+  }
+
+  function canonicalRows(){
+    prepare();
+    return Report.canonicalRows();
+  }
+
+  const facade={
+    version:'7.0.0-central',
+    prepare,
+    renderTabla,
+    renderInforme,
+    recalcular,
+    sumaAreasBrutas,
+    setIntervention,
+    addRow,
+    removeRow,
+    canonicalRows
+  };
+
+  window.ConclusionTecnicaV7=Object.freeze(facade);
+
+  /* ----------------------------------------------------------
+     RUTEO PÚBLICO ÚNICO
+     ---------------------------------------------------------- */
+
+  window.renderConclusionTabla=function(){
+    return facade.renderTabla();
+  };
+  try{ renderConclusionTabla=window.renderConclusionTabla; }catch(_e){}
+
+  window.conclusionReport=function(){
+    return facade.renderInforme();
+  };
+  try{ conclusionReport=window.conclusionReport; }catch(_e){}
+
+  window.recalcAreasCOSV36=function(){
+    if(window.__ALLPA_RESET_CONCLUSION_V61__) return;
+    return facade.recalcular();
+  };
+  try{ recalcAreasCOSV36=window.recalcAreasCOSV36; }catch(_e){}
+
+  window.sumaAreasBrutasConclusionV119N=function(){
+    return facade.sumaAreasBrutas();
+  };
+  try{ sumaAreasBrutasConclusionV119N=window.sumaAreasBrutasConclusionV119N; }catch(_e){}
+
+  window.updateAreaTypeV13=function(index,value){
+    return facade.setIntervention(index,value,{render:true});
+  };
+
+  /* Registrar las rutas activas para auditoría. */
+  window.__ConclusionTecnicaRoutesV7={
+    renderConclusionTabla:'ConclusionTecnicaV7.renderTabla',
+    conclusionReport:'ConclusionTecnicaV7.renderInforme',
+    recalcAreasCOSV36:'ConclusionTecnicaV7.recalcular',
+    sumaAreasBrutasConclusionV119N:'ConclusionTecnicaV7.sumaAreasBrutas',
+    updateAreaTypeV13:'ConclusionTecnicaV7.setIntervention'
+  };
+
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      try{
+        prepare();
+        if(document.getElementById('conclusionTabla')) renderTabla();
+      }catch(_e){}
+    },1050);
+  });
+})();
+</script>
+
+<script id="allpa-conclusion-core-v7-test">
 (function(){
   'use strict';
 
@@ -37282,65 +37461,64 @@ textarea.evidencia-text,
   async function run(){
     const R=[];
     const original=clone(state);
+    const V7=window.ConclusionTecnicaV7;
+    const Core=window.ConclusionTecnicaCoreV1;
 
     try{
-      const Core=window.ConclusionTecnicaCoreV1;
-      const Bridge=window.ConclusionTecnicaBridgeV3;
-      const MathV5=window.ConclusionTecnicaMathV5;
-      const Report=window.ConclusionTecnicaReportV6B;
+      add(R,'Control Central V7 disponible',!!V7,V7?.version||'');
+      if(!V7 || !Core) throw new Error('V7/Core no disponible.');
 
-      add(R,'Core disponible',!!Core,Core?.version||'');
-      add(R,'Bridge disponible',!!Bridge,Bridge?.version||'');
-      add(R,'Math V5 disponible',!!MathV5,MathV5?.version||'');
-      add(R,'Report V6B disponible',!!Report,Report?.version||'');
+      const routes=window.__ConclusionTecnicaRoutesV7||{};
+      add(R,'Rutas públicas centralizadas',
+        Object.keys(routes).length===5,
+        Object.values(routes).join(' · '));
 
       state=fixture();
-      Bridge.canonicalizeState();
-      MathV5.calculateState({ampMod:true});
+      V7.prepare();
 
-      const rows=Report.canonicalRows();
+      const rows=V7.canonicalRows();
 
-      add(R,'Filas canónicas del informe',
-        rows.length===state.aprobatorio.conclusion.length,
-        `state ${state.aprobatorio.conclusion.length} · informe ${rows.length}`);
+      add(R,'Filas canónicas',
+        rows.length===10,
+        `${rows.length} fila(s)`);
 
-      const brutaTotal=rows.find(r=>r.role==='brutaTotal');
-      const ampTotal=rows.find(r=>r.role==='areaAmpliacionTotal');
-      const cosPB=rows.find(r=>r.role==='cosPB');
-      const cosTotal=rows.find(r=>r.role==='cosTotal');
+      const sums=V7.sumaAreasBrutas();
+      add(R,'Área Bruta Central',
+        Number(sums.sum)===150,
+        `150 esperado · ${sums.sum} obtenido`);
 
-      add(R,'Área Bruta Total en informe',
-        brutaTotal?.cantidad==='150.00',
-        brutaTotal?.cantidad??'ausente');
+      const calc=V7.recalcular();
 
-      add(R,'Área Amp/Mod en informe',
-        ampTotal?.cantidad==='75.00',
-        ampTotal?.cantidad??'ausente');
+      add(R,'Área Amp/Mod Central',
+        calc.formatted.areaAmpMod==='75.00',
+        calc.formatted.areaAmpMod);
 
-      add(R,'COS PB en informe',
-        cosPB?.cantidad==='20.00',
-        cosPB?.cantidad??'ausente');
+      add(R,'COS PB Central',
+        calc.formatted.cosPB==='20.00',
+        calc.formatted.cosPB);
 
-      add(R,'COS Total en informe',
-        cosTotal?.cantidad==='40.00',
-        cosTotal?.cantidad??'ausente');
+      add(R,'COS Total Central',
+        calc.formatted.cosTotal==='40.00',
+        calc.formatted.cosTotal);
 
-      const html=Report.reportHtml();
+      /* Cambio de intervención por ruta pública oficial */
+      const brutas=state.aprobatorio.conclusion
+        .map((r,i)=>({r,i}))
+        .filter(x=>Core.role(x.r,x.i)==='bruta');
 
-      add(R,'HTML informe V6B generado',
-        /conclusion-report-core-v6b/.test(html),
-        `${html.length} caracteres`);
+      V7.setIntervention(brutas[0].i,'Modificación',{render:false});
 
-      add(R,'Informe contiene Ampliación',
-        /Ampliación/i.test(html),
-        'tipo visible');
+      add(R,'setIntervention canónico',
+        state.aprobatorio.conclusion[brutas[0].i].intervention==='Modificación' &&
+        state.aprobatorio.conclusion[brutas[0].i].tipoAreaV13==='Modificación',
+        `${state.aprobatorio.conclusion[brutas[0].i].intervention}/${state.aprobatorio.conclusion[brutas[0].i].tipoAreaV13}`);
 
-      add(R,'Informe contiene Modificación',
-        /Modificación/i.test(html),
-        'tipo visible');
+      const calc2=V7.recalcular();
+      add(R,'Recálculo tras cambiar intervención',
+        calc2.formatted.areaBrutaTotal==='50.00',
+        `esperado 50.00 · obtenido ${calc2.formatted.areaBrutaTotal}`);
 
-      /* Renderizar la tabla oficial DESPUÉS de preparar el informe.
-         Ambos deben trabajar ya sobre la misma estructura. */
+      /* Tabla oficial */
       let cont=document.getElementById('conclusionTabla'),temp=false;
       if(!cont){
         cont=document.createElement('div');
@@ -37349,34 +37527,61 @@ textarea.evidencia-text,
         temp=true;
       }
 
-      if(typeof renderConclusionTabla==='function'){
-        renderConclusionTabla();
-      }
+      V7.renderTabla();
 
-      const tableRows=cont.querySelectorAll('tbody tr').length;
-      const reportRows=Report.canonicalRows().length;
+      add(R,'renderConclusionTabla en ruta V7',
+        !!cont.querySelector('.editable-conclusion-core-v4'),
+        `${cont.querySelectorAll('tbody tr').length} fila(s)`);
+
+      const html=V7.renderInforme();
+
+      add(R,'conclusionReport en ruta V7',
+        /conclusion-report-core-v6b/.test(html),
+        `${html.length} caracteres`);
 
       add(R,'Tabla e informe mismo número de filas',
-        tableRows===reportRows,
-        `tabla ${tableRows} · informe ${reportRows}`);
+        cont.querySelectorAll('tbody tr').length===V7.canonicalRows().length,
+        `tabla ${cont.querySelectorAll('tbody tr').length} · informe ${V7.canonicalRows().length}`);
 
-      const globalHtml=typeof conclusionReport==='function'?conclusionReport():'';
-      add(R,'conclusionReport usa Core V6B',
-        /conclusion-report-core-v6b/.test(globalHtml),
-        `${globalHtml.length} caracteres`);
+      const beforeCount=state.aprobatorio.conclusion.length;
+      V7.addRow();
+      add(R,'Agregar fila por V7',
+        state.aprobatorio.conclusion.length===beforeCount+1,
+        `${beforeCount} → ${state.aprobatorio.conclusion.length}`);
 
-      add(R,'Filtro V81 ya no controla informe',
-        !Report.reportHtml.toString().includes('conclusionRowsForReportV81'),
-        'state canónico directo');
+      const customIndex=state.aprobatorio.conclusion.findIndex((r,i)=>
+        Core.role(r,i)==='bruta' &&
+        r._userRowV108 &&
+        !String(r.descripcion||'').trim()
+      );
 
-      add(R,'Fallback V6 preservado',
-        typeof window.__conclusionReportCoreV6FallbackV6B==='function',
-        'fallback disponible');
+      const removed=customIndex>=0?V7.removeRow(customIndex):false;
+
+      add(R,'Quitar fila por V7',
+        removed && state.aprobatorio.conclusion.length===beforeCount,
+        `${state.aprobatorio.conclusion.length} fila(s)`);
+
+      /* Verificar que las funciones públicas realmente son las rutas nuevas. */
+      add(R,'renderConclusionTabla público central',
+        window.renderConclusionTabla.toString().includes('facade.renderTabla'),
+        'ruta V7');
+
+      add(R,'conclusionReport público central',
+        window.conclusionReport.toString().includes('facade.renderInforme'),
+        'ruta V7');
+
+      add(R,'recalcAreasCOSV36 público central',
+        window.recalcAreasCOSV36.toString().includes('facade.recalcular'),
+        'ruta V7');
+
+      add(R,'sumaAreasBrutas público central',
+        window.sumaAreasBrutasConclusionV119N.toString().includes('facade.sumaAreasBrutas'),
+        'ruta V7');
 
       if(temp) cont.remove();
 
     }catch(e){
-      add(R,'Banco Core V6B',false,e?.stack||e);
+      add(R,'Banco Core V7',false,e?.stack||e);
     }finally{
       state=original;
       try{applyStateToUI()}catch(_e){}
@@ -37386,26 +37591,26 @@ textarea.evidencia-text,
 
     const ok=R.filter(x=>x.ok).length;
     const fail=R.length-ok;
-    const p=document.getElementById('allpaConclusionCorePanelV6B');
+    const p=document.getElementById('allpaConclusionCorePanelV7');
 
-    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V6B</h3>
-      <div class="corev6b-note">
-        V6B elimina el filtrado histórico V81 del renderer del informe.
-        Tabla e informe leen directamente del mismo state canónico.
+    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V7</h3>
+      <div class="corev7-note">
+        Todas las rutas públicas activas de Conclusión Técnica deben pasar por
+        una sola fachada: ConclusionTecnicaV7.
       </div>
       <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
-      R.map(x=>`<div class="corev6b-row">
-        <span class="${x.ok?'corev6b-ok':'corev6b-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
+      R.map(x=>`<div class="corev7-row">
+        <span class="${x.ok?'corev7-ok':'corev7-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
         <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
       </div>`).join('')+
-      `<p><button id="copyCoreV6B">Copiar resultado</button>
-      <button id="closeCoreV6B">Cerrar</button></p>`;
+      `<p><button id="copyCoreV7">Copiar resultado</button>
+      <button id="closeCoreV7">Cerrar</button></p>`;
 
     p.classList.add('open');
-    document.getElementById('closeCoreV6B').onclick=()=>p.classList.remove('open');
+    document.getElementById('closeCoreV7').onclick=()=>p.classList.remove('open');
 
-    document.getElementById('copyCoreV6B').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V6B\nOK:${ok} FAIL:${fail}\n`+
+    document.getElementById('copyCoreV7').onclick=async()=>{
+      const txt=`ALLPA-CONCLUSION-CORE-V7\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
 
       try{
@@ -37425,14 +37630,14 @@ textarea.evidencia-text,
 
   window.addEventListener('load',()=>setTimeout(()=>{
     const b=document.createElement('button');
-    b.id='allpaConclusionCoreBtnV6B';
+    b.id='allpaConclusionCoreBtnV7';
     b.type='button';
-    b.textContent='🧪 CORE CONCLUSIÓN V6B';
+    b.textContent='🧪 CORE CONCLUSIÓN V7';
     b.onclick=run;
     document.body.appendChild(b);
 
     const p=document.createElement('div');
-    p.id='allpaConclusionCorePanelV6B';
+    p.id='allpaConclusionCorePanelV7';
     document.body.appendChild(p);
   },1200));
 })();
