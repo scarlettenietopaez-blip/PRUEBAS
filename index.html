@@ -36250,7 +36250,7 @@ textarea.evidencia-text,
 
     const testHtml=panel.querySelector('#coreV2TestResults')?.outerHTML||'';
     panel.innerHTML=`
-      <h3>Conclusión Técnica — Core V2 paralelo</h3>
+      <h3>Conclusión Técnica — Core V2B paralelo</h3>
       <div class="corev2-actions">
         <button type="button" id="coreV2Reload">Recargar desde state</button>
         <button type="button" id="coreV2AddBruta">Agregar fila de área bruta</button>
@@ -36361,7 +36361,7 @@ textarea.evidencia-text,
 
     const box=document.createElement('div');
     box.id='coreV2TestResults';
-    box.innerHTML=`<h4>🧪 ALLPA CONCLUSIÓN CORE V2</h4>
+    box.innerHTML=`<h4>🧪 ALLPA CONCLUSIÓN CORE V2B</h4>
       <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
       R.map(x=>`<div class="corev2-row">
         <span class="${x.ok?'corev2-ok':'corev2-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
@@ -36371,7 +36371,7 @@ textarea.evidencia-text,
 
     panel.appendChild(box);
     document.getElementById('coreV2CopyResult').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V2\nOK:${ok} FAIL:${fail}\n`+
+      const txt=`ALLPA-CONCLUSION-CORE-V2B\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
       try{await navigator.clipboard.writeText(txt)}catch(_e){}
     };
@@ -36381,7 +36381,7 @@ textarea.evidencia-text,
     const b=document.createElement('button');
     b.id='allpaConclusionCoreBtnV2';
     b.type='button';
-    b.textContent='🧪 CORE CONCLUSIÓN V2';
+    b.textContent='🧪 CORE CONCLUSIÓN V2B';
     b.onclick=()=>{
       Sandbox.loadFromState();
       const p=document.getElementById('allpaConclusionCorePanelV2');
@@ -36395,6 +36395,34 @@ textarea.evidencia-text,
     document.body.appendChild(p);
   },1200));
 })();
+</script>
+
+
+<style id="allpa-core-v2b-marker-css">
+#allpaCoreV2BMarker{
+  position:fixed;left:14px;bottom:14px;z-index:999998;
+  padding:7px 10px;border-radius:8px;background:#fff;border:1px solid #cbd5e1;
+  box-shadow:0 3px 12px #0002;font:700 11px system-ui;opacity:.88
+}
+@media print{#allpaCoreV2BMarker{display:none!important}}
+</style>
+<script id="allpa-core-v2b-marker">
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('allpaConclusionCoreBtnV1')?.remove();
+    document.getElementById('allpaConclusionCorePanelV1')?.remove();
+
+    if(!document.getElementById('allpaCoreV2BMarker')){
+      const m=document.createElement('div');
+      m.id='allpaCoreV2BMarker';
+      m.textContent='ALLPA · CONCLUSIÓN CORE V2B';
+      document.body.appendChild(m);
+    }
+
+    const btn=document.getElementById('allpaConclusionCoreBtnV2');
+    if(btn) btn.textContent='🧪 CORE CONCLUSIÓN V2B';
+  },600);
+});
 </script>
 
 </body>
