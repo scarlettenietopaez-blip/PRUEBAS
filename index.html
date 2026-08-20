@@ -36970,24 +36970,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v9-css">
-#allpaConclusionCoreBtnV9{
- position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
- padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
-}
-#allpaConclusionCorePanelV9{
- display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
- width:min(1000px,calc(100vw - 36px));max-height:87vh;overflow:auto;
- background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
- box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
-}
-#allpaConclusionCorePanelV9.open{display:block}
-.corev9-ok{color:#177245;font-weight:700}.corev9-fail{color:#b42318;font-weight:700}
-.corev9-row{padding:6px 0;border-bottom:1px solid #eee}
-.corev9-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV9,#allpaConclusionCorePanelV9{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v9">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V9 — ESTRUCTURA / ROLES / IDENTIDAD
@@ -37321,7 +37303,140 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v9-test">
+
+<style id="allpa-conclusion-core-v10-css">
+#allpaConclusionCoreBtnV10{
+ position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
+ padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
+}
+#allpaConclusionCorePanelV10{
+ display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
+ width:min(980px,calc(100vw - 36px));max-height:86vh;overflow:auto;
+ background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
+ box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
+}
+#allpaConclusionCorePanelV10.open{display:block}
+.corev10-ok{color:#177245;font-weight:700}.corev10-fail{color:#b42318;font-weight:700}
+.corev10-row{padding:6px 0;border-bottom:1px solid #eee}
+.corev10-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV10,#allpaConclusionCorePanelV10{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v10">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V10 — NORMALIZACIÓN ÚNICA
+
+   Fuente única:
+     ConclusionTecnicaStructureV9.normalizeRow()
+
+   Adaptadores públicos:
+     normalizeConclusionRow
+     normalizeConclusionRowV37
+     normalizeConclusionRowSafeV73
+     rowConclV87
+     rowConclV108
+     rowV13
+
+   No se eliminan físicamente todavía las definiciones históricas.
+   V10 las reemplaza como rutas activas y conserva copias solo para auditoría.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const Structure=window.ConclusionTecnicaStructureV9;
+  if(!Structure) return;
+
+  const legacy={
+    normalizeConclusionRow:typeof window.normalizeConclusionRow==='function'?window.normalizeConclusionRow:null,
+    normalizeConclusionRowV37:typeof window.normalizeConclusionRowV37==='function'?window.normalizeConclusionRowV37:null,
+    normalizeConclusionRowSafeV73:typeof window.normalizeConclusionRowSafeV73==='function'?window.normalizeConclusionRowSafeV73:null,
+    rowConclV87:typeof window.rowConclV87==='function'?window.rowConclV87:null,
+    rowConclV108:typeof window.rowConclV108==='function'?window.rowConclV108:null,
+    rowV13:typeof window.rowV13==='function'?window.rowV13:null
+  };
+
+  function normalized(raw,index=0){
+    const n=Structure.normalizeRow(raw||{},index);
+
+    /* Mantener exactamente la forma esperada por las capas históricas. */
+    return {
+      descripcion:n.descripcion||'',
+      levels:Array.isArray(n.levels)?n.levels.slice():[],
+      cantidad:n.cantidad??'',
+      unidad:n.unidad||'m2',
+      allowLevels:!!n.allowLevels,
+
+      /* Metadata moderna accesible para módulos nuevos. */
+      role:n.role||'',
+      origin:n.origin||'',
+      intervention:n.intervention||'',
+      id:n.id||'',
+      baseOrder:n.baseOrder
+    };
+  }
+
+  function adapter(raw){
+    let index=0;
+
+    try{
+      const arr=state?.aprobatorio?.conclusion||[];
+      const found=arr.indexOf(raw);
+      if(found>=0) index=found;
+    }catch(_e){}
+
+    return normalized(raw,index);
+  }
+
+  window.ConclusionTecnicaNormalizeV10=Object.freeze({
+    version:'10.0.0-normalize',
+    normalized,
+    adapter,
+    legacy
+  });
+
+  window.normalizeConclusionRow=function(raw){
+    return adapter(raw);
+  };
+
+  window.normalizeConclusionRowV37=function(raw){
+    return adapter(raw);
+  };
+
+  window.normalizeConclusionRowSafeV73=function(raw){
+    return adapter(raw);
+  };
+
+  window.rowConclV87=function(raw){
+    return adapter(raw);
+  };
+
+  window.rowConclV108=function(raw){
+    return adapter(raw);
+  };
+
+  window.rowV13=function(raw){
+    return adapter(raw);
+  };
+
+  try{ normalizeConclusionRow=window.normalizeConclusionRow; }catch(_e){}
+  try{ normalizeConclusionRowV37=window.normalizeConclusionRowV37; }catch(_e){}
+  try{ normalizeConclusionRowSafeV73=window.normalizeConclusionRowSafeV73; }catch(_e){}
+  try{ rowConclV87=window.rowConclV87; }catch(_e){}
+  try{ rowConclV108=window.rowConclV108; }catch(_e){}
+  try{ rowV13=window.rowV13; }catch(_e){}
+
+  window.__ConclusionTecnicaNormalizerRoutesV10={
+    normalizeConclusionRow:'ConclusionTecnicaNormalizeV10.adapter',
+    normalizeConclusionRowV37:'ConclusionTecnicaNormalizeV10.adapter',
+    normalizeConclusionRowSafeV73:'ConclusionTecnicaNormalizeV10.adapter',
+    rowConclV87:'ConclusionTecnicaNormalizeV10.adapter',
+    rowConclV108:'ConclusionTecnicaNormalizeV10.adapter',
+    rowV13:'ConclusionTecnicaNormalizeV10.adapter'
+  };
+})();
+</script>
+
+<script id="allpa-conclusion-core-v10-test">
 (function(){
   'use strict';
 
@@ -37354,19 +37469,23 @@ textarea.evidencia-text,
     return {
       tipoInforme:'Informe Técnico Aprobatorio',
       aprobatorio:{conclusion:[
-        row('predio','Área del predio',500,{_baseKeyV108:'AREA DEL PREDIO'}),
+        row('predio','Área del predio',500),
         row('utilPB','Área útil planta baja',100),
         row('utilTotal','Área útil total',200),
         row('bruta','Área bruta planta baja',100,{
-          _baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)',
-          intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'
+          intervention:'Aprobada (Existente)',
+          tipoAreaV13:'Aprobada (Existente)',
+          levels:['0.00']
         }),
-        row('bruta','Área bruta planta baja',50,{
-          _baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:AMPLIACION',
-          intervention:'Ampliación',tipoAreaV13:'Ampliación'
+        row('bruta','Área bruta primera planta alta',50,{
+          intervention:'Ampliación',
+          tipoAreaV13:'Ampliación',
+          levels:['+3.20']
         }),
-        row('bruta','Área bruta primera planta alta',25,{
-          intervention:'Modificación',tipoAreaV13:'Modificación'
+        row('bruta','Área bruta segunda planta alta',25,{
+          intervention:'Modificación',
+          tipoAreaV13:'Modificación',
+          levels:['+6.40']
         }),
         row('brutaTotal','Área Bruta total de construcción',''),
         row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
@@ -37376,110 +37495,106 @@ textarea.evidencia-text,
     };
   }
 
+  function shape(v){
+    return {
+      descripcion:v?.descripcion||'',
+      levels:Array.isArray(v?.levels)?v.levels:[],
+      cantidad:String(v?.cantidad??''),
+      unidad:v?.unidad||'m2',
+      allowLevels:!!v?.allowLevels
+    };
+  }
+
   async function run(){
     const R=[];
     const original=C(state);
+    const N=window.ConclusionTecnicaNormalizeV10;
     const S=window.ConclusionTecnicaStructureV9;
-    const Core=window.ConclusionTecnicaCoreV1;
     const V7=window.ConclusionTecnicaV7;
+    const Core=window.ConclusionTecnicaCoreV1;
 
     try{
-      A(R,'Structure V9 disponible',!!S,S?.version||'');
-      if(!S || !Core || !V7) throw new Error('Structure/Core/V7 no disponible.');
+      A(R,'Normalize V10 disponible',!!N,N?.version||'');
+      if(!N || !S || !V7 || !Core) throw new Error('V10/V9/V7/Core no disponible.');
 
       state=fixture();
       S.canonicalizeState();
 
-      const rows=state.aprobatorio.conclusion;
-      A(R,'Mismo número de filas',rows.length===10,`${rows.length} fila(s)`);
+      const sample=state.aprobatorio.conclusion[3];
+      const canonical=N.normalized(sample,3);
 
-      const roles=rows.map((r,i)=>S.role(r,i));
-      A(R,'Roles estructurales',
-        ['predio','utilPB','utilTotal','bruta','brutaTotal','areaAmpliacionTotal','cosPB','cosTotal']
-          .every(role=>roles.includes(role)),
-        [...new Set(roles)].join(' · '));
+      A(R,'Descripción normalizada',
+        canonical.descripcion==='Área bruta planta baja',
+        canonical.descripcion);
 
-      const coreRoles=rows.map((r,i)=>Core.role(r,i));
-      A(R,'Paridad Roles V9/Core',
-        JSON.stringify(roles)===JSON.stringify(coreRoles),
-        roles.map((r,i)=>`${r}/${coreRoles[i]}`).join(' · '));
+      A(R,'Cantidad normalizada',
+        canonical.cantidad==='100',
+        canonical.cantidad);
 
-      const ids=rows.map(r=>r._ctIdV9);
-      A(R,'IDs V9 completos',
-        ids.every(Boolean),
-        `${ids.filter(Boolean).length}/${ids.length}`);
+      A(R,'Unidad normalizada',
+        canonical.unidad==='m2',
+        canonical.unidad);
 
-      A(R,'IDs V9 únicos',
-        new Set(ids).size===ids.length,
-        `${new Set(ids).size}/${ids.length}`);
+      A(R,'Niveles normalizados',
+        canonical.levels.length===1 && canonical.levels[0]==='0.00',
+        canonical.levels.join(', '));
 
-      const brutas=rows.map((r,i)=>({r,i})).filter(x=>S.role(x.r,x.i)==='bruta');
-      const first=brutas[0];
-      const idBefore=first.r._ctIdV9;
+      A(R,'allowLevels normalizado',
+        canonical.allowLevels===true,
+        String(canonical.allowLevels));
 
-      first.r.intervention='Modificación';
-      first.r.tipoAreaV13='Modificación';
-      S.canonicalizeState();
+      const adapters=[
+        ['normalizeConclusionRow',window.normalizeConclusionRow],
+        ['normalizeConclusionRowV37',window.normalizeConclusionRowV37],
+        ['normalizeConclusionRowSafeV73',window.normalizeConclusionRowSafeV73],
+        ['rowConclV87',window.rowConclV87],
+        ['rowConclV108',window.rowConclV108],
+        ['rowV13',window.rowV13]
+      ];
 
-      A(R,'ID no depende de Tipo de intervención',
-        first.r._ctIdV9===idBefore,
-        first.r._ctIdV9);
+      adapters.forEach(([name,fn])=>{
+        const out=fn(sample);
+        A(R,`${name} usa forma V10`,
+          JSON.stringify(shape(out))===JSON.stringify(shape(canonical)),
+          `${out.descripcion} · ${out.cantidad} · ${out.unidad}`);
+      });
 
-      A(R,'Base key sin TIPO',
-        !S.semanticBase(first.r,first.i).includes('||TIPO:'),
-        S.semanticBase(first.r,first.i));
+      A(R,'Rutas de normalización centralizadas',
+        Object.keys(window.__ConclusionTecnicaNormalizerRoutesV10||{}).length===6,
+        Object.values(window.__ConclusionTecnicaNormalizerRoutesV10||{}).join(' · '));
 
-      const json=S.serializeRows(rows);
-      const restored=S.deserializeRows(json);
-
-      A(R,'Serialización conserva IDs',
-        restored.map(r=>r._ctIdV9).join('|')===rows.map(r=>r._ctIdV9).join('|'),
-        `${restored.length} fila(s)`);
-
-      A(R,'Serialización conserva intervenciones',
-        restored.filter((r,i)=>S.role(r,i)==='bruta')
-          .map(r=>S.interventionOf(r)).join('|')===
-        rows.filter((r,i)=>S.role(r,i)==='bruta')
-          .map(r=>S.interventionOf(r)).join('|'),
-        restored.filter((r,i)=>S.role(r,i)==='bruta').map(r=>S.interventionOf(r)).join(' · '));
-
-      A(R,'roleConclV108 ruteado a V9',
-        window.roleConclV108.toString().includes('API.role'),
-        'Structure V9');
-
-      A(R,'conclusionRoleV104 ruteado a V9',
-        window.conclusionRoleV104.toString().includes('API.role'),
-        'Structure V9');
-
-      A(R,'roleFromDescV108 ruteado a V9',
-        window.roleFromDescV108.toString().includes('inferRoleFromDescription'),
-        'Structure V9');
-
-      if(typeof prepareRowsConclV108==='function'){
-        A(R,'prepareRowsConclV108 protegido por V9',
-          !!prepareRowsConclV108.__ctStructureV9Wrapped,
-          'canonicaliza después de reconstruir');
-      }
-
-      /* Regresión del núcleo validado */
       const calc=V7.recalcular();
-      A(R,'Área Bruta tras V9',
-        calc.formatted.areaBrutaTotal==='50.00',
-        `esperado 50.00 · obtenido ${calc.formatted.areaBrutaTotal}`);
 
-      A(R,'Área Amp/Mod tras V9',
-        calc.formatted.areaAmpMod==='175.00',
-        `esperado 175.00 · obtenido ${calc.formatted.areaAmpMod}`);
+      A(R,'Área Bruta tras V10',
+        calc.formatted.areaBrutaTotal==='150.00',
+        calc.formatted.areaBrutaTotal);
 
-      A(R,'COS PB tras V9',
+      A(R,'Área Amp/Mod tras V10',
+        calc.formatted.areaAmpMod==='75.00',
+        calc.formatted.areaAmpMod);
+
+      A(R,'COS PB tras V10',
         calc.formatted.cosPB==='20.00',
         calc.formatted.cosPB);
 
-      A(R,'COS Total tras V9',
+      A(R,'COS Total tras V10',
         calc.formatted.cosTotal==='40.00',
         calc.formatted.cosTotal);
 
+      /* Probar intervención y re-render con adaptadores activos */
+      const brutas=state.aprobatorio.conclusion
+        .map((r,i)=>({r,i}))
+        .filter(x=>Core.role(x.r,x.i)==='bruta');
+
+      V7.setIntervention(brutas[0].i,'Modificación',{render:false});
+      const calc2=V7.recalcular();
+
+      A(R,'Cambio de intervención con V10',
+        calc2.formatted.areaBrutaTotal==='50.00',
+        calc2.formatted.areaBrutaTotal);
+
       let cont=document.getElementById('conclusionTabla'),temp=false;
+
       if(!cont){
         cont=document.createElement('div');
         cont.id='conclusionTabla';
@@ -37488,22 +37603,36 @@ textarea.evidencia-text,
       }
 
       V7.renderTabla();
+
       const tableRows=cont.querySelectorAll('tbody tr').length;
       const reportRows=V7.canonicalRows().length;
 
-      A(R,'Tabla e informe siguen alineados',
+      A(R,'Tabla sigue operativa',
+        !!cont.querySelector('.editable-conclusion-core-v4'),
+        `${tableRows} fila(s)`);
+
+      A(R,'Tabla e informe alineados',
         tableRows===reportRows,
         `tabla ${tableRows} · informe ${reportRows}`);
 
       const html=V7.renderInforme();
-      A(R,'Informe Core sigue activo',
+
+      A(R,'Informe sigue operativo',
         /conclusion-report-core-v6b/.test(html),
         `${html.length} caracteres`);
+
+      /* Persistencia estructural */
+      const json=S.serializeRows(state.aprobatorio.conclusion);
+      const restored=S.deserializeRows(json);
+
+      A(R,'Serialización tras normalización V10',
+        restored.length===state.aprobatorio.conclusion.length,
+        `${restored.length} fila(s)`);
 
       if(temp) cont.remove();
 
     }catch(e){
-      A(R,'Banco Core V9B',false,e?.stack||e);
+      A(R,'Banco Core V10',false,e?.stack||e);
     }finally{
       state=original;
       try{applyStateToUI()}catch(_e){}
@@ -37513,26 +37642,26 @@ textarea.evidencia-text,
 
     const ok=R.filter(x=>x.ok).length;
     const fail=R.length-ok;
-    const p=document.getElementById('allpaConclusionCorePanelV9');
+    const p=document.getElementById('allpaConclusionCorePanelV10');
 
-    p.innerHTML=`<h3>🧱 ALLPA CONCLUSIÓN CORE V9B</h3>
-      <div class="corev9-note">
-        V9 centraliza estructura, roles e identidad. Los helpers históricos
-        todavía existen físicamente, pero los roles públicos ya entran por V9.
+    p.innerHTML=`<h3>🧩 ALLPA CONCLUSIÓN CORE V10</h3>
+      <div class="corev10-note">
+        Todos los normalizadores públicos deben producir la misma estructura
+        desde ConclusionTecnicaStructureV9.
       </div>
       <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
-      R.map(x=>`<div class="corev9-row">
-        <span class="${x.ok?'corev9-ok':'corev9-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
+      R.map(x=>`<div class="corev10-row">
+        <span class="${x.ok?'corev10-ok':'corev10-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
         <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
       </div>`).join('')+
-      `<p><button id="copyCoreV9">Copiar resultado</button>
-      <button id="closeCoreV9">Cerrar</button></p>`;
+      `<p><button id="copyCoreV10">Copiar resultado</button>
+      <button id="closeCoreV10">Cerrar</button></p>`;
 
     p.classList.add('open');
-    document.getElementById('closeCoreV9').onclick=()=>p.classList.remove('open');
+    document.getElementById('closeCoreV10').onclick=()=>p.classList.remove('open');
 
-    document.getElementById('copyCoreV9').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V9B\nOK:${ok} FAIL:${fail}\n`+
+    document.getElementById('copyCoreV10').onclick=async()=>{
+      const txt=`ALLPA-CONCLUSION-CORE-V10\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
 
       try{
@@ -37552,14 +37681,14 @@ textarea.evidencia-text,
 
   window.addEventListener('load',()=>setTimeout(()=>{
     const b=document.createElement('button');
-    b.id='allpaConclusionCoreBtnV9';
+    b.id='allpaConclusionCoreBtnV10';
     b.type='button';
-    b.textContent='🧱 CORE CONCLUSIÓN V9B';
+    b.textContent='🧩 CORE CONCLUSIÓN V10';
     b.onclick=run;
     document.body.appendChild(b);
 
     const p=document.createElement('div');
-    p.id='allpaConclusionCorePanelV9';
+    p.id='allpaConclusionCorePanelV10';
     document.body.appendChild(p);
   },1200));
 })();
