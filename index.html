@@ -14470,29 +14470,7 @@ function ensureDeletedConclusionKeysV106(){
   return state.aprobatorio.deletedConclusionKeysV106;
 }
 
-function conclusionDeleteKeyV106(i,row){
-  const r = row || (typeof rowConclV87 === 'function'
-    ? rowConclV87(state.aprobatorio?.conclusion?.[i] || {})
-    : (state.aprobatorio?.conclusion?.[i] || {}));
-
-  const role = typeof conclusionRoleV104 === 'function' ? conclusionRoleV104(i,r) : '';
-
-  /*
-    Para las filas calculadas usamos rol, pero no se eliminan.
-    Para las demás usamos descripción. Así no se eliminan varias filas
-    de área bruta por tener el mismo rol genérico "bruta".
-  */
-  const desc = r?.descripcion || '';
-  const key = typeof normDescConclusionV81 === 'function'
-    ? normDescConclusionV81(desc)
-    : (typeof normTextConclusionV104 === 'function' ? normTextConclusionV104(desc) : String(desc||'').trim().toUpperCase());
-
-  if(role && ['brutaTotal','cosPB','cosTotal'].includes(role)){
-    return 'role:' + role;
-  }
-
-  return key ? 'desc:' + key : 'idx:' + i;
-}
+/* Core V14: conclusionDeleteKeyV106 histórico retirado L14473 */
 
 function isAutoCalculatedConclusionV106(i,row){
   const r = row || (typeof rowConclV87 === 'function'
@@ -14674,22 +14652,7 @@ function roleConclusionV107(i,row){
   return '';
 }
 
-function assignBaseKeyConclusionV107(i,row){
-  const raw=state.aprobatorio?.conclusion?.[i];
-  if(!raw) return '';
-
-  if(raw._baseKeyV107) return raw._baseKeyV107;
-
-  const key=normConclusionV107(row?.descripcion || raw.descripcion || '');
-  const baseKeys=baseConclusionKeysV107();
-
-  if(key && baseKeys.has(key)){
-    raw._baseKeyV107=key;
-    return key;
-  }
-
-  return '';
-}
+/* Core V14: assignBaseKeyConclusionV107 histórico retirado L14655 */
 
 function deleteKeyConclusionV107(i,row){
   const raw=state.aprobatorio?.conclusion?.[i];
@@ -14916,20 +14879,9 @@ function roleConclV108(rawOrRow, i=null){
   return role;
 }
 
-function deletedKeysV108(){
-  if(!state.aprobatorio) state.aprobatorio={};
-  if(!Array.isArray(state.aprobatorio.deletedConclusionKeysV108)){
-    state.aprobatorio.deletedConclusionKeysV108=[];
-  }
-  return state.aprobatorio.deletedConclusionKeysV108;
-}
+/* Core V14: deletedKeysV108 histórico retirado L14882 */
 
-function deletedKeysAllV108(){
-  const out = new Set(deletedKeysV108());
-  (state.aprobatorio?.deletedConclusionKeysV107 || []).forEach(k=>out.add(k));
-  (state.aprobatorio?.deletedConclusionKeysV106 || []).forEach(k=>out.add(k));
-  return out;
-}
+/* Core V14: deletedKeysAllV108 histórico retirado L14884 */
 
 function protectedAmpModV108(rawOrRow,i=null){
   const role=roleConclV108(rawOrRow,i);
@@ -37508,14 +37460,22 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v13-css">
-#allpaConclusionCoreBtnV13{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV13{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1000px,calc(100vw - 36px));max-height:87vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV13.open{display:block}.corev13-ok{color:#177245;font-weight:700}.corev13-fail{color:#b42318;font-weight:700}.corev13-row{padding:6px 0;border-bottom:1px solid #eee}.corev13-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV13,#allpaConclusionCorePanelV13{display:none!important}}
+<style id="allpa-conclusion-core-v14-css">
+#allpaConclusionCoreBtnV14{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV14{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1020px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV14.open{display:block}.corev14-ok{color:#177245;font-weight:700}.corev14-fail{color:#b42318;font-weight:700}.corev14-row{padding:6px 0;border-bottom:1px solid #eee}.corev14-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV14,#allpaConclusionCorePanelV14{display:none!important}}
 </style>
 
-<script id="allpa-conclusion-core-v13">
+<script id="allpa-conclusion-core-v14">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V14 — CLAVES / ELIMINACIONES ÚNICAS
+
+   - elimina implementaciones históricas V106/V107/V108 de keys
+   - migra/lee claves antiguas
+   - conserva deletedKeysV108() como array mutable de compatibilidad
+   - acepta firmas antiguas y modernas
+   ========================================================== */
 (function(){
   'use strict';
 
@@ -37524,105 +37484,208 @@ textarea.evidencia-text,
 
   function norm(v){return S.norm(v);}
 
+  function stripPrefixes(v){
+    return String(v||'')
+      .replace(/^desc:/i,'')
+      .replace(/^base:/i,'')
+      .trim();
+  }
+
+  function canonicalKeyValue(value){
+    const raw=stripPrefixes(value);
+    if(!raw) return '';
+
+    /* Las claves de rol históricas se conservan como tales. */
+    if(/^role:/i.test(raw)) return raw.toLowerCase();
+
+    return norm(S.cleanBaseKey(raw));
+  }
+
+  function resolveArgs(a,b){
+    let raw=null,index=0,row=null;
+
+    if(typeof a==='number'){
+      index=a;
+      raw=state?.aprobatorio?.conclusion?.[index] || null;
+      row=b && typeof b==='object' ? b : raw;
+    }else{
+      raw=a && typeof a==='object' ? a : null;
+      row=raw;
+      if(typeof b==='number') index=b;
+      else{
+        try{
+          const found=(state?.aprobatorio?.conclusion||[]).indexOf(raw);
+          if(found>=0) index=found;
+        }catch(_e){}
+      }
+    }
+
+    return {raw,row,index};
+  }
+
   function key(raw,index=0){
     if(!raw) return '';
 
-    const explicit=S.cleanBaseKey(raw._baseKeyV108 || raw.baseKey || '');
-    if(explicit) return norm(explicit);
+    const explicit=S.cleanBaseKey(
+      raw._baseKeyV108 ||
+      raw._baseKeyV107 ||
+      raw.baseKey ||
+      ''
+    );
+
+    if(explicit) return canonicalKeyValue(explicit);
 
     const n=S.normalizeRow(raw,index);
-    if(n.descripcion) return norm(n.descripcion);
+    const desc=canonicalKeyValue(n.descripcion);
+    if(desc) return desc;
 
     return `${n.role||'row'}::${index}`;
   }
 
-  function deletionKey(rawOrKey,index=0){
-    if(rawOrKey && typeof rawOrKey==='object') return key(rawOrKey,index);
+  function deletionKey(a,b){
+    if(a && typeof a==='object' || typeof a==='number'){
+      const {raw,row,index}=resolveArgs(a,b);
+      const source=raw||row;
+      if(!source) return `idx:${index}`;
+      return key(source,index);
+    }
 
-    return norm(
-      S.cleanBaseKey(
-        String(rawOrKey||'').replace(/^desc:/i,'')
-      )
-    );
+    return canonicalKeyValue(a);
+  }
+
+  function ensureCompatArray(){
+    if(!state.aprobatorio) state.aprobatorio={};
+
+    if(!Array.isArray(state.aprobatorio._deletedConclusionKeysV14)){
+      state.aprobatorio._deletedConclusionKeysV14=[];
+    }
+
+    return state.aprobatorio._deletedConclusionKeysV14;
+  }
+
+  function allLegacyArrays(){
+    if(!state.aprobatorio) state.aprobatorio={};
+
+    return [
+      state.aprobatorio._deletedConclusionKeysV14,
+      state.aprobatorio._deletedConclusionKeysV13,
+      state.aprobatorio.deletedConclusionKeysV108,
+      state.aprobatorio.deletedConclusionKeysV107,
+      state.aprobatorio.deletedConclusionKeysV106
+    ].filter(Array.isArray);
   }
 
   function getDeletedSet(){
     const out=new Set();
 
-    try{
-      if(typeof deletedKeysAllV108==='function'){
-        for(const k of (deletedKeysAllV108()||[])){
-          const dk=deletionKey(k);
-          if(dk) out.add(dk);
-        }
-      }
-    }catch(_e){}
-
-    const local=state?.aprobatorio?._deletedConclusionKeysV13;
-    if(Array.isArray(local)){
-      local.forEach(k=>{
-        const dk=deletionKey(k);
-        if(dk) out.add(dk);
+    allLegacyArrays().forEach(arr=>{
+      arr.forEach(v=>{
+        const k=deletionKey(v);
+        if(k) out.add(k);
       });
-    }
+    });
 
     return out;
   }
 
-  function persist(setLike){
-    if(!state.aprobatorio) state.aprobatorio={};
+  function syncPrimaryFromSet(setLike){
+    const arr=ensureCompatArray();
+    arr.splice(0,arr.length,...[...(setLike||[])]
+      .map(deletionKey)
+      .filter(Boolean));
 
-    state.aprobatorio._deletedConclusionKeysV13=[
-      ...new Set([...(setLike||[])].map(deletionKey).filter(Boolean))
-    ];
+    /* dedupe in place */
+    const unique=[...new Set(arr)];
+    arr.splice(0,arr.length,...unique);
 
-    return state.aprobatorio._deletedConclusionKeysV13;
+    return arr;
   }
 
-  function markDeleted(raw,index=0){
+  function markDeleted(a,b){
     const set=getDeletedSet();
-    const dk=deletionKey(raw,index);
-    if(dk) set.add(dk);
-    persist(set);
-    return dk;
+    const k=deletionKey(a,b);
+    if(k) set.add(k);
+    syncPrimaryFromSet(set);
+    return k;
   }
 
-  function unmarkDeleted(rawOrKey,index=0){
+  function unmarkDeleted(a,b){
+    const k=deletionKey(a,b);
     const set=getDeletedSet();
-    const dk=deletionKey(rawOrKey,index);
-    set.delete(dk);
-    persist(set);
-    return dk;
+    set.delete(k);
+
+    /* Quitar también de arrays heredados para que no reaparezca. */
+    allLegacyArrays().forEach(arr=>{
+      for(let i=arr.length-1;i>=0;i--){
+        if(deletionKey(arr[i])===k) arr.splice(i,1);
+      }
+    });
+
+    syncPrimaryFromSet(set);
+    return k;
   }
 
-  window.ConclusionTecnicaKeysV13=Object.freeze({
-    version:'13.0.0-keys',
+  function assignBaseKey(a,b){
+    const {raw,row,index}=resolveArgs(a,b);
+    const target=raw || (a && typeof a==='object' ? a : null);
+    if(!target) return '';
+
+    const k=key(target,index);
+    target._baseKeyV108=k;
+    target._baseKeyV107=k;
+    return k;
+  }
+
+  function deleteKeyCompat(a,b){
+    return deletionKey(a,b);
+  }
+
+  window.ConclusionTecnicaKeysV14=Object.freeze({
+    version:'14.0.0-keys',
+    canonicalKeyValue,
+    resolveArgs,
     key,
     deletionKey,
+    ensureCompatArray,
     getDeletedSet,
-    persist,
+    syncPrimaryFromSet,
     markDeleted,
-    unmarkDeleted
+    unmarkDeleted,
+    assignBaseKey
   });
 
-  /* Adaptadores de compatibilidad. */
-  window.conclusionDeleteKeyV106=function(raw){
-    return deletionKey(raw);
+  /* Compatibilidad histórica: ahora todas estas rutas salen de V14. */
+  window.deletedKeysV108=function(){
+    return ensureCompatArray();
   };
 
-  window.assignBaseKeyConclusionV107=function(raw,index=0){
-    if(!raw || typeof raw!=='object') return '';
-    const k=key(raw,index);
-    raw._baseKeyV108=k;
-    return k;
+  window.deletedKeysAllV108=function(){
+    return getDeletedSet();
   };
 
+  window.conclusionDeleteKeyV106=function(a,b){
+    return deleteKeyCompat(a,b);
+  };
+
+  window.assignBaseKeyConclusionV107=function(a,b){
+    return assignBaseKey(a,b);
+  };
+
+  try{deletedKeysV108=window.deletedKeysV108;}catch(_e){}
+  try{deletedKeysAllV108=window.deletedKeysAllV108;}catch(_e){}
   try{conclusionDeleteKeyV106=window.conclusionDeleteKeyV106;}catch(_e){}
   try{assignBaseKeyConclusionV107=window.assignBaseKeyConclusionV107;}catch(_e){}
+
+  window.__ConclusionTecnicaKeyRoutesV14={
+    deletedKeysV108:'ConclusionTecnicaKeysV14.ensureCompatArray',
+    deletedKeysAllV108:'ConclusionTecnicaKeysV14.getDeletedSet',
+    conclusionDeleteKeyV106:'ConclusionTecnicaKeysV14.deletionKey',
+    assignBaseKeyConclusionV107:'ConclusionTecnicaKeysV14.assignBaseKey'
+  };
 })();
 </script>
 
-<script id="allpa-conclusion-core-v13-test">
+<script id="allpa-conclusion-core-v14-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -37639,28 +37702,55 @@ row('cosPB','COS PB',''),row('cosTotal','COS TOTAL','')]}}}
 async function run(){
  const R=[],orig=C(state);
  try{
-  const K=window.ConclusionTecnicaKeysV13,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
-  A(R,'Keys V13 disponible',!!K,K?.version||'');
-  A(R,'prepareRowsConclV108 activo',typeof prepareRowsConclV108==='function','Core V12');
-  A(R,'prepareRowsConclV108 es V12',!!prepareRowsConclV108.__ctPrepareV12,'V12');
-  A(R,'roleV13 activo',typeof roleV13==='function','Structure V9');
+  const K=window.ConclusionTecnicaKeysV14,S=window.ConclusionTecnicaStructureV9,P=window.ConclusionTecnicaPrepareV12,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
+  A(R,'Keys V14 disponible',!!K,K?.version||'');
+  A(R,'Rutas de claves centralizadas',Object.keys(window.__ConclusionTecnicaKeyRoutesV14||{}).length===4,Object.values(window.__ConclusionTecnicaKeyRoutesV14||{}).join(' · '));
 
-  const a=row('bruta','Área bruta planta baja',100,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)',intervention:'Aprobada (Existente)'});
-  const b=row('bruta','Área bruta planta baja',50,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:AMPLIACION',intervention:'Ampliación'});
-  A(R,'Clave ignora Tipo de intervención',K.key(a)===K.key(b),`${K.key(a)} / ${K.key(b)}`);
+  const a=row('bruta','Área bruta planta baja',100,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)'});
+  const b=row('bruta','Área bruta planta baja',50,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:AMPLIACION'});
+  A(R,'Clave independiente de Tipo',K.key(a)===K.key(b),`${K.key(a)} / ${K.key(b)}`);
 
   state=fixture();
-  const dk=K.markDeleted(state.aprobatorio.conclusion[1],1);
-  A(R,'Marcar eliminación',K.getDeletedSet().has(dk),dk);
-  K.unmarkDeleted(dk);
-  A(R,'Desmarcar eliminación',!K.getDeletedSet().has(dk),dk);
-
-  const raw=state.aprobatorio.conclusion[3];
-  const assigned=assignBaseKeyConclusionV107(raw,3);
-  A(R,'assignBaseKey V107 centralizado',assigned===K.key(raw,3),assigned);
-  A(R,'deleteKey V106 centralizado',conclusionDeleteKeyV106(raw)===K.deletionKey(raw),K.deletionKey(raw));
-
   S.canonicalizeState();
+
+  /* Firma moderna */
+  const modern=assignBaseKeyConclusionV107(state.aprobatorio.conclusion[3],3);
+  A(R,'assignBaseKey firma moderna',modern==='AREA BRUTA PLANTA BAJA',modern);
+
+  /* Firma histórica (i,row) */
+  const oldStyle=assignBaseKeyConclusionV107(4,rowConclV108(state.aprobatorio.conclusion[4]));
+  A(R,'assignBaseKey firma histórica',oldStyle==='AREA BRUTA PRIMERA PLANTA ALTA',oldStyle);
+
+  const dkModern=conclusionDeleteKeyV106(state.aprobatorio.conclusion[1],1);
+  const dkOld=conclusionDeleteKeyV106(1,rowConclV108(state.aprobatorio.conclusion[1]));
+  A(R,'deleteKey ambas firmas',dkModern===dkOld,`${dkModern} / ${dkOld}`);
+
+  const marked=K.markDeleted(state.aprobatorio.conclusion[1],1);
+  A(R,'Marcar eliminación',deletedKeysAllV108().has(marked),marked);
+
+  /* Compatibilidad con push directo histórico */
+  deletedKeysV108().push('desc:AREA UTIL TOTAL');
+  A(R,'Push histórico capturado',deletedKeysAllV108().has('AREA UTIL TOTAL'),'AREA UTIL TOTAL');
+
+  K.unmarkDeleted(marked);
+  A(R,'Desmarcar eliminación',!deletedKeysAllV108().has(marked),marked);
+
+  /* Migración de arrays antiguos */
+  state.aprobatorio.deletedConclusionKeysV106=['desc:COS PB'];
+  state.aprobatorio.deletedConclusionKeysV107=['AREA BRUTA TOTAL DE CONSTRUCCION'];
+  state.aprobatorio.deletedConclusionKeysV108=['AREA UTIL PLANTA BAJA||TIPO:AMPLIACION'];
+
+  const migrated=deletedKeysAllV108();
+  A(R,'Migración V106',migrated.has('COS PB'),'COS PB');
+  A(R,'Migración V107',migrated.has('AREA BRUTA TOTAL DE CONSTRUCCION'),'AREA BRUTA TOTAL');
+  A(R,'Migración V108 limpia TIPO',migrated.has('AREA UTIL PLANTA BAJA'),'AREA UTIL PLANTA BAJA');
+
+  /* Limpiar claves de prueba para regresión funcional */
+  state.aprobatorio.deletedConclusionKeysV106=[];
+  state.aprobatorio.deletedConclusionKeysV107=[];
+  state.aprobatorio.deletedConclusionKeysV108=[];
+  state.aprobatorio._deletedConclusionKeysV14=[];
+
   const calc=V7.recalcular();
   A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
   A(R,'Área Amp/Mod',calc.formatted.areaAmpMod==='75.00',calc.formatted.areaAmpMod);
@@ -37679,19 +37769,20 @@ async function run(){
   const html=V7.renderInforme();
   A(R,'Informe operativo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
   A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
+  A(R,'Prepare V12 sigue disponible',!!P,P?.version||'');
   A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
 
   if(temp)cont.remove();
- }catch(e){A(R,'Banco Core V13',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Core V14',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV13');
- p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V13</h3><div class="corev13-note">Primera limpieza física de roles/preparación y centralización de claves.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev13-row"><span class="${x.ok?'corev13-ok':'corev13-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV13">Copiar resultado</button> <button id="closeV13">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV13').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV13').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V13\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV14');
+ p.innerHTML=`<h3>🗝️ ALLPA CONCLUSIÓN CORE V14</h3><div class="corev14-note">Claves y eliminaciones V106/V107/V108 pasan por una sola capa compatible.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev14-row"><span class="${x.ok?'corev14-ok':'corev14-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV14">Copiar resultado</button> <button id="closeV14">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV14').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV14').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V14\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV13';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V13';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV13';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV14';b.type='button';b.textContent='🗝️ CORE CONCLUSIÓN V14';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV14';document.body.appendChild(p)},1200));
 })();
 </script>
 
