@@ -37418,13 +37418,240 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v11-css">
-#allpaConclusionCoreBtnV11{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV11{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(980px,calc(100vw - 36px));max-height:86vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV11.open{display:block}.corev11-ok{color:#177245;font-weight:700}.corev11-fail{color:#b42318;font-weight:700}.corev11-row{padding:6px 0;border-bottom:1px solid #eee}
-@media print{#allpaConclusionCoreBtnV11,#allpaConclusionCorePanelV11{display:none!important}}
+<style id="allpa-conclusion-core-v12-css">
+#allpaConclusionCoreBtnV12{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV12{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1000px,calc(100vw - 36px));max-height:87vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV12.open{display:block}.corev12-ok{color:#177245;font-weight:700}.corev12-fail{color:#b42318;font-weight:700}.corev12-row{padding:6px 0;border-bottom:1px solid #eee}.corev12-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV12,#allpaConclusionCorePanelV12{display:none!important}}
 </style>
-<script id="allpa-conclusion-core-v11-test">
+
+<script id="allpa-conclusion-core-v12">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V12 — PREPARACIÓN ESTRUCTURAL ÚNICA
+
+   Cambios:
+   - roleV13 -> Structure V9
+   - prepareRowsConclV108 -> algoritmo V12
+   - identidad base NO depende de intervention/tipoAreaV13
+   - filas custom se preservan
+   - custom se insertan antes de brutaTotal
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const S=window.ConclusionTecnicaStructureV9;
+  const V7=window.ConclusionTecnicaV7;
+  if(!S) return;
+
+  function clone(v){
+    try{return structuredClone(v)}
+    catch(_e){return JSON.parse(JSON.stringify(v))}
+  }
+
+  function norm(v){ return S.norm(v); }
+
+  function baseKey(raw){
+    const explicit=S.cleanBaseKey(raw?._baseKeyV108 || raw?.baseKey || '');
+    if(explicit) return norm(explicit);
+    return norm(raw?.descripcion ?? raw?.Descripción ?? raw?.Descripcion ?? '');
+  }
+
+  function deletionKeys(setLike){
+    const out=new Set();
+    (setLike||[]).forEach(k=>{
+      const raw=String(k||'').trim();
+      if(!raw) return;
+      out.add(norm(S.cleanBaseKey(raw.replace(/^desc:/i,''))));
+    });
+    return out;
+  }
+
+  function isBase(raw){
+    const origin=String(raw?.origin || raw?._originV108 || '').toLowerCase();
+    return origin==='base' || (!!raw?._baseKeyV108 && !raw?._userRowV108);
+  }
+
+  function mergeRows(currentRows, baseRows, deletedSet){
+    const current=Array.isArray(currentRows)?currentRows:[];
+    const bases=Array.isArray(baseRows)?baseRows:[];
+    const deleted=deletionKeys(deletedSet);
+
+    /* Sin base disponible, nunca destruir el state existente. */
+    if(!bases.length){
+      S.canonicalizeRows(current);
+      return current;
+    }
+
+    const baseQueues=new Map();
+    const custom=[];
+
+    current.forEach(raw=>{
+      if(isBase(raw)){
+        const key=baseKey(raw);
+        if(!baseQueues.has(key)) baseQueues.set(key,[]);
+        baseQueues.get(key).push(raw);
+      }else{
+        custom.push(raw);
+      }
+    });
+
+    const merged=[];
+
+    bases.forEach((base,index)=>{
+      const key=baseKey(base);
+      if(!key || deleted.has(key)) return;
+
+      const queue=baseQueues.get(key)||[];
+      const prev=queue.shift();
+
+      if(prev){
+        prev._baseKeyV108=S.cleanBaseKey(base._baseKeyV108 || key);
+        prev._originV108='base';
+        prev.origin='base';
+        prev._baseOrderV108=index;
+        prev.baseOrder=index;
+
+        /* La intervención nunca se toma de la base reconstruida si ya existe. */
+        if(S.role(prev)==='bruta'){
+          const type=S.interventionOf(prev);
+          prev.intervention=type;
+          prev.tipoAreaV13=type;
+        }
+
+        merged.push(prev);
+      }else{
+        const n=S.normalizeRow(base,index);
+        const fresh={
+          descripcion:n.descripcion||'',
+          levels:Array.isArray(n.levels)?n.levels.slice():[],
+          cantidad:String(n.cantidad??''),
+          unidad:n.unidad||'m2',
+          allowLevels:!!n.allowLevels,
+          _baseKeyV108:S.cleanBaseKey(base._baseKeyV108 || key),
+          _originV108:'base',
+          origin:'base',
+          _baseOrderV108:index,
+          baseOrder:index
+        };
+
+        const role=S.role(fresh,index);
+        if(role==='bruta'){
+          fresh.intervention='Aprobada (Existente)';
+          fresh.tipoAreaV13='Aprobada (Existente)';
+        }
+
+        merged.push(fresh);
+      }
+    });
+
+    const safeCustom=custom.filter(raw=>{
+      const key=baseKey(raw);
+      return !deleted.has(key);
+    });
+
+    safeCustom.forEach(raw=>{
+      raw._originV108='custom';
+      raw.origin='custom';
+      raw._userRowV108=true;
+    });
+
+    const totalIndex=merged.findIndex((raw,i)=>S.role(raw,i)==='brutaTotal');
+    if(totalIndex>=0) merged.splice(totalIndex,0,...safeCustom);
+    else merged.push(...safeCustom);
+
+    S.canonicalizeRows(merged);
+    return merged;
+  }
+
+  function currentBaseRows(){
+    try{
+      if(typeof baseRowsV108==='function'){
+        return baseRowsV108()||[];
+      }
+    }catch(_e){}
+    return [];
+  }
+
+  function currentDeleted(){
+    try{
+      if(typeof deletedKeysAllV108==='function'){
+        return [...(deletedKeysAllV108()||[])];
+      }
+    }catch(_e){}
+    return [];
+  }
+
+  function prepare(){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+
+    if(state.aprobatorio.conclusion.length===0 &&
+       typeof rebuildEditableConclusionAllRowsV81==='function'){
+      try{rebuildEditableConclusionAllRowsV81(false);}catch(_e){}
+    }
+
+    state.aprobatorio.conclusion=mergeRows(
+      state.aprobatorio.conclusion,
+      currentBaseRows(),
+      currentDeleted()
+    );
+
+    /* Filas estructurales obligatorias permanecen en sus helpers actuales
+       durante esta transición. */
+    try{
+      if(typeof ensureAreaUtilTotalConclusionV119N==='function'){
+        ensureAreaUtilTotalConclusionV119N();
+      }
+    }catch(_e){}
+
+    try{
+      if(typeof ensureAreaTotalV13==='function'){
+        ensureAreaTotalV13();
+      }
+    }catch(_e){}
+
+    S.canonicalizeState();
+
+    try{
+      if(V7) V7.recalcular();
+      else if(typeof recalcAreasCOSV36==='function') recalcAreasCOSV36();
+    }catch(_e){}
+
+    return state.aprobatorio.conclusion;
+  }
+
+  const legacyPrepare=typeof window.prepareRowsConclV108==='function'
+    ? window.prepareRowsConclV108
+    : null;
+
+  window.ConclusionTecnicaPrepareV12=Object.freeze({
+    version:'12.0.0-prepare',
+    baseKey,
+    deletionKeys,
+    mergeRows,
+    prepare,
+    legacyPrepare
+  });
+
+  /* Roles V13 dejan de ser otra fuente de verdad. */
+  window.roleV13=function(raw,i){
+    return S.role(raw,i);
+  };
+  try{roleV13=window.roleV13;}catch(_e){}
+
+  window.prepareRowsConclV108=function(){
+    return prepare();
+  };
+  window.prepareRowsConclV108.__ctPrepareV12=true;
+  try{prepareRowsConclV108=window.prepareRowsConclV108;}catch(_e){}
+
+  window.addEventListener('load',()=>setTimeout(()=>{
+    try{S.canonicalizeState();}catch(_e){}
+  },800));
+})();
+</script>
+
+<script id="allpa-conclusion-core-v12-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -37432,30 +37659,51 @@ function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
 function row(role,d,q,x={}){const r={descripcion:d,cantidad:String(q??''),unidad:role.startsWith('cos')?'%':'m2',levels:[],allowLevels:role==='bruta',...x};if(role==='areaAmpliacionTotal')r._roleV13='areaAmpliacionTotal';else r._roleV108=role;return r}
 function fixture(){return{tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[
 row('predio','Área del predio',500),row('utilPB','Área útil planta baja',100),row('utilTotal','Área útil total',200),
-row('bruta','Área bruta planta baja',100,{levels:['0.00'],intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
-row('bruta','Área bruta primera planta alta',50,{levels:['+3.20'],intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
-row('bruta','Área bruta segunda planta alta',25,{levels:['+6.40'],intervention:'Modificación',tipoAreaV13:'Modificación'}),
+row('bruta','Área bruta planta baja',100,{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
+row('bruta','Área bruta primera planta alta',50,{intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
+row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación',_originV108:'custom',_userRowV108:true}),
 row('brutaTotal','Área Bruta total de construcción',''),row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
 row('cosPB','COS PB',''),row('cosTotal','COS TOTAL','')]}}}
 
 async function run(){
  const R=[],orig=C(state);
  try{
-  const N=window.ConclusionTecnicaNormalizeV10,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
-  A(R,'Normalize V10 activo',!!N,N?.version||'');
-  A(R,'Bootstrap V11 disponible',typeof conclusionNormalizeBootstrapV11==='function','único bootstrap');
+  const P=window.ConclusionTecnicaPrepareV12,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
+  A(R,'Prepare V12 disponible',!!P,P?.version||'');
+  A(R,'prepareRowsConclV108 ruteado a V12',!!window.prepareRowsConclV108.__ctPrepareV12,'V12');
+  A(R,'roleV13 ruteado a V9',window.roleV13.toString().includes('S.role'),'Structure V9');
+
+  const bases=[
+   {...row('predio','Área del predio',''),_baseKeyV108:'AREA DEL PREDIO',_originV108:'base'},
+   {...row('utilPB','Área útil planta baja',''),_baseKeyV108:'AREA UTIL PLANTA BAJA',_originV108:'base'},
+   {...row('bruta','Área bruta planta baja',''),_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)',_originV108:'base'},
+   {...row('brutaTotal','Área Bruta total de construcción',''),_baseKeyV108:'AREA BRUTA TOTAL DE CONSTRUCCION',_originV108:'base'}
+  ];
+
+  const current=[
+   {...bases[0],cantidad:'500'},
+   {...bases[1],cantidad:'100'},
+   {...bases[2],cantidad:'100',intervention:'Ampliación',tipoAreaV13:'Ampliación'},
+   row('bruta','Área bruta personalizada',25,{_originV108:'custom',_userRowV108:true,intervention:'Modificación',tipoAreaV13:'Modificación'}),
+   {...bases[3],cantidad:'100'}
+  ];
+
+  const merged=P.mergeRows(C(current),C(bases),[]);
+  A(R,'Merge conserva filas base',merged.filter(r=>r._originV108==='base').length===4,`${merged.filter(r=>r._originV108==='base').length} base`);
+  A(R,'Merge conserva fila custom',merged.some(r=>r._userRowV108&&r.descripcion==='Área bruta personalizada'),'custom presente');
+
+  const customIdx=merged.findIndex(r=>r._userRowV108);
+  const totalIdx=merged.findIndex((r,i)=>S.role(r,i)==='brutaTotal');
+  A(R,'Custom antes de Área Bruta Total',customIdx>=0&&totalIdx>customIdx,`custom ${customIdx} · total ${totalIdx}`);
+
+  const baseBruta=merged.find(r=>r._originV108==='base'&&S.role(r)==='bruta');
+  A(R,'Intervención base preservada',S.interventionOf(baseBruta)==='Ampliación',S.interventionOf(baseBruta));
+  A(R,'Base key limpia de TIPO',!P.baseKey(baseBruta).includes('TIPO:'),P.baseKey(baseBruta));
+
+  const deleted=P.mergeRows(C(current),C(bases),['AREA UTIL PLANTA BAJA']);
+  A(R,'Eliminación estructural respetada',!deleted.some(r=>S.role(r)==='utilPB'),`${deleted.length} fila(s)`);
 
   state=fixture();S.canonicalizeState();
-  const sample=state.aprobatorio.conclusion[3];
-
-  const names=['normalizeConclusionRow','normalizeConclusionRowV37','normalizeConclusionRowSafeV73','rowConclV87','rowConclV108','rowV13'];
-  names.forEach(name=>{
-    const fn=window[name];
-    const out=fn(sample);
-    A(R,`${name} operativo`,!!out&&out.descripcion==='Área bruta planta baja'&&out.cantidad==='100'&&out.unidad==='m2',`${out.descripcion} · ${out.cantidad} · ${out.unidad}`);
-    A(R,`${name} ruteado a V10`,fn.toString().includes('adapter(raw)')||fn.toString().includes('return adapter(raw)'), 'V10 adapter');
-  });
-
   const calc=V7.recalcular();
   A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
   A(R,'Área Amp/Mod',calc.formatted.areaAmpMod==='75.00',calc.formatted.areaAmpMod);
@@ -37469,25 +37717,24 @@ async function run(){
 
   let cont=document.getElementById('conclusionTabla'),temp=false;
   if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
-  V7.renderTabla();
-  const tr=cont.querySelectorAll('tbody tr').length;
+  V7.renderTabla();const tr=cont.querySelectorAll('tbody tr').length;
   A(R,'Tabla operativa',!!cont.querySelector('.editable-conclusion-core-v4'),`${tr} fila(s)`);
   const html=V7.renderInforme();
   A(R,'Informe operativo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
   A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
 
-  const json=S.serializeRows(state.aprobatorio.conclusion);
-  A(R,'Serialización operativa',S.deserializeRows(json).length===10,'10 fila(s)');
+  A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
   if(temp)cont.remove();
- }catch(e){A(R,'Banco Core V11',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Core V12',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV11');
- p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V11</h3><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev11-row"><span class="${x.ok?'corev11-ok':'corev11-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV11">Copiar resultado</button> <button id="closeV11">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV11').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV11').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V11\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV12');
+ p.innerHTML=`<h3>🧱 ALLPA CONCLUSIÓN CORE V12</h3><div class="corev12-note">Preparación estructural única e identidad independiente del Tipo de intervención.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev12-row"><span class="${x.ok?'corev12-ok':'corev12-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV12">Copiar resultado</button> <button id="closeV12">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV12').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV12').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V12\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV11';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V11';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV11';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV12';b.type='button';b.textContent='🧱 CORE CONCLUSIÓN V12';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV12';document.body.appendChild(p)},1200));
 })();
 </script>
 
