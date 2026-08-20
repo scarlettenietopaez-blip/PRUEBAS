@@ -14974,123 +14974,7 @@ function preserveMetaV108(target, source){
   return target;
 }
 
-function prepareRowsConclV108(){
-  if(!state.aprobatorio) state.aprobatorio={};
-  if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
-
-  // Asegura que la base CSV esté disponible en estado inicial.
-  if(state.aprobatorio.conclusion.length===0 && typeof rebuildEditableConclusionAllRowsV81 === 'function'){
-    try{ rebuildEditableConclusionAllRowsV81(false); }catch(e){}
-  }
-
-  const bases=baseRowsV108();
-
-  /* ALLPA V54: una fila de área bruta se identifica por la combinación
-     Descripción + Tipo de intervención. De esta forma pueden coexistir dos
-     filas con la misma descripción cuando una es Aprobada (Existente) y la
-     otra es Ampliación o Modificación. */
-  const typedBaseKeyV54=function(raw){
-    const row=rowConclV108(raw||{});
-    const descKey=normConclV108(row.descripcion || raw?.descripcion || '');
-    const role=roleFromDescV108(row.descripcion || raw?.descripcion || '');
-    if(role==='bruta'){
-      const tipo=typeof normalizeAreaTypeV13==='function'
-        ? normalizeAreaTypeV13(raw?.tipoAreaV13 || row?.tipoAreaV13 || '')
-        : String(raw?.tipoAreaV13 || row?.tipoAreaV13 || '').trim();
-      return descKey+'||TIPO:'+normConclV108(tipo || 'APROBADA (EXISTENTE)');
-    }
-    return descKey;
-  };
-
-  bases.forEach(function(base){
-    base._baseKeyV108=typedBaseKeyV54(base);
-  });
-  const baseKeySet=new Set(bases.map(r=>r._baseKeyV108));
-  const deleted=deletedKeysAllV108();
-
-  // Etiqueta filas actuales. Si ya tenían metadata, se conserva aunque cambie descripción.
-  state.aprobatorio.conclusion.forEach((raw,i)=>{
-    const row=rowConclV108(raw);
-    {
-      const typedKey=typedBaseKeyV54(raw);
-      const plainKey=normConclV108(row.descripcion || raw.descripcion || '');
-      if(baseKeySet.has(typedKey)){
-        raw._baseKeyV108=typedKey;
-        raw._originV108='base';
-      }else if(!raw._baseKeyV108 && baseKeySet.has(plainKey)){
-        raw._baseKeyV108=plainKey;
-        raw._originV108='base';
-      }
-    }
-    if(raw._baseKeyV108 && raw._originV108!=='custom') raw._originV108='base';
-    if(!raw._originV108) raw._originV108='custom';
-    if(raw._originV108==='custom') raw._userRowV108=true;
-    roleConclV108(raw,i);
-  });
-
-  const currentByBase=new Map();
-  const customRows=[];
-
-  state.aprobatorio.conclusion.forEach((raw,i)=>{
-    if(raw._baseKeyV108 && raw._originV108==='base'){
-      if(!currentByBase.has(raw._baseKeyV108)) currentByBase.set(raw._baseKeyV108,raw);
-    }else{
-      customRows.push(raw);
-    }
-  });
-
-  let merged=bases
-    .filter(base=>!deleted.has(base._baseKeyV108) && !deleted.has('desc:'+base._baseKeyV108))
-    .map(base=>{
-      const prev=currentByBase.get(base._baseKeyV108);
-      if(prev){
-        preserveMetaV108(prev, base);
-        prev._baseKeyV108=base._baseKeyV108;
-        prev._originV108='base';
-        prev._baseOrderV108=base._baseOrderV108;
-        const role=roleFromDescV108(base.descripcion);
-        if(role){
-          prev._roleV108=prev._roleV108 || role;
-          prev._roleV104=prev._roleV104 || role;
-        }
-        return prev;
-      }
-      const fresh={
-        descripcion:base.descripcion||'',
-        levels:Array.isArray(base.levels)?base.levels:[],
-        cantidad:String(base.cantidad||''),
-        unidad:String(base.unidad||'m2'),
-        allowLevels:false,
-        _baseKeyV108:base._baseKeyV108,
-        _originV108:'base',
-        _baseOrderV108:base._baseOrderV108
-      };
-      const role=roleFromDescV108(fresh.descripcion);
-      if(role){
-        fresh._roleV108=role;
-        fresh._roleV104=role;
-      }
-      return fresh;
-    });
-
-  // Inserta filas personalizadas antes de Área Bruta total si son de usuario.
-  const safeCustom=customRows.filter(r=>{
-    const key=normConclV108(rowConclV108(r).descripcion || '');
-    return !deleted.has(key) && !deleted.has('desc:'+key);
-  }).map(r=>{
-    r._originV108='custom';
-    r._userRowV108=true;
-    return r;
-  });
-
-  const totalIdx=merged.findIndex(r=>roleConclV108(r)==='brutaTotal');
-  if(totalIdx>=0) merged.splice(totalIdx,0,...safeCustom);
-  else merged=[...merged,...safeCustom];
-
-  state.aprobatorio.conclusion=merged;
-
-  if(typeof recalcAreasCOSV36 === 'function') recalcAreasCOSV36();
-}
+/* Core V13: prepareRowsConclV108 histórico retirado L14977 */
 
 /* Sobrescribe sync para conservar metadata aunque se edite la descripción. */
 const _syncConclV87_base_V108 = typeof syncConclV87 === 'function' ? syncConclV87 : null;
@@ -21982,8 +21866,7 @@ function syncConclusionAutoV145(){
   setConclusionQtyV145(conclusionValueTargetV145('pisos'),pisos);
 }
 
-const _prepareRowsConclV108_base_V145=typeof prepareRowsConclV108==='function'?prepareRowsConclV108:null;
-if(_prepareRowsConclV108_base_V145) prepareRowsConclV108=function(){_prepareRowsConclV108_base_V145();syncConclusionAutoV145();};
+/* Core V13: wrapper V145 de prepareRows retirado */
 const _renderConclusionTabla_base_V145=typeof renderConclusionTabla==='function'?renderConclusionTabla:null;
 /* Core V8: histórico retirado renderConclusionTabla */const _conclusionReport_base_V145=typeof conclusionReport==='function'?conclusionReport:null;
 /* Core V8: histórico retirado conclusionReport */
@@ -30281,27 +30164,7 @@ renderObsSeleccionadas = function(){
     const value=normV13(projectDefV13());
     return value.includes('AMPLIACION') || value.includes('MODIFICATORIO') || value.includes('MODIFICATIORIO');
   }
-  function roleV13(raw,i){
-    const row=rowV13(raw);
-    const d=normV13(row.descripcion||raw?.descripcion||'');
-    if(raw?._fixedAreaAmpliacionV13 || d.includes('AREA TOTAL DE AMPLIACION')) return 'areaAmpliacionTotal';
-    if(typeof roleConclV108==='function'){
-      const role=roleConclV108(raw,i);
-      if(role) return role;
-    }
-    if(typeof conclusionRoleV119N==='function'){
-      const role=conclusionRoleV119N(raw,i);
-      if(role) return role;
-    }
-    if(d.includes('AREA')&&d.includes('BRUTA')&&d.includes('TOTAL')) return 'brutaTotal';
-    if(d.includes('AREA')&&d.includes('BRUTA')) return 'bruta';
-    if(d.includes('AREA')&&d.includes('PREDIO')) return 'predio';
-    if(d.includes('AREA')&&d.includes('UTIL')&&d.includes('PLANTA BAJA')) return 'utilPB';
-    if(d.includes('AREA')&&d.includes('UTIL')&&d.includes('TOTAL')) return 'utilTotal';
-    if(d.includes('COS PB')) return 'cosPB';
-    if(d.includes('COS TOTAL')) return 'cosTotal';
-    return '';
-  }
+  /* Core V13: roleV13 histórico retirado L30168 */
   function parseQtyV13(value){
     if(typeof parseNumeroV119N==='function'){
       const n=parseNumeroV119N(value); return Number.isFinite(n)?n:0;
@@ -37418,13 +37281,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v12-css">
-#allpaConclusionCoreBtnV12{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV12{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1000px,calc(100vw - 36px));max-height:87vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV12.open{display:block}.corev12-ok{color:#177245;font-weight:700}.corev12-fail{color:#b42318;font-weight:700}.corev12-row{padding:6px 0;border-bottom:1px solid #eee}.corev12-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV12,#allpaConclusionCorePanelV12{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v12">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V12 — PREPARACIÓN ESTRUCTURAL ÚNICA
@@ -37651,7 +37507,122 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v12-test">
+
+<style id="allpa-conclusion-core-v13-css">
+#allpaConclusionCoreBtnV13{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV13{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1000px,calc(100vw - 36px));max-height:87vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV13.open{display:block}.corev13-ok{color:#177245;font-weight:700}.corev13-fail{color:#b42318;font-weight:700}.corev13-row{padding:6px 0;border-bottom:1px solid #eee}.corev13-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV13,#allpaConclusionCorePanelV13{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v13">
+(function(){
+  'use strict';
+
+  const S=window.ConclusionTecnicaStructureV9;
+  if(!S) return;
+
+  function norm(v){return S.norm(v);}
+
+  function key(raw,index=0){
+    if(!raw) return '';
+
+    const explicit=S.cleanBaseKey(raw._baseKeyV108 || raw.baseKey || '');
+    if(explicit) return norm(explicit);
+
+    const n=S.normalizeRow(raw,index);
+    if(n.descripcion) return norm(n.descripcion);
+
+    return `${n.role||'row'}::${index}`;
+  }
+
+  function deletionKey(rawOrKey,index=0){
+    if(rawOrKey && typeof rawOrKey==='object') return key(rawOrKey,index);
+
+    return norm(
+      S.cleanBaseKey(
+        String(rawOrKey||'').replace(/^desc:/i,'')
+      )
+    );
+  }
+
+  function getDeletedSet(){
+    const out=new Set();
+
+    try{
+      if(typeof deletedKeysAllV108==='function'){
+        for(const k of (deletedKeysAllV108()||[])){
+          const dk=deletionKey(k);
+          if(dk) out.add(dk);
+        }
+      }
+    }catch(_e){}
+
+    const local=state?.aprobatorio?._deletedConclusionKeysV13;
+    if(Array.isArray(local)){
+      local.forEach(k=>{
+        const dk=deletionKey(k);
+        if(dk) out.add(dk);
+      });
+    }
+
+    return out;
+  }
+
+  function persist(setLike){
+    if(!state.aprobatorio) state.aprobatorio={};
+
+    state.aprobatorio._deletedConclusionKeysV13=[
+      ...new Set([...(setLike||[])].map(deletionKey).filter(Boolean))
+    ];
+
+    return state.aprobatorio._deletedConclusionKeysV13;
+  }
+
+  function markDeleted(raw,index=0){
+    const set=getDeletedSet();
+    const dk=deletionKey(raw,index);
+    if(dk) set.add(dk);
+    persist(set);
+    return dk;
+  }
+
+  function unmarkDeleted(rawOrKey,index=0){
+    const set=getDeletedSet();
+    const dk=deletionKey(rawOrKey,index);
+    set.delete(dk);
+    persist(set);
+    return dk;
+  }
+
+  window.ConclusionTecnicaKeysV13=Object.freeze({
+    version:'13.0.0-keys',
+    key,
+    deletionKey,
+    getDeletedSet,
+    persist,
+    markDeleted,
+    unmarkDeleted
+  });
+
+  /* Adaptadores de compatibilidad. */
+  window.conclusionDeleteKeyV106=function(raw){
+    return deletionKey(raw);
+  };
+
+  window.assignBaseKeyConclusionV107=function(raw,index=0){
+    if(!raw || typeof raw!=='object') return '';
+    const k=key(raw,index);
+    raw._baseKeyV108=k;
+    return k;
+  };
+
+  try{conclusionDeleteKeyV106=window.conclusionDeleteKeyV106;}catch(_e){}
+  try{assignBaseKeyConclusionV107=window.assignBaseKeyConclusionV107;}catch(_e){}
+})();
+</script>
+
+<script id="allpa-conclusion-core-v13-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -37661,49 +37632,35 @@ function fixture(){return{tipoInforme:'Informe Técnico Aprobatorio',aprobatorio
 row('predio','Área del predio',500),row('utilPB','Área útil planta baja',100),row('utilTotal','Área útil total',200),
 row('bruta','Área bruta planta baja',100,{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
 row('bruta','Área bruta primera planta alta',50,{intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
-row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación',_originV108:'custom',_userRowV108:true}),
+row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación'}),
 row('brutaTotal','Área Bruta total de construcción',''),row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
 row('cosPB','COS PB',''),row('cosTotal','COS TOTAL','')]}}}
 
 async function run(){
  const R=[],orig=C(state);
  try{
-  const P=window.ConclusionTecnicaPrepareV12,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
-  A(R,'Prepare V12 disponible',!!P,P?.version||'');
-  A(R,'prepareRowsConclV108 ruteado a V12',!!window.prepareRowsConclV108.__ctPrepareV12,'V12');
-  A(R,'roleV13 ruteado a V9',window.roleV13.toString().includes('S.role'),'Structure V9');
+  const K=window.ConclusionTecnicaKeysV13,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
+  A(R,'Keys V13 disponible',!!K,K?.version||'');
+  A(R,'prepareRowsConclV108 activo',typeof prepareRowsConclV108==='function','Core V12');
+  A(R,'prepareRowsConclV108 es V12',!!prepareRowsConclV108.__ctPrepareV12,'V12');
+  A(R,'roleV13 activo',typeof roleV13==='function','Structure V9');
 
-  const bases=[
-   {...row('predio','Área del predio',''),_baseKeyV108:'AREA DEL PREDIO',_originV108:'base'},
-   {...row('utilPB','Área útil planta baja',''),_baseKeyV108:'AREA UTIL PLANTA BAJA',_originV108:'base'},
-   {...row('bruta','Área bruta planta baja',''),_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)',_originV108:'base'},
-   {...row('brutaTotal','Área Bruta total de construcción',''),_baseKeyV108:'AREA BRUTA TOTAL DE CONSTRUCCION',_originV108:'base'}
-  ];
+  const a=row('bruta','Área bruta planta baja',100,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)',intervention:'Aprobada (Existente)'});
+  const b=row('bruta','Área bruta planta baja',50,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:AMPLIACION',intervention:'Ampliación'});
+  A(R,'Clave ignora Tipo de intervención',K.key(a)===K.key(b),`${K.key(a)} / ${K.key(b)}`);
 
-  const current=[
-   {...bases[0],cantidad:'500'},
-   {...bases[1],cantidad:'100'},
-   {...bases[2],cantidad:'100',intervention:'Ampliación',tipoAreaV13:'Ampliación'},
-   row('bruta','Área bruta personalizada',25,{_originV108:'custom',_userRowV108:true,intervention:'Modificación',tipoAreaV13:'Modificación'}),
-   {...bases[3],cantidad:'100'}
-  ];
+  state=fixture();
+  const dk=K.markDeleted(state.aprobatorio.conclusion[1],1);
+  A(R,'Marcar eliminación',K.getDeletedSet().has(dk),dk);
+  K.unmarkDeleted(dk);
+  A(R,'Desmarcar eliminación',!K.getDeletedSet().has(dk),dk);
 
-  const merged=P.mergeRows(C(current),C(bases),[]);
-  A(R,'Merge conserva filas base',merged.filter(r=>r._originV108==='base').length===4,`${merged.filter(r=>r._originV108==='base').length} base`);
-  A(R,'Merge conserva fila custom',merged.some(r=>r._userRowV108&&r.descripcion==='Área bruta personalizada'),'custom presente');
+  const raw=state.aprobatorio.conclusion[3];
+  const assigned=assignBaseKeyConclusionV107(raw,3);
+  A(R,'assignBaseKey V107 centralizado',assigned===K.key(raw,3),assigned);
+  A(R,'deleteKey V106 centralizado',conclusionDeleteKeyV106(raw)===K.deletionKey(raw),K.deletionKey(raw));
 
-  const customIdx=merged.findIndex(r=>r._userRowV108);
-  const totalIdx=merged.findIndex((r,i)=>S.role(r,i)==='brutaTotal');
-  A(R,'Custom antes de Área Bruta Total',customIdx>=0&&totalIdx>customIdx,`custom ${customIdx} · total ${totalIdx}`);
-
-  const baseBruta=merged.find(r=>r._originV108==='base'&&S.role(r)==='bruta');
-  A(R,'Intervención base preservada',S.interventionOf(baseBruta)==='Ampliación',S.interventionOf(baseBruta));
-  A(R,'Base key limpia de TIPO',!P.baseKey(baseBruta).includes('TIPO:'),P.baseKey(baseBruta));
-
-  const deleted=P.mergeRows(C(current),C(bases),['AREA UTIL PLANTA BAJA']);
-  A(R,'Eliminación estructural respetada',!deleted.some(r=>S.role(r)==='utilPB'),`${deleted.length} fila(s)`);
-
-  state=fixture();S.canonicalizeState();
+  S.canonicalizeState();
   const calc=V7.recalcular();
   A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
   A(R,'Área Amp/Mod',calc.formatted.areaAmpMod==='75.00',calc.formatted.areaAmpMod);
@@ -37722,19 +37679,19 @@ async function run(){
   const html=V7.renderInforme();
   A(R,'Informe operativo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
   A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
-
   A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
+
   if(temp)cont.remove();
- }catch(e){A(R,'Banco Core V12',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Core V13',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV12');
- p.innerHTML=`<h3>🧱 ALLPA CONCLUSIÓN CORE V12</h3><div class="corev12-note">Preparación estructural única e identidad independiente del Tipo de intervención.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev12-row"><span class="${x.ok?'corev12-ok':'corev12-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV12">Copiar resultado</button> <button id="closeV12">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV12').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV12').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V12\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV13');
+ p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V13</h3><div class="corev13-note">Primera limpieza física de roles/preparación y centralización de claves.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev13-row"><span class="${x.ok?'corev13-ok':'corev13-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV13">Copiar resultado</button> <button id="closeV13">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV13').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV13').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V13\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV12';b.type='button';b.textContent='🧱 CORE CONCLUSIÓN V12';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV12';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV13';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V13';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV13';document.body.appendChild(p)},1200));
 })();
 </script>
 
