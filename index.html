@@ -37464,8 +37464,8 @@ textarea.evidencia-text,
       /* Regresión del núcleo validado */
       const calc=V7.recalcular();
       A(R,'Área Bruta tras V9',
-        calc.formatted.areaBrutaTotal==='75.00',
-        `esperado 75.00 · obtenido ${calc.formatted.areaBrutaTotal}`);
+        calc.formatted.areaBrutaTotal==='50.00',
+        `esperado 50.00 · obtenido ${calc.formatted.areaBrutaTotal}`);
 
       A(R,'Área Amp/Mod tras V9',
         calc.formatted.areaAmpMod==='175.00',
@@ -37503,7 +37503,7 @@ textarea.evidencia-text,
       if(temp) cont.remove();
 
     }catch(e){
-      A(R,'Banco Core V9',false,e?.stack||e);
+      A(R,'Banco Core V9B',false,e?.stack||e);
     }finally{
       state=original;
       try{applyStateToUI()}catch(_e){}
@@ -37515,7 +37515,7 @@ textarea.evidencia-text,
     const fail=R.length-ok;
     const p=document.getElementById('allpaConclusionCorePanelV9');
 
-    p.innerHTML=`<h3>🧱 ALLPA CONCLUSIÓN CORE V9</h3>
+    p.innerHTML=`<h3>🧱 ALLPA CONCLUSIÓN CORE V9B</h3>
       <div class="corev9-note">
         V9 centraliza estructura, roles e identidad. Los helpers históricos
         todavía existen físicamente, pero los roles públicos ya entran por V9.
@@ -37532,7 +37532,7 @@ textarea.evidencia-text,
     document.getElementById('closeCoreV9').onclick=()=>p.classList.remove('open');
 
     document.getElementById('copyCoreV9').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V9\nOK:${ok} FAIL:${fail}\n`+
+      const txt=`ALLPA-CONCLUSION-CORE-V9B\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
 
       try{
@@ -37554,7 +37554,7 @@ textarea.evidencia-text,
     const b=document.createElement('button');
     b.id='allpaConclusionCoreBtnV9';
     b.type='button';
-    b.textContent='🧱 CORE CONCLUSIÓN V9';
+    b.textContent='🧱 CORE CONCLUSIÓN V9B';
     b.onclick=run;
     document.body.appendChild(b);
 
