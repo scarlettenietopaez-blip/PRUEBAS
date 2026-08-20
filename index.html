@@ -5219,12 +5219,12 @@ function syncConclusionObj(i,row){
 }
 /* Dep11: definición histórica no capturada retirada: renderConclusionTabla */
 function updConclusionLevel(i,j,v){ const row=normalizeConclusionRow(state.aprobatorio.conclusion[i]); row.levels[j]=smartInputCase(v); syncConclusionObj(i,row); renderReport(); renderPreview(); }
-function addConclusionLevel(i){ const row=normalizeConclusionRow(state.aprobatorio.conclusion[i]); row.levels.push(''); syncConclusionObj(i,row); renderConclusionTabla(); renderReport(); renderPreview(); }
-function delConclusionLevel(i,j){ const row=normalizeConclusionRow(state.aprobatorio.conclusion[i]); row.levels.splice(j,1); syncConclusionObj(i,row); renderConclusionTabla(); renderReport(); renderPreview(); }
-function addConclusionRowAfter(i){ state.aprobatorio.conclusion.splice(i+1,0,{descripcion:'',levels:[],cantidad:'',unidad:'m2'}); renderConclusionTabla(); renderReport(); renderPreview(); }
+/* Core V16: histórico retirado addConclusionLevel L5222 */
+/* Core V16: histórico retirado delConclusionLevel L5223 */
+/* Core V16: histórico retirado addConclusionRowAfter L5224 */
 /* función sin referencias retirada Dep10: addConclusionCell */
 function agregarConclusionRow(tipo=''){ state.aprobatorio.conclusion.push({descripcion:tipo,levels:[],cantidad:'',unidad:'m2'}); renderConclusionTabla(); renderReport(); renderPreview(); }
-function delConclusion(i){ state.aprobatorio.conclusion.splice(i,1); renderConclusionTabla(); renderReport(); renderPreview(); }
+/* Core V16: histórico retirado delConclusion L5227 */
 /* función sin referencias retirada Dep10: renderSimpleTables */
 /* función sin referencias retirada Dep10: agregarSimpleRow */
 /* función sin referencias retirada Dep10: updSimple */
@@ -5569,7 +5569,7 @@ function rowAllowsLevelsV36(row,i){
 function parseQtyV36(v){ return parseFloat(String(v||'').replace(',','.')) || 0; }
 function fmtNumV36(n){ if(!isFinite(n)) return ''; return (Math.round(n*100)/100).toFixed(2); }
 /* Dep11: definición histórica no capturada retirada: renderConclusionTabla */;
-addConclusionRowAfter = function(i){ state.aprobatorio.conclusion.splice(i+1,0,{descripcion:'',levels:[],cantidad:'',unidad:'m2',allowLevels:true}); renderConclusionTabla(); renderReport(); renderPreview(); };
+/* Core V16: histórico retirado addConclusionRowAfter L5572 */
 agregarConclusionRow = function(tipo=''){ state.aprobatorio.conclusion.push({descripcion:tipo,levels:[],cantidad:'',unidad:'m2',allowLevels:true}); renderConclusionTabla(); renderReport(); renderPreview(); };
 
 
@@ -5746,7 +5746,7 @@ function isComputedConclusionV37(raw){
  return d.includes('AREA BRUTA TOTAL') || d==='COS PB' || d==='COS TOTAL';
 }
 /* Dep11: definición histórica no capturada retirada: renderConclusionTabla */;
-addConclusionRowAfter = function(i){ state.aprobatorio.conclusion.splice(i+1,0,{descripcion:'',levels:[],cantidad:'',unidad:'m2',allowLevels:true}); renderConclusionTabla(); renderReport(); renderPreview(); };
+/* Core V16: histórico retirado addConclusionRowAfter L5749 */
 agregarConclusionRow = function(tipo=''){ state.aprobatorio.conclusion.push({descripcion:tipo,levels:[],cantidad:'',unidad:'m2',allowLevels:true}); renderConclusionTabla(); renderReport(); renderPreview(); };
 </script>
 
@@ -10087,10 +10087,7 @@ function conclusionIndexesV73(){
   }
   return {start,total};
 }
-function canEditLevelsV73(i){
-  const {start,total}=conclusionIndexesV73();
-  return start>=0 && total>=0 && i>=start && i<total;
-}
+/* Core V16: histórico retirado canEditLevelsV73 L10090 */
 function canInsertAfterV73(i){
   return canEditLevelsV73(i);
 }
@@ -10134,17 +10131,7 @@ function renderActionsCellV73(i,computed){
 }
 
 /* Core V8: histórico retirado renderConclusionTabla */
-addConclusionRowAfter = function(i){
-  ensureConclusionOrderV73();
-  if(!canInsertAfterV73(i)){
-    if(typeof msg==='function') msg('Solo puede agregar filas entre Área bruta planta baja y Área Bruta total de construcción.');
-    return;
-  }
-  const {total}=conclusionIndexesV73();
-  const insertAt=Math.min(i+1,total);
-  state.aprobatorio.conclusion.splice(insertAt,0,{descripcion:'',levels:[],cantidad:'',unidad:'m2',allowLevels:true});
-  renderConclusionTabla(); renderReport(); renderPreview();
-};
+/* Core V16: histórico retirado addConclusionRowAfter L10137 */
 
 agregarConclusionRow = function(tipo=''){
   ensureConclusionOrderV73();
@@ -10156,21 +10143,7 @@ agregarConclusionRow = function(tipo=''){
   state.aprobatorio.conclusion.splice(total,0,{descripcion:tipo||'',levels:[],cantidad:'',unidad:'m2',allowLevels:true});
   renderConclusionTabla(); renderReport(); renderPreview();
 };
-
-
-const _addConclusionLevel_base_V73 = typeof addConclusionLevel === 'function' ? addConclusionLevel : null;
-addConclusionLevel = function(i){
-  if(!canEditLevelsV73(i)){
-    if(typeof msg==='function') msg('Los niveles solo se permiten desde Área bruta planta baja hasta antes de Área Bruta total de construcción.');
-    return;
-  }
-  if(_addConclusionLevel_base_V73) return _addConclusionLevel_base_V73(i);
-  const r=normalizeConclusionRowSafeV73(state.aprobatorio.conclusion[i]);
-  if(!Array.isArray(r.levels)) r.levels=[];
-  r.levels.push('');
-  syncConclusionObjSafeV73(i,r);
-  renderConclusionTabla(); renderReport(); renderPreview();
-};
+/* Core V16: histórico retirado addConclusionLevel L10162 */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>{
@@ -11226,10 +11199,7 @@ function conclusionZoneIndexesV81(){
   const total=start>=0 ? arr.findIndex((r,i)=>i>start && isBrutaTotalV81(r.descripcion || r.Descripción || r.Descripcion || '')) : -1;
   return {start,total};
 }
-function canLevelsV81(i){
-  const {start,total}=conclusionZoneIndexesV81();
-  return start>=0 && total>=0 && i>=start && i<total;
-}
+/* Core V16: histórico retirado canLevelsV81 L11229 */
 function canInsertV81(i){
   return canLevelsV81(i);
 }
@@ -11251,28 +11221,9 @@ function renderActionsCellV81(r,i){
 /* Core V8: histórico retirado renderConclusionTabla */
 /* Reporte: aquí SÍ se filtra por Activo. */
 /* Core V8: histórico retirado conclusionRowsForReportV81 */
-addConclusionRowAfter = function(i){
-  if(!canInsertV81(i)){
-    if(typeof msg==='function') msg('Solo puede agregar filas entre Área bruta planta baja y Área Bruta total de construcción.');
-    return;
-  }
-  const {total}=conclusionZoneIndexesV81();
-  const insertAt=Math.min(i+1,total);
-  state.aprobatorio.conclusion.splice(insertAt,0,{descripcion:'',levels:[],cantidad:'',unidad:'m2',allowLevels:true});
-  renderConclusionTabla(); renderReport(); renderPreview();
-};
+/* Core V16: histórico retirado addConclusionRowAfter L11254 */
 
-addConclusionLevel = function(i){
-  if(!canLevelsV81(i)){
-    if(typeof msg==='function') msg('Los niveles solo se permiten desde Área bruta planta baja hasta antes de Área Bruta total de construcción.');
-    return;
-  }
-  const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(state.aprobatorio.conclusion[i]) : normalizeConclusionRow(state.aprobatorio.conclusion[i]);
-  if(!Array.isArray(r.levels)) r.levels=[];
-  r.levels.push('');
-  syncConclusionObj(i,r);
-  renderConclusionTabla(); renderReport(); renderPreview();
-};
+/* Core V16: histórico retirado addConclusionLevel L11265 */
 
 async function aplicarConclusionCSVV81(force=false){
   if(typeof cargarConclusionCSVV80 === 'function') await cargarConclusionCSVV80(force);
@@ -11616,10 +11567,7 @@ function idxZoneConclV86(){
   return {start,total};
 }
 
-function canLevelConclV86(i){
-  const {start,total}=idxZoneConclV86();
-  return start>=0 && total>=0 && i>=start && i<total;
-}
+/* Core V16: histórico retirado canLevelConclV86 L11619 */
 
 function canAddConclV86(i){
   return canLevelConclV86(i);
@@ -11727,30 +11675,9 @@ function bindConclusionInputsV86(){
 /* Render propio sin oninput/onblur inline. */
 /* Dep11: definición histórica no capturada retirada: renderConclusionTabla */;
 
-addConclusionRowAfter = function(i){
-  if(!canAddConclV86(i)){
-    if(typeof msg==='function') msg('Solo puede agregar filas entre Área bruta planta baja y Área Bruta total de construcción.');
-    return;
-  }
-  const {total}=idxZoneConclV86();
-  const insertAt=Math.min(i+1,total);
-  state.aprobatorio.conclusion.splice(insertAt,0,{descripcion:'',levels:[],cantidad:'',unidad:'m2',allowLevels:true});
-  window.__CONCLUSION_EDITING_V86__=false;
-  renderConclusionTabla();
-};
+/* Core V16: histórico retirado addConclusionRowAfter L11730 */
 
-addConclusionLevel = function(i){
-  if(!canLevelConclV86(i)){
-    if(typeof msg==='function') msg('Los niveles solo se permiten desde Área bruta planta baja hasta antes de Área Bruta total de construcción.');
-    return;
-  }
-  const r=rowConclV86(state.aprobatorio.conclusion[i] || {});
-  if(!Array.isArray(r.levels)) r.levels=[];
-  r.levels.push('');
-  syncConclV86(i,r);
-  window.__CONCLUSION_EDITING_V86__=false;
-  renderConclusionTabla();
-};
+/* Core V16: histórico retirado addConclusionLevel L11742 */
 
 
 /* renderReport wrapper histórico #4 retirado — Depuración 09 Rápida */
@@ -11831,10 +11758,7 @@ function zoneConclV87(){
   return {start,total};
 }
 
-function canLevelConclV87(i){
-  const {start,total}=zoneConclV87();
-  return start>=0 && total>=0 && i>=start && i<total;
-}
+/* Core V16: histórico retirado canLevelConclV87 L11834 */
 
 function buildRowsConclV87(force=false){
   if(typeof rebuildEditableConclusionAllRowsV81 === 'function'){
@@ -11857,12 +11781,7 @@ function renderLevelsV87(row,i){
   return `<td class="levels-edit">${levels}<button type="button" class="secondary add-level-row" onclick="addConclusionLevel(${i})">+ Niveles</button></td>`;
 }
 
-function renderActionsV87(row,i){
-  const computed=isCalcConclV87(row);
-  const add=canLevelConclV87(i) ? `<button type="button" class="mini-plus" title="Agregar fila antes de Área Bruta total de construcción" onclick="addConclusionRowAfter(${i})">+</button>` : '';
-  const quit=computed ? '' : `<button type="button" class="danger mini-btn" onclick="delConclusion(${i})">Quitar</button>`;
-  return `<td class="row-actions"><div class="actions-v73">${add}${quit || (!add?'<span class="no-row-action-v73">—</span>':'')}</div></td>`;
-}
+/* Core V16: histórico retirado renderActionsV87 L11860 */
 
 function commitConclusionInputV87(input){
   const i=Number(input.dataset.i);
@@ -11941,32 +11860,9 @@ function bindConclusionInputsV87(){
 /* Renderiza tabla editable sin eventos inline y sin guardado por tecla. */
 /* Dep11: definición histórica no capturada retirada: renderConclusionTabla */;
 
-addConclusionRowAfter = function(i){
-  commitAllConclusionInputsV87();
-  if(!canLevelConclV87(i)){
-    if(typeof msg==='function') msg('Solo puede agregar filas entre Área bruta planta baja y Área Bruta total de construcción.');
-    return;
-  }
-  const {total}=zoneConclV87();
-  const insertAt=Math.min(i+1,total);
-  state.aprobatorio.conclusion.splice(insertAt,0,{descripcion:'',levels:[],cantidad:'',unidad:'m2',allowLevels:true});
-  window.__CONCLUSION_EDITING_V87__=false;
-  renderConclusionTabla();
-};
+/* Core V16: histórico retirado addConclusionRowAfter L11944 */
 
-addConclusionLevel = function(i){
-  commitAllConclusionInputsV87();
-  if(!canLevelConclV87(i)){
-    if(typeof msg==='function') msg('Los niveles solo se permiten desde Área bruta planta baja hasta antes de Área Bruta total de construcción.');
-    return;
-  }
-  const row=rowConclV87(state.aprobatorio.conclusion[i] || {});
-  if(!Array.isArray(row.levels)) row.levels=[];
-  row.levels.push('');
-  syncConclV87(i,row);
-  window.__CONCLUSION_EDITING_V87__=false;
-  renderConclusionTabla();
-};
+/* Core V16: histórico retirado addConclusionLevel L11957 */
 
 
 /* renderReport wrapper histórico #5 retirado — Depuración 09 Rápida */
@@ -14499,58 +14395,10 @@ function filterDeletedConclusionRowsV106(){
   });
 }
 
-function renderActionsV106(row,i,allowDeleteDefault){
-  const computed = isAutoCalculatedConclusionV106(i,row);
-  const add = (typeof canLevelConclV87 === 'function' && canLevelConclV87(i))
-    ? `<button type="button" class="mini-plus" title="Agregar fila antes de Área Bruta total de construcción" onclick="addConclusionRowAfter(${i})">+</button>`
-    : '';
-
-  let quit='';
-  if(allowDeleteDefault){
-    quit = computed
-      ? ''
-      : `<button type="button" class="danger mini-btn" onclick="delConclusion(${i})">Quitar</button>`;
-  }else if(typeof renderActionsV87 === 'function'){
-    return renderActionsV87(row,i);
-  }
-
-  return `<td class="row-actions"><div class="actions-v73">${add}${quit || (!add?'<span class="no-row-action-v73">—</span>':'')}</div></td>`;
-}
+/* Core V16: histórico retirado renderActionsV106 L14502 */
 
 /* Sobrescribe Quitar solo para ampliatorio/modificatorio. */
-const _delConclusion_base_V106 = typeof delConclusion === 'function' ? delConclusion : null;
-delConclusion = function(i){
-  const allowMode = typeof permiteDescripcionCalculadaV104 === 'function' && permiteDescripcionCalculadaV104();
-
-  if(!allowMode){
-    if(_delConclusion_base_V106) return _delConclusion_base_V106(i);
-    state.aprobatorio.conclusion.splice(i,1);
-    renderConclusionTabla(); renderReport(); renderPreview();
-    return;
-  }
-
-  const row = typeof rowConclV87 === 'function'
-    ? rowConclV87(state.aprobatorio?.conclusion?.[i] || {})
-    : (state.aprobatorio?.conclusion?.[i] || {});
-
-  if(isAutoCalculatedConclusionV106(i,row)){
-    if(typeof msg === 'function'){
-      msg('Esta fila calcula valores automáticamente y no se puede quitar.');
-    }
-    return;
-  }
-
-  const key = conclusionDeleteKeyV106(i,row);
-  const deleted = ensureDeletedConclusionKeysV106();
-  if(key && !deleted.includes(key)) deleted.push(key);
-
-  state.aprobatorio.conclusion.splice(i,1);
-
-  if(typeof recalcAreasCOSV36 === 'function') recalcAreasCOSV36();
-  if(typeof renderConclusionTabla === 'function') renderConclusionTabla();
-  if(typeof renderReport === 'function') renderReport();
-  if(typeof renderPreview === 'function') renderPreview();
-};
+/* Core V16: histórico retirado delConclusion L14522 */
 
 /* Render de tabla actualizado: mantiene v104/v105, pero en ampliatorio/modificatorio
    muestra Quitar en todas las filas no calculadas, incluso si vienen por defecto. */
@@ -14691,16 +14539,7 @@ function isProtectedAmpliatorioConclusionV107(i,row){
   return false;
 }
 
-function canDeleteConclusionRowV107(i,row){
-  const r=row || rowConclusionV107(state.aprobatorio?.conclusion?.[i] || {});
-
-  if(modoAmpliatorioModificatorioV107()){
-    return !isProtectedAmpliatorioConclusionV107(i,r);
-  }
-
-  // Obra Mayor / tipo normal: solo filas nuevas agregadas por el usuario.
-  return !isDefaultConclusionRowV107(i,r);
-}
+/* Core V16: histórico retirado canDeleteConclusionRowV107 L14694 */
 
 function markDeletedConclusionRowV107(i,row){
   const r=row || rowConclusionV107(state.aprobatorio?.conclusion?.[i] || {});
@@ -14747,43 +14586,10 @@ function prepareConclusionRowsV107(){
   filterDeletedConclusionRowsV107();
 }
 
-function renderActionsConclusionV107(row,i){
-  const add=(typeof canLevelConclV87 === 'function' && canLevelConclV87(i))
-    ? `<button type="button" class="mini-plus" title="Agregar fila antes de Área Bruta total de construcción" onclick="addConclusionRowAfter(${i})">+</button>`
-    : '';
-
-  const quit=canDeleteConclusionRowV107(i,row)
-    ? `<button type="button" class="danger mini-btn" onclick="delConclusion(${i})">Quitar</button>`
-    : '';
-
-  return `<td class="row-actions"><div class="actions-v73">${add}${quit || (!add?'<span class="no-row-action-v73">—</span>':'')}</div></td>`;
-}
+/* Core V16: histórico retirado renderActionsConclusionV107 L14750 */
 
 /* Botón Quitar: elimina exactamente la fila presionada y guarda eliminación si era fila base. */
-delConclusion = function(i){
-  if(!Array.isArray(state.aprobatorio?.conclusion)) return;
-
-  const row=rowConclusionV107(state.aprobatorio.conclusion[i] || {});
-
-  if(!canDeleteConclusionRowV107(i,row)){
-    if(typeof msg === 'function'){
-      msg(modoAmpliatorioModificatorioV107()
-        ? 'Esta fila debe mantenerse en Ampliatorio/Modificatorio y no se puede quitar.'
-        : 'En Obra Mayor solo se pueden quitar las filas nuevas agregadas por el usuario.');
-    }
-    return;
-  }
-
-  markDeletedConclusionRowV107(i,row);
-  state.aprobatorio.conclusion.splice(i,1);
-
-  if(typeof recalcAreasCOSV36 === 'function') recalcAreasCOSV36();
-  filterDeletedConclusionRowsV107();
-
-  if(typeof renderConclusionTabla === 'function') renderConclusionTabla();
-  if(typeof renderReport === 'function') renderReport();
-  if(typeof renderPreview === 'function') renderPreview();
-};
+/* Core V16: histórico retirado delConclusion L14763 */
 
 /* Render final de Conclusión Técnica con reglas nuevas de Quitar. */
 /* Dep11: definición histórica no capturada retirada: renderConclusionTabla */;
@@ -14907,17 +14713,7 @@ function totalBrutaIndexV108(){
   return arr.findIndex((raw,i)=>roleConclV108(raw,i)==='brutaTotal');
 }
 
-function canDeleteConclV108(rawOrRow,i){
-  const raw=state.aprobatorio?.conclusion?.[i] || rawOrRow;
-  const isBase=!!raw?._baseKeyV108 || raw?._originV108==='base';
-
-  if(modoAmpModV108()){
-    return !protectedAmpModV108(raw,i);
-  }
-
-  // Obra Mayor / normales: solo filas nuevas del usuario.
-  return !isBase;
-}
+/* Core V16: histórico retirado canDeleteConclV108 L14910 */
 
 function preserveMetaV108(target, source){
   ['_baseKeyV108','_originV108','_baseOrderV108','_roleV108','_roleV104','_userRowV108'].forEach(k=>{
@@ -14950,37 +14746,9 @@ commitConclusionInputV87 = function(input){
 };
 
 /* Botón +: solo en Área Bruta total y agrega arriba de esa fila. */
-addConclusionRowBeforeTotalV108 = function(){
-  if(typeof commitAllConclusionInputsV87 === 'function') commitAllConclusionInputsV87();
-  prepareRowsConclV108();
+/* Core V16: histórico retirado addConclusionRowBeforeTotalV108 L14953 */
 
-  const idx=totalBrutaIndexV108();
-  if(idx<0){
-    if(typeof msg==='function') msg('No se encontró la fila Área Bruta total de construcción.');
-    return;
-  }
-
-  const row={
-    descripcion:'',
-    levels:[],
-    cantidad:'',
-    unidad:'m2',
-    allowLevels:true,
-    _originV108:'custom',
-    _userRowV108:true
-  };
-
-  state.aprobatorio.conclusion.splice(idx,0,row);
-  window.__CONCLUSION_EDITING_V87__=false;
-  renderConclusionTabla();
-  if(typeof renderReport === 'function') renderReport();
-  if(typeof renderPreview === 'function') renderPreview();
-};
-
-addConclusionRowAfter = function(i){
-  // Aunque el nombre sea "After", desde ahora el + agrega arriba de Área Bruta total.
-  return addConclusionRowBeforeTotalV108();
-};
+/* Core V16: histórico retirado addConclusionRowAfter L14980 */
 
 function renderActionsConclV108(row,i){
   const role=roleConclV108(row,i);
@@ -14995,35 +14763,7 @@ function renderActionsConclV108(row,i){
   return `<td class="row-actions"><div class="actions-v73">${add}${quit || (!add?'<span class="no-row-action-v73">—</span>':'')}</div></td>`;
 }
 
-delConclusion = function(i){
-  prepareRowsConclV108();
-
-  const raw=state.aprobatorio?.conclusion?.[i];
-  if(!raw) return;
-
-  const row=rowConclV108(raw);
-
-  if(!canDeleteConclV108(raw,i)){
-    if(typeof msg==='function'){
-      msg(modoAmpModV108()
-        ? 'Esta fila debe mantenerse en Ampliatorio/Modificatorio y no se puede quitar.'
-        : 'En Obra Mayor solo se pueden quitar las filas nuevas agregadas por el usuario.');
-    }
-    return;
-  }
-
-  if(raw._originV108==='base' && raw._baseKeyV108){
-    const deleted=deletedKeysV108();
-    if(!deleted.includes(raw._baseKeyV108)) deleted.push(raw._baseKeyV108);
-  }
-
-  state.aprobatorio.conclusion.splice(i,1);
-
-  if(typeof recalcAreasCOSV36 === 'function') recalcAreasCOSV36();
-  if(typeof renderConclusionTabla === 'function') renderConclusionTabla();
-  if(typeof renderReport === 'function') renderReport();
-  if(typeof renderPreview === 'function') renderPreview();
-};
+/* Core V16: histórico retirado delConclusion L14998 */
 
 /* Core V8: histórico retirado renderConclusionTabla */
 if(typeof conclusionRowsForReportV81 === 'function'){
@@ -37679,13 +37419,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v15-css">
-#allpaConclusionCoreBtnV15{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV15{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1020px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV15.open{display:block}.corev15-ok{color:#177245;font-weight:700}.corev15-fail{color:#b42318;font-weight:700}.corev15-row{padding:6px 0;border-bottom:1px solid #eee}.corev15-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV15,#allpaConclusionCorePanelV15{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v15">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V15 — ACCIONES / FILAS / NIVELES
@@ -37953,7 +37686,15 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v15-test">
+
+<style id="allpa-conclusion-core-v16-css">
+#allpaConclusionCoreBtnV16{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV16{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1020px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV16.open{display:block}.corev16-ok{color:#177245;font-weight:700}.corev16-fail{color:#b42318;font-weight:700}.corev16-row{padding:6px 0;border-bottom:1px solid #eee}.corev16-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV16,#allpaConclusionCorePanelV16{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v16-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -37976,46 +37717,44 @@ async function run(){
  try{
   const X=window.ConclusionTecnicaActionsV15,K=window.ConclusionTecnicaKeysV14,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
   A(R,'Actions V15 disponible',!!X,X?.version||'');
-  A(R,'Rutas públicas centralizadas',Object.keys(window.__ConclusionTecnicaActionRoutesV15||{}).length===8,Object.values(window.__ConclusionTecnicaActionRoutesV15||{}).join(' · '));
+  A(R,'delConclusion es V15',window.delConclusion.toString().includes('removeRow'),'Actions V15');
+  A(R,'addConclusionRowAfter es V15',window.addConclusionRowAfter.toString().includes('addRow'),'Actions V15');
+  A(R,'addConclusionLevel es V15',window.addConclusionLevel.toString().includes('addLevel'),'Actions V15');
+  A(R,'delConclusionLevel es V15',window.delConclusionLevel.toString().includes('removeLevel'),'Actions V15');
 
   state=fixture();S.canonicalizeState();
 
-  A(R,'Fila fija no eliminable',X.canDelete(0)===false,'predio protegido');
-  A(R,'Fila custom eliminable',X.canDelete(5)===true,'custom');
-  A(R,'Fila bruta admite niveles',X.canLevels(3)===true,'bruta');
-  A(R,'Fila predio no admite niveles',X.canLevels(0)===false,'predio');
+  A(R,'Predio protegido',X.canDelete(0)===false,'no eliminable');
+  A(R,'Custom eliminable',X.canDelete(5)===true,'eliminable');
+  A(R,'Bruta admite niveles',X.canLevels(3)===true,'sí');
+  A(R,'Predio no admite niveles',X.canLevels(0)===false,'no');
 
   const beforeAdd=state.aprobatorio.conclusion.length;
-  X.addRow();
-  const afterAdd=state.aprobatorio.conclusion.length;
-  A(R,'Agregar fila',afterAdd===beforeAdd+1,`${beforeAdd} → ${afterAdd}`);
+  addConclusionRowAfter(3);
+  A(R,'Agregar fila por ruta pública',state.aprobatorio.conclusion.length===beforeAdd+1,`${beforeAdd} → ${state.aprobatorio.conclusion.length}`);
 
-  const totalIdx=state.aprobatorio.conclusion.findIndex((r,i)=>S.role(r,i)==='brutaTotal');
   const blankIdx=state.aprobatorio.conclusion.findIndex((r,i)=>S.role(r,i)==='bruta'&&r._userRowV108&&!String(r.descripcion||'').trim());
-  A(R,'Fila nueva antes de Bruta Total',blankIdx>=0&&blankIdx<totalIdx,`nueva ${blankIdx} · total ${totalIdx}`);
+  const totalIdx=state.aprobatorio.conclusion.findIndex((r,i)=>S.role(r,i)==='brutaTotal');
+  A(R,'Fila nueva antes de total',blankIdx>=0&&blankIdx<totalIdx,`nueva ${blankIdx} · total ${totalIdx}`);
 
-  const addedLevel=X.addLevel(3);
-  A(R,'Agregar nivel',addedLevel&&state.aprobatorio.conclusion[3].levels.length===1,`${state.aprobatorio.conclusion[3].levels.length} nivel(es)`);
-
+  addConclusionLevel(3);
+  A(R,'Agregar nivel por ruta pública',state.aprobatorio.conclusion[3].levels.length===1,'1 nivel');
   X.updateLevel(3,0,'+3.20');
   A(R,'Actualizar nivel',state.aprobatorio.conclusion[3].levels[0]==='+3.20',state.aprobatorio.conclusion[3].levels[0]);
-
-  const removedLevel=X.removeLevel(3,0);
-  A(R,'Quitar nivel',removedLevel&&state.aprobatorio.conclusion[3].levels.length===0,'0 niveles');
+  delConclusionLevel(3,0);
+  A(R,'Quitar nivel por ruta pública',state.aprobatorio.conclusion[3].levels.length===0,'0 niveles');
 
   const customIdx=state.aprobatorio.conclusion.findIndex(r=>r.descripcion==='Área bruta personalizada');
-  const beforeRemove=state.aprobatorio.conclusion.length;
-  const removedCustom=X.removeRow(customIdx);
-  A(R,'Quitar custom',removedCustom&&state.aprobatorio.conclusion.length===beforeRemove-1,`${state.aprobatorio.conclusion.length} fila(s)`);
+  const beforeDel=state.aprobatorio.conclusion.length;
+  delConclusion(customIdx);
+  A(R,'Quitar custom por ruta pública',state.aprobatorio.conclusion.length===beforeDel-1,`${state.aprobatorio.conclusion.length} fila(s)`);
 
-  /* En modo Amp/Mod una fila base bruta no fija puede quitarse y debe marcarse. */
   const baseBrutaIdx=state.aprobatorio.conclusion.findIndex((r,i)=>S.role(r,i)==='bruta'&&r._originV108==='base');
   const baseKey=K.key(state.aprobatorio.conclusion[baseBrutaIdx],baseBrutaIdx);
-  const removedBase=X.removeRow(baseBrutaIdx);
-  A(R,'Quitar bruta base en Amp/Mod',removedBase,'permitido');
-  A(R,'Eliminación base persistida',K.getDeletedSet().has(baseKey),baseKey);
+  delConclusion(baseBrutaIdx);
+  A(R,'Quitar base permitida',!state.aprobatorio.conclusion.some((r,i)=>K.key(r,i)===baseKey),'retirada');
+  A(R,'Persistencia eliminación base',K.getDeletedSet().has(baseKey),baseKey);
 
-  /* Regresión matemática sobre fixture limpia */
   state=fixture();S.canonicalizeState();
   const calc=V7.recalcular();
   A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
@@ -38026,26 +37765,23 @@ async function run(){
   let cont=document.getElementById('conclusionTabla'),temp=false;
   if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
   V7.renderTabla();const tr=cont.querySelectorAll('tbody tr').length;
-  A(R,'Tabla operativa',!!cont.querySelector('.editable-conclusion-core-v4'),`${tr} fila(s)`);
+  A(R,'Tabla operativa sin acciones históricas',!!cont.querySelector('.editable-conclusion-core-v4'),`${tr} fila(s)`);
   const html=V7.renderInforme();
   A(R,'Informe operativo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
   A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
-
-  A(R,'delConclusion ruteado a V15',window.delConclusion.toString().includes('removeRow'),'Actions V15');
-  A(R,'addConclusionLevel ruteado a V15',window.addConclusionLevel.toString().includes('addLevel'),'Actions V15');
   A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
 
   if(temp)cont.remove();
- }catch(e){A(R,'Banco Core V15',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Core V16',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV15');
- p.innerHTML=`<h3>🧰 ALLPA CONCLUSIÓN CORE V15</h3><div class="corev15-note">Acciones, filas y niveles centralizados en una sola capa.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev15-row"><span class="${x.ok?'corev15-ok':'corev15-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV15">Copiar resultado</button> <button id="closeV15">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV15').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV15').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V15\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV16');
+ p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V16</h3><div class="corev16-note">Limpieza física de acciones históricas. Las rutas activas deben depender solo de Actions V15.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev16-row"><span class="${x.ok?'corev16-ok':'corev16-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV16">Copiar resultado</button> <button id="closeV16">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV16').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV16').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V16\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV15';b.type='button';b.textContent='🧰 CORE CONCLUSIÓN V15';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV15';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV16';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V16';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV16';document.body.appendChild(p)},1200));
 })();
 </script>
 
