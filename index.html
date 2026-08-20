@@ -10257,58 +10257,7 @@ function conclusionLooksIncompleteV76(){
   return missingImportant.length >= Math.max(2, Math.floor(csvRows.length/3));
 }
 
-function mergeConclusionFromCSVV76(force=false){
-  ensureAprobatorioData();
-  const csvRows = conclusionCSVRowsV76();
-  if(!csvRows.length) return false;
-
-  const arr = state.aprobatorio.conclusion || [];
-  if(!force && !conclusionLooksIncompleteV76()) return false;
-
-  // Si hay valores ingresados, no destruye todo. Fusiona por descripción.
-  const existingByDesc = new Map();
-  arr.forEach(raw => {
-    const r = normalizeConclusionRowSafeV73 ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    const key = normDescConclusionV76(r.descripcion);
-    if(key && !existingByDesc.has(key)) existingByDesc.set(key, r);
-  });
-
-  const baseKeys = new Set(csvRows.map(r=>normDescConclusionV76(r.descripcion)));
-  const extras = arr.map(raw => normalizeConclusionRowSafeV73 ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw))
-    .filter(r => {
-      const key = normDescConclusionV76(r.descripcion);
-      return key && !baseKeys.has(key);
-    });
-
-  const merged = csvRows.map(base => {
-    const prev = existingByDesc.get(normDescConclusionV76(base.descripcion));
-    return {
-      descripcion: base.descripcion,
-      levels: prev?.levels?.length ? prev.levels : base.levels,
-      cantidad: String(prev?.cantidad || base.cantidad || ''),
-      unidad: String(prev?.unidad || base.unidad || 'm2'),
-      allowLevels: false
-    };
-  });
-
-  // Conserva filas personalizadas solo si estaban en el bloque de áreas brutas.
-  const totalIndex = merged.findIndex(r => normDescConclusionV76(r.descripcion).includes('AREA BRUTA TOTAL'));
-  const validExtras = extras.filter(r => {
-    const d = normDescConclusionV76(r.descripcion);
-    return d && d.includes('BRUTA') && !d.includes('TOTAL');
-  });
-  if(totalIndex >= 0 && validExtras.length){
-    merged.splice(totalIndex, 0, ...validExtras.map(r=>({...r, allowLevels:true})));
-  }
-
-  state.aprobatorio.conclusion = merged;
-
-  if(typeof ensureConclusionOrderV73 === 'function') ensureConclusionOrderV73();
-  if(typeof recalcAreasCOSV36 === 'function') recalcAreasCOSV36();
-
-  console.log('Conclusión técnica reconstruida desde CSV:', merged.length, merged.map(r=>r.descripcion));
-  return true;
-}
+/* Core V18: histórico retirado mergeConclusionFromCSVV76 L10260 */
 
 /* Refuerza renderAprobatorioForm para reconstruir desde CSV antes de dibujar. */
 /* Refuerza el botón Nuevo para que la estructura del CSV se cargue limpia. */
@@ -10453,54 +10402,7 @@ function conclusionIncompleteV77(){
   return rows.length >= 3 && missing.length >= 2;
 }
 
-function rebuildConclusionFromRowsV77(force=false){
-  ensureAprobatorioData();
-
-  const rows = conclusionRowsFromDataV77();
-  if(rows.length < 3) return false;
-  if(!force && !conclusionIncompleteV77()) return false;
-
-  const old = state.aprobatorio.conclusion || [];
-  const oldByDesc = new Map();
-
-  old.forEach(raw=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    const key = normDescConclusionV77(r.descripcion);
-    if(key && !oldByDesc.has(key)) oldByDesc.set(key,r);
-  });
-
-  const baseKeys = new Set(rows.map(r=>normDescConclusionV77(r.descripcion)));
-
-  const merged = rows.map(base=>{
-    const prev = oldByDesc.get(normDescConclusionV77(base.descripcion));
-    return {
-      descripcion: base.descripcion,
-      levels: prev?.levels?.length ? prev.levels : base.levels,
-      cantidad: String(prev?.cantidad || base.cantidad || ''),
-      unidad: String(prev?.unidad || base.unidad || 'm2'),
-      allowLevels: false
-    };
-  });
-
-  // Conserva filas personalizadas de áreas brutas entre planta baja y total.
-  const oldExtras = old.map(raw => typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw))
-    .filter(r=>{
-      const d = normDescConclusionV77(r.descripcion);
-      return d && !baseKeys.has(d) && d.includes('BRUTA') && !d.includes('TOTAL');
-    })
-    .map(r=>({...r, allowLevels:true}));
-
-  const totalIdx = merged.findIndex(r=>normDescConclusionV77(r.descripcion).includes('AREA BRUTA TOTAL'));
-  if(totalIdx >= 0 && oldExtras.length) merged.splice(totalIdx,0,...oldExtras);
-
-  state.aprobatorio.conclusion = merged;
-
-  if(typeof ensureConclusionOrderV73 === 'function') ensureConclusionOrderV73();
-  if(typeof recalcAreasCOSV36 === 'function') recalcAreasCOSV36();
-
-  console.log('V77 Conclusión Técnica reconstruida:', merged.length, merged.map(r=>r.descripcion));
-  return true;
-}
+/* Core V18: histórico retirado rebuildConclusionFromRowsV77 L10456 */
 
 function showConclusionCSVStatusV77(){
   const box = document.getElementById('conclusionTabla');
@@ -10609,59 +10511,7 @@ function shouldSyncConclusionWithCSVV78(){
 }
 
 /* Reemplaza reconstrucción: siempre toma SOLO filas activas del CSV. */
-function rebuildConclusionFromRowsV77(force=false){
-  ensureAprobatorioData();
-
-  const rows = conclusionActiveRowsV78();
-  if(rows.length < 3) return false;
-  if(!force && !shouldSyncConclusionWithCSVV78() && !conclusionIncompleteV77()) return false;
-
-  const old = state.aprobatorio.conclusion || [];
-  const oldByDesc = new Map();
-
-  old.forEach(raw=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    const key = normDescConclusionV77(r.descripcion);
-    if(key && !oldByDesc.has(key)) oldByDesc.set(key,r);
-  });
-
-  const activeKeys = new Set(rows.map(r=>normDescConclusionV77(r.descripcion)).filter(Boolean));
-  const allCSVRows = (DATA.conclusionBase || []).map(mapConclusionRowV77).filter(r=>r.descripcion);
-  const allCSVKeys = new Set(allCSVRows.map(r=>normDescConclusionV77(r.descripcion)).filter(Boolean));
-
-  const merged = rows.map(base=>{
-    const prev = oldByDesc.get(normDescConclusionV77(base.descripcion));
-    return {
-      descripcion: base.descripcion,
-      levels: prev?.levels?.length ? prev.levels : base.levels,
-      cantidad: String(prev?.cantidad || base.cantidad || ''),
-      unidad: String(prev?.unidad || base.unidad || 'm2'),
-      allowLevels: false
-    };
-  });
-
-  // Conserva filas personalizadas del usuario solo si NO son filas base del CSV
-  // y pertenecen al bloque de áreas brutas.
-  const oldExtras = old.map(raw => typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw))
-    .filter(r=>{
-      const d = normDescConclusionV77(r.descripcion);
-      if(!d) return false;
-      if(allCSVKeys.has(d)) return false; // evita conservar filas base inactivas como "Área útil total"
-      return d.includes('BRUTA') && !d.includes('TOTAL');
-    })
-    .map(r=>({...r, allowLevels:true}));
-
-  const totalIdx = merged.findIndex(r=>normDescConclusionV77(r.descripcion).includes('AREA BRUTA TOTAL'));
-  if(totalIdx >= 0 && oldExtras.length) merged.splice(totalIdx,0,...oldExtras);
-
-  state.aprobatorio.conclusion = merged;
-
-  if(typeof ensureConclusionOrderV73 === 'function') ensureConclusionOrderV73();
-  if(typeof recalcAreasCOSV36 === 'function') recalcAreasCOSV36();
-
-  console.log('V78 Conclusión Técnica sincronizada con filas activas del CSV:', merged.length, merged.map(r=>r.descripcion));
-  return true;
-}
+/* Core V18: histórico retirado rebuildConclusionFromRowsV77 L10612 */
 
 /* Recalcular sin inventar filas: si Área útil total está inactiva/no existe, COS Total queda vacío. */
 /* Fuerza sincronización cada vez que se entra o se dibuja Aprobatorio. */
@@ -11141,57 +10991,7 @@ function isComputedConclusionV81(row){
 }
 
 /* Reconstruye la tabla editable con TODAS las filas del CSV. */
-function rebuildEditableConclusionAllRowsV81(force=false){
-  ensureAprobatorioData();
-  const rows = allConclusionCSVRowsV81();
-  if(rows.length < 3) return false;
-
-  const current = state.aprobatorio.conclusion || [];
-  const currentByDesc = new Map();
-  current.forEach(raw=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    const key = normDescConclusionV81(r.descripcion);
-    if(key && !currentByDesc.has(key)) currentByDesc.set(key,r);
-  });
-
-  const baseKeys = new Set(rows.map(r=>normDescConclusionV81(r.descripcion)).filter(Boolean));
-  const existingKeys = current.map(raw=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    return normDescConclusionV81(r.descripcion);
-  }).filter(Boolean);
-
-  const csvKeys = rows.map(r=>normDescConclusionV81(r.descripcion)).filter(Boolean);
-  const hasAllCsvRows = csvKeys.every(k=>existingKeys.includes(k));
-
-  if(!force && hasAllCsvRows && current.length >= rows.length) return false;
-
-  const merged = rows.map(base=>{
-    const prev = currentByDesc.get(normDescConclusionV81(base.descripcion));
-    return {
-      descripcion:base.descripcion,
-      levels:prev?.levels?.length ? prev.levels : (base.levels || []),
-      cantidad:String(prev?.cantidad || base.cantidad || ''),
-      unidad:String(prev?.unidad || base.unidad || 'm2'),
-      allowLevels:false
-    };
-  });
-
-  // Conserva filas personalizadas de áreas brutas creadas por el usuario.
-  const extras = current.map(raw => typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw))
-    .filter(r=>{
-      const d=normDescConclusionV81(r.descripcion);
-      return d && !baseKeys.has(d) && d.includes('BRUTA') && !d.includes('TOTAL');
-    })
-    .map(r=>({...r, allowLevels:true}));
-
-  const totalIdx = merged.findIndex(r=>isBrutaTotalV81(r.descripcion));
-  if(totalIdx >= 0 && extras.length) merged.splice(totalIdx,0,...extras);
-
-  state.aprobatorio.conclusion = merged;
-  recalcAreasCOSV36();
-  console.log('V81 tabla editable reconstruida con todas las filas:', merged.map(r=>r.descripcion));
-  return true;
-}
+/* Core V18: histórico retirado rebuildEditableConclusionAllRowsV81 L11144 */
 
 function conclusionZoneIndexesV81(){
   const arr=state.aprobatorio?.conclusion || [];
@@ -14643,20 +14443,7 @@ function modoAmpModV108(){
 
 /* Core V11: rowConclV108 histórico retirado */
 
-function baseRowsV108(){
-  try{
-    if(typeof allConclusionCSVRowsV81 === 'function'){
-      return (allConclusionCSVRowsV81() || []).map((r,idx)=>{
-        const row = rowConclV108(r);
-        const key = normConclV108(row.descripcion || r.descripcion || '');
-        return {...row, _baseKeyV108:key, _originV108:'base', _baseOrderV108:idx};
-      }).filter(r=>r._baseKeyV108);
-    }
-  }catch(e){
-    console.warn('V108 base rows:', e);
-  }
-  return [];
-}
+/* Core V18: histórico retirado baseRowsV108 L14646 */
 
 function roleFromDescV108(desc){
   const d=normConclV108(desc);
@@ -37687,13 +37474,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v17-css">
-#allpaConclusionCoreBtnV17{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV17{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1040px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV17.open{display:block}.corev17-ok{color:#177245;font-weight:700}.corev17-fail{color:#b42318;font-weight:700}.corev17-row{padding:6px 0;border-bottom:1px solid #eee}.corev17-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV17,#allpaConclusionCorePanelV17{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v17">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V17 — ENTRADA CSV ÚNICA
@@ -37869,7 +37649,15 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v17-test">
+
+<style id="allpa-conclusion-core-v18-css">
+#allpaConclusionCoreBtnV18{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV18{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1040px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV18.open{display:block}.corev18-ok{color:#177245;font-weight:700}.corev18-fail{color:#b42318;font-weight:700}.corev18-row{padding:6px 0;border-bottom:1px solid #eee}.corev18-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV18,#allpaConclusionCorePanelV18{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v18-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -37888,37 +37676,36 @@ async function run(){
  try{
   const CSV=window.ConclusionTecnicaCSVV17,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
   A(R,'CSV V17 disponible',!!CSV,CSV?.version||'');
-  A(R,'Rutas CSV centralizadas',Object.keys(window.__ConclusionTecnicaCSVRoutesV17||{}).length===4,Object.values(window.__ConclusionTecnicaCSVRoutesV17||{}).join(' · '));
+  A(R,'baseRowsV108 es V17',window.baseRowsV108.toString().includes('baseRows'),'CSV V17');
+  A(R,'V81 es V17',window.rebuildEditableConclusionAllRowsV81.toString().includes('rebuild'),'CSV V17');
+  A(R,'V76 es V17',window.mergeConclusionFromCSVV76.toString().includes('rebuild'),'CSV V17');
+  A(R,'V77 es V17',window.rebuildConclusionFromRowsV77.toString().includes('rebuild'),'CSV V17');
 
-  const src=CSV.sourceRows();
-  A(R,'Fuente CSV disponible',src.length>=3,`${src.length} fila(s)`);
+  const source=CSV.sourceRows();
+  A(R,'Fuente CSV preservada',source.length>=3,`${source.length} fila(s)`);
 
-  const bases=CSV.baseRows();
-  A(R,'Base normalizada',bases.length>=3,`${bases.length} fila(s)`);
-  A(R,'Base con claves',bases.every(r=>!!r._baseKeyV108),`${bases.filter(r=>r._baseKeyV108).length}/${bases.length}`);
+  const bases=baseRowsV108();
+  A(R,'Base V17 preservada',bases.length>=3,`${bases.length} fila(s)`);
+  A(R,'Claves base completas',bases.every(r=>!!r._baseKeyV108),`${bases.filter(r=>r._baseKeyV108).length}/${bases.length}`);
 
-  const brutaBase=bases.find((r,i)=>S.role(r,i)==='bruta');
-  A(R,'Fila bruta base canónica',!brutaBase || brutaBase.intervention==='Aprobada (Existente)',brutaBase?.intervention||'sin bruta');
+  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[]}};
+  const rebuilt=rebuildEditableConclusionAllRowsV81(true);
+  A(R,'Reconstrucción V81 sin histórico',rebuilt===true&&state.aprobatorio.conclusion.length>=3,`${state.aprobatorio.conclusion.length} fila(s)`);
+
+  const countAfterV81=state.aprobatorio.conclusion.length;
+  const v76=mergeConclusionFromCSVV76(false);
+  A(R,'V76 no duplica estructura',state.aprobatorio.conclusion.length===countAfterV81,`${state.aprobatorio.conclusion.length} fila(s)`);
+
+  const v77=rebuildConclusionFromRowsV77(false);
+  A(R,'V77 no duplica estructura',state.aprobatorio.conclusion.length===countAfterV81,`${state.aprobatorio.conclusion.length} fila(s)`);
 
   state=fixture();S.canonicalizeState();
   const beforeTypes=state.aprobatorio.conclusion.filter((r,i)=>Core.role(r,i)==='bruta').map(r=>S.interventionOf(r)).join('|');
-  CSV.rebuild(false);
+  rebuildEditableConclusionAllRowsV81(false);
   const afterTypes=state.aprobatorio.conclusion.filter((r,i)=>Core.role(r,i)==='bruta').map(r=>S.interventionOf(r)).join('|');
+  A(R,'Intervenciones sobreviven rebuild',afterTypes.includes('Ampliación')&&afterTypes.includes('Modificación'),afterTypes);
+  A(R,'Tipos siguen diferenciados',beforeTypes.split('|').length>=3,afterTypes);
 
-  A(R,'Rebuild no destruye intervenciones',afterTypes.includes('Ampliación')&&afterTypes.includes('Modificación'),afterTypes);
-  A(R,'Intervenciones siguen diferenciadas',beforeTypes.split('|').length>=3,afterTypes);
-
-  /* Estado vacío debe poder reconstruirse desde base real. */
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[]}};
-  const rebuilt=CSV.rebuildIfEmpty();
-  A(R,'Reconstrucción desde vacío',rebuilt===true && state.aprobatorio.conclusion.length>=3,`${state.aprobatorio.conclusion.length} fila(s)`);
-
-  A(R,'baseRowsV108 ruteado a V17',window.baseRowsV108.toString().includes('baseRows'),'CSV V17');
-  A(R,'V81 ruteado a V17',window.rebuildEditableConclusionAllRowsV81.toString().includes('rebuild'),'CSV V17');
-  A(R,'V76 ruteado a V17',window.mergeConclusionFromCSVV76.toString().includes('rebuild'),'CSV V17');
-  A(R,'V77 ruteado a V17',window.rebuildConclusionFromRowsV77.toString().includes('rebuild'),'CSV V17');
-
-  state=fixture();S.canonicalizeState();
   const calc=V7.recalcular();
   A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
   A(R,'Área Amp/Mod',calc.formatted.areaAmpMod==='75.00',calc.formatted.areaAmpMod);
@@ -37928,23 +37715,23 @@ async function run(){
   let cont=document.getElementById('conclusionTabla'),temp=false;
   if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
   V7.renderTabla();const tr=cont.querySelectorAll('tbody tr').length;
-  A(R,'Tabla operativa',!!cont.querySelector('.editable-conclusion-core-v4'),`${tr} fila(s)`);
+  A(R,'Tabla operativa sin reconstructores históricos',!!cont.querySelector('.editable-conclusion-core-v4'),`${tr} fila(s)`);
   const html=V7.renderInforme();
   A(R,'Informe operativo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
   A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
   A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
 
   if(temp)cont.remove();
- }catch(e){A(R,'Banco Core V17',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Core V18',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV17');
- p.innerHTML=`<h3>🧬 ALLPA CONCLUSIÓN CORE V17</h3><div class="corev17-note">Una sola entrada CSV para Conclusión Técnica; el loader CSV global permanece intacto.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev17-row"><span class="${x.ok?'corev17-ok':'corev17-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV17">Copiar resultado</button> <button id="closeV17">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV17').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV17').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V17\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV18');
+ p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V18</h3><div class="corev18-note">Limpieza física de reconstructores CSV históricos. La fuente allConclusionCSVRowsV81 se conserva.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev18-row"><span class="${x.ok?'corev18-ok':'corev18-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV18">Copiar resultado</button> <button id="closeV18">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV18').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV18').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V18\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV17';b.type='button';b.textContent='🧬 CORE CONCLUSIÓN V17';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV17';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV18';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V18';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV18';document.body.appendChild(p)},1200));
 })();
 </script>
 
