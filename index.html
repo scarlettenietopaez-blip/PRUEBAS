@@ -36646,11 +36646,244 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v4-test">
+
+<style id="allpa-conclusion-core-v5-css">
+#allpaConclusionCoreBtnV5{
+ position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
+ padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
+}
+#allpaConclusionCorePanelV5{
+ display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
+ width:min(940px,calc(100vw - 36px));max-height:86vh;overflow:auto;
+ background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
+ box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
+}
+#allpaConclusionCorePanelV5.open{display:block}
+.corev5-ok{color:#177245;font-weight:700}.corev5-fail{color:#b42318;font-weight:700}
+.corev5-row{padding:6px 0;border-bottom:1px solid #eee}
+.corev5-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV5,#allpaConclusionCorePanelV5{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v5">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V5 — MOTOR MATEMÁTICO ÚNICO
+
+   REGLAS CONSERVADAS:
+   - Área Bruta Total:
+       normal -> suma todas las filas brutas
+       Amp/Mod -> Aprobada + Ampliación; excluye Modificación
+   - Área Total de Ampliación/Modificación:
+       Ampliación + Modificación
+   - COS PB:
+       Área útil planta baja / Área del predio * 100
+   - COS Total:
+       Área útil total / Área del predio * 100
+
+   NO cambia la validación Área Bruta vs Información General.
+   ========================================================== */
 (function(){
   'use strict';
 
-  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  const Core=window.ConclusionTecnicaCoreV1;
+  const Bridge=window.ConclusionTecnicaBridgeV3;
+  if(!Core || !Bridge) return;
+
+  function numberOf(value){
+    const n=Number(String(value??'')
+      .replace(/\s/g,'')
+      .replace(',','.')
+      .replace(/[^\d.-]/g,''));
+    return Number.isFinite(n)?n:0;
+  }
+
+  function format2(value){
+    return (Math.round(Number(value||0)*100)/100).toFixed(2);
+  }
+
+  function modeFromRows(rows){
+    let projectMode=false;
+    try{
+      if(typeof modoAmpModV13==='function') projectMode=!!modoAmpModV13();
+    }catch(_e){}
+
+    const structural=(rows||[]).some((raw,i)=>Core.role(raw,i)==='areaAmpliacionTotal');
+    const typed=(rows||[]).some((raw,i)=>
+      Core.role(raw,i)==='bruta' &&
+      Core.normalizeIntervention(raw?.intervention ?? raw?.tipoAreaV13)!=='Aprobada (Existente)'
+    );
+
+    return projectMode || structural || typed;
+  }
+
+  function calculateRows(rowsArg,{ampMod=null}={}){
+    const rows=Core.normalizeRows(rowsArg||[]);
+    const mode=ampMod===null ? modeFromRows(rowsArg||[]) : !!ampMod;
+
+    let areaPredio=0;
+    let areaUtilPB=0;
+    let areaUtilTotal=0;
+    let areaBrutaTotal=0;
+    let areaAmpMod=0;
+    let brutaCount=0;
+
+    rows.forEach(row=>{
+      const value=numberOf(row.cantidad);
+
+      if(row.role==='predio') areaPredio=value;
+      if(row.role==='utilPB') areaUtilPB=value;
+      if(row.role==='utilTotal') areaUtilTotal=value;
+
+      if(row.role==='bruta'){
+        brutaCount++;
+        const type=Core.normalizeIntervention(row.intervention);
+
+        if(!mode || type!=='Modificación'){
+          areaBrutaTotal+=value;
+        }
+
+        if(mode && (type==='Ampliación' || type==='Modificación')){
+          areaAmpMod+=value;
+        }
+      }
+    });
+
+    const cosPB=areaPredio>0 ? (areaUtilPB/areaPredio)*100 : null;
+    const cosTotal=areaPredio>0 ? (areaUtilTotal/areaPredio)*100 : null;
+
+    return {
+      mode,
+      values:{
+        areaPredio,
+        areaUtilPB,
+        areaUtilTotal,
+        areaBrutaTotal,
+        areaAmpMod,
+        cosPB,
+        cosTotal,
+        brutaCount
+      },
+      formatted:{
+        areaBrutaTotal:format2(areaBrutaTotal),
+        areaAmpMod:format2(areaAmpMod),
+        cosPB:cosPB===null?'':format2(cosPB),
+        cosTotal:cosTotal===null?'':format2(cosTotal)
+      }
+    };
+  }
+
+  function writeCalculatedRows(rowsArg,result){
+    const rows=rowsArg||[];
+
+    rows.forEach((raw,index)=>{
+      const role=Core.role(raw,index);
+
+      if(role==='brutaTotal'){
+        raw.cantidad=result.formatted.areaBrutaTotal;
+        raw.unidad=raw.unidad||'m2';
+      }
+
+      if(role==='areaAmpliacionTotal'){
+        raw.cantidad=result.formatted.areaAmpMod;
+        raw.unidad=raw.unidad||'m2';
+      }
+
+      if(role==='cosPB'){
+        raw.cantidad=result.formatted.cosPB;
+        raw.unidad=raw.unidad||'%';
+      }
+
+      if(role==='cosTotal'){
+        raw.cantidad=result.formatted.cosTotal;
+        raw.unidad=raw.unidad||'%';
+      }
+    });
+
+    return rows;
+  }
+
+  function calculateState({ampMod=null}={}){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+
+    Bridge.canonicalizeState();
+
+    const rows=state.aprobatorio.conclusion;
+    const result=calculateRows(rows,{ampMod});
+    writeCalculatedRows(rows,result);
+    Bridge.canonicalizeState();
+
+    return result;
+  }
+
+  window.ConclusionTecnicaMathV5=Object.freeze({
+    version:'5.0.0-math',
+    numberOf,
+    format2,
+    modeFromRows,
+    calculateRows,
+    writeCalculatedRows,
+    calculateState
+  });
+
+  /* Guardar el último recálculo histórico como respaldo, pero desde ahora
+     recalcAreasCOSV36 apunta al motor único. */
+  if(typeof window.recalcAreasCOSV36==='function'){
+    window.__recalcAreasCOSHistoricoV5=window.recalcAreasCOSV36;
+  }
+
+  window.recalcAreasCOSV36=function(){
+    if(window.__ALLPA_RESET_CONCLUSION_V61__) return;
+    return calculateState();
+  };
+  try{ recalcAreasCOSV36=window.recalcAreasCOSV36; }catch(_e){}
+
+  /* La función usada por la validación de Área Bruta toma el mismo motor,
+     conservando la regla actual de exclusión de Modificación. */
+  if(typeof window.sumaAreasBrutasConclusionV119N==='function'){
+    window.__sumaAreasBrutasHistoricaV5=window.sumaAreasBrutasConclusionV119N;
+  }
+
+  window.sumaAreasBrutasConclusionV119N=function(){
+    const result=calculateState();
+    return {
+      sum:result.values.areaBrutaTotal,
+      count:result.values.brutaCount
+    };
+  };
+  try{ sumaAreasBrutasConclusionV119N=window.sumaAreasBrutasConclusionV119N; }catch(_e){}
+
+  /* Integración con el renderer oficial Core V4B:
+     calcular ANTES de dibujar para que Bruta/COS ya lleguen actualizados. */
+  if(typeof window.renderConclusionTabla==='function' && !window.renderConclusionTabla.__ctMathV5Wrapped){
+    const renderBaseV5=window.renderConclusionTabla;
+
+    const renderV5=function(){
+      calculateState();
+      return renderBaseV5.apply(this,arguments);
+    };
+
+    renderV5.__ctMathV5Wrapped=true;
+    renderV5.__ctMathV5Original=renderBaseV5;
+
+    window.renderConclusionTabla=renderV5;
+    try{ renderConclusionTabla=window.renderConclusionTabla; }catch(_e){}
+  }
+
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      try{
+        calculateState();
+        if(document.getElementById('conclusionTabla')) window.renderConclusionTabla();
+      }catch(_e){}
+    },1050);
+  });
+})();
+</script>
+
+<script id="allpa-conclusion-core-v5-test">
+(function(){
+  'use strict';
 
   function clone(v){
     try{return structuredClone(v)}
@@ -36661,131 +36894,131 @@ textarea.evidencia-text,
     R.push({name,ok:!!ok,detail:String(detail||'')});
   }
 
-  function role(raw,index){
-    return window.ConclusionTecnicaCoreV1?.role(raw,index)||'';
+  function row(role,descripcion,cantidad,extra={}){
+    return {
+      descripcion,
+      cantidad:String(cantidad??''),
+      unidad:role.startsWith('cos')?'%':'m2',
+      levels:[],
+      allowLevels:role==='bruta',
+      _roleV108:role,
+      ...extra
+    };
   }
 
   async function run(){
     const R=[];
     const original=clone(state);
+    const MathV5=window.ConclusionTecnicaMathV5;
+    const Core=window.ConclusionTecnicaCoreV1;
 
     try{
-      const Core=window.ConclusionTecnicaCoreV1;
-      const Bridge=window.ConclusionTecnicaBridgeV3;
-      const Renderer=window.ConclusionTecnicaRendererV4;
+      add(R,'Motor V5 disponible',!!MathV5,MathV5?.version||'');
+      if(!MathV5 || !Core) throw new Error('Motor/Core no disponible.');
 
-      add(R,'Core disponible',!!Core,Core?.version||'');
-      add(R,'Bridge disponible',!!Bridge,Bridge?.version||'');
-      add(R,'Renderer V4 disponible',!!Renderer,Renderer?.version||'');
+      const fixture=[
+        row('predio','Área del predio',500),
+        row('utilPB','Área útil planta baja',100),
+        row('utilTotal','Área útil total',200),
+        row('bruta','Área bruta planta baja',100,{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
+        row('bruta','Área bruta primera planta alta',50,{intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
+        row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación'}),
+        row('brutaTotal','Área Bruta total de construcción',''),
+        {...row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),_roleV13:'areaAmpliacionTotal'},
+        row('cosPB','COS PB',''),
+        row('cosTotal','COS TOTAL','')
+      ];
 
-      /* Usar state actual si tiene conclusión; de lo contrario IndexedDB. */
-      let source=null,label='';
-      if(Array.isArray(state?.aprobatorio?.conclusion) && state.aprobatorio.conclusion.length){
-        source=clone(state); label='state actual';
-      }else{
-        try{
-          if(typeof db!=='undefined' && !db && typeof openDB==='function') await openDB();
-          if(typeof dbAll==='function'){
-            const all=await dbAll();
-            const found=(all||[]).find(r=>Array.isArray(r?.aprobatorio?.conclusion)&&r.aprobatorio.conclusion.length>=5);
-            if(found){source=clone(found);label=`IndexedDB ${found.egob||''}`.trim();}
-          }
-        }catch(_e){}
+      const calc=MathV5.calculateRows(fixture,{ampMod:true});
+
+      add(R,'Área Bruta Total',
+        calc.formatted.areaBrutaTotal==='150.00',
+        `esperado 150.00 · obtenido ${calc.formatted.areaBrutaTotal}`);
+
+      add(R,'Área Ampliación/Modificación',
+        calc.formatted.areaAmpMod==='75.00',
+        `esperado 75.00 · obtenido ${calc.formatted.areaAmpMod}`);
+
+      add(R,'COS PB',
+        calc.formatted.cosPB==='20.00',
+        `100 / 500 × 100 = ${calc.formatted.cosPB}`);
+
+      add(R,'COS Total',
+        calc.formatted.cosTotal==='40.00',
+        `200 / 500 × 100 = ${calc.formatted.cosTotal}`);
+
+      const normal=MathV5.calculateRows(fixture,{ampMod:false});
+      add(R,'Obra normal suma todas las brutas',
+        normal.formatted.areaBrutaTotal==='175.00',
+        `esperado 175.00 · obtenido ${normal.formatted.areaBrutaTotal}`);
+
+      /* Aplicación real sobre una copia del state actual. */
+      const copy=clone(original);
+      if(!copy.aprobatorio) copy.aprobatorio={};
+      if(!Array.isArray(copy.aprobatorio.conclusion) || !copy.aprobatorio.conclusion.length){
+        copy.aprobatorio.conclusion=clone(fixture);
       }
 
-      if(!source){
-        source={
-          tipoInforme:'Informe Técnico Aprobatorio',
-          aprobatorio:{conclusion:[
-            {descripcion:'Área del predio',cantidad:'500',unidad:'m2',_roleV108:'predio'},
-            {descripcion:'Área útil planta baja',cantidad:'100',unidad:'m2',_roleV108:'utilPB'},
-            {descripcion:'Área útil total',cantidad:'180',unidad:'m2',_roleV108:'utilTotal'},
-            {descripcion:'Área bruta planta baja',cantidad:'100',unidad:'m2',allowLevels:true,_roleV108:'bruta',tipoAreaV13:'Aprobada (Existente)'},
-            {descripcion:'Área Bruta total de construcción',cantidad:'100',unidad:'m2',_roleV108:'brutaTotal'},
-            {descripcion:'Área Total de Ampliación/Modificación',cantidad:'0',unidad:'m2',_roleV13:'areaAmpliacionTotal'}
-          ]}
-        };
-        label='fixture';
-      }
+      state=copy;
+      const beforeTypes=(state.aprobatorio.conclusion||[])
+        .filter((r,i)=>Core.role(r,i)==='bruta')
+        .map(r=>Core.normalizeIntervention(r.intervention??r.tipoAreaV13));
 
-      state=source;
-      Bridge.canonicalizeState();
+      const realCalc=MathV5.calculateState();
 
-      add(R,'Fuente de prueba',
-        state.aprobatorio.conclusion.length>0,
-        `${label} · ${state.aprobatorio.conclusion.length} fila(s)`);
+      const afterTypes=(state.aprobatorio.conclusion||[])
+        .filter((r,i)=>Core.role(r,i)==='bruta')
+        .map(r=>Core.normalizeIntervention(r.intervention??r.tipoAreaV13));
 
-      /* Forzar modo Amp/Mod para probar selector, sin tocar formulario original. */
-      let brutas=state.aprobatorio.conclusion.map((r,i)=>({r,i})).filter(x=>role(x.r,x.i)==='bruta');
-      if(brutas.length<2){
-        const total=state.aprobatorio.conclusion.findIndex((r,i)=>role(r,i)==='brutaTotal');
-        state.aprobatorio.conclusion.splice(total>=0?total:state.aprobatorio.conclusion.length,0,{
-          descripcion:'Área bruta prueba V4',cantidad:'25',unidad:'m2',levels:[],allowLevels:true,
-          _roleV108:'bruta',_originV108:'custom',_userRowV108:true,
-          intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'
-        });
-      }
+      add(R,'Cálculo no cambia Tipo de intervención',
+        JSON.stringify(beforeTypes)===JSON.stringify(afterTypes),
+        afterTypes.join(' · ')||'sin filas brutas');
 
-      brutas=state.aprobatorio.conclusion.map((r,i)=>({r,i})).filter(x=>role(x.r,x.i)==='bruta');
-      Renderer.setType(brutas[0].i,'Ampliación');
-      Renderer.setType(brutas[1].i,'Modificación');
+      const brutaRow=(state.aprobatorio.conclusion||[])
+        .find((r,i)=>Core.role(r,i)==='brutaTotal');
+      add(R,'Área Bruta Total escrita en state',
+        !!brutaRow && String(brutaRow.cantidad)!=='',
+        brutaRow?.cantidad??'ausente');
 
-      /* Render en contenedor aislado si no está visible. */
+      const cosPBRow=(state.aprobatorio.conclusion||[])
+        .find((r,i)=>Core.role(r,i)==='cosPB');
+      const cosTotalRow=(state.aprobatorio.conclusion||[])
+        .find((r,i)=>Core.role(r,i)==='cosTotal');
+
+      add(R,'COS PB escrito en state',
+        !cosPBRow || String(cosPBRow.cantidad)!=='',
+        cosPBRow?.cantidad??'fila no presente');
+
+      add(R,'COS Total escrito en state',
+        !cosTotalRow || String(cosTotalRow.cantidad)!=='',
+        cosTotalRow?.cantidad??'fila no presente');
+
+      /* Renderer oficial debe poder consumir el resultado matemático. */
       let cont=document.getElementById('conclusionTabla'),temp=false;
       if(!cont){
-        cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true;
+        cont=document.createElement('div');
+        cont.id='conclusionTabla';
+        document.body.appendChild(cont);
+        temp=true;
       }
 
-      Renderer.render();
-      await wait(20);
+      if(typeof renderConclusionTabla==='function'){
+        renderConclusionTabla();
+      }
 
-      add(R,'Tabla oficial construida por Core',
+      add(R,'Renderer oficial funciona con Motor V5',
         !!cont.querySelector('.editable-conclusion-core-v4'),
         `${cont.querySelectorAll('tbody tr').length} fila(s)`);
 
-      const selects=cont.querySelectorAll('[data-ctv4-type]');
-      add(R,'Selectores Tipo de intervención',
-        selects.length>=2,
-        `${selects.length} selector(es)`);
-
-      const values=[...selects].map(s=>s.value);
-      add(R,'Ampliación visible tras render',
-        values.includes('Ampliación'),
-        values.join(' · '));
-      add(R,'Modificación visible tras render',
-        values.includes('Modificación'),
-        values.join(' · '));
-
-      Renderer.render();
-      const values2=[...cont.querySelectorAll('[data-ctv4-type]')].map(s=>s.value);
-      add(R,'Tipos sobreviven segundo render',
-        values2.includes('Ampliación')&&values2.includes('Modificación'),
-        values2.join(' · '));
-
-      const beforeCount=state.aprobatorio.conclusion.length;
-      Renderer.addRow();
-      add(R,'Agregar fila Core V4',
-        state.aprobatorio.conclusion.length===beforeCount+1,
-        `${beforeCount} → ${state.aprobatorio.conclusion.length}`);
-
-      const customIndex=state.aprobatorio.conclusion.findIndex((r,i)=>
-        role(r,i)==='bruta' && r._userRowV108 && !String(r.descripcion||'').trim()
-      );
-      const removed=customIndex>=0?Renderer.removeRow(customIndex):false;
-      add(R,'Quitar fila Core V4',
-        removed && state.aprobatorio.conclusion.length===beforeCount,
-        `${state.aprobatorio.conclusion.length} fila(s)`);
-
-      const calc=Core.calculate(Bridge.exportCanonicalRows(),{ampMod:true});
-      add(R,'Cálculo Core conserva tipos',
-        calc.rows.filter(r=>r.role==='bruta').some(r=>r.intervention==='Ampliación') &&
-        calc.rows.filter(r=>r.role==='bruta').some(r=>r.intervention==='Modificación'),
-        `Bruta ${calc.totals.brutaTotal} · Amp/Mod ${calc.totals.areaAmpliacionModificacion}`);
-
       if(temp) cont.remove();
 
+      /* La validación histórica debe seguir disponible. */
+      add(R,'Validación Área Bruta conservada',
+        typeof errorAreaBrutaConclusionV119N==='function',
+        'errorAreaBrutaConclusionV119N disponible');
+
     }catch(e){
-      add(R,'Banco Core V4B',false,e?.stack||e);
+      add(R,'Banco Core V5',false,e?.stack||e);
     }finally{
       state=original;
       try{applyStateToUI()}catch(_e){}
@@ -36793,57 +37026,57 @@ textarea.evidencia-text,
 
     add(R,'Formulario original restaurado',true,'state restaurado');
 
-    const ok=R.filter(x=>x.ok).length,fail=R.length-ok;
-    const p=document.getElementById('allpaConclusionCorePanelV4');
+    const ok=R.filter(x=>x.ok).length;
+    const fail=R.length-ok;
+    const p=document.getElementById('allpaConclusionCorePanelV5');
 
-    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V4B</h3>
+    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V5</h3>
+      <div class="corev5-note">
+        Motor matemático único. La validación Área Bruta vs Información General
+        permanece sin modificaciones.
+      </div>
       <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
-      R.map(x=>`<div class="corev4-row">
-        <span class="${x.ok?'corev4-ok':'corev4-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
+      R.map(x=>`<div class="corev5-row">
+        <span class="${x.ok?'corev5-ok':'corev5-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
         <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
       </div>`).join('')+
-      `<p><button id="copyCoreV4">Copiar resultado</button> <button id="closeCoreV4">Cerrar</button></p>`;
+      `<p><button id="copyCoreV5">Copiar resultado</button>
+      <button id="closeCoreV5">Cerrar</button></p>`;
 
     p.classList.add('open');
-    document.getElementById('closeCoreV4').onclick=()=>p.classList.remove('open');
-    document.getElementById('copyCoreV4').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V4B\nOK:${ok} FAIL:${fail}\n`+
+    document.getElementById('closeCoreV5').onclick=()=>p.classList.remove('open');
+
+    document.getElementById('copyCoreV5').onclick=async()=>{
+      const txt=`ALLPA-CONCLUSION-CORE-V5\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-      try{await navigator.clipboard.writeText(txt)}
-      catch(_e){
-        const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
-        document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(__e){}ta.remove();
+      try{
+        await navigator.clipboard.writeText(txt);
+      }catch(_e){
+        const ta=document.createElement('textarea');
+        ta.value=txt;
+        ta.style.position='fixed';
+        ta.style.opacity='0';
+        document.body.appendChild(ta);
+        ta.select();
+        try{document.execCommand('copy')}catch(__e){}
+        ta.remove();
       }
     };
   }
 
   window.addEventListener('load',()=>setTimeout(()=>{
     const b=document.createElement('button');
-    b.id='allpaConclusionCoreBtnV4';b.type='button';b.textContent='🧪 CORE CONCLUSIÓN V4B';b.onclick=run;
+    b.id='allpaConclusionCoreBtnV5';
+    b.type='button';
+    b.textContent='🧪 CORE CONCLUSIÓN V5';
+    b.onclick=run;
     document.body.appendChild(b);
-    const p=document.createElement('div');p.id='allpaConclusionCorePanelV4';document.body.appendChild(p);
+
+    const p=document.createElement('div');
+    p.id='allpaConclusionCorePanelV5';
+    document.body.appendChild(p);
   },1200));
 })();
-</script>
-
-
-<style id="allpa-core-v4b-marker-css">
-#allpaCoreV4BMarker{
- position:fixed;top:10px;right:10px;z-index:1000001;background:#fff;
- border:2px solid #111827;border-radius:10px;padding:8px 12px;
- font:800 12px system-ui;box-shadow:0 5px 18px #0003
-}
-@media print{#allpaCoreV4BMarker{display:none!important}}
-</style>
-<script id="allpa-core-v4b-marker">
-window.addEventListener('load',()=>setTimeout(()=>{
-  if(!document.getElementById('allpaCoreV4BMarker')){
-    const m=document.createElement('div');
-    m.id='allpaCoreV4BMarker';
-    m.textContent='ARCHIVO ACTIVO: CORE V4B';
-    document.body.appendChild(m);
-  }
-},450));
 </script>
 
 </body>
