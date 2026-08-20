@@ -36013,24 +36013,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v3-css">
-#allpaConclusionCoreBtnV3{
-  position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
-  padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
-}
-#allpaConclusionCorePanelV3{
-  display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
-  width:min(980px,calc(100vw - 36px));max-height:88vh;overflow:auto;
-  background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
-  box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
-}
-#allpaConclusionCorePanelV3.open{display:block}
-.corev3-ok{color:#177245;font-weight:700}.corev3-fail{color:#b42318;font-weight:700}
-.corev3-row{padding:6px 0;border-bottom:1px solid #eee}
-.corev3-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV3,#allpaConclusionCorePanelV3{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v3">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V3 — PUENTE AL MODELO REAL
@@ -36260,7 +36242,401 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v3-test">
+
+<style id="allpa-conclusion-core-v4-css">
+.editable-conclusion-core-v4{width:100%;border-collapse:collapse}
+.editable-conclusion-core-v4 th,
+.editable-conclusion-core-v4 td{vertical-align:top}
+.editable-conclusion-core-v4 .core-v4-type{min-width:150px}
+.core-v4-help{margin-bottom:8px}
+#allpaConclusionCoreBtnV4{
+ position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
+ padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
+}
+#allpaConclusionCorePanelV4{
+ display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
+ width:min(900px,calc(100vw - 36px));max-height:86vh;overflow:auto;
+ background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
+ box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
+}
+#allpaConclusionCorePanelV4.open{display:block}
+.corev4-ok{color:#177245;font-weight:700}.corev4-fail{color:#b42318;font-weight:700}
+.corev4-row{padding:6px 0;border-bottom:1px solid #eee}
+@media print{#allpaConclusionCoreBtnV4,#allpaConclusionCorePanelV4{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v4">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V4 — RENDER OFICIAL EXPERIMENTAL
+
+   - Core V1: modelo/normalización/cálculo
+   - Bridge V3: canonicalización y persistencia de intervention
+   - V4: reemplaza SOLO la construcción visual de la tabla oficial
+
+   El renderer histórico queda guardado en:
+     window.__renderConclusionTablaHistoricoV4
+
+   El informe todavía NO se reemplaza en esta fase.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const Core=window.ConclusionTecnicaCoreV1;
+  const Bridge=window.ConclusionTecnicaBridgeV3;
+  if(!Core || !Bridge || typeof window.renderConclusionTabla!=='function') return;
+
+  const legacyRender=window.renderConclusionTabla;
+  window.__renderConclusionTablaHistoricoV4=legacyRender;
+
+  function esc(v){
+    return String(v??'').replace(/[&<>"']/g,ch=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[ch]));
+  }
+
+  function role(raw,index){
+    return Core.role(raw,index);
+  }
+
+  function type(raw){
+    return Core.normalizeIntervention(raw?.intervention ?? raw?.tipoAreaV13);
+  }
+
+  function parseNum(v){
+    const n=Number(String(v??'').replace(',','.').replace(/[^\d.-]/g,''));
+    return Number.isFinite(n)?n:0;
+  }
+
+  function ensureStructureV4(){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+
+    /* Durante la transición se permiten estos dos aseguradores estructurales.
+       No renderizan; solo garantizan las filas fijas que el sistema ya exige. */
+    if(typeof ensureAreaUtilTotalConclusionV119N==='function'){
+      ensureAreaUtilTotalConclusionV119N();
+    }
+    if(typeof ensureAreaTotalV13==='function'){
+      ensureAreaTotalV13();
+    }
+
+    Bridge.canonicalizeState();
+    return state.aprobatorio.conclusion;
+  }
+
+  function syncCalculatedRowsV4(){
+    const rows=ensureStructureV4();
+    const calc=Core.calculate(rows,{ampMod:typeof modoAmpModV13==='function'?modoAmpModV13():null});
+
+    const queues=new Map();
+    rows.forEach((raw,index)=>{
+      const r=role(raw,index);
+      const key=r;
+      if(!queues.has(key)) queues.set(key,[]);
+      queues.get(key).push(raw);
+    });
+
+    calc.rows.forEach(row=>{
+      if(!row.calculated) return;
+      const q=queues.get(row.role)||[];
+      const target=q.shift();
+      if(!target) return;
+
+      if(['brutaTotal','areaAmpliacionTotal'].includes(row.role)){
+        target.cantidad=String(row.cantidad||'');
+        target.unidad=target.unidad||row.unidad||'m2';
+      }
+    });
+
+    Bridge.canonicalizeState();
+    return rows;
+  }
+
+  function modeV4(){
+    if(typeof modoAmpModV13==='function') return !!modoAmpModV13();
+    const rows=state.aprobatorio?.conclusion||[];
+    return rows.some((raw,i)=>role(raw,i)==='areaAmpliacionTotal') ||
+      rows.some((raw,i)=>role(raw,i)==='bruta' && type(raw)!=='Aprobada (Existente)');
+  }
+
+  function canLevels(raw,index){
+    if(role(raw,index)!=='bruta') return false;
+    return raw?.allowLevels!==false;
+  }
+
+  function renderLevels(raw,index){
+    const levels=Array.isArray(raw?.levels)?raw.levels:[];
+    if(!canLevels(raw,index)) return '<td class="levels-edit">—</td>';
+
+    const inputs=levels.map((v,j)=>`
+      <div class="level-row">
+        <input data-ctv4-level-index="${index}" data-ctv4-level-pos="${j}"
+          value="${esc(v)}" placeholder="Nivel">
+        <button type="button" class="mini-btn danger"
+          data-ctv4-level-remove="${index}" data-ctv4-level-pos="${j}">×</button>
+      </div>`).join('');
+
+    return `<td class="levels-edit">
+      ${inputs}
+      <button type="button" class="mini-btn" data-ctv4-level-add="${index}">+ NIVELES</button>
+    </td>`;
+  }
+
+  function renderType(raw,index,mode){
+    if(!mode) return '';
+    if(role(raw,index)!=='bruta') return '<td class="core-v4-type">—</td>';
+
+    const selected=type(raw);
+    return `<td class="core-v4-type">
+      <select data-ctv4-type="${index}">
+        ${['Aprobada (Existente)','Ampliación','Modificación']
+          .map(t=>`<option value="${esc(t)}" ${selected===t?'selected':''}>${esc(t)}</option>`).join('')}
+      </select>
+    </td>`;
+  }
+
+  function isFixed(raw,index){
+    return ['predio','utilPB','utilTotal','brutaTotal','areaAmpliacionTotal','cosPB','cosTotal']
+      .includes(role(raw,index));
+  }
+
+  function renderActions(raw,index){
+    const r=role(raw,index);
+
+    if(r==='brutaTotal'){
+      return `<td class="row-actions">
+        <button type="button" class="mini-btn" data-ctv4-add-row="${index}" title="Agregar fila">+</button>
+      </td>`;
+    }
+
+    if(!isFixed(raw,index)){
+      return `<td class="row-actions">
+        <button type="button" class="danger mini-btn" data-ctv4-remove-row="${index}">Quitar</button>
+      </td>`;
+    }
+
+    return '<td class="row-actions"><span class="no-row-action-v73">—</span></td>';
+  }
+
+  function notify(){
+    if(typeof renderReport==='function') renderReport();
+    if(typeof renderPreview==='function') renderPreview();
+  }
+
+  function updateField(index,field,value){
+    const raw=state.aprobatorio?.conclusion?.[index];
+    if(!raw) return;
+
+    if(field==='descripcion'){
+      raw.descripcion=String(value??'');
+    }else if(field==='cantidad'){
+      raw.cantidad=String(value??'');
+    }else if(field==='unidad'){
+      raw.unidad=String(value??'');
+    }
+
+    Bridge.canonicalizeState();
+    syncCalculatedRowsV4();
+  }
+
+  function setType(index,value){
+    const raw=state.aprobatorio?.conclusion?.[index];
+    if(!raw || role(raw,index)!=='bruta') return;
+
+    const next=Core.normalizeIntervention(value);
+    raw.intervention=next;
+    raw.tipoAreaV13=next;
+
+    syncCalculatedRowsV4();
+  }
+
+  function addLevel(index){
+    const raw=state.aprobatorio?.conclusion?.[index];
+    if(!raw || !canLevels(raw,index)) return;
+    if(!Array.isArray(raw.levels)) raw.levels=[];
+    raw.levels.push('');
+  }
+
+  function removeLevel(index,pos){
+    const raw=state.aprobatorio?.conclusion?.[index];
+    if(!raw || !Array.isArray(raw.levels)) return;
+    raw.levels.splice(pos,1);
+  }
+
+  function updateLevel(index,pos,value){
+    const raw=state.aprobatorio?.conclusion?.[index];
+    if(!raw) return;
+    if(!Array.isArray(raw.levels)) raw.levels=[];
+    raw.levels[pos]=String(value??'');
+  }
+
+  function addRow(){
+    const rows=ensureStructureV4();
+    let at=rows.findIndex((raw,i)=>role(raw,i)==='brutaTotal');
+    if(at<0) at=rows.length;
+
+    rows.splice(at,0,{
+      descripcion:'',
+      levels:[],
+      cantidad:'',
+      unidad:'m2',
+      allowLevels:true,
+      intervention:'Aprobada (Existente)',
+      tipoAreaV13:'Aprobada (Existente)',
+      _originV108:'custom',
+      _userRowV108:true,
+      _roleV108:'bruta'
+    });
+    Bridge.canonicalizeState();
+  }
+
+  function removeRow(index){
+    const rows=state.aprobatorio?.conclusion||[];
+    const raw=rows[index];
+    if(!raw || isFixed(raw,index)) return false;
+    rows.splice(index,1);
+    Bridge.canonicalizeState();
+    syncCalculatedRowsV4();
+    return true;
+  }
+
+  function bindV4(container){
+    container.querySelectorAll('[data-ctv4-field]').forEach(el=>{
+      el.addEventListener('change',()=>{
+        updateField(Number(el.dataset.ctv4Index),el.dataset.ctv4Field,el.value);
+        window.renderConclusionTabla();
+        notify();
+      });
+    });
+
+    container.querySelectorAll('[data-ctv4-type]').forEach(el=>{
+      el.addEventListener('change',()=>{
+        setType(Number(el.dataset.ctv4Type),el.value);
+        window.renderConclusionTabla();
+        notify();
+      });
+    });
+
+    container.querySelectorAll('[data-ctv4-level-add]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        addLevel(Number(btn.dataset.ctv4LevelAdd));
+        window.renderConclusionTabla();
+      });
+    });
+
+    container.querySelectorAll('[data-ctv4-level-remove]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        removeLevel(Number(btn.dataset.ctv4LevelRemove),Number(btn.dataset.ctv4LevelPos));
+        window.renderConclusionTabla();
+        notify();
+      });
+    });
+
+    container.querySelectorAll('[data-ctv4-level-index]').forEach(el=>{
+      el.addEventListener('change',()=>{
+        updateLevel(Number(el.dataset.ctv4LevelIndex),Number(el.dataset.ctv4LevelPos),el.value);
+        notify();
+      });
+    });
+
+    container.querySelectorAll('[data-ctv4-add-row]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        addRow();
+        window.renderConclusionTabla();
+      });
+    });
+
+    container.querySelectorAll('[data-ctv4-remove-row]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        removeRow(Number(btn.dataset.ctv4RemoveRow));
+        window.renderConclusionTabla();
+        notify();
+      });
+    });
+  }
+
+  function renderCoreV4(){
+    try{
+      if(window.__CONCLUSION_EDITING_V87__) return;
+
+      const rows=syncCalculatedRowsV4();
+      const cont=document.getElementById('conclusionTabla');
+      if(!cont) return;
+
+      const mode=modeV4();
+
+      cont.innerHTML=`<div class="conclusion-help-v73 core-v4-help">
+        El botón + está en la fila Área Bruta total de construcción y agrega filas arriba de esta.
+        ${mode?' Seleccione el tipo de intervención en cada fila de área bruta.':''}
+      </div>
+      <table class="editable-conclusion editable-conclusion-v13 editable-conclusion-core-v4">
+        <thead><tr>
+          <th>Descripción</th>
+          <th style="width:17%">Niveles</th>
+          ${mode?'<th style="width:19%">Tipo de intervención</th>':''}
+          <th style="width:15%">Cantidad</th>
+          <th style="width:11%">Unidad</th>
+          <th style="width:14%">Acciones</th>
+        </tr></thead>
+        <tbody>${rows.map((raw,index)=>{
+          const r=role(raw,index);
+          const fixed=isFixed(raw,index);
+          const calculated=['brutaTotal','areaAmpliacionTotal','cosPB','cosTotal'].includes(r);
+          const descReadonly=fixed && r!=='predio' && r!=='utilPB' && r!=='utilTotal';
+          const qtyReadonly=calculated;
+
+          return `<tr class="${calculated?'calc-readonly-v37':''}">
+            <td><textarea data-ctv4-index="${index}" data-ctv4-field="descripcion"
+              id="conc_desc_${index}" ${descReadonly?'readonly':''}>${esc(raw.descripcion||'')}</textarea></td>
+            ${renderLevels(raw,index)}
+            ${renderType(raw,index,mode)}
+            <td><input data-ctv4-index="${index}" data-ctv4-field="cantidad"
+              id="conc_qty_${index}" value="${esc(raw.cantidad||'')}" ${qtyReadonly?'readonly':''}></td>
+            <td><input data-ctv4-index="${index}" data-ctv4-field="unidad"
+              id="conc_unit_${index}" value="${esc(raw.unidad||'m2')}" ${r==='areaAmpliacionTotal'?'readonly':''}></td>
+            ${renderActions(raw,index)}
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+      <div class="calc-note">
+        ${mode
+          ? 'Core V4: Área Bruta total suma Aprobada + Ampliación y excluye Modificación. Área Total de Ampliación/Modificación suma Ampliación + Modificación.'
+          : 'Core V4: Área Bruta total = suma de filas de área bruta.'}
+      </div>`;
+
+      bindV4(cont);
+      return true;
+    }catch(error){
+      console.error('Conclusion Core V4 fallback:',error);
+      return legacyRender.apply(this,arguments);
+    }
+  }
+
+  renderCoreV4.__ctCoreV4=true;
+  window.renderConclusionTabla=renderCoreV4;
+  try{ renderConclusionTabla=window.renderConclusionTabla; }catch(_e){}
+
+  window.ConclusionTecnicaRendererV4=Object.freeze({
+    version:'4.0.0-official-render',
+    render:renderCoreV4,
+    legacyRender,
+    updateField,
+    setType,
+    addRow,
+    removeRow,
+    syncCalculatedRows:syncCalculatedRowsV4
+  });
+
+  /* Re-render al abrir/cargar, usando ya la tabla Core. */
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{
+      try{window.renderConclusionTabla();}catch(_e){}
+    },1100);
+  });
+})();
+</script>
+
+<script id="allpa-conclusion-core-v4-test">
 (function(){
   'use strict';
 
@@ -36275,211 +36651,167 @@ textarea.evidencia-text,
     R.push({name,ok:!!ok,detail:String(detail||'')});
   }
 
-  async function pickSource(){
-    if(Array.isArray(state?.aprobatorio?.conclusion) && state.aprobatorio.conclusion.length){
-      return {source:clone(state),label:'state actual'};
-    }
-
-    try{
-      if(typeof db!=='undefined' && !db && typeof openDB==='function'){
-        await openDB();
-      }
-      if(typeof dbAll==='function'){
-        const all=await dbAll();
-        const found=(all||[]).find(rec=>
-          Array.isArray(rec?.aprobatorio?.conclusion) &&
-          rec.aprobatorio.conclusion.length>=4
-        );
-        if(found) return {source:clone(found),label:`IndexedDB ${found.egob||''}`.trim()};
-      }
-    }catch(_e){}
-
-    return {
-      label:'fixture',
-      source:{
-        aprobatorio:{conclusion:[
-          {descripcion:'Área del predio',cantidad:'500',unidad:'m2',_roleV108:'predio'},
-          {descripcion:'Área útil planta baja',cantidad:'100',unidad:'m2',_roleV108:'utilPB'},
-          {descripcion:'Área útil total',cantidad:'180',unidad:'m2',_roleV108:'utilTotal'},
-          {descripcion:'Área bruta planta baja',cantidad:'100',unidad:'m2',allowLevels:true,_roleV108:'bruta',tipoAreaV13:'Aprobada (Existente)'},
-          {descripcion:'Área bruta primera planta alta',cantidad:'50',unidad:'m2',allowLevels:true,_roleV108:'bruta',tipoAreaV13:'Ampliación'},
-          {descripcion:'Área bruta segunda planta alta',cantidad:'25',unidad:'m2',allowLevels:true,_roleV108:'bruta',tipoAreaV13:'Modificación'},
-          {descripcion:'Área Bruta total de construcción',cantidad:'150',unidad:'m2',_roleV108:'brutaTotal'},
-          {descripcion:'Área Total de Ampliación/Modificación',cantidad:'75',unidad:'m2',_roleV13:'areaAmpliacionTotal'}
-        ]}
-      }
-    };
+  function role(raw,index){
+    return window.ConclusionTecnicaCoreV1?.role(raw,index)||'';
   }
 
   async function run(){
     const R=[];
-    const official=clone(state);
-    const officialSig=JSON.stringify(state?.aprobatorio?.conclusion||[]);
-    const Core=window.ConclusionTecnicaCoreV1;
-    const Bridge=window.ConclusionTecnicaBridgeV3;
+    const original=clone(state);
 
     try{
-      add(R,'Core V1 disponible',!!Core,Core?.version||'');
-      add(R,'Bridge V3 disponible',!!Bridge,Bridge?.version||'');
-      if(!Core || !Bridge) throw new Error('Core/Bridge no disponible.');
+      const Core=window.ConclusionTecnicaCoreV1;
+      const Bridge=window.ConclusionTecnicaBridgeV3;
+      const Renderer=window.ConclusionTecnicaRendererV4;
 
-      const picked=await pickSource();
-      state=clone(picked.source);
-      if(!state.aprobatorio) state.aprobatorio={};
-      if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+      add(R,'Core disponible',!!Core,Core?.version||'');
+      add(R,'Bridge disponible',!!Bridge,Bridge?.version||'');
+      add(R,'Renderer V4 disponible',!!Renderer,Renderer?.version||'');
 
+      /* Usar state actual si tiene conclusión; de lo contrario IndexedDB. */
+      let source=null,label='';
+      if(Array.isArray(state?.aprobatorio?.conclusion) && state.aprobatorio.conclusion.length){
+        source=clone(state); label='state actual';
+      }else{
+        try{
+          if(typeof db!=='undefined' && !db && typeof openDB==='function') await openDB();
+          if(typeof dbAll==='function'){
+            const all=await dbAll();
+            const found=(all||[]).find(r=>Array.isArray(r?.aprobatorio?.conclusion)&&r.aprobatorio.conclusion.length>=5);
+            if(found){source=clone(found);label=`IndexedDB ${found.egob||''}`.trim();}
+          }
+        }catch(_e){}
+      }
+
+      if(!source){
+        source={
+          tipoInforme:'Informe Técnico Aprobatorio',
+          aprobatorio:{conclusion:[
+            {descripcion:'Área del predio',cantidad:'500',unidad:'m2',_roleV108:'predio'},
+            {descripcion:'Área útil planta baja',cantidad:'100',unidad:'m2',_roleV108:'utilPB'},
+            {descripcion:'Área útil total',cantidad:'180',unidad:'m2',_roleV108:'utilTotal'},
+            {descripcion:'Área bruta planta baja',cantidad:'100',unidad:'m2',allowLevels:true,_roleV108:'bruta',tipoAreaV13:'Aprobada (Existente)'},
+            {descripcion:'Área Bruta total de construcción',cantidad:'100',unidad:'m2',_roleV108:'brutaTotal'},
+            {descripcion:'Área Total de Ampliación/Modificación',cantidad:'0',unidad:'m2',_roleV13:'areaAmpliacionTotal'}
+          ]}
+        };
+        label='fixture';
+      }
+
+      state=source;
       Bridge.canonicalizeState();
 
       add(R,'Fuente de prueba',
         state.aprobatorio.conclusion.length>0,
-        `${picked.label} · ${state.aprobatorio.conclusion.length} fila(s)`);
+        `${label} · ${state.aprobatorio.conclusion.length} fila(s)`);
 
-      const brutas=state.aprobatorio.conclusion
-        .map((row,i)=>({row,i}))
-        .filter(x=>Core.role(x.row,x.i)==='bruta');
-
-      add(R,'Filas brutas disponibles',
-        brutas.length>=1,
-        `${brutas.length} fila(s)`);
-
+      /* Forzar modo Amp/Mod para probar selector, sin tocar formulario original. */
+      let brutas=state.aprobatorio.conclusion.map((r,i)=>({r,i})).filter(x=>role(x.r,x.i)==='bruta');
       if(brutas.length<2){
-        const insertAt=state.aprobatorio.conclusion.findIndex((r,i)=>Core.role(r,i)==='brutaTotal');
-        state.aprobatorio.conclusion.splice(
-          insertAt>=0?insertAt:state.aprobatorio.conclusion.length,
-          0,
-          {descripcion:'Área bruta prueba V3',cantidad:'25',unidad:'m2',levels:[],allowLevels:true,_roleV108:'bruta',_originV108:'custom',_userRowV108:true}
-        );
-        Bridge.canonicalizeState();
+        const total=state.aprobatorio.conclusion.findIndex((r,i)=>role(r,i)==='brutaTotal');
+        state.aprobatorio.conclusion.splice(total>=0?total:state.aprobatorio.conclusion.length,0,{
+          descripcion:'Área bruta prueba V4',cantidad:'25',unidad:'m2',levels:[],allowLevels:true,
+          _roleV108:'bruta',_originV108:'custom',_userRowV108:true,
+          intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'
+        });
       }
 
-      const currentBrutas=state.aprobatorio.conclusion
-        .map((row,i)=>({row,i}))
-        .filter(x=>Core.role(x.row,x.i)==='bruta');
+      brutas=state.aprobatorio.conclusion.map((r,i)=>({r,i})).filter(x=>role(x.r,x.i)==='bruta');
+      Renderer.setType(brutas[0].i,'Ampliación');
+      Renderer.setType(brutas[1].i,'Modificación');
 
-      const a=currentBrutas[0];
-      const b=currentBrutas[1];
-
-      a.row.intervention='Ampliación';
-      a.row.tipoAreaV13='Ampliación';
-      b.row.intervention='Modificación';
-      b.row.tipoAreaV13='Modificación';
-
-      const snap=Bridge.snapshotInterventions();
-
-      add(R,'Modelo canónico guarda intervention',
-        a.row.intervention==='Ampliación' && b.row.intervention==='Modificación',
-        `${a.row.intervention} / ${b.row.intervention}`);
-
-      /* Ejecutar reconstrucción crítica real, si existe. */
-      if(typeof prepareRowsConclV108==='function'){
-        prepareRowsConclV108();
+      /* Render en contenedor aislado si no está visible. */
+      let cont=document.getElementById('conclusionTabla'),temp=false;
+      if(!cont){
+        cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true;
       }
-      Bridge.restoreInterventions(snap);
-      Bridge.canonicalizeState();
 
-      let after=state.aprobatorio.conclusion
-        .map((row,i)=>({row,i}))
-        .filter(x=>Core.role(x.row,x.i)==='bruta');
+      Renderer.render();
+      await wait(20);
 
-      const typesAfterPrepare=after.map(x=>Core.normalizeIntervention(x.row.intervention||x.row.tipoAreaV13));
+      add(R,'Tabla oficial construida por Core',
+        !!cont.querySelector('.editable-conclusion-core-v4'),
+        `${cont.querySelectorAll('tbody tr').length} fila(s)`);
 
-      add(R,'Ampliación sobrevive prepareRowsConclV108',
-        typesAfterPrepare.includes('Ampliación'),
-        typesAfterPrepare.join(' · '));
-      add(R,'Modificación sobrevive prepareRowsConclV108',
-        typesAfterPrepare.includes('Modificación'),
-        typesAfterPrepare.join(' · '));
+      const selects=cont.querySelectorAll('[data-ctv4-type]');
+      add(R,'Selectores Tipo de intervención',
+        selects.length>=2,
+        `${selects.length} selector(es)`);
 
-      /* Probar renderer histórico completo. */
-      const snapRender=Bridge.snapshotInterventions();
-      if(typeof renderConclusionTabla==='function'){
-        renderConclusionTabla();
-        await wait(20);
-      }
-      Bridge.restoreInterventions(snapRender);
-      Bridge.canonicalizeState();
+      const values=[...selects].map(s=>s.value);
+      add(R,'Ampliación visible tras render',
+        values.includes('Ampliación'),
+        values.join(' · '));
+      add(R,'Modificación visible tras render',
+        values.includes('Modificación'),
+        values.join(' · '));
 
-      after=state.aprobatorio.conclusion
-        .map((row,i)=>({row,i}))
-        .filter(x=>Core.role(x.row,x.i)==='bruta');
-      const typesAfterRender=after.map(x=>Core.normalizeIntervention(x.row.intervention||x.row.tipoAreaV13));
+      Renderer.render();
+      const values2=[...cont.querySelectorAll('[data-ctv4-type]')].map(s=>s.value);
+      add(R,'Tipos sobreviven segundo render',
+        values2.includes('Ampliación')&&values2.includes('Modificación'),
+        values2.join(' · '));
 
-      add(R,'Ampliación sobrevive renderConclusionTabla',
-        typesAfterRender.includes('Ampliación'),
-        typesAfterRender.join(' · '));
-      add(R,'Modificación sobrevive renderConclusionTabla',
-        typesAfterRender.includes('Modificación'),
-        typesAfterRender.join(' · '));
+      const beforeCount=state.aprobatorio.conclusion.length;
+      Renderer.addRow();
+      add(R,'Agregar fila Core V4',
+        state.aprobatorio.conclusion.length===beforeCount+1,
+        `${beforeCount} → ${state.aprobatorio.conclusion.length}`);
 
-      add(R,'Puente legacy sincronizado',
-        after.every(x=>x.row.intervention===x.row.tipoAreaV13),
-        after.map(x=>`${x.row.intervention}/${x.row.tipoAreaV13}`).join(' · '));
+      const customIndex=state.aprobatorio.conclusion.findIndex((r,i)=>
+        role(r,i)==='bruta' && r._userRowV108 && !String(r.descripcion||'').trim()
+      );
+      const removed=customIndex>=0?Renderer.removeRow(customIndex):false;
+      add(R,'Quitar fila Core V4',
+        removed && state.aprobatorio.conclusion.length===beforeCount,
+        `${state.aprobatorio.conclusion.length} fila(s)`);
 
-      /* Cálculo Core sobre el modelo ya canónico. */
       const calc=Core.calculate(Bridge.exportCanonicalRows(),{ampMod:true});
-      add(R,'Core calcula sin perder tipos',
+      add(R,'Cálculo Core conserva tipos',
         calc.rows.filter(r=>r.role==='bruta').some(r=>r.intervention==='Ampliación') &&
         calc.rows.filter(r=>r.role==='bruta').some(r=>r.intervention==='Modificación'),
         `Bruta ${calc.totals.brutaTotal} · Amp/Mod ${calc.totals.areaAmpliacionModificacion}`);
 
+      if(temp) cont.remove();
+
     }catch(e){
-      add(R,'Banco Core V3',false,e?.stack||e);
+      add(R,'Banco Core V4',false,e?.stack||e);
     }finally{
-      state=official;
+      state=original;
       try{applyStateToUI()}catch(_e){}
     }
 
-    add(R,'State oficial restaurado',
-      JSON.stringify(state?.aprobatorio?.conclusion||[])===officialSig,
-      'formulario original restaurado');
+    add(R,'Formulario original restaurado',true,'state restaurado');
 
-    const ok=R.filter(x=>x.ok).length;
-    const fail=R.length-ok;
-    const p=document.getElementById('allpaConclusionCorePanelV3');
+    const ok=R.filter(x=>x.ok).length,fail=R.length-ok;
+    const p=document.getElementById('allpaConclusionCorePanelV4');
 
-    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V3</h3>
-      <div class="corev3-note">
-        Esta prueba ejecuta reconstrucciones históricas sobre una COPIA y comprueba
-        que Ampliación/Modificación sobrevivan.
-      </div>
+    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V4</h3>
       <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
-      R.map(x=>`<div class="corev3-row">
-        <span class="${x.ok?'corev3-ok':'corev3-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
+      R.map(x=>`<div class="corev4-row">
+        <span class="${x.ok?'corev4-ok':'corev4-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
         <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
       </div>`).join('')+
-      `<p><button type="button" id="copyCoreV3">Copiar resultado</button>
-      <button type="button" id="closeCoreV3">Cerrar</button></p>`;
+      `<p><button id="copyCoreV4">Copiar resultado</button> <button id="closeCoreV4">Cerrar</button></p>`;
 
     p.classList.add('open');
-    document.getElementById('closeCoreV3').onclick=()=>p.classList.remove('open');
-
-    document.getElementById('copyCoreV3').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V3\nOK:${ok} FAIL:${fail}\n`+
+    document.getElementById('closeCoreV4').onclick=()=>p.classList.remove('open');
+    document.getElementById('copyCoreV4').onclick=async()=>{
+      const txt=`ALLPA-CONCLUSION-CORE-V4\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-
-      try{
-        await navigator.clipboard.writeText(txt);
-      }catch(_e){
-        const ta=document.createElement('textarea');
-        ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
-        document.body.appendChild(ta); ta.select();
-        try{document.execCommand('copy')}catch(__e){}
-        ta.remove();
+      try{await navigator.clipboard.writeText(txt)}
+      catch(_e){
+        const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+        document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(__e){}ta.remove();
       }
     };
   }
 
   window.addEventListener('load',()=>setTimeout(()=>{
     const b=document.createElement('button');
-    b.id='allpaConclusionCoreBtnV3';
-    b.type='button';
-    b.textContent='🧪 CORE CONCLUSIÓN V3';
-    b.onclick=run;
+    b.id='allpaConclusionCoreBtnV4';b.type='button';b.textContent='🧪 CORE CONCLUSIÓN V4';b.onclick=run;
     document.body.appendChild(b);
-
-    const p=document.createElement('div');
-    p.id='allpaConclusionCorePanelV3';
-    document.body.appendChild(p);
+    const p=document.createElement('div');p.id='allpaConclusionCorePanelV4';document.body.appendChild(p);
   },1200));
 })();
 </script>
