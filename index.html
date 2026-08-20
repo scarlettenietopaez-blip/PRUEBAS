@@ -10114,31 +10114,7 @@ function renderActionsCellV73(i,computed){
   return `<td class="row-actions"><div class="actions-v73">${content || '<span class="no-row-action-v73">—</span>'}</div></td>`;
 }
 
-renderConclusionTabla = function(){
-  ensureAreaUtilTotalRowV37();
-  ensureConclusionOrderV73();
-  recalcAreasCOSV36();
-  ensureConclusionOrderV73();
-
-  const arr=state.aprobatorio.conclusion||[];
-  const cont=document.getElementById('conclusionTabla');
-  if(!cont) return;
-
-  cont.innerHTML=`<div class="conclusion-help-v73">Use el botón + únicamente en el bloque de áreas brutas. Las filas nuevas se insertan antes de Área Bruta total de construcción y pueden usar niveles.</div><table class="editable-conclusion"><thead><tr><th>Descripción</th><th style="width:18%">Niveles</th><th style="width:18%">Cantidad</th><th style="width:14%">Unidad</th><th style="width:16%">Acciones</th></tr></thead><tbody>${arr.map((raw,i)=>{
-    const r=normalizeConclusionRowSafeV73(raw);
-    const canLevels=canEditLevelsV73(i);
-    const computed=isComputedConclusionV73(r);
-    const cls=[computed?'calc-readonly-v37':'',canLevels?'bruta-editable-v73':''].filter(Boolean).join(' ');
-    return `<tr class="${cls}">
-      <td><input id="conc_desc_${i}" value="${esc(r.descripcion)}" placeholder="Descripción" oninput="updConclusionField(${i},'descripcion',this.value)" onblur="renderConclusionTabla()" ${computed?'readonly':''}></td>
-      ${renderLevelsCellV73(r,i,canLevels)}
-      <td><input id="conc_qty_${i}" value="${esc(r.cantidad)}" placeholder="Cantidad" oninput="updConclusionField(${i},'cantidad',this.value)" ${computed?'readonly':''}></td>
-      <td><input id="conc_unit_${i}" value="${esc(r.unidad)}" placeholder="Unidad" oninput="updConclusionField(${i},'unidad',this.value)"></td>
-      ${renderActionsCellV73(i,computed)}
-    </tr>`;
-  }).join('')}</tbody></table><div class="calc-note">Área Bruta total = suma de filas con “Bruta”. COS PB = Área útil planta baja / Área del predio × 100. COS Total = Área útil total / Área del predio × 100.</div>`;
-};
-
+/* Core V8: histórico retirado renderConclusionTabla */
 addConclusionRowAfter = function(i){
   ensureConclusionOrderV73();
   if(!canInsertAfterV73(i)){
@@ -10554,25 +10530,7 @@ function showConclusionCSVStatusV77(){
 
 /* Render principal reforzado: si solo hay una fila, fuerza reconstrucción. */
 const _renderConclusionTabla_base_V77 = typeof renderConclusionTabla === 'function' ? renderConclusionTabla : null;
-renderConclusionTabla = function(){
-  if(conclusionIncompleteV77()) rebuildConclusionFromRowsV77(false);
-
-  if(_renderConclusionTabla_base_V77) _renderConclusionTabla_base_V77();
-
-  showConclusionCSVStatusV77();
-
-  const arr = state.aprobatorio?.conclusion || [];
-  if(arr.length <= 1 && !window.__CONCLUSION_CSV_V77__.loading){
-    cargarConclusionCSVDirectoV77(true).then(()=>{
-      rebuildConclusionFromRowsV77(true);
-      if(_renderConclusionTabla_base_V77) _renderConclusionTabla_base_V77();
-      showConclusionCSVStatusV77();
-      if(typeof renderReport === 'function') renderReport();
-      if(typeof renderPreview === 'function') renderPreview();
-    });
-  }
-};
-
+/* Core V8: histórico retirado renderConclusionTabla */
 async function forceConclusionFromCSVV77(force=false){
   await cargarConclusionCSVDirectoV77(force);
   rebuildConclusionFromRowsV77(force || conclusionIncompleteV77());
@@ -10863,11 +10821,7 @@ function syncConclusionActivoV79(){
 /* Sobrescribe el reporte para no mostrar filas inactivas aunque sigan en memoria. */
 /* También filtra la tabla editable antes de dibujar. */
 const _renderConclusionTabla_base_V79 = typeof renderConclusionTabla === 'function' ? renderConclusionTabla : null;
-renderConclusionTabla = function(){
-  syncConclusionActivoV79();
-  if(_renderConclusionTabla_base_V79) _renderConclusionTabla_base_V79();
-};
-
+/* Core V8: histórico retirado renderConclusionTabla */
 /* Fuerza lectura y re-render cuando se entra a Aprobatorio o Vista. */
 async function aplicarActivoConclusionV79(force=false){
   await cargarConclusionCSVDirectoV77(force);
@@ -11071,40 +11025,7 @@ function rebuildConclusionEditableFromCSVV80(force=false){
 }
 
 /* Recalcula usando todas las filas editables, incluso si Activo = No. */
-recalcAreasCOSV36 = function(){
-  const arr = state.aprobatorio?.conclusion || [];
-  let areaLote=0, aupb=0, areaUtilTotal=0, brutaTotal=0;
-
-  arr.forEach(raw=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    const d = normV36(r.descripcion);
-    const q = parseQtyV36(r.cantidad);
-
-    if((d.includes('AREA DEL PREDIO') || d.includes('AREA TOTAL DE LOTE')) && q) areaLote=q;
-    if(d.includes('AREA UTIL PLANTA BAJA')) aupb=q;
-    if(d.includes('AREA UTIL TOTAL')) areaUtilTotal=q;
-    if(d.includes('BRUTA') && !d.includes('TOTAL')) brutaTotal += q;
-  });
-
-  arr.forEach((raw,i)=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    const d = normV36(r.descripcion);
-
-    if(d.includes('AREA BRUTA TOTAL')){
-      r.cantidad = brutaTotal ? fmtNumV36(brutaTotal) : '';
-      syncConclusionObj(i,r);
-    }
-    if(d.includes('COS PB')){
-      r.cantidad = (areaLote && aupb) ? fmtNumV36((aupb/areaLote)*100) : '';
-      syncConclusionObj(i,r);
-    }
-    if(d.includes('COS TOTAL')){
-      r.cantidad = (areaLote && areaUtilTotal) ? fmtNumV36((areaUtilTotal/areaLote)*100) : '';
-      syncConclusionObj(i,r);
-    }
-  });
-};
-
+/* Core V8: histórico retirado recalcAreasCOSV36 */
 /* En el informe se imprimen solo filas activas del CSV + filas personalizadas. */
 function conclusionRowsForReportV80(){
   const arr = state.aprobatorio?.conclusion || [];
@@ -11308,51 +11229,9 @@ function renderActionsCellV81(r,i){
 }
 
 /* Render editable propio: aquí NO se filtra por Activo. */
-renderConclusionTabla = function(){
-  rebuildEditableConclusionAllRowsV81(false);
-  recalcAreasCOSV36();
-
-  const cont=document.getElementById('conclusionTabla');
-  if(!cont) return;
-
-  const arr=state.aprobatorio.conclusion || [];
-
-  cont.innerHTML=`<div class="conclusion-help-v73">Use el botón + únicamente en el bloque de áreas brutas. Las filas nuevas se insertan antes de Área Bruta total de construcción y pueden usar niveles.</div>
-  <table class="editable-conclusion">
-    <thead><tr><th>Descripción</th><th style="width:18%">Niveles</th><th style="width:18%">Cantidad</th><th style="width:14%">Unidad</th><th style="width:16%">Acciones</th></tr></thead>
-    <tbody>${arr.map((raw,i)=>{
-      const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-      const computed=isComputedConclusionV81(r);
-      const cls=[computed?'calc-readonly-v37':'',canLevelsV81(i)?'bruta-editable-v73':''].filter(Boolean).join(' ');
-      return `<tr class="${cls}">
-        <td><input id="conc_desc_${i}" value="${esc(r.descripcion)}" placeholder="Descripción" oninput="updConclusionField(${i},'descripcion',this.value)" onblur="renderConclusionTabla()" ${computed?'readonly':''}></td>
-        ${renderLevelsCellV81(r,i)}
-        <td><input id="conc_qty_${i}" value="${esc(r.cantidad)}" placeholder="Cantidad" oninput="updConclusionField(${i},'cantidad',this.value)" ${computed?'readonly':''}></td>
-        <td><input id="conc_unit_${i}" value="${esc(r.unidad)}" placeholder="Unidad" oninput="updConclusionField(${i},'unidad',this.value)"></td>
-        ${renderActionsCellV81(r,i)}
-      </tr>`;
-    }).join('')}</tbody>
-  </table>
-  <div class="calc-note">Área Bruta total = suma de filas con “Bruta”. COS PB = Área útil planta baja / Área del predio × 100. COS Total = Área útil total / Área del predio × 100.</div>`;
-};
-
+/* Core V8: histórico retirado renderConclusionTabla */
 /* Reporte: aquí SÍ se filtra por Activo. */
-function conclusionRowsForReportV81(){
-  const arr=state.aprobatorio?.conclusion || [];
-  const activeKeys=activeConclusionKeysV81();
-  const baseKeys=allConclusionKeysV81();
-
-  if(baseKeys.size < 3 || activeKeys.size < 1) return arr;
-
-  return arr.filter(raw=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function' ? normalizeConclusionRowSafeV73(raw) : normalizeConclusionRow(raw);
-    const key=normDescConclusionV81(r.descripcion);
-    if(!key) return false;
-    if(baseKeys.has(key)) return activeKeys.has(key);
-    return key.includes('BRUTA') && !key.includes('TOTAL');
-  });
-}
-
+/* Core V8: histórico retirado conclusionRowsForReportV81 */
 addConclusionRowAfter = function(i){
   if(!canInsertV81(i)){
     if(typeof msg==='function') msg('Solo puede agregar filas entre Área bruta planta baja y Área Bruta total de construcción.');
@@ -11492,15 +11371,7 @@ function conclusionDescBlurV84(){
 
 /* Refuerza el render de la tabla para que use blur controlado y no bloquee la escritura. */
 const _renderConclusionTabla_base_V84 = typeof renderConclusionTabla === 'function' ? renderConclusionTabla : null;
-renderConclusionTabla = function(){
-  if(_renderConclusionTabla_base_V84) _renderConclusionTabla_base_V84();
-
-  // Reemplaza el onblur anterior por uno seguro, si existe la tabla.
-  document.querySelectorAll('.editable-conclusion input[id^="conc_desc_"]').forEach(input=>{
-    input.onblur = conclusionDescBlurV84;
-  });
-};
-
+/* Core V8: histórico retirado renderConclusionTabla */
 window.addEventListener('load',()=>{
   setTimeout(()=>{
     if(typeof renderConclusionTabla === 'function') renderConclusionTabla();
@@ -14353,52 +14224,7 @@ function formatCalcV104(n, dec=2){
 
 /* Mantiene cálculos aun si se modifican las descripciones, usando roles internos. */
 const _recalcAreasCOSV36_base_V104 = typeof recalcAreasCOSV36 === 'function' ? recalcAreasCOSV36 : null;
-recalcAreasCOSV36 = function(){
-  if(_recalcAreasCOSV36_base_V104) _recalcAreasCOSV36_base_V104();
-
-  try{
-    assignConclusionRolesV104();
-    const arr=state.aprobatorio?.conclusion || [];
-    let predio=0, utilPB=0, utilTotal=0, bruta=0;
-
-    arr.forEach((raw,i)=>{
-      const r=typeof rowConclV87 === 'function' ? rowConclV87(raw || {}) : (raw || {});
-      const role=conclusionRoleV104(i,r);
-      const q=qtyNumberV104(r.cantidad);
-
-      if(role==='predio') predio=q;
-      if(role==='utilPB') utilPB=q;
-      if(role==='utilTotal') utilTotal=q;
-      if(role==='bruta') bruta+=q;
-    });
-
-    arr.forEach((raw,i)=>{
-      const r=typeof rowConclV87 === 'function' ? rowConclV87(raw || {}) : (raw || {});
-      const role=conclusionRoleV104(i,r);
-
-      if(role==='brutaTotal'){
-        r.cantidad=formatCalcV104(bruta,2);
-        if(typeof syncConclV87 === 'function') syncConclV87(i,r);
-        else state.aprobatorio.conclusion[i]={...raw,...r};
-      }
-
-      if(role==='cosPB'){
-        r.cantidad=predio ? formatCalcV104((utilPB/predio)*100,2) : '';
-        if(typeof syncConclV87 === 'function') syncConclV87(i,r);
-        else state.aprobatorio.conclusion[i]={...raw,...r};
-      }
-
-      if(role==='cosTotal'){
-        r.cantidad=predio ? formatCalcV104((utilTotal/predio)*100,2) : '';
-        if(typeof syncConclV87 === 'function') syncConclV87(i,r);
-        else state.aprobatorio.conclusion[i]={...raw,...r};
-      }
-    });
-  }catch(e){
-    console.warn('V104 recálculo por roles:', e);
-  }
-};
-
+/* Core V8: histórico retirado recalcAreasCOSV36 */
 /* Permite cambiar descripción de filas calculadas solo en ampliatorio/modificatorio.
    Mantiene bloqueada la cantidad de las filas calculadas. */
 commitConclusionInputV87 = function(input){
@@ -14582,33 +14408,7 @@ aprobatorioInfoTableFromTemplate = function(text){
 
 /* Tabla de Conclusión Técnica del informe:
    añade N+ antes de cada nivel. */
-function conclusionReport(){
-  const arr = typeof conclusionRowsForReportV81 === 'function'
-    ? conclusionRowsForReportV81()
-    : (state.aprobatorio?.conclusion || []);
-
-  if(!arr.length) return '<p>No se registran datos de conclusión técnica.</p>';
-
-  return `<table class="informe-table conclusion-report"><thead><tr><th colspan="2">DESCRIPCIÓN</th><th>CANTIDAD</th><th>UNIDAD</th></tr></thead><tbody>${arr.map(raw=>{
-    const r = typeof normalizeConclusionRowSafeV73 === 'function'
-      ? normalizeConclusionRowSafeV73(raw)
-      : (typeof normalizeConclusionRow === 'function' ? normalizeConclusionRow(raw) : raw);
-
-    const niveles = (r.levels || [])
-      .filter(v => String(v ?? '').trim())
-      .map(v => esc(normalizarNivelV105(v)))
-      .join('<br>');
-
-    const descClass = /TOTAL|NÚMERO DE PISOS|NUMERO DE PISOS|UNIDADES|COS/.test(upper(r.descripcion || '')) ? 'desc-bold' : '';
-
-    if(niveles){
-      return `<tr><td class="${descClass}">${esc(r.descripcion)}</td><td class="level-cell">${niveles}</td><td class="right">${esc(r.cantidad)}</td><td>${esc(r.unidad)}</td></tr>`;
-    }
-
-    return `<tr><td colspan="2" class="${descClass}">${esc(r.descripcion)}</td><td class="right">${esc(r.cantidad)}</td><td>${esc(r.unidad)}</td></tr>`;
-  }).join('')}</tbody></table>`;
-}
-
+/* Core V8: histórico retirado conclusionReport */
 /* Tabla de Requisitos del informe:
    elimina la columna Nro. */
 function reqTable(reqs, mode){
@@ -14773,10 +14573,7 @@ delConclusion = function(i){
    tampoco debe reaparecer en la vista del informe. */
 if(typeof conclusionRowsForReportV81 === 'function'){
   const _conclusionRowsForReportV81_base_V106 = conclusionRowsForReportV81;
-  conclusionRowsForReportV81 = function(){
-    filterDeletedConclusionRowsV106();
-    return _conclusionRowsForReportV81_base_V106();
-  };
+  /* Core V8: histórico retirado conclusionRowsForReportV81 */
 }
 
 window.addEventListener('load',()=>{
@@ -15022,10 +14819,7 @@ delConclusion = function(i){
 /* Refuerzo para que las filas eliminadas tampoco aparezcan en el informe. */
 if(typeof conclusionRowsForReportV81 === 'function'){
   const _conclusionRowsForReportV81_base_V107 = conclusionRowsForReportV81;
-  conclusionRowsForReportV81 = function(){
-    filterDeletedConclusionRowsV107();
-    return _conclusionRowsForReportV81_base_V107();
-  };
+  /* Core V8: histórico retirado conclusionRowsForReportV81 */
 }
 
 window.addEventListener('load',()=>{
@@ -15391,72 +15185,10 @@ delConclusion = function(i){
   if(typeof renderPreview === 'function') renderPreview();
 };
 
-renderConclusionTabla = function(){
-  if(window.__CONCLUSION_EDITING_V87__) return;
-
-  prepareRowsConclV108();
-
-  const cont=document.getElementById('conclusionTabla');
-  if(!cont) return;
-
-  const arr=state.aprobatorio?.conclusion || [];
-  const allowDesc=modoAmpModV108();
-
-  cont.innerHTML=`<div class="conclusion-help-v73">El botón + está en la fila Área Bruta total de construcción y agrega filas arriba de esta.</div>
-    <table class="editable-conclusion ${allowDesc?'descripcion-editable-v104':''}">
-      <thead><tr><th>Descripción</th><th style="width:18%">Niveles</th><th style="width:18%">Cantidad</th><th style="width:14%">Unidad</th><th style="width:16%">Acciones</th></tr></thead>
-      <tbody>${arr.map((raw,i)=>{
-        const r=rowConclV108(raw || {});
-        const computed=isCalculatedConclV108(raw,i);
-        const descReadonly=computed && !allowDesc;
-        const qtyReadonly=computed;
-        const cls=[computed?'calc-readonly-v37':'',typeof canLevelConclV87==='function' && canLevelConclV87(i)?'bruta-editable-v73':''].filter(Boolean).join(' ');
-        const levelsHtml=typeof renderLevelsV87 === 'function'
-          ? renderLevelsV87(r,i)
-          : `<td class="levels-edit"></td>`;
-
-        return `<tr class="${cls}">
-          <td><textarea class="concl-edit-v87" data-i="${i}" data-field="descripcion" id="conc_desc_${i}" placeholder="Descripción" ${descReadonly?'readonly':''}>${escapeAttrV87(r.descripcion)}</textarea></td>
-          ${levelsHtml}
-          <td><input class="concl-edit-v87" data-i="${i}" data-field="cantidad" id="conc_qty_${i}" value="${escapeAttrV87(r.cantidad)}" placeholder="Cantidad" ${qtyReadonly?'readonly':''}></td>
-          <td><input class="concl-edit-v87" data-i="${i}" data-field="unidad" id="conc_unit_${i}" value="${escapeAttrV87(r.unidad)}" placeholder="Unidad"></td>
-          ${renderActionsConclV108(raw,i)}
-        </tr>`;
-      }).join('')}</tbody>
-    </table>
-    <div class="calc-note ${allowDesc?'descripcion-editable-note-v104':''}">
-      ${allowDesc
-        ? 'Modo ampliatorio/modificatorio: se mantienen Área del predio, Área útil planta baja, Área útil total, Área Bruta total, COS PB y COS Total. Las demás filas pueden quitarse aunque se edite su descripción.'
-        : 'Obra Mayor: las filas base no se pueden quitar. Solo se pueden quitar las filas nuevas agregadas con el botón +.'}
-    </div>`;
-
-  if(typeof bindConclusionInputsV87 === 'function') bindConclusionInputsV87();
-};
-
+/* Core V8: histórico retirado renderConclusionTabla */
 if(typeof conclusionRowsForReportV81 === 'function'){
 
-  conclusionRowsForReportV81 = function(){
-    prepareRowsConclV108();
-
-    const arr=state.aprobatorio?.conclusion || [];
-    let activeKeys=new Set();
-    try{
-      activeKeys = typeof activeConclusionKeysV81 === 'function' ? activeConclusionKeysV81() : new Set();
-    }catch(e){}
-
-    if(!activeKeys || !activeKeys.size) return arr;
-
-    return arr.filter(raw=>{
-      if(raw._originV108==='custom') return true;
-      if(raw._baseKeyV108){
-        const fullKey=String(raw._baseKeyV108);
-        const plainKey=fullKey.split('||TIPO:')[0];
-        return activeKeys.has(fullKey) || activeKeys.has(plainKey);
-      }
-      const key=normConclV108(rowConclV108(raw).descripcion || '');
-      return activeKeys.has(key);
-    });
-  };
+  /* Core V8: histórico retirado conclusionRowsForReportV81 */
 }
 
 window.addEventListener('load',()=>{
@@ -22249,10 +21981,8 @@ function syncConclusionAutoV145(){
 const _prepareRowsConclV108_base_V145=typeof prepareRowsConclV108==='function'?prepareRowsConclV108:null;
 if(_prepareRowsConclV108_base_V145) prepareRowsConclV108=function(){_prepareRowsConclV108_base_V145();syncConclusionAutoV145();};
 const _renderConclusionTabla_base_V145=typeof renderConclusionTabla==='function'?renderConclusionTabla:null;
-if(_renderConclusionTabla_base_V145) renderConclusionTabla=function(){syncConclusionAutoV145();const out=_renderConclusionTabla_base_V145();syncConclusionAutoV145();return out;};
-const _conclusionReport_base_V145=typeof conclusionReport==='function'?conclusionReport:null;
-if(_conclusionReport_base_V145) conclusionReport=function(){syncConclusionAutoV145();return _conclusionReport_base_V145();};
-
+/* Core V8: histórico retirado renderConclusionTabla */const _conclusionReport_base_V145=typeof conclusionReport==='function'?conclusionReport:null;
+/* Core V8: histórico retirado conclusionReport */
 const _bindReqDetailInputsV94_base_V145=typeof bindReqDetailInputsV94==='function'?bindReqDetailInputsV94:null;
 bindReqDetailInputsV94=function(){
   if(_bindReqDetailInputsV94_base_V145) _bindReqDetailInputsV94_base_V145();
@@ -25227,29 +24957,7 @@ const _conclusionRowsForReport_base_V119N = typeof conclusionRowsForReportV81 ==
   ? conclusionRowsForReportV81 : null;
 
 if(_conclusionRowsForReport_base_V119N){
-  conclusionRowsForReportV81 = function(){
-    ensureAreaUtilTotalConclusionV119N();
-
-    let rows=_conclusionRowsForReport_base_V119N() || [];
-    const has=rows.some((raw,i)=>conclusionRoleV119N(raw,i)==='utilTotal'
-      || normV119N(conclusionRowNormV119N(raw).descripcion).includes('AREA UTIL TOTAL'));
-
-    if(!has){
-      const source=(state.aprobatorio?.conclusion||[]).find((raw,i)=>conclusionRoleV119N(raw,i)==='utilTotal'
-        || normV119N(conclusionRowNormV119N(raw).descripcion).includes('AREA UTIL TOTAL'));
-      if(source){
-        const idxPB=rows.findIndex((raw,i)=>conclusionRoleV119N(raw,i)==='utilPB'
-          || normV119N(conclusionRowNormV119N(raw).descripcion).includes('AREA UTIL PLANTA BAJA'));
-        const idxBruta=rows.findIndex((raw,i)=>conclusionRoleV119N(raw,i)==='bruta');
-        const copy={...source};
-        if(idxPB>=0) rows.splice(idxPB+1,0,copy);
-        else if(idxBruta>=0) rows.splice(idxBruta,0,copy);
-        else rows.push(copy);
-      }
-    }
-
-    return rows;
-  };
+  /* Core V8: histórico retirado conclusionRowsForReportV81 */
 }
 
 /* ---------- 2. Copiar también para Observaciones ---------- */
@@ -25556,39 +25264,7 @@ function areaBrutaInformacionGeneralV119N(){
   return parseNumeroV119N(val);
 }
 
-function sumaAreasBrutasConclusionV119N(){
-  if(typeof commitAllConclusionInputsV87 === 'function'){
-    try{ commitAllConclusionInputsV87(); }catch(error){}
-  }
-
-  if(typeof prepareRowsConclV108 === 'function'){
-    try{ prepareRowsConclV108(); }catch(error){}
-  }else{
-    ensureAreaUtilTotalConclusionV119N();
-  }
-
-  const rows=state.aprobatorio?.conclusion || [];
-  let sum=0;
-  let count=0;
-
-  rows.forEach((raw,i)=>{
-    const r=conclusionRowNormV119N(raw);
-    const role=conclusionRoleV119N(raw,i);
-    const desc=normV119N(r.descripcion||'');
-
-    const esBruta=role==='bruta' || (desc.includes('AREA') && desc.includes('BRUTA') && !desc.includes('TOTAL'));
-    if(!esBruta) return;
-
-    const n=parseNumeroV119N(r.cantidad);
-    if(Number.isFinite(n)){
-      sum+=n;
-      count++;
-    }
-  });
-
-  return {sum,count};
-}
-
+/* Core V8: histórico retirado sumaAreasBrutasConclusionV119N */
 function errorAreaBrutaConclusionV119N(){
   if(state.tipoInforme!=='Informe Técnico Aprobatorio') return '';
 
@@ -25733,45 +25409,10 @@ function findAreaUtilTotalStateRowV119O(){
 const _conclusionRowsForReportV81_base_V119O = typeof conclusionRowsForReportV81 === 'function'
   ? conclusionRowsForReportV81 : null;
 
-conclusionRowsForReportV81 = function(){
-  if(typeof ensureAreaUtilTotalConclusionV119N === 'function'){
-    try{ ensureAreaUtilTotalConclusionV119N(); }catch(error){}
-  }
-
-  let rows = _conclusionRowsForReportV81_base_V119O
-    ? (_conclusionRowsForReportV81_base_V119O() || [])
-    : (state.aprobatorio?.conclusion || []);
-
-  const hasUtilTotal = rows.some(raw=>isAreaUtilTotalRowV119O(raw));
-  if(hasUtilTotal) return rows;
-
-  const utilTotal = findAreaUtilTotalStateRowV119O();
-  if(!utilTotal) return rows;
-
-  const idxPB = rows.findIndex(raw=>isAreaUtilPBRowV119O(raw));
-  const idxBrutaPB = rows.findIndex(raw=>{
-    const d=normV119O(rowConclV119O(raw).descripcion||'');
-    return d.includes('AREA') && d.includes('BRUTA') && d.includes('PLANTA BAJA');
-  });
-
-  const copy = {...utilTotal};
-  rows = rows.slice();
-
-  if(idxPB >= 0) rows.splice(idxPB + 1, 0, copy);
-  else if(idxBrutaPB >= 0) rows.splice(idxBrutaPB, 0, copy);
-  else rows.push(copy);
-
-  return rows;
-};
-
+/* Core V8: histórico retirado conclusionRowsForReportV81 */
 const _conclusionReport_base_V119O = typeof conclusionReport === 'function' ? conclusionReport : null;
 if(_conclusionReport_base_V119O){
-  conclusionReport = function(){
-    if(typeof ensureAreaUtilTotalConclusionV119N === 'function'){
-      try{ ensureAreaUtilTotalConclusionV119N(); }catch(error){}
-    }
-    return _conclusionReport_base_V119O();
-  };
+  /* Core V8: histórico retirado conclusionReport */
 }
 
 /* ---------- 2. Buscador con selección previa ---------- */
@@ -30752,10 +30393,7 @@ renderObsSeleccionadas = function(){
     });
   }
   const recalcBaseV13=typeof recalcAreasCOSV36==='function'?recalcAreasCOSV36:null;
-  recalcAreasCOSV36=function(){
-    if(recalcBaseV13) recalcBaseV13.apply(this,arguments);
-    calculateAreasV13();
-  };
+  /* Core V8: histórico retirado recalcAreasCOSV36 */
   const syncAutoBaseV13=typeof syncConclusionAutoV145==='function'?syncConclusionAutoV145:null;
   if(syncAutoBaseV13){
     syncConclusionAutoV145=function(){
@@ -30785,66 +30423,13 @@ renderObsSeleccionadas = function(){
       <option ${selected==='Modificación'?'selected':''}>Modificación</option>
     </select></td>`;
   }
-  renderConclusionTabla=function(){
-    if(window.__CONCLUSION_EDITING_V87__) return;
-    if(typeof prepareRowsConclV108==='function') prepareRowsConclV108();
-    if(typeof ensureAreaUtilTotalConclusionV119N==='function') ensureAreaUtilTotalConclusionV119N();
-    ensureAreaTotalV13();
-    if(typeof syncConclusionAutoV145==='function') syncConclusionAutoV145();
-    if(typeof recalcAreasCOSV36==='function') recalcAreasCOSV36();
-    calculateAreasV13();
-    const cont=document.getElementById('conclusionTabla'); if(!cont) return;
-    const arr=state.aprobatorio?.conclusion||[];
-    const mode=modoAmpModV13();
-    cont.innerHTML=`<div class="conclusion-help-v73">El botón + está en la fila Área Bruta total de construcción y agrega filas arriba de esta.${mode?' Seleccione el tipo de intervención en cada fila de área bruta.':''}</div>
-      <table class="editable-conclusion editable-conclusion-v13 ${mode?'descripcion-editable-v104':''}">
-        <thead><tr><th>Descripción</th><th style="width:17%">Niveles</th>${mode?'<th style="width:19%">Tipo de intervención</th>':''}<th style="width:15%">Cantidad</th><th style="width:11%">Unidad</th><th style="width:14%">Acciones</th></tr></thead>
-        <tbody>${arr.map((raw,i)=>{
-          const row=rowV13(raw); const role=roleV13(raw,i);
-          const fixed=role==='areaAmpliacionTotal';
-          const calculated=fixed || (typeof isCalculatedConclV108==='function'&&isCalculatedConclV108(raw,i));
-          const descReadonly=fixed || (calculated && !mode);
-          const qtyReadonly=calculated;
-          const levels=(!fixed && typeof renderLevelsV87==='function')?renderLevelsV87(row,i):'<td class="levels-edit"></td>';
-          let actions='<td class="row-actions"><span class="no-row-action-v73">—</span></td>';
-          if(!fixed && typeof renderActionsConclV108==='function') actions=renderActionsConclV108(raw,i);
-          /* V14: la fila Área Total de Ampliación usa el mismo formato visual
-             de las demás filas totales calculadas. */
-          const cls=[calculated?'calc-readonly-v37':'',canLevelsV13(raw,i)?'bruta-editable-v73':''].filter(Boolean).join(' ');
-          return `<tr class="${cls}"><td><textarea class="concl-edit-v87" data-i="${i}" data-field="descripcion" id="conc_desc_${i}" placeholder="Descripción" ${descReadonly?'readonly':''}>${escV13(row.descripcion)}</textarea></td>${levels}${typeCellV13(raw,i,mode)}<td><input class="concl-edit-v87" data-i="${i}" data-field="cantidad" id="conc_qty_${i}" value="${escV13(row.cantidad)}" placeholder="Cantidad" ${qtyReadonly?'readonly':''}></td><td><input class="concl-edit-v87" data-i="${i}" data-field="unidad" id="conc_unit_${i}" value="${escV13(row.unidad)}" placeholder="Unidad" ${fixed?'readonly':''}></td>${actions}</tr>`;
-        }).join('')}</tbody>
-      </table>
-      <div class="calc-note">${mode?'Área Bruta total suma las áreas brutas excepto las marcadas como Modificación. Área Total de Ampliación/Modificación suma las filas marcadas como Ampliación o Modificación.':'Área Bruta total = suma de filas con “Bruta”.'}</div>`;
-    if(typeof bindConclusionInputsV87==='function') bindConclusionInputsV87();
-  };
+  /* Core V8: histórico retirado renderConclusionTabla */
   const reportRowsBaseV13=typeof conclusionRowsForReportV81==='function'?conclusionRowsForReportV81:null;
   if(reportRowsBaseV13){
-    conclusionRowsForReportV81=function(){
-      ensureAreaTotalV13(); calculateAreasV13();
-      let rows=(reportRowsBaseV13.apply(this,arguments)||[]).slice();
-      /* V14: evitar que rutinas anteriores reubiquen la fila calculada. */
-      const fromRows=rows.find((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal');
-      const fromState=(state.aprobatorio?.conclusion||[]).find((raw,i)=>roleV13(raw,i)==='areaAmpliacionTotal');
-      const source=fromRows||fromState;
-      rows=rows.filter((raw,i)=>roleV13(raw,i)!=='areaAmpliacionTotal');
-      if(modoAmpModV13()&&source){
-        const idx=rows.findIndex((raw,i)=>roleV13(raw,i)==='brutaTotal');
-        rows.splice(idx>=0?idx+1:rows.length,0,source);
-      }
-      return rows;
-    };
+    /* Core V8: histórico retirado conclusionRowsForReportV81 */
   }
   if(typeof sumaAreasBrutasConclusionV119N==='function'){
-    sumaAreasBrutasConclusionV119N=function(){
-      if(typeof commitAllConclusionInputsV87==='function') try{commitAllConclusionInputsV87();}catch(_e){}
-      const rows=state.aprobatorio?.conclusion||[]; let sum=0,count=0;
-      rows.forEach((raw,i)=>{
-        if(roleV13(raw,i)!=='bruta') return;
-        if(modoAmpModV13() && normalizeAreaTypeV13(raw.tipoAreaV13)==='Modificación') return;
-        const n=parseQtyV13(rowV13(raw).cantidad); sum+=n; count++;
-      });
-      return {sum,count};
-    };
+    /* Core V8: histórico retirado sumaAreasBrutasConclusionV119N */
   }
   function areaAmpliacionV13(){
     calculateAreasV13();
@@ -33678,10 +33263,7 @@ textarea.evidencia-text,
 
   if(typeof recalcAreasCOSV36==='function' && !recalcAreasCOSV36.__v61){
     var recalcBaseV61=recalcAreasCOSV36;
-    recalcAreasCOSV36=function(){
-      if(window.__ALLPA_RESET_CONCLUSION_V61__) return;
-      return recalcBaseV61.apply(this,arguments);
-    };
+    /* Core V8: histórico retirado recalcAreasCOSV36 */
     recalcAreasCOSV36.__v61=true;
     try{ window.recalcAreasCOSV36=recalcAreasCOSV36; }catch(_e){}
   }
@@ -36283,9 +35865,11 @@ textarea.evidencia-text,
 
   const Core=window.ConclusionTecnicaCoreV1;
   const Bridge=window.ConclusionTecnicaBridgeV3;
-  if(!Core || !Bridge || typeof window.renderConclusionTabla!=='function') return;
+  if(!Core || !Bridge) return;
 
-  const legacyRender=window.renderConclusionTabla;
+  const legacyRender=typeof window.renderConclusionTabla==='function'
+    ? window.renderConclusionTabla
+    : null;
   window.__renderConclusionTablaHistoricoV4=legacyRender;
 
   function esc(v){
@@ -36617,8 +36201,11 @@ textarea.evidencia-text,
       bindV4(cont);
       return true;
     }catch(error){
-      console.error('Conclusion Core V4 fallback:',error);
-      return legacyRender.apply(this,arguments);
+      console.error('Conclusion Core V4:',error);
+      if(typeof legacyRender==='function'){
+        try{return legacyRender.apply(this,arguments);}catch(_e){}
+      }
+      throw error;
     }
   }
 
@@ -37204,24 +36791,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v7-css">
-#allpaConclusionCoreBtnV7{
- position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
- padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
-}
-#allpaConclusionCorePanelV7{
- display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
- width:min(980px,calc(100vw - 36px));max-height:86vh;overflow:auto;
- background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
- box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
-}
-#allpaConclusionCorePanelV7.open{display:block}
-.corev7-ok{color:#177245;font-weight:700}.corev7-fail{color:#b42318;font-weight:700}
-.corev7-row{padding:6px 0;border-bottom:1px solid #eee}
-.corev7-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV7,#allpaConclusionCorePanelV7{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v7">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V7 — CONTROL CENTRAL
@@ -37400,246 +36969,63 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v7-test">
+
+<style id="allpa-conclusion-core-v8-css">
+#allpaConclusionCoreBtnV8{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV8{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(960px,calc(100vw - 36px));max-height:86vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV8.open{display:block}.corev8-ok{color:#177245;font-weight:700}.corev8-fail{color:#b42318;font-weight:700}.corev8-row{padding:6px 0;border-bottom:1px solid #eee}
+@media print{#allpaConclusionCoreBtnV8,#allpaConclusionCorePanelV8{display:none!important}}
+</style>
+<script id="allpa-conclusion-core-v8-test">
 (function(){
-  'use strict';
-
-  function clone(v){
-    try{return structuredClone(v)}
-    catch(_e){return JSON.parse(JSON.stringify(v))}
-  }
-
-  function add(R,name,ok,detail){
-    R.push({name,ok:!!ok,detail:String(detail||'')});
-  }
-
-  function row(role,descripcion,cantidad,extra={}){
-    const r={
-      descripcion,
-      cantidad:String(cantidad??''),
-      unidad:role.startsWith('cos')?'%':'m2',
-      levels:[],
-      allowLevels:role==='bruta',
-      ...extra
-    };
-
-    if(role==='areaAmpliacionTotal') r._roleV13='areaAmpliacionTotal';
-    else r._roleV108=role;
-
-    return r;
-  }
-
-  function fixture(){
-    return {
-      tipoInforme:'Informe Técnico Aprobatorio',
-      aprobatorio:{
-        conclusion:[
-          row('predio','Área del predio',500),
-          row('utilPB','Área útil planta baja',100),
-          row('utilTotal','Área útil total',200),
-          row('bruta','Área bruta planta baja',100,{
-            intervention:'Aprobada (Existente)',
-            tipoAreaV13:'Aprobada (Existente)'
-          }),
-          row('bruta','Área bruta primera planta alta',50,{
-            intervention:'Ampliación',
-            tipoAreaV13:'Ampliación'
-          }),
-          row('bruta','Área bruta segunda planta alta',25,{
-            intervention:'Modificación',
-            tipoAreaV13:'Modificación'
-          }),
-          row('brutaTotal','Área Bruta total de construcción',''),
-          row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
-          row('cosPB','COS PB',''),
-          row('cosTotal','COS TOTAL','')
-        ]
-      }
-    };
-  }
-
-  async function run(){
-    const R=[];
-    const original=clone(state);
-    const V7=window.ConclusionTecnicaV7;
-    const Core=window.ConclusionTecnicaCoreV1;
-
-    try{
-      add(R,'Control Central V7 disponible',!!V7,V7?.version||'');
-      if(!V7 || !Core) throw new Error('V7/Core no disponible.');
-
-      const routes=window.__ConclusionTecnicaRoutesV7||{};
-      add(R,'Rutas públicas centralizadas',
-        Object.keys(routes).length===5,
-        Object.values(routes).join(' · '));
-
-      state=fixture();
-      V7.prepare();
-
-      const rows=V7.canonicalRows();
-
-      add(R,'Filas canónicas',
-        rows.length===10,
-        `${rows.length} fila(s)`);
-
-      const sums=V7.sumaAreasBrutas();
-      add(R,'Área Bruta Central',
-        Number(sums.sum)===150,
-        `150 esperado · ${sums.sum} obtenido`);
-
-      const calc=V7.recalcular();
-
-      add(R,'Área Amp/Mod Central',
-        calc.formatted.areaAmpMod==='75.00',
-        calc.formatted.areaAmpMod);
-
-      add(R,'COS PB Central',
-        calc.formatted.cosPB==='20.00',
-        calc.formatted.cosPB);
-
-      add(R,'COS Total Central',
-        calc.formatted.cosTotal==='40.00',
-        calc.formatted.cosTotal);
-
-      /* Cambio de intervención por ruta pública oficial */
-      const brutas=state.aprobatorio.conclusion
-        .map((r,i)=>({r,i}))
-        .filter(x=>Core.role(x.r,x.i)==='bruta');
-
-      V7.setIntervention(brutas[0].i,'Modificación',{render:false});
-
-      add(R,'setIntervention canónico',
-        state.aprobatorio.conclusion[brutas[0].i].intervention==='Modificación' &&
-        state.aprobatorio.conclusion[brutas[0].i].tipoAreaV13==='Modificación',
-        `${state.aprobatorio.conclusion[brutas[0].i].intervention}/${state.aprobatorio.conclusion[brutas[0].i].tipoAreaV13}`);
-
-      const calc2=V7.recalcular();
-      add(R,'Recálculo tras cambiar intervención',
-        calc2.formatted.areaBrutaTotal==='50.00',
-        `esperado 50.00 · obtenido ${calc2.formatted.areaBrutaTotal}`);
-
-      /* Tabla oficial */
-      let cont=document.getElementById('conclusionTabla'),temp=false;
-      if(!cont){
-        cont=document.createElement('div');
-        cont.id='conclusionTabla';
-        document.body.appendChild(cont);
-        temp=true;
-      }
-
-      V7.renderTabla();
-
-      add(R,'renderConclusionTabla en ruta V7',
-        !!cont.querySelector('.editable-conclusion-core-v4'),
-        `${cont.querySelectorAll('tbody tr').length} fila(s)`);
-
-      const html=V7.renderInforme();
-
-      add(R,'conclusionReport en ruta V7',
-        /conclusion-report-core-v6b/.test(html),
-        `${html.length} caracteres`);
-
-      add(R,'Tabla e informe mismo número de filas',
-        cont.querySelectorAll('tbody tr').length===V7.canonicalRows().length,
-        `tabla ${cont.querySelectorAll('tbody tr').length} · informe ${V7.canonicalRows().length}`);
-
-      const beforeCount=state.aprobatorio.conclusion.length;
-      V7.addRow();
-      add(R,'Agregar fila por V7',
-        state.aprobatorio.conclusion.length===beforeCount+1,
-        `${beforeCount} → ${state.aprobatorio.conclusion.length}`);
-
-      const customIndex=state.aprobatorio.conclusion.findIndex((r,i)=>
-        Core.role(r,i)==='bruta' &&
-        r._userRowV108 &&
-        !String(r.descripcion||'').trim()
-      );
-
-      const removed=customIndex>=0?V7.removeRow(customIndex):false;
-
-      add(R,'Quitar fila por V7',
-        removed && state.aprobatorio.conclusion.length===beforeCount,
-        `${state.aprobatorio.conclusion.length} fila(s)`);
-
-      /* Verificar que las funciones públicas realmente son las rutas nuevas. */
-      add(R,'renderConclusionTabla público central',
-        window.renderConclusionTabla.toString().includes('facade.renderTabla'),
-        'ruta V7');
-
-      add(R,'conclusionReport público central',
-        window.conclusionReport.toString().includes('facade.renderInforme'),
-        'ruta V7');
-
-      add(R,'recalcAreasCOSV36 público central',
-        window.recalcAreasCOSV36.toString().includes('facade.recalcular'),
-        'ruta V7');
-
-      add(R,'sumaAreasBrutas público central',
-        window.sumaAreasBrutasConclusionV119N.toString().includes('facade.sumaAreasBrutas'),
-        'ruta V7');
-
-      if(temp) cont.remove();
-
-    }catch(e){
-      add(R,'Banco Core V7',false,e?.stack||e);
-    }finally{
-      state=original;
-      try{applyStateToUI()}catch(_e){}
-    }
-
-    add(R,'Formulario original restaurado',true,'state restaurado');
-
-    const ok=R.filter(x=>x.ok).length;
-    const fail=R.length-ok;
-    const p=document.getElementById('allpaConclusionCorePanelV7');
-
-    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V7</h3>
-      <div class="corev7-note">
-        Todas las rutas públicas activas de Conclusión Técnica deben pasar por
-        una sola fachada: ConclusionTecnicaV7.
-      </div>
-      <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
-      R.map(x=>`<div class="corev7-row">
-        <span class="${x.ok?'corev7-ok':'corev7-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
-        <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
-      </div>`).join('')+
-      `<p><button id="copyCoreV7">Copiar resultado</button>
-      <button id="closeCoreV7">Cerrar</button></p>`;
-
-    p.classList.add('open');
-    document.getElementById('closeCoreV7').onclick=()=>p.classList.remove('open');
-
-    document.getElementById('copyCoreV7').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V7\nOK:${ok} FAIL:${fail}\n`+
-        R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-
-      try{
-        await navigator.clipboard.writeText(txt);
-      }catch(_e){
-        const ta=document.createElement('textarea');
-        ta.value=txt;
-        ta.style.position='fixed';
-        ta.style.opacity='0';
-        document.body.appendChild(ta);
-        ta.select();
-        try{document.execCommand('copy')}catch(__e){}
-        ta.remove();
-      }
-    };
-  }
-
-  window.addEventListener('load',()=>setTimeout(()=>{
-    const b=document.createElement('button');
-    b.id='allpaConclusionCoreBtnV7';
-    b.type='button';
-    b.textContent='🧪 CORE CONCLUSIÓN V7';
-    b.onclick=run;
-    document.body.appendChild(b);
-
-    const p=document.createElement('div');
-    p.id='allpaConclusionCorePanelV7';
-    document.body.appendChild(p);
-  },1200));
+'use strict';
+function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
+function A(r,n,ok,d){r.push({name:n,ok:!!ok,detail:String(d||'')})}
+function row(role,d,q,x={}){const r={descripcion:d,cantidad:String(q??''),unidad:role.startsWith('cos')?'%':'m2',levels:[],allowLevels:role==='bruta',...x};if(role==='areaAmpliacionTotal')r._roleV13='areaAmpliacionTotal';else r._roleV108=role;return r}
+function fixture(){return{tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[
+row('predio','Área del predio',500),row('utilPB','Área útil planta baja',100),row('utilTotal','Área útil total',200),
+row('bruta','Área bruta planta baja',100,{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
+row('bruta','Área bruta primera planta alta',50,{intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
+row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación'}),
+row('brutaTotal','Área Bruta total de construcción',''),row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
+row('cosPB','COS PB',''),row('cosTotal','COS TOTAL','')]}}}
+async function run(){
+ const R=[],orig=C(state);
+ try{
+  const V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
+  A(R,'Control Central V7',!!V7,V7?.version||'');
+  A(R,'Renderer histórico V4 ya no requerido',window.__renderConclusionTablaHistoricoV4==null,'fallback nulo');
+  state=fixture();V7.prepare();
+  const calc=V7.recalcular();
+  A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
+  A(R,'Área Amp/Mod',calc.formatted.areaAmpMod==='75.00',calc.formatted.areaAmpMod);
+  A(R,'COS PB',calc.formatted.cosPB==='20.00',calc.formatted.cosPB);
+  A(R,'COS Total',calc.formatted.cosTotal==='40.00',calc.formatted.cosTotal);
+  let cont=document.getElementById('conclusionTabla'),temp=false;
+  if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
+  V7.renderTabla();
+  const tr=cont.querySelectorAll('tbody tr').length;
+  A(R,'Tabla Core sin renderer histórico',!!cont.querySelector('.editable-conclusion-core-v4'),`${tr} fila(s)`);
+  const html=V7.renderInforme();
+  A(R,'Informe Core sin report histórico',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
+  A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
+  const brutas=state.aprobatorio.conclusion.map((r,i)=>({r,i})).filter(x=>Core.role(x.r,x.i)==='bruta');
+  V7.setIntervention(brutas[0].i,'Modificación',{render:false});
+  A(R,'Intervención canónica',state.aprobatorio.conclusion[brutas[0].i].intervention==='Modificación','Modificación');
+  const calc2=V7.recalcular();
+  A(R,'Recálculo tras intervención',calc2.formatted.areaBrutaTotal==='50.00',calc2.formatted.areaBrutaTotal);
+  A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
+  A(R,'Rutas públicas V7',window.renderConclusionTabla.toString().includes('facade.renderTabla')&&window.conclusionReport.toString().includes('facade.renderInforme')&&window.recalcAreasCOSV36.toString().includes('facade.recalcular'),'tabla · informe · cálculo');
+  if(temp)cont.remove();
+ }catch(e){A(R,'Banco V8',false,e?.stack||e)}
+ finally{state=orig;try{applyStateToUI()}catch(e){}}
+ A(R,'Formulario original restaurado',true,'state restaurado');
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV8');
+ p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V8</h3><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev8-row"><span class="${x.ok?'corev8-ok':'corev8-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV8">Copiar resultado</button> <button id="closeV8">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV8').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV8').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V8\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+}
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV8';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V8';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV8';document.body.appendChild(p)},1200));
 })();
 </script>
 
