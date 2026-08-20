@@ -37460,13 +37460,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v14-css">
-#allpaConclusionCoreBtnV14{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV14{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1020px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV14.open{display:block}.corev14-ok{color:#177245;font-weight:700}.corev14-fail{color:#b42318;font-weight:700}.corev14-row{padding:6px 0;border-bottom:1px solid #eee}.corev14-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV14,#allpaConclusionCorePanelV14{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v14">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V14 — CLAVES / ELIMINACIONES ÚNICAS
@@ -37685,82 +37678,350 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v14-test">
+
+<style id="allpa-conclusion-core-v15-css">
+#allpaConclusionCoreBtnV15{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV15{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1020px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV15.open{display:block}.corev15-ok{color:#177245;font-weight:700}.corev15-fail{color:#b42318;font-weight:700}.corev15-row{padding:6px 0;border-bottom:1px solid #eee}.corev15-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV15,#allpaConclusionCorePanelV15{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v15">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V15 — ACCIONES / FILAS / NIVELES
+
+   Centraliza:
+   - agregar fila
+   - eliminar fila
+   - agregar nivel
+   - eliminar nivel
+   - reglas de eliminación
+   - reglas de edición de niveles
+
+   Las implementaciones históricas todavía permanecen físicamente,
+   pero las rutas públicas activas pasan por esta capa.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const Core=window.ConclusionTecnicaCoreV1;
+  const S=window.ConclusionTecnicaStructureV9;
+  const K=window.ConclusionTecnicaKeysV14;
+  const V7=window.ConclusionTecnicaV7;
+  if(!Core || !S || !K || !V7) return;
+
+  function rows(){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+    return state.aprobatorio.conclusion;
+  }
+
+  function role(raw,index){
+    return S.role(raw,index);
+  }
+
+  function modeAmpMod(){
+    try{
+      if(typeof modoAmpModV13==='function' && modoAmpModV13()) return true;
+    }catch(_e){}
+
+    return rows().some((raw,i)=>role(raw,i)==='areaAmpliacionTotal') ||
+      rows().some((raw,i)=>
+        role(raw,i)==='bruta' &&
+        S.interventionOf(raw)!=='Aprobada (Existente)'
+      );
+  }
+
+  function isFixed(raw,index){
+    return ['predio','utilPB','utilTotal','brutaTotal','areaAmpliacionTotal','cosPB','cosTotal']
+      .includes(role(raw,index));
+  }
+
+  function isBase(raw){
+    const origin=String(raw?.origin || raw?._originV108 || '').toLowerCase();
+    return origin==='base' || (!!raw?._baseKeyV108 && !raw?._userRowV108);
+  }
+
+  function canDelete(index){
+    const raw=rows()[index];
+    if(!raw) return false;
+    if(isFixed(raw,index)) return false;
+
+    if(modeAmpMod()){
+      return true;
+    }
+
+    return !isBase(raw) || !!raw._userRowV108;
+  }
+
+  function canLevels(index){
+    const raw=rows()[index];
+    if(!raw) return false;
+    return role(raw,index)==='bruta';
+  }
+
+  function refresh(){
+    try{V7.recalcular();}catch(_e){}
+    try{V7.renderTabla();}catch(_e){}
+    try{if(typeof renderReport==='function') renderReport();}catch(_e){}
+    try{if(typeof renderPreview==='function') renderPreview();}catch(_e){}
+  }
+
+  function addRow(){
+    V7.prepare();
+    const before=rows().length;
+    const result=V7.addRow();
+    S.canonicalizeState();
+
+    const current=rows();
+    const added=current.find((r,i)=>
+      role(r,i)==='bruta' &&
+      r._userRowV108 &&
+      !String(r.descripcion||'').trim()
+    );
+
+    if(added){
+      added.origin='custom';
+      added._originV108='custom';
+      added._userRowV108=true;
+      added.intervention=S.interventionOf(added)||'Aprobada (Existente)';
+      added.tipoAreaV13=added.intervention;
+    }
+
+    refresh();
+    return current.length===before+1 ? added || result || true : false;
+  }
+
+  function removeRow(index){
+    V7.prepare();
+
+    const current=rows();
+    const raw=current[index];
+    if(!raw) return false;
+
+    if(!canDelete(index)){
+      if(typeof msg==='function'){
+        msg(modeAmpMod()
+          ? 'Esta fila debe mantenerse en Ampliatorio/Modificatorio y no se puede quitar.'
+          : 'En Obra Mayor solo se pueden quitar las filas nuevas agregadas por el usuario.');
+      }
+      return false;
+    }
+
+    if(isBase(raw)){
+      K.markDeleted(raw,index);
+    }
+
+    current.splice(index,1);
+    S.canonicalizeState();
+    refresh();
+    return true;
+  }
+
+  function addLevel(index){
+    V7.prepare();
+    const raw=rows()[index];
+
+    if(!raw || !canLevels(index)){
+      if(typeof msg==='function'){
+        msg('Los niveles solo se permiten en filas de área bruta.');
+      }
+      return false;
+    }
+
+    if(!Array.isArray(raw.levels)) raw.levels=[];
+    raw.levels.push('');
+    S.canonicalizeState();
+    refresh();
+    return true;
+  }
+
+  function removeLevel(index,pos){
+    V7.prepare();
+    const raw=rows()[index];
+
+    if(!raw || !canLevels(index) || !Array.isArray(raw.levels)){
+      return false;
+    }
+
+    if(pos<0 || pos>=raw.levels.length) return false;
+
+    raw.levels.splice(pos,1);
+    S.canonicalizeState();
+    refresh();
+    return true;
+  }
+
+  function updateLevel(index,pos,value){
+    const raw=rows()[index];
+    if(!raw || !canLevels(index)) return false;
+
+    if(!Array.isArray(raw.levels)) raw.levels=[];
+    raw.levels[pos]=String(value??'');
+    S.canonicalizeState();
+    return true;
+  }
+
+  window.ConclusionTecnicaActionsV15=Object.freeze({
+    version:'15.0.0-actions',
+    modeAmpMod,
+    isFixed,
+    isBase,
+    canDelete,
+    canLevels,
+    addRow,
+    removeRow,
+    addLevel,
+    removeLevel,
+    updateLevel,
+    refresh
+  });
+
+  /* ----------------------------------------------------------
+     RUTAS PÚBLICAS DE COMPATIBILIDAD
+     ---------------------------------------------------------- */
+
+  window.addConclusionRowAfter=function(){
+    return addRow();
+  };
+
+  window.addConclusionRowBeforeTotalV108=function(){
+    return addRow();
+  };
+
+  window.delConclusion=function(i){
+    return removeRow(Number(i));
+  };
+
+  window.addConclusionLevel=function(i){
+    return addLevel(Number(i));
+  };
+
+  window.delConclusionLevel=function(i,j){
+    return removeLevel(Number(i),Number(j));
+  };
+
+  window.canDeleteConclV108=function(rawOrRow,i){
+    const idx=Number.isInteger(i)
+      ? i
+      : rows().indexOf(rawOrRow);
+    return canDelete(idx);
+  };
+
+  window.canDeleteConclusionRowV107=function(i){
+    return canDelete(Number(i));
+  };
+
+  window.canLevelConclV87=function(i){
+    return canLevels(Number(i));
+  };
+
+  window.canLevelConclV86=function(i){
+    return canLevels(Number(i));
+  };
+
+  window.canLevelsV81=function(i){
+    return canLevels(Number(i));
+  };
+
+  window.canEditLevelsV73=function(i){
+    return canLevels(Number(i));
+  };
+
+  try{addConclusionRowAfter=window.addConclusionRowAfter;}catch(_e){}
+  try{addConclusionRowBeforeTotalV108=window.addConclusionRowBeforeTotalV108;}catch(_e){}
+  try{delConclusion=window.delConclusion;}catch(_e){}
+  try{addConclusionLevel=window.addConclusionLevel;}catch(_e){}
+  try{delConclusionLevel=window.delConclusionLevel;}catch(_e){}
+  try{canDeleteConclV108=window.canDeleteConclV108;}catch(_e){}
+  try{canDeleteConclusionRowV107=window.canDeleteConclusionRowV107;}catch(_e){}
+  try{canLevelConclV87=window.canLevelConclV87;}catch(_e){}
+  try{canLevelConclV86=window.canLevelConclV86;}catch(_e){}
+  try{canLevelsV81=window.canLevelsV81;}catch(_e){}
+  try{canEditLevelsV73=window.canEditLevelsV73;}catch(_e){}
+
+  window.__ConclusionTecnicaActionRoutesV15={
+    addConclusionRowAfter:'ConclusionTecnicaActionsV15.addRow',
+    addConclusionRowBeforeTotalV108:'ConclusionTecnicaActionsV15.addRow',
+    delConclusion:'ConclusionTecnicaActionsV15.removeRow',
+    addConclusionLevel:'ConclusionTecnicaActionsV15.addLevel',
+    delConclusionLevel:'ConclusionTecnicaActionsV15.removeLevel',
+    canDeleteConclV108:'ConclusionTecnicaActionsV15.canDelete',
+    canDeleteConclusionRowV107:'ConclusionTecnicaActionsV15.canDelete',
+    canLevelConclV87:'ConclusionTecnicaActionsV15.canLevels'
+  };
+})();
+</script>
+
+<script id="allpa-conclusion-core-v15-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
 function row(role,d,q,x={}){const r={descripcion:d,cantidad:String(q??''),unidad:role.startsWith('cos')?'%':'m2',levels:[],allowLevels:role==='bruta',...x};if(role==='areaAmpliacionTotal')r._roleV13='areaAmpliacionTotal';else r._roleV108=role;return r}
 function fixture(){return{tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[
-row('predio','Área del predio',500),row('utilPB','Área útil planta baja',100),row('utilTotal','Área útil total',200),
-row('bruta','Área bruta planta baja',100,{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
-row('bruta','Área bruta primera planta alta',50,{intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
-row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación'}),
-row('brutaTotal','Área Bruta total de construcción',''),row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
-row('cosPB','COS PB',''),row('cosTotal','COS TOTAL','')]}}}
+row('predio','Área del predio',500,{_originV108:'base',_baseKeyV108:'AREA DEL PREDIO'}),
+row('utilPB','Área útil planta baja',100,{_originV108:'base',_baseKeyV108:'AREA UTIL PLANTA BAJA'}),
+row('utilTotal','Área útil total',200,{_originV108:'base',_baseKeyV108:'AREA UTIL TOTAL'}),
+row('bruta','Área bruta planta baja',100,{_originV108:'base',_baseKeyV108:'AREA BRUTA PLANTA BAJA',intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
+row('bruta','Área bruta primera planta alta',50,{_originV108:'base',_baseKeyV108:'AREA BRUTA PRIMERA PLANTA ALTA',intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
+row('bruta','Área bruta personalizada',25,{_originV108:'custom',_userRowV108:true,intervention:'Modificación',tipoAreaV13:'Modificación'}),
+row('brutaTotal','Área Bruta total de construcción','',{_originV108:'base',_baseKeyV108:'AREA BRUTA TOTAL DE CONSTRUCCION'}),
+row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
+row('cosPB','COS PB',''),
+row('cosTotal','COS TOTAL','')]}}}
 
 async function run(){
  const R=[],orig=C(state);
  try{
-  const K=window.ConclusionTecnicaKeysV14,S=window.ConclusionTecnicaStructureV9,P=window.ConclusionTecnicaPrepareV12,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
-  A(R,'Keys V14 disponible',!!K,K?.version||'');
-  A(R,'Rutas de claves centralizadas',Object.keys(window.__ConclusionTecnicaKeyRoutesV14||{}).length===4,Object.values(window.__ConclusionTecnicaKeyRoutesV14||{}).join(' · '));
+  const X=window.ConclusionTecnicaActionsV15,K=window.ConclusionTecnicaKeysV14,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
+  A(R,'Actions V15 disponible',!!X,X?.version||'');
+  A(R,'Rutas públicas centralizadas',Object.keys(window.__ConclusionTecnicaActionRoutesV15||{}).length===8,Object.values(window.__ConclusionTecnicaActionRoutesV15||{}).join(' · '));
 
-  const a=row('bruta','Área bruta planta baja',100,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:APROBADA (EXISTENTE)'});
-  const b=row('bruta','Área bruta planta baja',50,{_baseKeyV108:'AREA BRUTA PLANTA BAJA||TIPO:AMPLIACION'});
-  A(R,'Clave independiente de Tipo',K.key(a)===K.key(b),`${K.key(a)} / ${K.key(b)}`);
+  state=fixture();S.canonicalizeState();
 
-  state=fixture();
-  S.canonicalizeState();
+  A(R,'Fila fija no eliminable',X.canDelete(0)===false,'predio protegido');
+  A(R,'Fila custom eliminable',X.canDelete(5)===true,'custom');
+  A(R,'Fila bruta admite niveles',X.canLevels(3)===true,'bruta');
+  A(R,'Fila predio no admite niveles',X.canLevels(0)===false,'predio');
 
-  /* Firma moderna */
-  const modern=assignBaseKeyConclusionV107(state.aprobatorio.conclusion[3],3);
-  A(R,'assignBaseKey firma moderna',modern==='AREA BRUTA PLANTA BAJA',modern);
+  const beforeAdd=state.aprobatorio.conclusion.length;
+  X.addRow();
+  const afterAdd=state.aprobatorio.conclusion.length;
+  A(R,'Agregar fila',afterAdd===beforeAdd+1,`${beforeAdd} → ${afterAdd}`);
 
-  /* Firma histórica (i,row) */
-  const oldStyle=assignBaseKeyConclusionV107(4,rowConclV108(state.aprobatorio.conclusion[4]));
-  A(R,'assignBaseKey firma histórica',oldStyle==='AREA BRUTA PRIMERA PLANTA ALTA',oldStyle);
+  const totalIdx=state.aprobatorio.conclusion.findIndex((r,i)=>S.role(r,i)==='brutaTotal');
+  const blankIdx=state.aprobatorio.conclusion.findIndex((r,i)=>S.role(r,i)==='bruta'&&r._userRowV108&&!String(r.descripcion||'').trim());
+  A(R,'Fila nueva antes de Bruta Total',blankIdx>=0&&blankIdx<totalIdx,`nueva ${blankIdx} · total ${totalIdx}`);
 
-  const dkModern=conclusionDeleteKeyV106(state.aprobatorio.conclusion[1],1);
-  const dkOld=conclusionDeleteKeyV106(1,rowConclV108(state.aprobatorio.conclusion[1]));
-  A(R,'deleteKey ambas firmas',dkModern===dkOld,`${dkModern} / ${dkOld}`);
+  const addedLevel=X.addLevel(3);
+  A(R,'Agregar nivel',addedLevel&&state.aprobatorio.conclusion[3].levels.length===1,`${state.aprobatorio.conclusion[3].levels.length} nivel(es)`);
 
-  const marked=K.markDeleted(state.aprobatorio.conclusion[1],1);
-  A(R,'Marcar eliminación',deletedKeysAllV108().has(marked),marked);
+  X.updateLevel(3,0,'+3.20');
+  A(R,'Actualizar nivel',state.aprobatorio.conclusion[3].levels[0]==='+3.20',state.aprobatorio.conclusion[3].levels[0]);
 
-  /* Compatibilidad con push directo histórico */
-  deletedKeysV108().push('desc:AREA UTIL TOTAL');
-  A(R,'Push histórico capturado',deletedKeysAllV108().has('AREA UTIL TOTAL'),'AREA UTIL TOTAL');
+  const removedLevel=X.removeLevel(3,0);
+  A(R,'Quitar nivel',removedLevel&&state.aprobatorio.conclusion[3].levels.length===0,'0 niveles');
 
-  K.unmarkDeleted(marked);
-  A(R,'Desmarcar eliminación',!deletedKeysAllV108().has(marked),marked);
+  const customIdx=state.aprobatorio.conclusion.findIndex(r=>r.descripcion==='Área bruta personalizada');
+  const beforeRemove=state.aprobatorio.conclusion.length;
+  const removedCustom=X.removeRow(customIdx);
+  A(R,'Quitar custom',removedCustom&&state.aprobatorio.conclusion.length===beforeRemove-1,`${state.aprobatorio.conclusion.length} fila(s)`);
 
-  /* Migración de arrays antiguos */
-  state.aprobatorio.deletedConclusionKeysV106=['desc:COS PB'];
-  state.aprobatorio.deletedConclusionKeysV107=['AREA BRUTA TOTAL DE CONSTRUCCION'];
-  state.aprobatorio.deletedConclusionKeysV108=['AREA UTIL PLANTA BAJA||TIPO:AMPLIACION'];
+  /* En modo Amp/Mod una fila base bruta no fija puede quitarse y debe marcarse. */
+  const baseBrutaIdx=state.aprobatorio.conclusion.findIndex((r,i)=>S.role(r,i)==='bruta'&&r._originV108==='base');
+  const baseKey=K.key(state.aprobatorio.conclusion[baseBrutaIdx],baseBrutaIdx);
+  const removedBase=X.removeRow(baseBrutaIdx);
+  A(R,'Quitar bruta base en Amp/Mod',removedBase,'permitido');
+  A(R,'Eliminación base persistida',K.getDeletedSet().has(baseKey),baseKey);
 
-  const migrated=deletedKeysAllV108();
-  A(R,'Migración V106',migrated.has('COS PB'),'COS PB');
-  A(R,'Migración V107',migrated.has('AREA BRUTA TOTAL DE CONSTRUCCION'),'AREA BRUTA TOTAL');
-  A(R,'Migración V108 limpia TIPO',migrated.has('AREA UTIL PLANTA BAJA'),'AREA UTIL PLANTA BAJA');
-
-  /* Limpiar claves de prueba para regresión funcional */
-  state.aprobatorio.deletedConclusionKeysV106=[];
-  state.aprobatorio.deletedConclusionKeysV107=[];
-  state.aprobatorio.deletedConclusionKeysV108=[];
-  state.aprobatorio._deletedConclusionKeysV14=[];
-
+  /* Regresión matemática sobre fixture limpia */
+  state=fixture();S.canonicalizeState();
   const calc=V7.recalcular();
   A(R,'Área Bruta',calc.formatted.areaBrutaTotal==='150.00',calc.formatted.areaBrutaTotal);
   A(R,'Área Amp/Mod',calc.formatted.areaAmpMod==='75.00',calc.formatted.areaAmpMod);
   A(R,'COS PB',calc.formatted.cosPB==='20.00',calc.formatted.cosPB);
   A(R,'COS Total',calc.formatted.cosTotal==='40.00',calc.formatted.cosTotal);
-
-  const brutas=state.aprobatorio.conclusion.map((r,i)=>({r,i})).filter(x=>Core.role(x.r,x.i)==='bruta');
-  V7.setIntervention(brutas[0].i,'Modificación',{render:false});
-  const calc2=V7.recalcular();
-  A(R,'Intervención + recálculo',calc2.formatted.areaBrutaTotal==='50.00',calc2.formatted.areaBrutaTotal);
 
   let cont=document.getElementById('conclusionTabla'),temp=false;
   if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
@@ -37769,20 +38030,22 @@ async function run(){
   const html=V7.renderInforme();
   A(R,'Informe operativo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
   A(R,'Tabla e informe alineados',tr===V7.canonicalRows().length,`tabla ${tr} · informe ${V7.canonicalRows().length}`);
-  A(R,'Prepare V12 sigue disponible',!!P,P?.version||'');
+
+  A(R,'delConclusion ruteado a V15',window.delConclusion.toString().includes('removeRow'),'Actions V15');
+  A(R,'addConclusionLevel ruteado a V15',window.addConclusionLevel.toString().includes('addLevel'),'Actions V15');
   A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
 
   if(temp)cont.remove();
- }catch(e){A(R,'Banco Core V14',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Core V15',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV14');
- p.innerHTML=`<h3>🗝️ ALLPA CONCLUSIÓN CORE V14</h3><div class="corev14-note">Claves y eliminaciones V106/V107/V108 pasan por una sola capa compatible.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev14-row"><span class="${x.ok?'corev14-ok':'corev14-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV14">Copiar resultado</button> <button id="closeV14">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV14').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV14').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V14\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV15');
+ p.innerHTML=`<h3>🧰 ALLPA CONCLUSIÓN CORE V15</h3><div class="corev15-note">Acciones, filas y niveles centralizados en una sola capa.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev15-row"><span class="${x.ok?'corev15-ok':'corev15-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV15">Copiar resultado</button> <button id="closeV15">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV15').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV15').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V15\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV14';b.type='button';b.textContent='🗝️ CORE CONCLUSIÓN V14';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV14';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaConclusionCoreBtnV15';b.type='button';b.textContent='🧰 CORE CONCLUSIÓN V15';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaConclusionCorePanelV15';document.body.appendChild(p)},1200));
 })();
 </script>
 
