@@ -36864,24 +36864,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v6-css">
-#allpaConclusionCoreBtnV6{
- position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
- padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
-}
-#allpaConclusionCorePanelV6{
- display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
- width:min(980px,calc(100vw - 36px));max-height:86vh;overflow:auto;
- background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
- box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
-}
-#allpaConclusionCorePanelV6.open{display:block}
-.corev6-ok{color:#177245;font-weight:700}.corev6-fail{color:#b42318;font-weight:700}
-.corev6-row{padding:6px 0;border-bottom:1px solid #eee}
-.corev6-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV6,#allpaConclusionCorePanelV6{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v6">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V6 — RENDER ÚNICO PARA INFORME
@@ -37053,7 +37035,193 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v6-test">
+
+<style id="allpa-conclusion-core-v6b-css">
+#allpaConclusionCoreBtnV6B{
+ position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
+ padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
+}
+#allpaConclusionCorePanelV6B{
+ display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
+ width:min(980px,calc(100vw - 36px));max-height:86vh;overflow:auto;
+ background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
+ box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
+}
+#allpaConclusionCorePanelV6B.open{display:block}
+.corev6b-ok{color:#177245;font-weight:700}.corev6b-fail{color:#b42318;font-weight:700}
+.corev6b-row{padding:6px 0;border-bottom:1px solid #eee}
+.corev6b-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV6B,#allpaConclusionCorePanelV6B{display:none!important}}
+</style>
+
+<script id="allpa-conclusion-core-v6b">
+(function(){
+  'use strict';
+
+  const Core=window.ConclusionTecnicaCoreV1;
+  const Bridge=window.ConclusionTecnicaBridgeV3;
+  const MathV5=window.ConclusionTecnicaMathV5;
+  if(!Core || !Bridge || !MathV5) return;
+
+  function esc(v){
+    return String(v??'').replace(/[&<>"']/g,ch=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[ch]));
+  }
+
+  function norm(v){
+    return String(v??'')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\s+/g,' ')
+      .trim().toUpperCase();
+  }
+
+  function mode(){
+    try{
+      if(typeof modoAmpModV13==='function' && modoAmpModV13()) return true;
+    }catch(_e){}
+
+    const rows=state?.aprobatorio?.conclusion||[];
+    return rows.some((raw,i)=>Core.role(raw,i)==='areaAmpliacionTotal') ||
+      rows.some((raw,i)=>
+        Core.role(raw,i)==='bruta' &&
+        Core.normalizeIntervention(raw?.intervention ?? raw?.tipoAreaV13)!=='Aprobada (Existente)'
+      );
+  }
+
+  function ensureStructure(){
+    if(!state.aprobatorio) state.aprobatorio={};
+    if(!Array.isArray(state.aprobatorio.conclusion)) state.aprobatorio.conclusion=[];
+
+    /* Tabla e informe deben preparar exactamente la misma estructura. */
+    if(typeof ensureAreaUtilTotalConclusionV119N==='function'){
+      ensureAreaUtilTotalConclusionV119N();
+    }
+
+    if(typeof ensureAreaTotalV13==='function'){
+      ensureAreaTotalV13();
+    }
+
+    Bridge.canonicalizeState();
+    MathV5.calculateState();
+
+    return state.aprobatorio.conclusion;
+  }
+
+  function canonicalRows(){
+    const source=ensureStructure();
+
+    /* V6B elimina deliberadamente el filtro histórico V81.
+       El orden y contenido oficial es el state canónico. */
+    return source.map((raw,index)=>{
+      const n=Core.normalizeRow(raw,index);
+
+      return {
+        raw,
+        index,
+        ...n,
+        intervention:n.role==='bruta'
+          ? Core.normalizeIntervention(raw?.intervention ?? raw?.tipoAreaV13)
+          : ''
+      };
+    });
+  }
+
+  function description(row){
+    let d=String(row.descripcion||'').trim();
+
+    if(mode() && row.role==='bruta'){
+      const t=Core.normalizeIntervention(row.intervention);
+      if(t && !norm(d).endsWith(norm(t))){
+        d=(d+' '+t).trim();
+      }
+    }
+
+    return d;
+  }
+
+  function reportHtml(){
+    const rows=canonicalRows();
+
+    if(!rows.length){
+      return '<p>No se registran datos de conclusión técnica.</p>';
+    }
+
+    const body=rows.map(row=>{
+      const niveles=(row.levels||[])
+        .filter(v=>String(v??'').trim())
+        .map(v=>{
+          try{
+            return esc(typeof normalizarNivelV105==='function'
+              ? normalizarNivelV105(v)
+              : v);
+          }catch(_e){
+            return esc(v);
+          }
+        })
+        .join('<br>');
+
+      const desc=description(row);
+      const cls=/TOTAL|NÚMERO DE PISOS|NUMERO DE PISOS|UNIDADES|COS/.test(norm(desc))
+        ? 'desc-bold'
+        : '';
+
+      if(niveles){
+        return `<tr>
+          <td class="${cls}">${esc(desc)}</td>
+          <td class="level-cell">${niveles}</td>
+          <td class="right">${esc(row.cantidad||'')}</td>
+          <td>${esc(row.unidad||'')}</td>
+        </tr>`;
+      }
+
+      return `<tr>
+        <td colspan="2" class="${cls}">${esc(desc)}</td>
+        <td class="right">${esc(row.cantidad||'')}</td>
+        <td>${esc(row.unidad||'')}</td>
+      </tr>`;
+    }).join('');
+
+    return `<table class="informe-table conclusion-report conclusion-report-core-v6b">
+      <thead><tr>
+        <th colspan="2">DESCRIPCIÓN</th>
+        <th>CANTIDAD</th>
+        <th>UNIDAD</th>
+      </tr></thead>
+      <tbody>${body}</tbody>
+    </table>`;
+  }
+
+  /* Conservar V6 como fallback. */
+  if(typeof window.conclusionReport==='function'){
+    window.__conclusionReportCoreV6FallbackV6B=window.conclusionReport;
+  }
+
+  window.conclusionReport=function(){
+    try{
+      return reportHtml();
+    }catch(error){
+      console.error('Conclusion Core V6B fallback:',error);
+      if(typeof window.__conclusionReportCoreV6FallbackV6B==='function'){
+        return window.__conclusionReportCoreV6FallbackV6B.apply(this,arguments);
+      }
+      return '<p>No se registran datos de conclusión técnica.</p>';
+    }
+  };
+  try{ conclusionReport=window.conclusionReport; }catch(_e){}
+
+  window.ConclusionTecnicaReportV6B=Object.freeze({
+    version:'6.1.0-report',
+    ensureStructure,
+    canonicalRows,
+    description,
+    reportHtml,
+    fallback:window.__conclusionReportCoreV6FallbackV6B||null
+  });
+})();
+</script>
+
+<script id="allpa-conclusion-core-v6b-test">
 (function(){
   'use strict';
 
@@ -37119,22 +37287,22 @@ textarea.evidencia-text,
       const Core=window.ConclusionTecnicaCoreV1;
       const Bridge=window.ConclusionTecnicaBridgeV3;
       const MathV5=window.ConclusionTecnicaMathV5;
-      const Report=window.ConclusionTecnicaReportV6;
+      const Report=window.ConclusionTecnicaReportV6B;
 
       add(R,'Core disponible',!!Core,Core?.version||'');
       add(R,'Bridge disponible',!!Bridge,Bridge?.version||'');
       add(R,'Math V5 disponible',!!MathV5,MathV5?.version||'');
-      add(R,'Report V6 disponible',!!Report,Report?.version||'');
+      add(R,'Report V6B disponible',!!Report,Report?.version||'');
 
       state=fixture();
       Bridge.canonicalizeState();
       MathV5.calculateState({ampMod:true});
 
-      const rows=Report.canonicalReportRows();
+      const rows=Report.canonicalRows();
 
-      add(R,'Filas del informe',
-        rows.length===10,
-        `${rows.length} fila(s)`);
+      add(R,'Filas canónicas del informe',
+        rows.length===state.aprobatorio.conclusion.length,
+        `state ${state.aprobatorio.conclusion.length} · informe ${rows.length}`);
 
       const brutaTotal=rows.find(r=>r.role==='brutaTotal');
       const ampTotal=rows.find(r=>r.role==='areaAmpliacionTotal');
@@ -37159,8 +37327,8 @@ textarea.evidencia-text,
 
       const html=Report.reportHtml();
 
-      add(R,'HTML informe generado',
-        /conclusion-report-core-v6/.test(html),
+      add(R,'HTML informe V6B generado',
+        /conclusion-report-core-v6b/.test(html),
         `${html.length} caracteres`);
 
       add(R,'Informe contiene Ampliación',
@@ -37171,7 +37339,8 @@ textarea.evidencia-text,
         /Modificación/i.test(html),
         'tipo visible');
 
-      /* Comparación con tabla oficial usando el mismo fixture. */
+      /* Renderizar la tabla oficial DESPUÉS de preparar el informe.
+         Ambos deben trabajar ya sobre la misma estructura. */
       let cont=document.getElementById('conclusionTabla'),temp=false;
       if(!cont){
         cont=document.createElement('div');
@@ -37180,27 +37349,34 @@ textarea.evidencia-text,
         temp=true;
       }
 
-      if(typeof renderConclusionTabla==='function') renderConclusionTabla();
+      if(typeof renderConclusionTabla==='function'){
+        renderConclusionTabla();
+      }
 
       const tableRows=cont.querySelectorAll('tbody tr').length;
-      add(R,'Tabla e informe usan mismo número de filas',
-        tableRows===rows.length,
-        `tabla ${tableRows} · informe ${rows.length}`);
+      const reportRows=Report.canonicalRows().length;
+
+      add(R,'Tabla e informe mismo número de filas',
+        tableRows===reportRows,
+        `tabla ${tableRows} · informe ${reportRows}`);
+
+      const globalHtml=typeof conclusionReport==='function'?conclusionReport():'';
+      add(R,'conclusionReport usa Core V6B',
+        /conclusion-report-core-v6b/.test(globalHtml),
+        `${globalHtml.length} caracteres`);
+
+      add(R,'Filtro V81 ya no controla informe',
+        !Report.reportHtml.toString().includes('conclusionRowsForReportV81'),
+        'state canónico directo');
+
+      add(R,'Fallback V6 preservado',
+        typeof window.__conclusionReportCoreV6FallbackV6B==='function',
+        'fallback disponible');
 
       if(temp) cont.remove();
 
-      /* Validar renderer global */
-      const globalHtml=typeof conclusionReport==='function'?conclusionReport():'';
-      add(R,'conclusionReport usa Core V6',
-        /conclusion-report-core-v6/.test(globalHtml),
-        `${globalHtml.length} caracteres`);
-
-      add(R,'Renderer histórico preservado',
-        typeof window.__conclusionReportHistoricoV6==='function',
-        'fallback disponible');
-
     }catch(e){
-      add(R,'Banco Core V6',false,e?.stack||e);
+      add(R,'Banco Core V6B',false,e?.stack||e);
     }finally{
       state=original;
       try{applyStateToUI()}catch(_e){}
@@ -37210,25 +37386,26 @@ textarea.evidencia-text,
 
     const ok=R.filter(x=>x.ok).length;
     const fail=R.length-ok;
-    const p=document.getElementById('allpaConclusionCorePanelV6');
+    const p=document.getElementById('allpaConclusionCorePanelV6B');
 
-    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V6</h3>
-      <div class="corev6-note">
-        Formulario e informe leen del mismo modelo canónico y del mismo motor matemático.
+    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V6B</h3>
+      <div class="corev6b-note">
+        V6B elimina el filtrado histórico V81 del renderer del informe.
+        Tabla e informe leen directamente del mismo state canónico.
       </div>
       <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
-      R.map(x=>`<div class="corev6-row">
-        <span class="${x.ok?'corev6-ok':'corev6-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
+      R.map(x=>`<div class="corev6b-row">
+        <span class="${x.ok?'corev6b-ok':'corev6b-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
         <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
       </div>`).join('')+
-      `<p><button id="copyCoreV6">Copiar resultado</button>
-      <button id="closeCoreV6">Cerrar</button></p>`;
+      `<p><button id="copyCoreV6B">Copiar resultado</button>
+      <button id="closeCoreV6B">Cerrar</button></p>`;
 
     p.classList.add('open');
-    document.getElementById('closeCoreV6').onclick=()=>p.classList.remove('open');
+    document.getElementById('closeCoreV6B').onclick=()=>p.classList.remove('open');
 
-    document.getElementById('copyCoreV6').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V6\nOK:${ok} FAIL:${fail}\n`+
+    document.getElementById('copyCoreV6B').onclick=async()=>{
+      const txt=`ALLPA-CONCLUSION-CORE-V6B\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
 
       try{
@@ -37248,14 +37425,14 @@ textarea.evidencia-text,
 
   window.addEventListener('load',()=>setTimeout(()=>{
     const b=document.createElement('button');
-    b.id='allpaConclusionCoreBtnV6';
+    b.id='allpaConclusionCoreBtnV6B';
     b.type='button';
-    b.textContent='🧪 CORE CONCLUSIÓN V6';
+    b.textContent='🧪 CORE CONCLUSIÓN V6B';
     b.onclick=run;
     document.body.appendChild(b);
 
     const p=document.createElement('div');
-    p.id='allpaConclusionCorePanelV6';
+    p.id='allpaConclusionCorePanelV6B';
     document.body.appendChild(p);
   },1200));
 })();
