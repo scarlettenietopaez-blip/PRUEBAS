@@ -36881,7 +36881,8 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v5-test">
+
+<script id="allpa-conclusion-core-v5b-test">
 (function(){
   'use strict';
 
@@ -36890,110 +36891,124 @@ textarea.evidencia-text,
     catch(_e){return JSON.parse(JSON.stringify(v))}
   }
 
-  function add(R,name,ok,detail){
-    R.push({name,ok:!!ok,detail:String(detail||'')});
+  function add(R,name,status,detail){
+    R.push({name,status,detail:String(detail||'')});
   }
 
   function row(role,descripcion,cantidad,extra={}){
-    return {
+    const base={
       descripcion,
       cantidad:String(cantidad??''),
       unidad:role.startsWith('cos')?'%':'m2',
       levels:[],
       allowLevels:role==='bruta',
-      _roleV108:role,
       ...extra
+    };
+
+    if(role==='areaAmpliacionTotal') base._roleV13='areaAmpliacionTotal';
+    else base._roleV108=role;
+
+    return base;
+  }
+
+  function fixture(){
+    return {
+      tipoInforme:'Informe Técnico Aprobatorio',
+      aprobatorio:{
+        conclusion:[
+          row('predio','Área del predio',500),
+          row('utilPB','Área útil planta baja',100),
+          row('utilTotal','Área útil total',200),
+          row('bruta','Área bruta planta baja',100,{
+            intervention:'Aprobada (Existente)',
+            tipoAreaV13:'Aprobada (Existente)'
+          }),
+          row('bruta','Área bruta primera planta alta',50,{
+            intervention:'Ampliación',
+            tipoAreaV13:'Ampliación'
+          }),
+          row('bruta','Área bruta segunda planta alta',25,{
+            intervention:'Modificación',
+            tipoAreaV13:'Modificación'
+          }),
+          row('brutaTotal','Área Bruta total de construcción',''),
+          row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),
+          row('cosPB','COS PB',''),
+          row('cosTotal','COS TOTAL','')
+        ]
+      }
     };
   }
 
   async function run(){
     const R=[];
     const original=clone(state);
+    const originalSig=JSON.stringify(state?.aprobatorio?.conclusion||[]);
     const MathV5=window.ConclusionTecnicaMathV5;
     const Core=window.ConclusionTecnicaCoreV1;
 
     try{
-      add(R,'Motor V5 disponible',!!MathV5,MathV5?.version||'');
+      add(R,'Motor V5 disponible',MathV5?'OK':'FAIL',MathV5?.version||'');
       if(!MathV5 || !Core) throw new Error('Motor/Core no disponible.');
 
-      const fixture=[
-        row('predio','Área del predio',500),
-        row('utilPB','Área útil planta baja',100),
-        row('utilTotal','Área útil total',200),
-        row('bruta','Área bruta planta baja',100,{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}),
-        row('bruta','Área bruta primera planta alta',50,{intervention:'Ampliación',tipoAreaV13:'Ampliación'}),
-        row('bruta','Área bruta segunda planta alta',25,{intervention:'Modificación',tipoAreaV13:'Modificación'}),
-        row('brutaTotal','Área Bruta total de construcción',''),
-        {...row('areaAmpliacionTotal','Área Total de Ampliación/Modificación',''),_roleV13:'areaAmpliacionTotal'},
-        row('cosPB','COS PB',''),
-        row('cosTotal','COS TOTAL','')
-      ];
+      /* 1. Fórmulas puras */
+      const f=fixture();
+      const rows=clone(f.aprobatorio.conclusion);
+      const calc=MathV5.calculateRows(rows,{ampMod:true});
 
-      const calc=MathV5.calculateRows(fixture,{ampMod:true});
-
-      add(R,'Área Bruta Total',
-        calc.formatted.areaBrutaTotal==='150.00',
+      add(R,'Área Bruta Total',calc.formatted.areaBrutaTotal==='150.00'?'OK':'FAIL',
         `esperado 150.00 · obtenido ${calc.formatted.areaBrutaTotal}`);
 
-      add(R,'Área Ampliación/Modificación',
-        calc.formatted.areaAmpMod==='75.00',
+      add(R,'Área Ampliación/Modificación',calc.formatted.areaAmpMod==='75.00'?'OK':'FAIL',
         `esperado 75.00 · obtenido ${calc.formatted.areaAmpMod}`);
 
-      add(R,'COS PB',
-        calc.formatted.cosPB==='20.00',
+      add(R,'COS PB',calc.formatted.cosPB==='20.00'?'OK':'FAIL',
         `100 / 500 × 100 = ${calc.formatted.cosPB}`);
 
-      add(R,'COS Total',
-        calc.formatted.cosTotal==='40.00',
+      add(R,'COS Total',calc.formatted.cosTotal==='40.00'?'OK':'FAIL',
         `200 / 500 × 100 = ${calc.formatted.cosTotal}`);
 
-      const normal=MathV5.calculateRows(fixture,{ampMod:false});
-      add(R,'Obra normal suma todas las brutas',
-        normal.formatted.areaBrutaTotal==='175.00',
+      const normal=MathV5.calculateRows(rows,{ampMod:false});
+      add(R,'Obra normal suma todas las brutas',normal.formatted.areaBrutaTotal==='175.00'?'OK':'FAIL',
         `esperado 175.00 · obtenido ${normal.formatted.areaBrutaTotal}`);
 
-      /* Aplicación real sobre una copia del state actual. */
-      const copy=clone(original);
-      if(!copy.aprobatorio) copy.aprobatorio={};
-      if(!Array.isArray(copy.aprobatorio.conclusion) || !copy.aprobatorio.conclusion.length){
-        copy.aprobatorio.conclusion=clone(fixture);
-      }
+      /* 2. Escritura real en state, usando fixture completa */
+      state=fixture();
+      if(window.ConclusionTecnicaBridgeV3) window.ConclusionTecnicaBridgeV3.canonicalizeState();
 
-      state=copy;
-      const beforeTypes=(state.aprobatorio.conclusion||[])
+      const typesBefore=state.aprobatorio.conclusion
         .filter((r,i)=>Core.role(r,i)==='bruta')
         .map(r=>Core.normalizeIntervention(r.intervention??r.tipoAreaV13));
 
-      const realCalc=MathV5.calculateState();
+      const result=MathV5.calculateState({ampMod:true});
 
-      const afterTypes=(state.aprobatorio.conclusion||[])
+      const typesAfter=state.aprobatorio.conclusion
         .filter((r,i)=>Core.role(r,i)==='bruta')
         .map(r=>Core.normalizeIntervention(r.intervention??r.tipoAreaV13));
 
       add(R,'Cálculo no cambia Tipo de intervención',
-        JSON.stringify(beforeTypes)===JSON.stringify(afterTypes),
-        afterTypes.join(' · ')||'sin filas brutas');
+        JSON.stringify(typesBefore)===JSON.stringify(typesAfter)?'OK':'FAIL',
+        typesAfter.join(' · '));
 
-      const brutaRow=(state.aprobatorio.conclusion||[])
-        .find((r,i)=>Core.role(r,i)==='brutaTotal');
+      const findRole=role=>state.aprobatorio.conclusion.find((r,i)=>Core.role(r,i)===role);
+
       add(R,'Área Bruta Total escrita en state',
-        !!brutaRow && String(brutaRow.cantidad)!=='',
-        brutaRow?.cantidad??'ausente');
+        String(findRole('brutaTotal')?.cantidad||'')==='150.00'?'OK':'FAIL',
+        findRole('brutaTotal')?.cantidad??'ausente');
 
-      const cosPBRow=(state.aprobatorio.conclusion||[])
-        .find((r,i)=>Core.role(r,i)==='cosPB');
-      const cosTotalRow=(state.aprobatorio.conclusion||[])
-        .find((r,i)=>Core.role(r,i)==='cosTotal');
+      add(R,'Área Amp/Mod escrita en state',
+        String(findRole('areaAmpliacionTotal')?.cantidad||'')==='75.00'?'OK':'FAIL',
+        findRole('areaAmpliacionTotal')?.cantidad??'ausente');
 
       add(R,'COS PB escrito en state',
-        !cosPBRow || String(cosPBRow.cantidad)!=='',
-        cosPBRow?.cantidad??'fila no presente');
+        String(findRole('cosPB')?.cantidad||'')==='20.00'?'OK':'FAIL',
+        findRole('cosPB')?.cantidad??'ausente');
 
       add(R,'COS Total escrito en state',
-        !cosTotalRow || String(cosTotalRow.cantidad)!=='',
-        cosTotalRow?.cantidad??'fila no presente');
+        String(findRole('cosTotal')?.cantidad||'')==='40.00'?'OK':'FAIL',
+        findRole('cosTotal')?.cantidad??'ausente');
 
-      /* Renderer oficial debe poder consumir el resultado matemático. */
+      /* 3. Renderer oficial consumiendo los valores calculados */
       let cont=document.getElementById('conclusionTabla'),temp=false;
       if(!cont){
         cont=document.createElement('div');
@@ -37002,53 +37017,76 @@ textarea.evidencia-text,
         temp=true;
       }
 
-      if(typeof renderConclusionTabla==='function'){
-        renderConclusionTabla();
-      }
+      if(typeof renderConclusionTabla==='function') renderConclusionTabla();
 
       add(R,'Renderer oficial funciona con Motor V5',
-        !!cont.querySelector('.editable-conclusion-core-v4'),
+        cont.querySelector('.editable-conclusion-core-v4')?'OK':'FAIL',
         `${cont.querySelectorAll('tbody tr').length} fila(s)`);
 
       if(temp) cont.remove();
 
-      /* La validación histórica debe seguir disponible. */
+      /* 4. Auditoría no destructiva del formulario real */
+      state=clone(original);
+      const realRows=state?.aprobatorio?.conclusion||[];
+      const roles=new Set(realRows.map((r,i)=>Core.role(r,i)).filter(Boolean));
+
+      add(R,'Auditoría formulario real','OK',
+        `${realRows.length} fila(s) · roles: ${[...roles].join(', ')||'ninguno'}`);
+
+      if(!roles.has('cosPB')){
+        add(R,'COS PB en formulario real','WARN','fila no presente; no es fallo del motor');
+      }else{
+        add(R,'COS PB en formulario real','OK',findRealValue('cosPB',realRows,Core));
+      }
+
+      if(!roles.has('cosTotal')){
+        add(R,'COS Total en formulario real','WARN','fila no presente; no es fallo del motor');
+      }else{
+        add(R,'COS Total en formulario real','OK',findRealValue('cosTotal',realRows,Core));
+      }
+
       add(R,'Validación Área Bruta conservada',
-        typeof errorAreaBrutaConclusionV119N==='function',
+        typeof errorAreaBrutaConclusionV119N==='function'?'OK':'FAIL',
         'errorAreaBrutaConclusionV119N disponible');
 
     }catch(e){
-      add(R,'Banco Core V5',false,e?.stack||e);
+      add(R,'Banco Core V5B','FAIL',e?.stack||e);
     }finally{
       state=original;
       try{applyStateToUI()}catch(_e){}
     }
 
-    add(R,'Formulario original restaurado',true,'state restaurado');
+    add(R,'Formulario original restaurado',
+      JSON.stringify(state?.aprobatorio?.conclusion||[])===originalSig?'OK':'FAIL',
+      'state restaurado');
 
-    const ok=R.filter(x=>x.ok).length;
-    const fail=R.length-ok;
+    const ok=R.filter(x=>x.status==='OK').length;
+    const fail=R.filter(x=>x.status==='FAIL').length;
+    const warn=R.filter(x=>x.status==='WARN').length;
     const p=document.getElementById('allpaConclusionCorePanelV5');
 
-    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V5</h3>
+    p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V5B</h3>
       <div class="corev5-note">
-        Motor matemático único. La validación Área Bruta vs Información General
-        permanece sin modificaciones.
+        Fórmulas y escritura se prueban sobre una estructura completa.
+        El formulario real se audita por separado.
       </div>
-      <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+      <p><b>OK ${ok} · FAIL ${fail} · WARN ${warn}</b></p>`+
       R.map(x=>`<div class="corev5-row">
-        <span class="${x.ok?'corev5-ok':'corev5-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
+        <span class="${x.status==='OK'?'corev5-ok':x.status==='FAIL'?'corev5-fail':''}">
+          ${x.status==='OK'?'✅':x.status==='FAIL'?'❌':'⚠️'} ${x.status} | ${x.name}
+        </span>
         <div>${String(x.detail).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
       </div>`).join('')+
-      `<p><button id="copyCoreV5">Copiar resultado</button>
-      <button id="closeCoreV5">Cerrar</button></p>`;
+      `<p><button id="copyCoreV5B">Copiar resultado</button>
+      <button id="closeCoreV5B">Cerrar</button></p>`;
 
     p.classList.add('open');
-    document.getElementById('closeCoreV5').onclick=()=>p.classList.remove('open');
+    document.getElementById('closeCoreV5B').onclick=()=>p.classList.remove('open');
 
-    document.getElementById('copyCoreV5').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V5\nOK:${ok} FAIL:${fail}\n`+
-        R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+    document.getElementById('copyCoreV5B').onclick=async()=>{
+      const txt=`ALLPA-CONCLUSION-CORE-V5B\nOK:${ok} FAIL:${fail} WARN:${warn}\n`+
+        R.map(x=>`${x.status} | ${x.name} | ${x.detail}`).join('\n');
+
       try{
         await navigator.clipboard.writeText(txt);
       }catch(_e){
@@ -37064,17 +37102,27 @@ textarea.evidencia-text,
     };
   }
 
+  function findRealValue(role,rows,Core){
+    const r=rows.find((x,i)=>Core.role(x,i)===role);
+    return r?.cantidad??'(vacío)';
+  }
+
   window.addEventListener('load',()=>setTimeout(()=>{
+    const old=document.getElementById('allpaConclusionCoreBtnV5');
+    if(old) old.remove();
+
     const b=document.createElement('button');
     b.id='allpaConclusionCoreBtnV5';
     b.type='button';
-    b.textContent='🧪 CORE CONCLUSIÓN V5';
+    b.textContent='🧪 CORE CONCLUSIÓN V5B';
     b.onclick=run;
     document.body.appendChild(b);
 
-    const p=document.createElement('div');
-    p.id='allpaConclusionCorePanelV5';
-    document.body.appendChild(p);
+    if(!document.getElementById('allpaConclusionCorePanelV5')){
+      const p=document.createElement('div');
+      p.id='allpaConclusionCorePanelV5';
+      document.body.appendChild(p);
+    }
   },1200));
 })();
 </script>
