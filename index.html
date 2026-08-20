@@ -36250,7 +36250,7 @@ textarea.evidencia-text,
 
     const testHtml=panel.querySelector('#coreV2TestResults')?.outerHTML||'';
     panel.innerHTML=`
-      <h3>Conclusión Técnica — Core V2B paralelo</h3>
+      <h3>Conclusión Técnica — Core V2C paralelo</h3>
       <div class="corev2-actions">
         <button type="button" id="coreV2Reload">Recargar desde state</button>
         <button type="button" id="coreV2AddBruta">Agregar fila de área bruta</button>
@@ -36272,37 +36272,88 @@ textarea.evidencia-text,
     R.push({name,ok:!!ok,detail:String(detail||'')});
   }
 
-  function runTests(){
-    const R=[];
-    const originalSignature=JSON.stringify(state?.aprobatorio?.conclusion||[]);
+  async function pickTestSourceV2C(){
+    const current=window.state;
+    if(Array.isArray(current?.aprobatorio?.conclusion) && current.aprobatorio.conclusion.length){
+      return {source:current,label:'state actual'};
+    }
 
     try{
-      Sandbox.loadFromState();
+      if(typeof db!=='undefined' && !db && typeof openDB==='function'){
+        await openDB();
+      }
+      if(typeof dbAll==='function'){
+        const all=await dbAll();
+        const found=(all||[]).find(rec=>
+          Array.isArray(rec?.aprobatorio?.conclusion) &&
+          rec.aprobatorio.conclusion.length
+        );
+        if(found) return {source:found,label:`IndexedDB ${found.egob||''}`.trim()};
+      }
+    }catch(_e){}
 
-      add(R,'Carga desde state',
-        Sandbox.rows.length===(state?.aprobatorio?.conclusion||[]).length,
+    return {
+      label:'fixture sintética',
+      source:{
+        aprobatorio:{
+          conclusion:[
+            {descripcion:'Área del predio',cantidad:'500',unidad:'m2',_roleV108:'predio'},
+            {descripcion:'Área útil planta baja',cantidad:'100',unidad:'m2',_roleV108:'utilPB'},
+            {descripcion:'Área útil total',cantidad:'200',unidad:'m2',_roleV108:'utilTotal'},
+            {descripcion:'Área bruta planta baja',cantidad:'100',unidad:'m2',allowLevels:true,tipoAreaV13:'Aprobada (Existente)',_roleV108:'bruta'},
+            {descripcion:'Área Bruta total de construcción',cantidad:'100',unidad:'m2',_roleV108:'brutaTotal'},
+            {descripcion:'Área Total de Ampliación/Modificación',cantidad:'0',unidad:'m2',_roleV13:'areaAmpliacionTotal'},
+            {descripcion:'COS PB',cantidad:'20',unidad:'%',_roleV108:'cosPB'},
+            {descripcion:'COS TOTAL',cantidad:'40',unidad:'%',_roleV108:'cosTotal'}
+          ]
+        }
+      }
+    };
+  }
+
+  async function runTests(){
+    const R=[];
+    const officialSignature=JSON.stringify(state?.aprobatorio?.conclusion||[]);
+
+    try{
+      const picked=await pickTestSourceV2C();
+      const source=picked.source;
+      const sourceRows=source?.aprobatorio?.conclusion||[];
+
+      const sourceSandbox=createSandbox(source);
+      Sandbox.rows=sourceSandbox.rows;
+      Sandbox.mode=sourceSandbox.mode;
+      Sandbox.totals=sourceSandbox.totals;
+      Sandbox.sourceSignature=JSON.stringify(sourceRows);
+
+      add(R,'Fuente de prueba',
+        sourceRows.length>0,
+        `${picked.label} · ${sourceRows.length} fila(s)`);
+
+      add(R,'Carga de Conclusión',
+        Sandbox.rows.length===sourceRows.length && Sandbox.rows.length>0,
         `${Sandbox.rows.length} fila(s)`);
 
-      add(R,'Sandbox no modifica state',
-        JSON.stringify(state?.aprobatorio?.conclusion||[])===originalSignature,
+      add(R,'Sandbox no modifica state oficial',
+        JSON.stringify(state?.aprobatorio?.conclusion||[])===officialSignature,
         'state oficial intacto');
 
-      /* El antiguo FAIL deja de exigir 2 filas reales. Si hay 1, se clona
-         dentro del sandbox para probar dos intervenciones. */
-      const brutas=Sandbox.rows.map((r,i)=>({r,i})).filter(x=>x.r.role==='bruta');
-      add(R,'Al menos una fila bruta real',
+      let brutas=Sandbox.rows.map((r,i)=>({r,i})).filter(x=>x.r.role==='bruta');
+      add(R,'Fila bruta disponible',
         brutas.length>=1,
         `${brutas.length} fila(s)`);
 
       if(brutas.length){
-        const first=brutas[0].i;
-        Sandbox.setField(first,'intervention','Ampliación');
+        Sandbox.mode=true;
+        Sandbox.setField(brutas[0].i,'intervention','Ampliación');
 
-        let second=Sandbox.rows.map((r,i)=>({r,i})).filter(x=>x.r.role==='bruta')[1];
-        if(!second){
-          const newRow=Sandbox.addBruta();
-          second={r:newRow,i:Sandbox.rows.indexOf(newRow)};
+        brutas=Sandbox.rows.map((r,i)=>({r,i})).filter(x=>x.r.role==='bruta');
+        if(brutas.length<2){
+          Sandbox.addBruta();
+          brutas=Sandbox.rows.map((r,i)=>({r,i})).filter(x=>x.r.role==='bruta');
         }
+
+        const second=brutas[1];
         Sandbox.setField(second.i,'cantidad','25');
         Sandbox.setField(second.i,'intervention','Modificación');
 
@@ -36319,19 +36370,20 @@ textarea.evidencia-text,
         Sandbox.restore(saved);
         const afterTypes=Sandbox.rows.filter(r=>r.role==='bruta').map(r=>r.intervention).join('|');
 
-        add(R,'Tipos sobreviven serialización V2',
+        add(R,'Tipos sobreviven serialización V2C',
           beforeTypes===afterTypes,
           afterTypes);
       }
 
       const countBefore=Sandbox.rows.length;
       const added=Sandbox.addBruta();
+      const addedId=added?.id;
       add(R,'Agregar fila',
         Sandbox.rows.length===countBefore+1,
         `${countBefore} → ${Sandbox.rows.length}`);
 
-      const idx=Sandbox.rows.indexOf(added);
-      const removed=Sandbox.remove(idx);
+      const idx=Sandbox.rows.findIndex(r=>r.id===addedId);
+      const removed=idx>=0 ? Sandbox.remove(idx) : false;
       add(R,'Quitar fila personalizada',
         removed && Sandbox.rows.length===countBefore,
         `${Sandbox.rows.length} fila(s)`);
@@ -36345,12 +36397,12 @@ textarea.evidencia-text,
           'Área Bruta Total protegida');
       }
 
-      add(R,'State sigue intacto al finalizar',
-        JSON.stringify(state?.aprobatorio?.conclusion||[])===originalSignature,
+      add(R,'State oficial sigue intacto',
+        JSON.stringify(state?.aprobatorio?.conclusion||[])===officialSignature,
         'sin mutación');
 
     }catch(e){
-      add(R,'Banco Core V2',false,e?.stack||e);
+      add(R,'Banco Core V2C',false,e?.stack||e);
     }
 
     const ok=R.filter(x=>x.ok).length;
@@ -36361,7 +36413,7 @@ textarea.evidencia-text,
 
     const box=document.createElement('div');
     box.id='coreV2TestResults';
-    box.innerHTML=`<h4>🧪 ALLPA CONCLUSIÓN CORE V2B</h4>
+    box.innerHTML=`<h4>🧪 ALLPA CONCLUSIÓN CORE V2C</h4>
       <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
       R.map(x=>`<div class="corev2-row">
         <span class="${x.ok?'corev2-ok':'corev2-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
@@ -36371,7 +36423,7 @@ textarea.evidencia-text,
 
     panel.appendChild(box);
     document.getElementById('coreV2CopyResult').onclick=async()=>{
-      const txt=`ALLPA-CONCLUSION-CORE-V2B\nOK:${ok} FAIL:${fail}\n`+
+      const txt=`ALLPA-CONCLUSION-CORE-V2C\nOK:${ok} FAIL:${fail}\n`+
         R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
       try{await navigator.clipboard.writeText(txt)}catch(_e){}
     };
@@ -36381,7 +36433,7 @@ textarea.evidencia-text,
     const b=document.createElement('button');
     b.id='allpaConclusionCoreBtnV2';
     b.type='button';
-    b.textContent='🧪 CORE CONCLUSIÓN V2B';
+    b.textContent='🧪 CORE CONCLUSIÓN V2C';
     b.onclick=()=>{
       Sandbox.loadFromState();
       const p=document.getElementById('allpaConclusionCorePanelV2');
@@ -36415,12 +36467,12 @@ window.addEventListener('load',()=>{
     if(!document.getElementById('allpaCoreV2BMarker')){
       const m=document.createElement('div');
       m.id='allpaCoreV2BMarker';
-      m.textContent='ALLPA · CONCLUSIÓN CORE V2B';
+      m.textContent='ALLPA · CONCLUSIÓN CORE V2C';
       document.body.appendChild(m);
     }
 
     const btn=document.getElementById('allpaConclusionCoreBtnV2');
-    if(btn) btn.textContent='🧪 CORE CONCLUSIÓN V2B';
+    if(btn) btn.textContent='🧪 CORE CONCLUSIÓN V2C';
   },600);
 });
 </script>
