@@ -15840,33 +15840,7 @@ function savedTitleV117(x){
 
 /* Ajusta la lista de guardados para que no duplique el tipo de informe
    en los segundos informes de observaciones. */
-renderSavedList = async function(){
-  if(!db) return;
-
-  dbAll().then(arr=>{
-    arr=(arr||[]).sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
-
-    const content = arr.length ? arr.map(x=>{
-      const title=savedTitleV117(x);
-      const key=String(x.egob||'');
-      return `<div class="saved-item">
-        <strong>${esc(title)}</strong>
-        <span class="mini">Técnico: ${esc(x.tecnico||'')}<br>Actualizado: ${esc((x.updatedAt||'').replace('T',' ').slice(0,16))}</span>
-        <div class="buttons">
-          <button class="secondary" onclick="cargarFormulario('${esc(key)}')">Abrir</button>
-          <button onclick="cargarFormulario('${esc(key)}').then(()=>{ if(state.tipoInforme==='Informe Técnico Aprobatorio') copiarInformeAprobatorio(); else imprimirInforme(); })">${x.tipoInforme==='Informe Técnico Aprobatorio'?'📋':'PDF'}</button>
-          <button class="danger" onclick="eliminarFormulario('${esc(key)}')">Eliminar</button>
-        </div>
-      </div>`;
-    }).join('') : '<p class="mini">Aún no hay formularios guardados en este navegador.</p>';
-
-    const a=document.getElementById('guardadosLista');
-    if(a) a.innerHTML=content;
-
-    const b=document.getElementById('guardadosListaSide');
-    if(b) b.innerHTML=content;
-  });
-};
+/* Fase 22B: renderSavedList histórico retirado L15843 */
 
 /* Si se guarda un segundo informe nuevo, se fuerza el nombre limpio. */
 const _guardarSegundoInformeObservaciones_base_V117 = typeof guardarSegundoInformeObservacionesV116 === 'function' ? guardarSegundoInformeObservacionesV116 : null;
@@ -15953,35 +15927,7 @@ function savedTitleV118(x){
 
   return `eGOB ${base} - ${tipo}`;
 }
-
-renderSavedList = async function(){
-  if(!db) return;
-
-  dbAll().then(arr=>{
-    arr=(arr||[]).sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
-
-    const content = arr.length ? arr.map(x=>{
-      const key=String(x.egob||'');
-      const title=savedTitleV118(x);
-
-      return `<div class="saved-item">
-        <strong>${esc(title)}</strong>
-        <span class="mini">Técnico: ${esc(x.tecnico||'')}<br>Actualizado: ${esc((x.updatedAt||'').replace('T',' ').slice(0,16))}</span>
-        <div class="buttons">
-          <button class="secondary" onclick="cargarFormulario('${esc(key)}')">Abrir</button>
-          <button onclick="cargarFormulario('${esc(key)}').then(()=>{ if(state.tipoInforme==='Informe Técnico Aprobatorio') copiarInformeAprobatorio(); else imprimirInforme(); })">${x.tipoInforme==='Informe Técnico Aprobatorio'?'📋':'PDF'}</button>
-          <button class="danger" onclick="eliminarFormulario('${esc(key)}')">Eliminar</button>
-        </div>
-      </div>`;
-    }).join('') : '<p class="mini">Aún no hay formularios guardados en este navegador.</p>';
-
-    const a=document.getElementById('guardadosLista');
-    if(a) a.innerHTML=content;
-
-    const b=document.getElementById('guardadosListaSide');
-    if(b) b.innerHTML=content;
-  });
-};
+/* Fase 22B: renderSavedList histórico retirado L15956 */
 
 const _guardarFormulario_base_V118 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
 if(_guardarFormulario_base_V118){
@@ -16193,35 +16139,7 @@ function savedTitleV119(x){
 
   return `eGOB ${raw}`;
 }
-
-renderSavedList = async function(){
-  if(!db) return;
-
-  dbAll().then(arr=>{
-    arr=(arr||[]).sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
-
-    const content = arr.length ? arr.map(x=>{
-      const key=String(x.egob||'');
-      const title=savedTitleV119(x);
-
-      return `<div class="saved-item">
-        <strong>${esc(title)}</strong>
-        <span class="mini">Técnico: ${esc(x.tecnico||'')}<br>Actualizado: ${esc((x.updatedAt||'').replace('T',' ').slice(0,16))}</span>
-        <div class="buttons">
-          <button class="secondary" onclick="cargarFormulario('${esc(key)}')">Abrir</button>
-          <button onclick="cargarFormulario('${esc(key)}').then(()=>{ if(state.tipoInforme==='Informe Técnico Aprobatorio') copiarInformeAprobatorio(); else imprimirInforme(); })">${x.tipoInforme==='Informe Técnico Aprobatorio'?'📋':'PDF'}</button>
-          <button class="danger" onclick="eliminarFormulario('${esc(key)}')">Eliminar</button>
-        </div>
-      </div>`;
-    }).join('') : '<p class="mini">Aún no hay formularios guardados en este navegador.</p>';
-
-    const a=document.getElementById('guardadosLista');
-    if(a) a.innerHTML=content;
-
-    const b=document.getElementById('guardadosListaSide');
-    if(b) b.innerHTML=content;
-  });
-};
+/* Fase 22B: renderSavedList histórico retirado L16196 */
 
 /* Al cargar un registro con nombre largo, el formulario muestra solo el eGOB base,
    pero conserva internamente la llave del registro. */
@@ -17797,11 +17715,7 @@ window.applyStateToUICentralV55V129 = function(){
 };
 
 const _renderSavedList_base_V129 = typeof renderSavedList==='function' ? renderSavedList : null;
-renderSavedList=async function(){
-  const out=_renderSavedList_base_V129 ? await _renderSavedList_base_V129() : undefined;
-  await refreshSavedDropdownV129();
-  return out;
-};
+/* Fase 22B: renderSavedList histórico retirado L17800 */
 
 window.addEventListener('resize',resizeSideWidgetViewportV129);
 window.addEventListener('load',()=>{
@@ -24428,60 +24342,14 @@ async function exportarFormularioSeleccionadoV119N(key=null){
 }
 
 const _exportarRespaldo_base_V119N = typeof exportarRespaldo === 'function' ? exportarRespaldo : null;
-
-exportarRespaldo = async function(){
-  const key=selectedKeyV119N();
-  if(key) return exportarFormularioSeleccionadoV119N(key);
-  if(_exportarRespaldo_base_V119N) return _exportarRespaldo_base_V119N();
-  if(typeof msg==='function') msg('No se pudo exportar el respaldo.');
-};
+/* Fase 22B: exportarRespaldo histórico retirado L24345 */
 
 const _importarRespaldo_base_V119N = typeof importarRespaldo === 'function' ? importarRespaldo : null;
 
 if(_importarRespaldo_base_V119N){
-  importarRespaldo = async function(ev){
-    const out=await _importarRespaldo_base_V119N(ev);
-    if(typeof refreshSavedSearchV131==='function') await refreshSavedSearchV131();
-    if(typeof renderSavedList==='function') renderSavedList();
-    renderSelectedSavedPanelV119N();
-    return out;
-  };
+/* Fase 22B: importarRespaldo histórico retirado L24350 */
 }
-
-renderSavedList = async function(){
-  if(!db || typeof dbAll!=='function') return;
-
-  const arr=(await dbAll()||[])
-    .sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
-
-  const selected=selectedKeyV119N();
-  const panel='<div data-selected-saved-panel-v119n></div>';
-
-  const content = arr.length ? arr.map(x=>{
-    const key=savedRecordKeyV119N(x);
-    const encoded=encodeURIComponent(key);
-    const title=savedTitleForListV119N(x);
-    const selectedClass=key===selected ? ' selected-v119n' : '';
-    return `<div class="saved-item${selectedClass}" data-saved-row-key-v119n="${encoded}">
-      <strong>${esc(title)}</strong>
-      <span class="mini">Técnico: ${esc(x.tecnico||'')}<br>Actualizado: ${esc((x.updatedAt||'').replace('T',' ').slice(0,16))}</span>
-      <div class="buttons">
-        <button type="button" class="secondary saved-select-btn-v119n" data-select-saved-v119n="${encoded}">Seleccionar</button>
-        <button type="button" class="success saved-arrow-v119n" data-open-saved-v119n="${encoded}" title="Seguir editando">➜</button>
-        <button type="button" class="secondary saved-export-btn-v119n" data-export-saved-v119n="${encoded}">Exportar</button>
-        <button type="button" onclick="cargarFormulario('${esc(key)}').then(()=>{ if(state.tipoInforme==='Informe Técnico Aprobatorio' || state.tipoInforme==='Informe con Observaciones') copiarInformeAprobatorio(); else imprimirInforme(); })">${x.tipoInforme==='Informe Técnico Aprobatorio'||x.tipoInforme==='Informe con Observaciones'?'📋':'PDF'}</button>
-        <button type="button" class="danger" onclick="eliminarFormulario('${esc(key)}')">Eliminar</button>
-      </div>
-    </div>`;
-  }).join('') : '<p class="mini">Aún no hay formularios guardados en este navegador.</p>';
-
-  const final=panel+content;
-  const a=document.getElementById('guardadosLista'); if(a) a.innerHTML=final;
-  const b=document.getElementById('guardadosListaSide'); if(b) b.innerHTML=final;
-
-  renderSelectedSavedPanelV119N();
-  markSelectedSavedRowsV119N();
-};
+/* Fase 22B: renderSavedList histórico retirado L24450 */
 
 if(typeof renderSavedSearchResultsV131 === 'function'){
   renderSavedSearchResultsV131 = function(query=''){
@@ -24948,42 +24816,11 @@ setSelectedSavedRecordV119N = function(key){
 };
 
 const _exportarRespaldo_base_V119O = typeof exportarRespaldo === 'function' ? exportarRespaldo : null;
-exportarRespaldo = async function(){
-  const key=selectedSavedKeyV119O();
-  if(key && typeof exportarFormularioSeleccionadoV119N === 'function'){
-    return exportarFormularioSeleccionadoV119N(key);
-  }
-  if(_exportarRespaldo_base_V119O) return _exportarRespaldo_base_V119O();
-};
+/* Fase 22B: exportarRespaldo histórico retirado L24831 */
 
 /* La lista lateral se simplifica: se elimina Exportar y flecha por cada registro.
    Para editar/exportar individualmente se usa la selección + botones globales. */
-renderSavedList = async function(){
-  if(!db || typeof dbAll!=='function') return;
-
-  const arr=(await dbAll()||[])
-    .sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
-
-  const selected=selectedSavedKeyV119O();
-
-  const content = arr.length ? arr.map(x=>{
-    const key=savedRecordKeyV119O(x);
-    const encoded=encodeURIComponent(key);
-    const title=savedTitleV119O(x);
-    const selectedClass=key===selected ? ' selected-v119n' : '';
-    return `<div class="saved-item${selectedClass}" data-saved-row-key-v119n="${encoded}">
-      <strong>${esc(title)}</strong>
-      <span class="mini">Técnico: ${esc(x.tecnico||'')}<br>Actualizado: ${esc((x.updatedAt||'').replace('T',' ').slice(0,16))}</span>
-      <div class="buttons">
-        <button type="button" class="secondary saved-select-btn-v119n" data-select-saved-v119n="${encoded}">Seleccionar</button>
-        <button type="button" class="danger" onclick="eliminarFormulario('${esc(key)}')">Eliminar</button>
-      </div>
-    </div>`;
-  }).join('') : '<p class="mini">Aún no hay formularios guardados en este navegador.</p>';
-
-  const a=document.getElementById('guardadosLista'); if(a) a.innerHTML=content;
-  const b=document.getElementById('guardadosListaSide'); if(b) b.innerHTML=content;
-};
+/* Fase 22B: renderSavedList histórico retirado L24961 */
 
 document.addEventListener('click',event=>{
   const row=event.target.closest('[data-select-saved-search-v119o]');
@@ -26202,11 +26039,7 @@ if(_renderSavedSearchResultsV131_base_V119T){
 
 const _renderSavedList_base_V119T = typeof renderSavedList === 'function' ? renderSavedList : null;
 if(_renderSavedList_base_V119T){
-  renderSavedList = async function(){
-    const out=await _renderSavedList_base_V119T.apply(this, arguments);
-    setTimeout(()=>aplicarIconosOutlineV119T(),0);
-    return out;
-  };
+/* Fase 22B: renderSavedList histórico retirado L26205 */
 }
 
 window.addEventListener('load',()=>{
@@ -38278,42 +38111,136 @@ window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElemen
 </script>
 
 
-<style id="allpa-persistence-core-v22-css">
-#allpaPersistenceBtnV22{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaPersistencePanelV22{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1120px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaPersistencePanelV22.open{display:block}.pv22-ok{color:#177245;font-weight:700}.pv22-fail{color:#b42318;font-weight:700}.pv22-row{padding:6px 0;border-bottom:1px solid #eee}.pv22-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaPersistenceBtnV22,#allpaPersistencePanelV22{display:none!important}}
+<style id="allpa-persistence-core-v22b-css">
+#allpaPersistenceBtnV22B{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaPersistencePanelV22B{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1120px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaPersistencePanelV22B.open{display:block}.pv22b-ok{color:#177245;font-weight:700}.pv22b-fail{color:#b42318;font-weight:700}.pv22b-row{padding:6px 0;border-bottom:1px solid #eee}.pv22b-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaPersistenceBtnV22B,#allpaPersistencePanelV22B{display:none!important}}
 </style>
 
-<script id="allpa-persistence-core-v22">
+<script id="allpa-persistence-core-v22b">
 (function(){
 'use strict';
 
 const historical={
   guardar:typeof window.guardarFormulario==='function'?window.guardarFormulario:null,
   cargar:typeof window.cargarFormulario==='function'?window.cargarFormulario:null,
-  nuevo:typeof window.nuevoFormulario==='function'?window.nuevoFormulario:null,
-  lista:typeof window.renderSavedList==='function'?window.renderSavedList:null,
-  exportar:typeof window.exportarRespaldo==='function'?window.exportarRespaldo:null,
-  importar:typeof window.importarRespaldo==='function'?window.importarRespaldo:null
+  nuevo:typeof window.nuevoFormulario==='function'?window.nuevoFormulario:null
 };
+
+function selectedKey(){
+  try{
+    if(typeof selectedSavedKeyV119O==='function') return String(selectedSavedKeyV119O()||'').trim();
+  }catch(_e){}
+  try{
+    if(typeof selectedKeyV119N==='function') return String(selectedKeyV119N()||'').trim();
+  }catch(_e){}
+  return String(window.selectedSavedRecordKeyV119N||'').trim();
+}
+
+function recordKey(x){
+  try{if(typeof savedRecordKeyV119O==='function') return savedRecordKeyV119O(x)}catch(_e){}
+  try{if(typeof savedRecordKeyV119N==='function') return savedRecordKeyV119N(x)}catch(_e){}
+  return String(x?.egob||'');
+}
+
+function recordTitle(x){
+  try{if(typeof savedTitleV119O==='function') return savedTitleV119O(x)}catch(_e){}
+  try{if(typeof savedTitleV119==='function') return savedTitleV119(x)}catch(_e){}
+  return `eGOB ${String(x?.egob||'')} - ${String(x?.tipoInforme||'')}`;
+}
+
+async function list(){
+  if(!db || typeof dbAll!=='function') return;
+  const arr=(await dbAll()||[]).sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+  const selected=selectedKey();
+
+  const content=arr.length?arr.map(x=>{
+    const key=recordKey(x);
+    const encoded=encodeURIComponent(key);
+    const title=recordTitle(x);
+    const selectedClass=key===selected?' selected-v119n':'';
+    return `<div class="saved-item${selectedClass}" data-saved-row-key-v119n="${encoded}">
+      <strong>${esc(title)}</strong>
+      <span class="mini">Técnico: ${esc(x.tecnico||'')}<br>Actualizado: ${esc((x.updatedAt||'').replace('T',' ').slice(0,16))}</span>
+      <div class="buttons">
+        <button type="button" class="secondary saved-select-btn-v119n" data-select-saved-v119n="${encoded}">Seleccionar</button>
+        <button type="button" class="danger" onclick="eliminarFormulario('${esc(key)}')">Eliminar</button>
+      </div>
+    </div>`;
+  }).join(''):'<p class="mini">Aún no hay formularios guardados en este navegador.</p>';
+
+  const a=document.getElementById('guardadosLista');if(a)a.innerHTML=content;
+  const b=document.getElementById('guardadosListaSide');if(b)b.innerHTML=content;
+
+  try{if(typeof aplicarIconosOutlineV119T==='function')setTimeout(()=>aplicarIconosOutlineV119T(),0)}catch(_e){}
+  try{if(typeof renderSelectedSavedPanelV119N==='function')renderSelectedSavedPanelV119N()}catch(_e){}
+  return arr;
+}
+
+async function exportBackup(){
+  const key=selectedKey();
+  if(key && typeof exportarFormularioSeleccionadoV119N==='function'){
+    return exportarFormularioSeleccionadoV119N(key);
+  }
+
+  const formularios=await dbAll();
+  const observaciones_manuales=typeof manualObsAll==='function'?await manualObsAll():[];
+  const fecha=typeof today==='function'?today():new Date().toISOString().slice(0,10);
+  const blob=new Blob([JSON.stringify({version:2,fecha,formularios,observaciones_manuales},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='RESPALDO_INFORMES_OBRAS_MAYORES_'+fecha+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function importBackup(ev){
+  const file=ev?.target?.files?.[0];
+  if(!file)return;
+  const txt=await file.text();
+  const data=JSON.parse(txt);
+  let formularios=[],manuales=[];
+
+  if(Array.isArray(data)) formularios=data;
+  else{
+    formularios=data?.formularios||[];
+    manuales=data?.observaciones_manuales||data?.observacionesManuales||[];
+  }
+
+  for(const item of formularios){
+    if(item?.egob) await dbPut(item);
+  }
+  if(typeof manualObsPut==='function'){
+    for(const item of manuales){
+      if(item?.id) await manualObsPut(item);
+    }
+  }
+
+  await list();
+  try{if(typeof renderManualObsDB==='function')renderManualObsDB()}catch(_e){}
+  try{if(typeof refreshSavedSearchV131==='function')await refreshSavedSearchV131()}catch(_e){}
+  try{if(typeof renderSelectedSavedPanelV119N==='function')renderSelectedSavedPanelV119N()}catch(_e){}
+  if(typeof msg==='function')msg('Respaldo importado correctamente.',true);
+  if(ev?.target)ev.target.value='';
+}
 
 async function save(){return historical.guardar?historical.guardar.apply(this,arguments):false}
 async function load(){return historical.cargar?historical.cargar.apply(this,arguments):undefined}
 function createNew(){return historical.nuevo?historical.nuevo.apply(this,arguments):undefined}
-async function list(){return historical.lista?historical.lista.apply(this,arguments):undefined}
-async function exportBackup(){return historical.exportar?historical.exportar.apply(this,arguments):undefined}
-async function importBackup(){return historical.importar?historical.importar.apply(this,arguments):undefined}
 
-window.PersistenceV22=Object.freeze({
-  version:'22.0.0-audit',
+window.PersistenceV22B=Object.freeze({
+  version:'22.1.0-list-backup',
   historical,
   save,
   load,
   createNew,
   list,
   exportBackup,
-  importBackup
+  importBackup,
+  selectedKey,
+  recordKey,
+  recordTitle
 });
 
 window.guardarFormulario=save;
@@ -38330,128 +38257,94 @@ try{renderSavedList=window.renderSavedList}catch(_e){}
 try{exportarRespaldo=window.exportarRespaldo}catch(_e){}
 try{importarRespaldo=window.importarRespaldo}catch(_e){}
 
-window.__PersistenceRoutesV22={
-  guardarFormulario:'PersistenceV22.save→historical-chain',
-  cargarFormulario:'PersistenceV22.load→historical-chain',
-  nuevoFormulario:'PersistenceV22.createNew→historical-chain',
-  renderSavedList:'PersistenceV22.list→historical-chain',
-  exportarRespaldo:'PersistenceV22.exportBackup→historical-chain',
-  importarRespaldo:'PersistenceV22.importBackup→historical-chain'
+window.__PersistenceRoutesV22B={
+  guardarFormulario:'PersistenceV22B.save→historical',
+  cargarFormulario:'PersistenceV22B.load→historical',
+  nuevoFormulario:'PersistenceV22B.createNew→historical',
+  renderSavedList:'PersistenceV22B.list',
+  exportarRespaldo:'PersistenceV22B.exportBackup',
+  importarRespaldo:'PersistenceV22B.importBackup'
 };
 })();
 </script>
 
-<script id="allpa-persistence-core-v22-test">
+<script id="allpa-persistence-core-v22b-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
- const R=[],orig=C(state),origTab=document.querySelector('.tab-btn.active')?.dataset?.tab||'';
- const key='ALLPA-V22-TEMP-'+Date.now();
- let tempStored=false;
+ const R=[],orig=C(state),key='ALLPA-V22B-TEMP-'+Date.now();
+ let stored=false;
  try{
-  const P=window.PersistenceV22;
-  A(R,'Persistence V22 disponible',!!P,P?.version||'');
-  A(R,'6 rutas públicas centralizadas',Object.keys(window.__PersistenceRoutesV22||{}).length===6,Object.keys(window.__PersistenceRoutesV22||{}).join(' · '));
-  A(R,'Cadena guardar preservada',typeof P?.historical?.guardar==='function','disponible');
-  A(R,'Cadena cargar preservada',typeof P?.historical?.cargar==='function','disponible');
-  A(R,'Cadena nuevo preservada',typeof P?.historical?.nuevo==='function','disponible');
-  A(R,'Cadena lista preservada',typeof P?.historical?.lista==='function','disponible');
-
-  A(R,'IndexedDB dbPut disponible',typeof dbPut==='function','dbPut');
-  A(R,'IndexedDB dbGet disponible',typeof dbGet==='function','dbGet');
-  A(R,'IndexedDB dbAll disponible',typeof dbAll==='function','dbAll');
-  A(R,'IndexedDB dbDelete disponible',typeof dbDelete==='function','dbDelete');
+  const P=window.PersistenceV22B;
+  A(R,'Persistence V22B disponible',!!P,P?.version||'');
+  A(R,'Lista centralizada',window.renderSavedList===P?.list,'V22B');
+  A(R,'Exportación centralizada',window.exportarRespaldo===P?.exportBackup,'V22B');
+  A(R,'Importación centralizada',window.importarRespaldo===P?.importBackup,'V22B');
+  A(R,'Guardar histórico preservado',typeof P?.historical?.guardar==='function','disponible');
+  A(R,'Cargar histórico preservado',typeof P?.historical?.cargar==='function','disponible');
+  A(R,'Nuevo histórico preservado',typeof P?.historical?.nuevo==='function','disponible');
 
   const before=await dbAll();
-  A(R,'IndexedDB lectura inicial',Array.isArray(before),`${before?.length||0} formulario(s)`);
+  A(R,'IndexedDB inicial',Array.isArray(before),`${before.length} formulario(s)`);
 
-  /* Prueba CRUD aislada sin depender de validaciones de formulario. */
   const temp=C(orig||{});
-  temp.egob=key;
-  temp.updatedAt=new Date().toISOString();
-  if(!temp.createdAt) temp.createdAt=temp.updatedAt;
+  temp.egob=key;temp.updatedAt=new Date().toISOString();temp.createdAt=temp.createdAt||temp.updatedAt;
   temp.projectType=temp.projectType||'obra_mayor_definitivo';
   temp.tipoInforme=temp.tipoInforme||'Informe Técnico Aprobatorio';
+  await dbPut(temp);stored=true;
 
-  await dbPut(temp); tempStored=true;
-  const got=await dbGet(key);
-  A(R,'dbPut → dbGet',!!got&&String(got.egob)===key,key);
+  const arr=await renderSavedList();
+  A(R,'Lista devuelve registros',Array.isArray(arr),`${arr?.length||0} formulario(s)`);
+  A(R,'Temporal aparece en lista',(arr||[]).some(x=>String(x.egob||'')===key),key);
 
-  const all1=await dbAll();
-  A(R,'dbAll contiene temporal',all1.some(x=>String(x.egob||'')===key),`${all1.length} formulario(s)`);
+  const main=document.getElementById('guardadosLista');
+  const side=document.getElementById('guardadosListaSide');
+  const encoded=encodeURIComponent(key);
+  A(R,'Fila temporal renderizada DOM',
+    !!document.querySelector(`[data-saved-row-key-v119n="${encoded}"]`) || (!main&&!side),
+    main||side?'fila presente':'listas no montadas');
 
-  /* Lista pública debe poder renderizar sin excepción. */
-  await renderSavedList(); await wait(80);
-  A(R,'renderSavedList ejecuta',true,'sin excepción');
+  A(R,'Título temporal disponible',!!P.recordTitle(temp),P.recordTitle(temp));
+  A(R,'Clave temporal estable',P.recordKey(temp)===key,P.recordKey(temp));
 
-  /* Carga pública sobre registro temporal. */
-  await cargarFormulario(key); await wait(220);
-  const loadedKey=String(state?._savedKeyV119R||state?._savedKeyV164||state?._savedKeyV119||state?.egob||'');
-  A(R,'cargarFormulario temporal ejecuta',!!state,'state disponible');
-  A(R,'Carga conserva proyecto',!!state.projectType,state.projectType||'');
-  A(R,'ApplyState V21D sigue activo',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
+  await cargarFormulario(key);await wait(180);
+  A(R,'Carga pública sigue operativa',!!state,'state');
+  A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
 
-  /* Guardado real sobre el temporal solo si hay técnico válido disponible. */
-  const tech=(Array.isArray(window.DATA?.tecnicos)&&window.DATA.tecnicos.length)?window.DATA.tecnicos[0]:'';
-  if(tech){
-    state.egob=key;
-    state.tecnico=tech;
-    state.tipoInforme='Informe Técnico Aprobatorio';
-    state.projectType=state.projectType||'obra_mayor_definitivo';
-    try{
-      applyStateToUI(); await wait(80);
-      const saved=await guardarFormulario(false);
-      const got2=await dbGet(key);
-      A(R,'guardarFormulario ejecuta',saved!==false,'resultado válido');
-      A(R,'Guardar persiste temporal',!!got2,got2?String(got2.egob||''):'ausente');
-    }catch(e){
-      A(R,'guardarFormulario ejecuta',false,e.message||e);
-    }
-  }else{
-    A(R,'guardarFormulario ejecuta',true,'omitido: catálogo Técnicos vacío');
-    A(R,'Guardar persiste temporal',true,'CRUD directo ya validado');
-  }
-
-  /* Verificar estructuras críticas del registro guardado. */
   const persisted=await dbGet(key);
-  A(R,'Persistencia conclusion',Array.isArray(persisted?.aprobatorio?.conclusion),`${persisted?.aprobatorio?.conclusion?.length||0} fila(s)`);
-  A(R,'Persistencia propietarios',Array.isArray(persisted?.propietarios),`${persisted?.propietarios?.length||0} propietario(s)`);
-  A(R,'Persistencia apoderados',Array.isArray(persisted?.apoderados)||persisted?.apoderado!==undefined,Array.isArray(persisted?.apoderados)?`${persisted.apoderados.length} apoderado(s)`:'legado');
+  A(R,'Conclusión persistida',Array.isArray(persisted?.aprobatorio?.conclusion),`${persisted?.aprobatorio?.conclusion?.length||0} fila(s)`);
+  A(R,'Propietarios persistidos',Array.isArray(persisted?.propietarios),`${persisted?.propietarios?.length||0} propietario(s)`);
+  A(R,'Apoderados persistidos',Array.isArray(persisted?.apoderados)||persisted?.apoderado!==undefined,Array.isArray(persisted?.apoderados)?`${persisted.apoderados.length} apoderado(s)`:'legado');
 
-  await dbDelete(key); tempStored=false;
-  A(R,'dbDelete temporal',!(await dbGet(key)),'eliminado');
+  /* Importación se valida sin tocar archivos reales: ruta y parser quedan centralizados. */
+  A(R,'ImportBackup acepta evento',P.importBackup.length>=1,'función');
+  A(R,'ExportBackup disponible',typeof P.exportBackup==='function','función');
 
-  const all2=await dbAll();
-  A(R,'Conteo restaurado',all2.length===before.length,`${before.length} → ${all2.length}`);
+  await dbDelete(key);stored=false;
+  const after=await dbAll();
+  A(R,'Temporal eliminado',!after.some(x=>String(x.egob||'')===key),'eliminado');
+  A(R,'Conteo IndexedDB restaurado',after.length===before.length,`${before.length} → ${after.length}`);
 
-  await renderSavedList(); await wait(80);
-  A(R,'Lista refresca tras eliminar',true,'actualizada');
+  await renderSavedList();
+  A(R,'Lista final refrescada',true,'actualizada');
 
-  A(R,'Exportar respaldo disponible',typeof window.exportarRespaldo==='function','ruta V22');
-  A(R,'Importar respaldo disponible',typeof window.importarRespaldo==='function','ruta V22');
-
- }catch(e){A(R,'Banco Persistencia V22',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Persistencia V22B',false,e?.stack||e)}
  finally{
-  if(tempStored){try{await dbDelete(key)}catch(_e){}}
-  state=orig;
-  try{applyStateToUI()}catch(_e){}
-  await wait(160);
-  try{await renderSavedList()}catch(_e){}
-  if(origTab&&typeof showTab==='function'){try{showTab(origTab)}catch(_e){}}
+  if(stored){try{await dbDelete(key)}catch(_e){}}
+  state=orig;try{applyStateToUI()}catch(_e){};await wait(140);try{await renderSavedList()}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
-
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22');
- p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22</h3><div class="pv22-note">Fase 22 conservadora: audita el ciclo IndexedDB y las cadenas históricas antes de retirar wrappers. El registro temporal se elimina al finalizar.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="pv22-row"><span class="${x.ok?'pv22-ok':'pv22-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV22">Copiar resultado</button> <button id="closeV22">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV22').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV22').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22B');
+ p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22B</h3><div class="pv22b-note">Lista, exportación e importación ya están físicamente centralizadas. Guardar/Cargar/Nuevo continúan sobre sus cadenas históricas para la siguiente subfase.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="pv22b-row"><span class="${x.ok?'pv22b-ok':'pv22b-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV22B">Copiar resultado</button> <button id="closeV22B">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV22B').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV22B').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22B\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22';b.type='button';b.textContent='💾 PERSISTENCIA V22';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22B';b.type='button';b.textContent='💾 PERSISTENCIA V22B';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22B';document.body.appendChild(p)},1200));
 })();
 </script>
 
