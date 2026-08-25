@@ -17760,8 +17760,8 @@ if(_selectProjectV123_base_V129){
   };
 }
 
-/* DEPURACIÓN 18 — applyStateToUI CENTRAL V55–V129 */
-applyStateToUI = function(){
+/* DEPURACIÓN 18 — Core central V55–V129 conservado como base V21D */
+window.applyStateToUICentralV55V129 = function(){
   if(!state.projectType){
     state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
   }
@@ -27390,15 +27390,12 @@ window.addEventListener('load',()=>{
     };
   }
 
-  const baseApplyStateToUIV163=typeof applyStateToUI==='function'?applyStateToUI:null;
-  if(baseApplyStateToUIV163){
-    applyStateToUI=function(){
-      ensureAnexosDataV163();
-      const out=baseApplyStateToUIV163.apply(this,arguments);
-      setTimeout(()=>{ renderAnexosV163(); renderAnexosVistaV163(); },0);
-      return out;
-    };
-  }
+  /* V21D: wrapper applyStateToUI retirado; hook público explícito. */
+  window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+  window.AllpaApplyStateHooksV21D.anexos=function(){
+    ensureAnexosDataV163();
+    setTimeout(()=>{ renderAnexosV163(); renderAnexosVistaV163(); },0);
+  };
 
   window.addEventListener('load',()=>{
     setTimeout(()=>{ ensureAnexosDataV163(); renderAnexosV163(); renderAnexosVistaV163(); },900);
@@ -28135,15 +28132,12 @@ window.addEventListener('load',()=>{
   if(renderReportBaseV119X){
     /* renderReport wrapper histórico #27 retirado — Depuración 09 Rápida */
   }
-  const applyStateBaseV119X=typeof applyStateToUI==='function'?applyStateToUI:null;
-  if(applyStateBaseV119X){
-    applyStateToUI=function(){
-      ensureNotificationStateV119X(); respaldoPdfsV119X=[];
-      const out=applyStateBaseV119X.apply(this,arguments);
-      setTimeout(()=>{setupNotificationTabV119X();renderNotificationTabV119X();},0);
-      return out;
-    };
-  }
+  /* V21D: wrapper applyStateToUI retirado; hook público explícito. */
+  window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+  window.AllpaApplyStateHooksV21D.notificacion=function(){
+    ensureNotificationStateV119X(); respaldoPdfsV119X=[];
+    setTimeout(()=>{setupNotificationTabV119X();renderNotificationTabV119X();},0);
+  };
   const newFormBaseV119X=typeof nuevoFormulario==='function'?nuevoFormulario:null;
   if(newFormBaseV119X){
     nuevoFormulario=function(){
@@ -28485,15 +28479,12 @@ window.addEventListener('load',()=>{
       return out;
     };
   }
-  const applyStateBaseV119Y=typeof applyStateToUI==='function'?applyStateToUI:null;
-  if(applyStateBaseV119Y){
-    applyStateToUI=function(){
-      ensureAsuntoStateV119Y();
-      const out=applyStateBaseV119Y.apply(this,arguments);
-      setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },20);
-      return out;
-    };
-  }
+  /* V21D: wrapper applyStateToUI retirado; hook público explícito. */
+  window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+  window.AllpaApplyStateHooksV21D.asunto=function(){
+    ensureAsuntoStateV119Y();
+    setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },20);
+  };
   const nuevoBaseV119Y=typeof nuevoFormulario==='function'?nuevoFormulario:null;
   if(nuevoBaseV119Y){
     nuevoFormulario=function(){
@@ -29190,15 +29181,12 @@ window.addEventListener('load',()=>{
       return out;
     };
   }
-  if(typeof applyStateToUI==='function'){
-    const applyStateBaseV2=applyStateToUI;
-    applyStateToUI=function(){
-      ensurePropStateV2();
-      const out=applyStateBaseV2.apply(this,arguments);
-      setTimeout(()=>{setupReqSubtabsV2();renderPropuestaV2();},20);
-      return out;
-    };
-  }
+  /* V21D: wrapper applyStateToUI retirado; hook público explícito. */
+  window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+  window.AllpaApplyStateHooksV21D.requisitosV2=function(){
+    ensurePropStateV2();
+    setTimeout(()=>{setupReqSubtabsV2();renderPropuestaV2();},20);
+  };
   if(typeof nuevoFormulario==='function'){
     const nuevoBaseV2=nuevoFormulario;
     nuevoFormulario=function(){
@@ -29422,18 +29410,15 @@ window.addEventListener('load',()=>{
     /* renderReport wrapper histórico #29 retirado — Depuración 09 Rápida */
   }
 
-  const applyStateBaseV12=typeof applyStateToUI==='function'?applyStateToUI:null;
-  if(applyStateBaseV12){
-    applyStateToUI=function(){
-      const result=applyStateBaseV12.apply(this,arguments);
-      setTimeout(()=>{
-        if(state?.tipoInforme==='Informe con Observaciones' && isSecondObservationV12()) {
-          refreshSecondObservationV12();
-        }
-      },60);
-      return result;
-    };
-  }
+  /* V21D: wrapper applyStateToUI retirado; hook público explícito. */
+  window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+  window.AllpaApplyStateHooksV21D.segundaObservacion=function(){
+    setTimeout(()=>{
+      if(state?.tipoInforme==='Informe con Observaciones' && isSecondObservationV12()) {
+        refreshSecondObservationV12();
+      }
+    },60);
+  };
 
   document.addEventListener('change',function(event){
     if(event.target?.id==='calc5DiasSubsanacionV55'){
@@ -33258,14 +33243,11 @@ textarea.evidencia-text,
     };
   }
 
-  if(typeof applyStateToUI==='function'){
-    const base=applyStateToUI;
-    applyStateToUI=function(){
-      const out=base.apply(this,arguments);
-      setTimeout(window.allpaActualizarNotaNormativaRequisitos,20);
-      return out;
-    };
-  }
+  /* V21D: wrapper applyStateToUI retirado; hook público explícito. */
+  window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+  window.AllpaApplyStateHooksV21D.notaNormativa=function(){
+    setTimeout(window.allpaActualizarNotaNormativaRequisitos,20);
+  };
 
   window.addEventListener('load',function(){
     setTimeout(window.allpaActualizarNotaNormativaRequisitos,0);
@@ -34479,17 +34461,13 @@ textarea.evidencia-text,
     };
   }
 
-  /* Migración al abrir/reconstruir: no sincronizar desde legado si ya existe arreglo. */
-  if(typeof applyStateToUI==='function'){
-    const baseApplyStateV3=applyStateToUI;
-    applyStateToUI=function(){
-      ensureApoderadosV3();
-      syncLegacyV3();
-      const out=baseApplyStateV3.apply(this,arguments);
-      ensureApoderadosV3();
-      return out;
-    };
-  }
+  /* V21D: wrapper applyStateToUI retirado; hook público explícito. */
+  window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+  window.AllpaApplyStateHooksV21D.apoderados=function(){
+    ensureApoderadosV3();
+    syncLegacyV3();
+    ensureApoderadosV3();
+  };
 
   window.addEventListener('load',()=>{
     setTimeout(()=>{
@@ -38150,26 +38128,65 @@ window.addEventListener('load',()=>setTimeout(()=>{
 </script>
 
 
-<style id="allpa-apply-state-core-v21c-css">
-#allpaApplyStateBtnV21C{position:fixed;right:18px;bottom:18px;z-index:1000001;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaApplyStatePanelV21C{display:none;position:fixed;right:18px;bottom:68px;z-index:1000001;width:min(1100px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaApplyStatePanelV21C.open{display:block}.asv21c-ok{color:#177245;font-weight:700}.asv21c-fail{color:#b42318;font-weight:700}.asv21c-row{padding:6px 0;border-bottom:1px solid #eee}.asv21c-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaApplyStateBtnV21C,#allpaApplyStatePanelV21C{display:none!important}}
+<style id="allpa-apply-state-core-v21d-css">
+#allpaApplyStateBtnV21D{position:fixed;right:18px;bottom:18px;z-index:1000001;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaApplyStatePanelV21D{display:none;position:fixed;right:18px;bottom:68px;z-index:1000001;width:min(1120px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaApplyStatePanelV21D.open{display:block}.asv21d-ok{color:#177245;font-weight:700}.asv21d-fail{color:#b42318;font-weight:700}.asv21d-row{padding:6px 0;border-bottom:1px solid #eee}.asv21d-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaApplyStateBtnV21D,#allpaApplyStatePanelV21D{display:none!important}}
 </style>
 
-<script id="allpa-apply-state-core-v21c">
+<script id="allpa-apply-state-core-v21d">
 (function(){
 'use strict';
-const historical=typeof window.applyStateToUI==='function'?window.applyStateToUI:null;
-function apply(){return historical?historical.apply(this,arguments):undefined;}
-window.ApplyStateUIV21C=Object.freeze({version:'21.2.0-audit',apply,historical});
+const H=window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
+
+function runHook(name){
+  try{if(typeof H[name]==='function') return H[name]();}
+  catch(e){console.warn('[ApplyState V21D hook]',name,e);}
+}
+function apply(){
+  /* Antes del Core: los wrappers que antes envolvían la llamada. */
+  runHook('apoderados');
+  runHook('anexos');
+  runHook('notificacion');
+  runHook('asunto');
+  runHook('requisitosV2');
+
+  const out=typeof window.applyStateToUICentralV55V129==='function'
+    ? window.applyStateToUICentralV55V129.apply(this,arguments)
+    : (typeof window.applyStateToUICoreV18==='function'
+        ? window.applyStateToUICoreV18.apply(this,arguments)
+        : undefined);
+
+  /* Después del Core: efectos diferidos. Los hooks ya respetan sus delays históricos. */
+  runHook('segundaObservacion');
+  runHook('notaNormativa');
+
+  /* Re-ejecutar hooks que históricamente tenían fase post-Core. */
+  setTimeout(()=>{
+    runHook('anexos');
+    runHook('notificacion');
+    runHook('asunto');
+    runHook('requisitosV2');
+    runHook('apoderados');
+  },0);
+
+  return out;
+}
+
+window.ApplyStateUIV21D=Object.freeze({
+  version:'21.3.0-consolidated',
+  apply,
+  hooks:H,
+  base:window.applyStateToUICentralV55V129
+});
 window.applyStateToUI=apply;
 try{applyStateToUI=window.applyStateToUI;}catch(_e){}
-window.__ApplyStateRouteV21C='ApplyStateUIV21C.apply→historical-chain';
+window.__ApplyStateRouteV21D='ApplyStateUIV21D.apply→CentralV55V129→CoreV18';
 })();
 </script>
 
-<script id="allpa-apply-state-core-v21c-test">
+<script id="allpa-apply-state-core-v21d-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38177,129 +38194,86 @@ function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 function activeTab(){return document.querySelector('.tab-btn.active')?.dataset?.tab||''}
 async function testTabs(R,type,ids){
-  const old=state.tipoInforme;
-  state.tipoInforme=type;
-  applyStateToUI(); await wait(120);
-  let ok=true,detail=[];
-  for(const id of ids){
-    const btn=document.querySelector(`.tab-btn[data-tab="${id}"]`);
-    const pane=document.getElementById(id);
-    if(!btn||!pane){ok=false;detail.push(`${id}:ausente`);continue}
-    try{showTab(id);await wait(30);const cur=activeTab();if(cur!==id){ok=false;detail.push(`${id}→${cur}`)}}catch(e){ok=false;detail.push(`${id}:${e.message}`)}
-  }
-  A(R,`Navegación ${type}`,ok,ok?ids.join(' → '):detail.join(' · '));
-  state.tipoInforme=old;
+ const old=state.tipoInforme;state.tipoInforme=type;applyStateToUI();await wait(150);
+ let ok=true,ds=[];
+ for(const id of ids){
+  if(!document.querySelector(`.tab-btn[data-tab="${id}"]`)||!document.getElementById(id)){ok=false;ds.push(id+':ausente');continue}
+  try{showTab(id);await wait(25);const cur=activeTab();if(cur!==id){ok=false;ds.push(`${id}→${cur}`)}}catch(e){ok=false;ds.push(`${id}:${e.message}`)}
+ }
+ A(R,`Navegación ${type}`,ok,ok?ids.join(' → '):ds.join(' · '));state.tipoInforme=old;
 }
 async function run(){
  const R=[],orig=C(state),origTab=activeTab();
  try{
-  const V=window.ApplyStateUIV21C;
-  A(R,'Control V21C disponible',!!V,V?.version||'');
-  A(R,'Ruta pública V21C',window.applyStateToUI===V?.apply,window.__ApplyStateRouteV21C||'');
-  A(R,'Cadena histórica preservada',typeof V?.historical==='function','disponible');
+  const V=window.ApplyStateUIV21D,H=window.AllpaApplyStateHooksV21D||{};
+  A(R,'Control V21D disponible',!!V,V?.version||'');
+  A(R,'Ruta pública única',window.applyStateToUI===V?.apply,window.__ApplyStateRouteV21D||'');
+  A(R,'Base Central V55–V129 disponible',typeof window.applyStateToUICentralV55V129==='function','central');
+  A(R,'Core V18 disponible',typeof window.applyStateToUICoreV18==='function','core');
 
-  const rows0=(state?.aprobatorio?.conclusion||[]).length;
-  const prop0=(state?.propietarios||[]).length;
-  const apod0=(state?.apoderados||[]).length;
+  const hookNames=['anexos','notificacion','asunto','requisitosV2','segundaObservacion','notaNormativa','apoderados'];
+  const available=hookNames.filter(n=>typeof H[n]==='function');
+  A(R,'7 hooks explícitos disponibles',available.length===7,available.join(' · '));
 
-  applyStateToUI(); await wait(180);
-  A(R,'ApplyState ejecuta',true,'sin excepción');
+  const rows0=(state?.aprobatorio?.conclusion||[]).length,prop0=(state?.propietarios||[]).length,apod0=(state?.apoderados||[]).length;
+  applyStateToUI();await wait(220);
+  A(R,'ApplyState consolidado ejecuta',true,'sin excepción');
   A(R,'ProjectType preservado',!!state.projectType,state.projectType||'');
   A(R,'Conclusión no se duplica',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
-
-  applyStateToUI(); await wait(180);
+  applyStateToUI();await wait(220);
   A(R,'Segundo ApplyState idempotente',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
   A(R,'Propietarios preservados',(state?.propietarios||[]).length===prop0,`${prop0} → ${(state?.propietarios||[]).length}`);
   A(R,'Apoderados preservados',(state?.apoderados||[]).length===apod0,`${apod0} → ${(state?.apoderados||[]).length}`);
-
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
-  A(R,'Requisitos renderer',typeof window.renderRequisitosForm==='function','disponible');
-  A(R,'Observaciones renderer',typeof window.renderObservacionesForm==='function','disponible');
-  A(R,'Navegación showTab',typeof window.showTab==='function','disponible');
 
   await testTabs(R,'Informe con Observaciones',['tab-info','tab-req','tab-obs','tab-vista']);
   await testTabs(R,'Informe Técnico Aprobatorio',['tab-info','tab-req','tab-apr','tab-vista']);
   await testTabs(R,'Informe de Desistimiento',['tab-info','tab-req','tab-obs','tab-des','tab-vista']);
 
-  state.tipoInforme=orig.tipoInforme;
-  applyStateToUI(); await wait(180);
-
+  state.tipoInforme=orig.tipoInforme;applyStateToUI();await wait(220);
   A(R,'eGOB reflejado',(document.getElementById('egob')?.value||'')===String(state.egob||''),String(state.egob||'(vacío)'));
   A(R,'Técnico reflejado',(document.getElementById('tecnico')?.value||'')===String(state.tecnico||''),String(state.tecnico||'(vacío)'));
   A(R,'Tipo Informe reflejado',(document.getElementById('tipoInforme')?.value||'')===String(state.tipoInforme||''),String(state.tipoInforme||'(vacío)'));
 
-  A(R,'Anexos efecto disponible',
-    !!document.querySelector('[id*="anexo"]') || !!state?.aprobatorio?.anexos || !!state?.anexos,
-    'DOM/state');
-  A(R,'Notificación efecto disponible',
-    !!document.getElementById('tab-notificar-siento-v119x') || !!document.querySelector('[id*="119x"]') || !!state?.notificacion,
-    'DOM/state');
-  A(R,'Asunto efecto disponible',
-    !!document.querySelector('[id*="asunto"]') || !!state?.aprobatorio?.asunto || !!state?.asunto,
-    'DOM/state');
+  A(R,'Anexos efecto disponible',!!document.querySelector('[id*="anexo"]')||!!state?.aprobatorio?.anexos||!!state?.anexos,'DOM/state');
+  A(R,'Notificación efecto disponible',!!document.getElementById('tab-notificar-siento-v119x')||!!document.querySelector('[id*="119x"]')||!!state?.notificacion,'DOM/state');
+  A(R,'Asunto efecto disponible',!!document.querySelector('[id*="asunto"]')||!!state?.aprobatorio?.asunto||!!state?.asunto,'DOM/state');
 
-  /* Selector corregido según implementación real V2 */
-  const reqNav=document.getElementById('reqSubtabsV2');
-  const reqDoc=document.getElementById('reqDocumentalesPaneV2');
-  const reqProp=document.getElementById('reqPropuestaPaneV2');
-  const reqDocBtn=document.getElementById('reqDocBtnV2');
-  const reqPropBtn=document.getElementById('reqPropBtnV2');
-
-  A(R,'Subpestañas requisitos V2 presentes',
-    !!reqNav && !!reqDoc && !!reqProp && !!reqDocBtn && !!reqPropBtn,
-    `${reqNav?'nav ':''}${reqDoc?'doc ':''}${reqProp?'prop ':''}`.trim()||'ausente');
-
-  if(typeof window.showReqSubtabV2==='function' && reqNav){
-    window.showReqSubtabV2('documentales',false);
-    await wait(20);
-    A(R,'Subpestaña Documentales activa',
-      reqDoc.classList.contains('active') && reqDocBtn.classList.contains('active'),
-      'documentales');
-
-    window.showReqSubtabV2('propuesta',false);
-    await wait(20);
-    A(R,'Subpestaña Propuesta activa',
-      reqProp.classList.contains('active') && reqPropBtn.classList.contains('active'),
-      'propuesta');
-
+  const nav=document.getElementById('reqSubtabsV2'),doc=document.getElementById('reqDocumentalesPaneV2'),prop=document.getElementById('reqPropuestaPaneV2'),
+        db=document.getElementById('reqDocBtnV2'),pb=document.getElementById('reqPropBtnV2');
+  A(R,'Subpestañas requisitos V2 presentes',!!nav&&!!doc&&!!prop&&!!db&&!!pb,`${nav?'nav ':''}${doc?'doc ':''}${prop?'prop ':''}`.trim()||'ausente');
+  if(typeof window.showReqSubtabV2==='function'&&nav){
+    window.showReqSubtabV2('documentales',false);await wait(20);
+    A(R,'Subpestaña Documentales activa',doc.classList.contains('active')&&db.classList.contains('active'),'documentales');
+    window.showReqSubtabV2('propuesta',false);await wait(20);
+    A(R,'Subpestaña Propuesta activa',prop.classList.contains('active')&&pb.classList.contains('active'),'propuesta');
     window.showReqSubtabV2('documentales',false);
   }
 
-  A(R,'Nota normativa efecto disponible',
-    typeof window.allpaActualizarNotaNormativaRequisitos==='function','actualizador');
-
-  A(R,'Multi-apoderados efecto disponible',
-    typeof window.ensureApoderadosV3==='function' || Array.isArray(state?.apoderados),
-    `${(state?.apoderados||[]).length} apoderado(s)`);
+  A(R,'Nota normativa disponible',typeof window.allpaActualizarNotaNormativaRequisitos==='function','actualizador');
+  A(R,'Multi-apoderados disponible',typeof window.ensureApoderadosV3==='function'||Array.isArray(state?.apoderados),`${(state?.apoderados||[]).length} apoderado(s)`);
 
   if(typeof window.renderInformeAprobatorio==='function'){
     let html='';try{html=window.renderInformeAprobatorio()||''}catch(_e){}
     A(R,'Informe Aprobatorio renderiza',typeof html==='string'&&html.length>500,`${html.length} caracteres`);
   }
 
- }catch(e){A(R,'Banco ApplyState V21C',false,e?.stack||e)}
+  /* Estructura: ya no debe existir una cadena de wrappers post-central. */
+  A(R,'Control declara 7 hooks',Object.keys(H).filter(k=>hookNames.includes(k)).length===7,Object.keys(H).filter(k=>hookNames.includes(k)).join(' · '));
+ }catch(e){A(R,'Banco ApplyState V21D',false,e?.stack||e)}
  finally{
-  state=orig;try{applyStateToUI()}catch(_e){};await wait(150);
+  state=orig;try{applyStateToUI()}catch(_e){};await wait(180);
   if(origTab&&typeof showTab==='function'){try{showTab(origTab)}catch(_e){}}
  }
-
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaApplyStatePanelV21C');
- p.innerHTML=`<h3>🧭 ALLPA APPLY STATE V21C</h3><div class="asv21c-note">Auditoría final de Fase 21: valida el DOM real de subpestañas V2 y mantiene la cadena histórica intacta.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="asv21c-row"><span class="${x.ok?'asv21c-ok':'asv21c-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV21C">Copiar resultado</button> <button id="closeV21C">Cerrar</button></p>`;
- p.classList.add('open');
- document.getElementById('closeV21C').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV21C').onclick=async()=>{
-   const s=`ALLPA-APPLYSTATE-V21C\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-   try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
- };
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaApplyStatePanelV21D');
+ p.innerHTML=`<h3>🧭 ALLPA APPLY STATE V21D</h3><div class="asv21d-note">V21D retira los 7 wrappers post-central y los sustituye por hooks públicos explícitos bajo un único controlador.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="asv21d-row"><span class="${x.ok?'asv21d-ok':'asv21d-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV21D">Copiar resultado</button> <button id="closeV21D">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV21D').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV21D').onclick=async()=>{const s=`ALLPA-APPLYSTATE-V21D\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-
-window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaApplyStateBtnV21C';b.type='button';b.textContent='🧭 APPLY STATE V21C';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaApplyStatePanelV21C';document.body.appendChild(p);
-},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaApplyStateBtnV21D';b.type='button';b.textContent='🧭 APPLY STATE V21D';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaApplyStatePanelV21D';document.body.appendChild(p)},1200));
 })();
 </script>
 
