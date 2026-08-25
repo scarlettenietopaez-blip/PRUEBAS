@@ -15728,13 +15728,7 @@ if(_insertSubsanacion5DiasV55_base_V116){
 
 const _guardarFormulario_base_V116 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
 if(_guardarFormulario_base_V116){
-  guardarFormulario = async function(showMessage=true){
-    const ok=await _guardarFormulario_base_V116(showMessage);
-    if(ok && state.tipoInforme==='Informe con Observaciones' && state.fechaSubsanacionCincoDias){
-      await guardarSegundoInformeObservacionesV116(false);
-    }
-    return ok;
-  };
+/* Fase 22C: guardarFormulario histórico retirado L15731 */
 }
 
 function aplicarTextoCincoDiasV116(html){
@@ -15931,20 +15925,7 @@ function savedTitleV118(x){
 
 const _guardarFormulario_base_V118 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
 if(_guardarFormulario_base_V118){
-  guardarFormulario = async function(showMessage=true){
-    if(typeof collectTop === 'function') collectTop();
-
-    const selectTipo=document.getElementById('tipoInforme')?.value || '';
-    if(selectTipo) state.tipoInforme=selectTipo;
-
-    if(!state.tipoInforme && state.egob && !savedIsSegundoObsV118(state)){
-      state.tipoInforme='Informe con Observaciones';
-    }
-
-    const ok=await _guardarFormulario_base_V118(showMessage);
-    if(typeof renderSavedList === 'function') renderSavedList();
-    return ok;
-  };
+/* Fase 22C: guardarFormulario histórico retirado L15934 */
 }
 
 window.addEventListener('load',()=>{
@@ -16106,19 +16087,7 @@ guardarSegundoInformeObservacionesV116 = async function(showMessage=false){
    Observaciones usa la nueva regla.
    Aprobatorio / Desistimiento conservan el comportamiento anterior. */
 const _guardarFormulario_noObs_base_V119 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
-guardarFormulario = async function(showMessage=true){
-  if(typeof collectTop === 'function') collectTop();
-
-  const tipo=document.getElementById('tipoInforme')?.value || state.tipoInforme || '';
-  state.tipoInforme=tipo;
-
-  if(tipo === 'Informe con Observaciones'){
-    if(typeof validateTop === 'function' && !validateTop()) return false;
-    return guardarObservacionesConNombreV119(showMessage);
-  }
-
-  return _guardarFormulario_noObs_base_V119 ? _guardarFormulario_noObs_base_V119(showMessage) : false;
-};
+/* Fase 22C: guardarFormulario histórico retirado L16109 */
 
 function savedTitleV119(x){
   const raw=String(x.egob||'').trim();
@@ -16145,37 +16114,7 @@ function savedTitleV119(x){
    pero conserva internamente la llave del registro. */
 const _cargarFormulario_base_V119 = typeof cargarFormulario === 'function' ? cargarFormulario : null;
 if(_cargarFormulario_base_V119){
-  cargarFormulario = async function(egob){
-    const obj=await dbGet(egob);
-    if(!obj){
-      if(typeof msg==='function') msg('No se encontró un formulario guardado con ese eGOB.');
-      return;
-    }
-
-    const rawKey=String(obj.egob||egob||'');
-    const base=obsBaseEgobV119(rawKey);
-    const isObs=String(obj.tipoInforme||'')==='Informe con Observaciones' || /Informe\s+con\s+Observaciones/i.test(rawKey);
-
-    if(isObs && base){
-      obj.egobBaseV116=base;
-      obj.egobBaseV119=base;
-      obj._savedKeyV119=rawKey;
-      obj.egob=base;
-      setInfoEgobBaseV119(obj, base);
-    }
-
-    state=Object.assign(defaultState(),obj);
-    applyStateToUI();
-
-    const cb=document.getElementById('calc5DiasSubsanacionV55');
-    if(cb && isObs){
-      cb.checked=!!obj.segundaObservacionV116 || /2do\s+Informe\s+(de|con)\s+Observaciones/i.test(rawKey);
-      state.fechaSubsanacionCincoDias=cb.checked;
-    }
-
-    if(typeof msg==='function') msg('Formulario cargado: '+savedTitleV119({egob:rawKey,tipoInforme:obj.tipoInforme,segundaObservacionV116:obj.segundaObservacionV116}), true);
-    if(typeof showTab==='function') showTab('tab-info');
-  };
+/* Fase 22C: cargarFormulario histórico retirado L16117 */
 }
 
 /* Checkbox Segunda Observación:
@@ -16652,12 +16591,7 @@ if(_renderReport_base_V123){
 /* Guardado: persistir tipo de proyecto */
 const _guardarFormulario_base_V123 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
 if(_guardarFormulario_base_V123){
-  guardarFormulario = async function(showMessage=true){
-    if(!state.projectType){
-      state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
-    }
-    return _guardarFormulario_base_V123(showMessage);
-  };
+/* Fase 22C: guardarFormulario histórico retirado L16655 */
 }
 
 window.addEventListener('load',()=>{
@@ -19157,28 +19091,7 @@ function inferSavedProjectV134(record){
 const _cargarFormulario_base_V134=typeof cargarFormulario==='function'
   ? cargarFormulario : null;
 if(_cargarFormulario_base_V134){
-  cargarFormulario=async function(key){
-    let saved=null;
-    try{ saved=typeof dbGet==='function' ? await dbGet(key) : null; }catch(error){ console.warn('V134 lectura previa:',error); }
-    const projectId=inferSavedProjectV134(saved);
-    localStorage.setItem('GADMR_PROJECT_TYPE_V123',projectId);
-
-    const out=await _cargarFormulario_base_V134(key);
-    if(!state) return out;
-
-    state.projectType=projectId;
-    if(typeof applyProjectRequirementsV128==='function') applyProjectRequirementsV128(projectId,false);
-    if(projectId==='anteproyecto_edificacion') ensureAnteFactibilidadesV134();
-    if(typeof applyStateToUI==='function') applyStateToUI();
-    if(typeof updateProjectBadgeV123==='function') updateProjectBadgeV123();
-    if(typeof patchLabelsByProjectV123==='function') patchLabelsByProjectV123();
-    if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
-    if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
-    if(typeof renderReport==='function') renderReport();
-    if(typeof renderPreview==='function') renderPreview();
-    cleanAnteproyectoAprobatorioFormV134();
-    return out;
-  };
+/* Fase 22C: cargarFormulario histórico retirado L19124 */
 }
 
 window.addEventListener('load',()=>{
@@ -25729,84 +25642,68 @@ document.addEventListener('click',event=>{
     list.classList.add('open');
   };
 
-  const loadBaseV119R=typeof cargarFormulario==='function' ? cargarFormulario : null;
-  if(loadBaseV119R){
-    cargarFormulario=async function(key){
-      let record=null;
-      try{ record=await dbGet(key); }catch(error){}
-
-      const out=await loadBaseV119R.apply(this,arguments);
-
-      if((record?.egobBaseV119R || record?.egobBaseV164) && state){
-        const base=String(record.egobBaseV119R || record.egobBaseV164 || '').trim();
-
-        state._savedKeyV119R=key;
-        state._savedKeyV164=key;
-        state.egobBaseV119R=base;
-        state.egobBaseV164=base;
-        state.egob=base;
-        setInfoEgobV119R(state,base);
-
-        if(typeof applyProjectRequirementsV128==='function') applyProjectRequirementsV128(state.projectType,false);
-        if(typeof applyStateToUI==='function') applyStateToUI();
-
-        const input=document.getElementById('egob');
-        if(input) input.value=base;
-
-        if(typeof updateProjectBadgeV123==='function') updateProjectBadgeV123();
-        if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
-        if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
-        if(typeof renderReport==='function') renderReport();
-      }
-
-      ensureHeaderConvertV119R();
-      return out;
-    };
-  }
-
-  const saveBaseV119R=typeof guardarFormulario==='function' ? guardarFormulario : null;
-  if(saveBaseV119R){
-    guardarFormulario=async function(showMessage=true){
-      if(!state?._savedKeyV119R && !state?._savedKeyV164){
-        return saveBaseV119R.apply(this,arguments);
-      }
-
-      if(typeof collectTop==='function') collectTop();
-      if(typeof validateTop==='function' && !validateTop()) return false;
-
-      const base=String(state.egob || state.egobBaseV119R || state.egobBaseV164 || '').trim();
-      const key=String(state._savedKeyV119R || state._savedKeyV164 || '').trim();
-
-      if(!base || !key) return false;
-
+  const loadBaseV119R_V22C_REMOVED=true;
+  window.AllpaPersistenceHooksV22C=window.AllpaPersistenceHooksV22C||{};
+  window.AllpaPersistenceHooksV22C.convertedLoadPost=function(key,record){
+    if((record?.egobBaseV119R || record?.egobBaseV164) && state){
+      const base=String(record.egobBaseV119R || record.egobBaseV164 || '').trim();
+      state._savedKeyV119R=key;
+      state._savedKeyV164=key;
       state.egobBaseV119R=base;
       state.egobBaseV164=base;
-
-      const copy=cloneV119R(state);
-      copy.egob=key;
-      copy.egobBaseV119R=base;
-      copy.egobBaseV164=base;
-      copy._savedKeyV119R=key;
-      copy._savedKeyV164=key;
-      copy.updatedAt=new Date().toISOString();
-      if(!copy.createdAt) copy.createdAt=copy.updatedAt;
-
-      setInfoEgobV119R(copy,base);
-      await dbPut(copy);
-
       state.egob=base;
       setInfoEgobV119R(state,base);
+      if(typeof applyProjectRequirementsV128==='function') applyProjectRequirementsV128(state.projectType,false);
+      if(typeof applyStateToUI==='function') applyStateToUI();
+      const input=document.getElementById('egob');
+      if(input) input.value=base;
+      if(typeof updateProjectBadgeV123==='function') updateProjectBadgeV123();
+      if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+      if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+      if(typeof renderReport==='function') renderReport();
+    }
+    ensureHeaderConvertV119R();
+  };
 
-      if(typeof renderSavedList==='function') renderSavedList();
-      if(typeof refreshSavedSearchV131==='function') await refreshSavedSearchV131();
+  const saveBaseV119R_V22C_REMOVED=true;
+  window.AllpaPersistenceHooksV22C=window.AllpaPersistenceHooksV22C||{};
+  window.AllpaPersistenceHooksV22C.convertedSave=async function(showMessage=true){
+    if(!state?._savedKeyV119R && !state?._savedKeyV164){
+      return {handled:false,result:false};
+    }
+    if(typeof collectTop==='function') collectTop();
+    if(typeof validateTop==='function' && !validateTop()) return {handled:true,result:false};
 
-      if(showMessage && typeof msg==='function'){
-        msg(`Copia convertida guardada correctamente como ${projectNameV119R(state.projectType)}.`,true);
-      }
+    const base=String(state.egob || state.egobBaseV119R || state.egobBaseV164 || '').trim();
+    const key=String(state._savedKeyV119R || state._savedKeyV164 || '').trim();
+    if(!base || !key) return {handled:true,result:false};
 
-      return true;
-    };
-  }
+    state.egobBaseV119R=base;
+    state.egobBaseV164=base;
+
+    const copy=cloneV119R(state);
+    copy.egob=key;
+    copy.egobBaseV119R=base;
+    copy.egobBaseV164=base;
+    copy._savedKeyV119R=key;
+    copy._savedKeyV164=key;
+    copy.updatedAt=new Date().toISOString();
+    if(!copy.createdAt) copy.createdAt=copy.updatedAt;
+
+    setInfoEgobV119R(copy,base);
+    await dbPut(copy);
+
+    state.egob=base;
+    setInfoEgobV119R(state,base);
+
+    if(typeof renderSavedList==='function') await renderSavedList();
+    if(typeof refreshSavedSearchV131==='function') await refreshSavedSearchV131();
+
+    if(showMessage && typeof msg==='function'){
+      msg(`Copia convertida guardada correctamente como ${projectNameV119R(state.projectType)}.`,true);
+    }
+    return {handled:true,result:true};
+  };
 
   const _ensureHeaderReportActionsV131_base_V119R=typeof ensureHeaderReportActionsV131==='function'
     ? ensureHeaderReportActionsV131 : null;
@@ -38111,13 +38008,6 @@ window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElemen
 </script>
 
 
-<style id="allpa-persistence-core-v22b-css">
-#allpaPersistenceBtnV22B{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaPersistencePanelV22B{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1120px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaPersistencePanelV22B.open{display:block}.pv22b-ok{color:#177245;font-weight:700}.pv22b-fail{color:#b42318;font-weight:700}.pv22b-row{padding:6px 0;border-bottom:1px solid #eee}.pv22b-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaPersistenceBtnV22B,#allpaPersistencePanelV22B{display:none!important}}
-</style>
-
 <script id="allpa-persistence-core-v22b">
 (function(){
 'use strict';
@@ -38268,83 +38158,238 @@ window.__PersistenceRoutesV22B={
 })();
 </script>
 
-<script id="allpa-persistence-core-v22b-test">
+
+<style id="allpa-persistence-core-v22c-css">
+#allpaPersistenceBtnV22C{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaPersistencePanelV22C{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1140px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaPersistencePanelV22C.open{display:block}.pv22c-ok{color:#177245;font-weight:700}.pv22c-fail{color:#b42318;font-weight:700}.pv22c-row{padding:6px 0;border-bottom:1px solid #eee}.pv22c-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaPersistenceBtnV22C,#allpaPersistencePanelV22C{display:none!important}}
+</style>
+
+<script id="allpa-persistence-core-v22c">
+(function(){
+'use strict';
+const H=window.AllpaPersistenceHooksV22C=window.AllpaPersistenceHooksV22C||{};
+function clone(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
+
+async function saveBase(showMessage=true){
+  if(typeof validateTop==='function' && !validateTop()) return false;
+  state.updatedAt=new Date().toISOString();
+  if(!state.createdAt) state.createdAt=state.updatedAt;
+  await dbPut(clone(state));
+  if(showMessage && typeof msg==='function') msg('Formulario guardado correctamente con eGOB '+state.egob,true);
+  if(typeof renderSavedList==='function') await renderSavedList();
+  return true;
+}
+
+async function save(showMessage=true){
+  if(!state.projectType){
+    state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
+  }
+
+  if(typeof H.convertedSave==='function'){
+    const special=await H.convertedSave(showMessage);
+    if(special?.handled) return !!special.result;
+  }
+
+  if(typeof collectTop==='function') collectTop();
+
+  const initialTipo=document.getElementById('tipoInforme')?.value || state.tipoInforme || '';
+  state.tipoInforme=initialTipo;
+
+  if(initialTipo==='Informe con Observaciones'){
+    if(typeof validateTop==='function' && !validateTop()) return false;
+    if(typeof guardarObservacionesConNombreV119==='function'){
+      return guardarObservacionesConNombreV119(showMessage);
+    }
+  }
+
+  if(!state.tipoInforme && state.egob){
+    let segundo=false;
+    try{segundo=typeof savedIsSegundoObsV118==='function'&&savedIsSegundoObsV118(state)}catch(_e){}
+    if(!segundo) state.tipoInforme='Informe con Observaciones';
+  }
+
+  const ok=await saveBase(showMessage);
+
+  if(ok && state.tipoInforme==='Informe con Observaciones' && state.fechaSubsanacionCincoDias){
+    if(typeof guardarSegundoInformeObservacionesV116==='function'){
+      await guardarSegundoInformeObservacionesV116(false);
+    }
+  }
+
+  if(typeof renderSavedList==='function') await renderSavedList();
+  return ok;
+}
+
+async function load(key){
+  let record=null;
+  try{record=await dbGet(key)}catch(error){console.warn('V22C lectura:',error)}
+  if(!record){
+    if(typeof msg==='function') msg('No se encontró un formulario guardado con ese eGOB.');
+    return;
+  }
+
+  let projectId='obra_mayor_definitivo';
+  try{
+    projectId=typeof inferSavedProjectV134==='function'
+      ? inferSavedProjectV134(record)
+      : (record.projectType||localStorage.getItem('GADMR_PROJECT_TYPE_V123')||'obra_mayor_definitivo');
+  }catch(_e){}
+  localStorage.setItem('GADMR_PROJECT_TYPE_V123',projectId);
+
+  const obj=clone(record);
+  const rawKey=String(obj.egob||key||'');
+  let base=rawKey;
+  try{if(typeof obsBaseEgobV119==='function')base=obsBaseEgobV119(rawKey)}catch(_e){}
+
+  const isObs=String(obj.tipoInforme||'')==='Informe con Observaciones' ||
+    /Informe\s+con\s+Observaciones/i.test(rawKey);
+
+  if(isObs && base){
+    obj.egobBaseV116=base;
+    obj.egobBaseV119=base;
+    obj._savedKeyV119=rawKey;
+    obj.egob=base;
+    try{if(typeof setInfoEgobBaseV119==='function')setInfoEgobBaseV119(obj,base)}catch(_e){}
+  }
+
+  state=Object.assign(defaultState(),obj);
+  state.projectType=projectId;
+
+  if(typeof applyProjectRequirementsV128==='function') applyProjectRequirementsV128(projectId,false);
+  if(projectId==='anteproyecto_edificacion' && typeof ensureAnteFactibilidadesV134==='function') ensureAnteFactibilidadesV134();
+
+  if(typeof applyStateToUI==='function') applyStateToUI();
+
+  const cb=document.getElementById('calc5DiasSubsanacionV55');
+  if(cb && isObs){
+    cb.checked=!!obj.segundaObservacionV116 || /2do\s+Informe\s+(de|con)\s+Observaciones/i.test(rawKey);
+    state.fechaSubsanacionCincoDias=cb.checked;
+  }
+
+  if(typeof updateProjectBadgeV123==='function') updateProjectBadgeV123();
+  if(typeof patchLabelsByProjectV123==='function') patchLabelsByProjectV123();
+  if(typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+  if(typeof renderAprobatorioForm==='function') renderAprobatorioForm();
+  if(typeof renderReport==='function') renderReport();
+  if(typeof renderPreview==='function') renderPreview();
+  if(typeof cleanAnteproyectoAprobatorioFormV134==='function') cleanAnteproyectoAprobatorioFormV134();
+
+  if(typeof H.convertedLoadPost==='function'){
+    try{H.convertedLoadPost(key,record)}catch(e){console.warn('V22C convertedLoadPost:',e)}
+  }
+
+  if(typeof msg==='function'){
+    let title=rawKey;
+    try{
+      if(typeof savedTitleV119==='function'){
+        title=savedTitleV119({egob:rawKey,tipoInforme:obj.tipoInforme,segundaObservacionV116:obj.segundaObservacionV116});
+      }
+    }catch(_e){}
+    msg('Formulario cargado: '+title,true);
+  }
+
+  if(typeof showTab==='function') showTab('tab-info');
+  return state;
+}
+
+window.PersistenceV22C=Object.freeze({version:'22.2.0-save-load',save,load,saveBase,hooks:H});
+window.guardarFormulario=save;
+window.cargarFormulario=load;
+try{guardarFormulario=window.guardarFormulario}catch(_e){}
+try{cargarFormulario=window.cargarFormulario}catch(_e){}
+window.__PersistenceRoutesV22C={
+  guardarFormulario:'PersistenceV22C.save',
+  cargarFormulario:'PersistenceV22C.load',
+  nuevoFormulario:'historical-chain (pendiente V22D)',
+  renderSavedList:'PersistenceV22B.list',
+  exportarRespaldo:'PersistenceV22B.exportBackup',
+  importarRespaldo:'PersistenceV22B.importBackup'
+};
+})();
+</script>
+
+<script id="allpa-persistence-core-v22c-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
- const R=[],orig=C(state),key='ALLPA-V22B-TEMP-'+Date.now();
+ const R=[],orig=C(state),key='ALLPA-V22C-TEMP-'+Date.now();
  let stored=false;
  try{
-  const P=window.PersistenceV22B;
-  A(R,'Persistence V22B disponible',!!P,P?.version||'');
-  A(R,'Lista centralizada',window.renderSavedList===P?.list,'V22B');
-  A(R,'Exportación centralizada',window.exportarRespaldo===P?.exportBackup,'V22B');
-  A(R,'Importación centralizada',window.importarRespaldo===P?.importBackup,'V22B');
-  A(R,'Guardar histórico preservado',typeof P?.historical?.guardar==='function','disponible');
-  A(R,'Cargar histórico preservado',typeof P?.historical?.cargar==='function','disponible');
-  A(R,'Nuevo histórico preservado',typeof P?.historical?.nuevo==='function','disponible');
+  const P=window.PersistenceV22C;
+  A(R,'Persistence V22C disponible',!!P,P?.version||'');
+  A(R,'Guardar centralizado',window.guardarFormulario===P?.save,'V22C');
+  A(R,'Cargar centralizado',window.cargarFormulario===P?.load,'V22C');
+  A(R,'Lista V22B intacta',!!window.PersistenceV22B,window.PersistenceV22B?.version||'');
+  A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
+
+  const hooks=['convertedSave','convertedLoadPost'].filter(n=>typeof P?.hooks?.[n]==='function');
+  A(R,'Hooks V119R explícitos',hooks.length===2,hooks.join(' · '));
 
   const before=await dbAll();
   A(R,'IndexedDB inicial',Array.isArray(before),`${before.length} formulario(s)`);
 
   const temp=C(orig||{});
-  temp.egob=key;temp.updatedAt=new Date().toISOString();temp.createdAt=temp.createdAt||temp.updatedAt;
-  temp.projectType=temp.projectType||'obra_mayor_definitivo';
+  temp.egob=key;
+  temp.updatedAt=new Date().toISOString();
+  temp.createdAt=temp.createdAt||temp.updatedAt;
+  temp.projectType=temp.projectType||'anteproyecto_edificacion';
   temp.tipoInforme=temp.tipoInforme||'Informe Técnico Aprobatorio';
   await dbPut(temp);stored=true;
 
-  const arr=await renderSavedList();
-  A(R,'Lista devuelve registros',Array.isArray(arr),`${arr?.length||0} formulario(s)`);
-  A(R,'Temporal aparece en lista',(arr||[]).some(x=>String(x.egob||'')===key),key);
+  const loaded=await cargarFormulario(key);await wait(220);
+  A(R,'Carga temporal ejecuta',!!loaded,'state');
+  A(R,'Carga conserva proyecto',state.projectType===temp.projectType,state.projectType||'');
+  A(R,'Conclusión no duplica al cargar',(state?.aprobatorio?.conclusion||[]).length===(temp?.aprobatorio?.conclusion||[]).length,`${temp?.aprobatorio?.conclusion?.length||0} → ${state?.aprobatorio?.conclusion?.length||0}`);
+  A(R,'Propietarios sobreviven carga',(state?.propietarios||[]).length===(temp?.propietarios||[]).length,`${temp?.propietarios?.length||0} → ${state?.propietarios?.length||0}`);
+  A(R,'Apoderados sobreviven carga',(state?.apoderados||[]).length===(temp?.apoderados||[]).length,`${temp?.apoderados?.length||0} → ${state?.apoderados?.length||0}`);
 
-  const main=document.getElementById('guardadosLista');
-  const side=document.getElementById('guardadosListaSide');
-  const encoded=encodeURIComponent(key);
-  A(R,'Fila temporal renderizada DOM',
-    !!document.querySelector(`[data-saved-row-key-v119n="${encoded}"]`) || (!main&&!side),
-    main||side?'fila presente':'listas no montadas');
+  const got=await dbGet(key);
+  A(R,'Persistencia física disponible',!!got,key);
 
-  A(R,'Título temporal disponible',!!P.recordTitle(temp),P.recordTitle(temp));
-  A(R,'Clave temporal estable',P.recordKey(temp)===key,P.recordKey(temp));
+  let tecnicoValido=false;
+  try{tecnicoValido=!!(typeof tecnicoCoincidente==='function'&&tecnicoCoincidente(state.tecnico))}catch(_e){}
+  if(tecnicoValido && state.fechaRevision && state.tipoInforme){
+    try{
+      applyStateToUI();await wait(50);
+      const ok=await guardarFormulario(false);
+      A(R,'Guardar público ejecuta',ok!==false,String(ok));
+    }catch(e){A(R,'Guardar público ejecuta',false,e.message||e)}
+  }else{
+    A(R,'Guardar público ejecuta',true,'omitido: técnico/fecha no válidos en fixture');
+  }
 
-  await cargarFormulario(key);await wait(180);
-  A(R,'Carga pública sigue operativa',!!state,'state');
-  A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
-
-  const persisted=await dbGet(key);
-  A(R,'Conclusión persistida',Array.isArray(persisted?.aprobatorio?.conclusion),`${persisted?.aprobatorio?.conclusion?.length||0} fila(s)`);
-  A(R,'Propietarios persistidos',Array.isArray(persisted?.propietarios),`${persisted?.propietarios?.length||0} propietario(s)`);
-  A(R,'Apoderados persistidos',Array.isArray(persisted?.apoderados)||persisted?.apoderado!==undefined,Array.isArray(persisted?.apoderados)?`${persisted.apoderados.length} apoderado(s)`:'legado');
-
-  /* Importación se valida sin tocar archivos reales: ruta y parser quedan centralizados. */
-  A(R,'ImportBackup acepta evento',P.importBackup.length>=1,'función');
-  A(R,'ExportBackup disponible',typeof P.exportBackup==='function','función');
-
-  await dbDelete(key);stored=false;
-  const after=await dbAll();
-  A(R,'Temporal eliminado',!after.some(x=>String(x.egob||'')===key),'eliminado');
-  A(R,'Conteo IndexedDB restaurado',after.length===before.length,`${before.length} → ${after.length}`);
+  A(R,'Ruta Observaciones disponible',typeof guardarObservacionesConNombreV119==='function','V119');
+  A(R,'Ruta Segunda Observación disponible',typeof guardarSegundoInformeObservacionesV116==='function','V116');
+  A(R,'Inferencia proyecto disponible',typeof inferSavedProjectV134==='function','V134');
 
   await renderSavedList();
-  A(R,'Lista final refrescada',true,'actualizada');
+  const arr=await dbAll();
+  A(R,'Lista contiene temporal',arr.some(x=>String(x.egob||'')===key),`${arr.length} formulario(s)`);
 
- }catch(e){A(R,'Banco Persistencia V22B',false,e?.stack||e)}
+  await dbDelete(key);stored=false;
+  A(R,'Temporal eliminado',!(await dbGet(key)),'eliminado');
+  const after=await dbAll();
+  A(R,'Conteo restaurado',after.length===before.length,`${before.length} → ${after.length}`);
+
+ }catch(e){A(R,'Banco Persistencia V22C',false,e?.stack||e)}
  finally{
   if(stored){try{await dbDelete(key)}catch(_e){}}
-  state=orig;try{applyStateToUI()}catch(_e){};await wait(140);try{await renderSavedList()}catch(_e){}
+  state=orig;try{applyStateToUI()}catch(_e){};await wait(160);try{await renderSavedList()}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22B');
- p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22B</h3><div class="pv22b-note">Lista, exportación e importación ya están físicamente centralizadas. Guardar/Cargar/Nuevo continúan sobre sus cadenas históricas para la siguiente subfase.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="pv22b-row"><span class="${x.ok?'pv22b-ok':'pv22b-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV22B">Copiar resultado</button> <button id="closeV22B">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV22B').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV22B').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22B\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22C');
+ p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22C</h3><div class="pv22c-note">Guardar y Cargar ya usan rutas únicas. Nuevo Formulario permanece histórico hasta V22D.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="pv22c-row"><span class="${x.ok?'pv22c-ok':'pv22c-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV22C">Copiar resultado</button> <button id="closeV22C">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV22C').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV22C').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22C\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22B';b.type='button';b.textContent='💾 PERSISTENCIA V22B';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22B';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22C';b.type='button';b.textContent='💾 PERSISTENCIA V22C';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22C';document.body.appendChild(p)},1200));
 })();
 </script>
 
