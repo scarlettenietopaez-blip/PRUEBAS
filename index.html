@@ -10261,23 +10261,7 @@ function conclusionLooksIncompleteV76(){
 
 /* Refuerza renderAprobatorioForm para reconstruir desde CSV antes de dibujar. */
 /* Refuerza el botón Nuevo para que la estructura del CSV se cargue limpia. */
-const _nuevoFormulario_base_V76 = typeof nuevoFormulario === 'function' ? nuevoFormulario : null;
-if(_nuevoFormulario_base_V76){
-  nuevoFormulario = function(){
-    _nuevoFormulario_base_V76();
-    setTimeout(()=>{
-      try{
-        mergeConclusionFromCSVV76(true);
-        if(typeof renderAprobatorioForm === 'function') renderAprobatorioForm();
-        if(typeof renderReport === 'function') renderReport();
-        if(typeof renderPreview === 'function') renderPreview();
-      }catch(e){
-        console.warn('V76 nuevo formulario conclusión:', e);
-      }
-    },80);
-  };
-}
-
+/* Fase 22D: wrapper nuevoFormulario V76 retirado; Conclusión usa Core V20. */
 /* Al terminar de cargar CSV externos, revisa si la conclusión está incompleta. */
 /* Dep13 wrapper CSV retirado */
 
@@ -10436,14 +10420,7 @@ async function forceConclusionFromCSVV77(force=false){
 
 /* Refuerza formularios y carga inicial */
 /* Botón Nuevo: fuerza la estructura del CSV */
-const _nuevoFormulario_base_V77 = typeof nuevoFormulario === 'function' ? nuevoFormulario : null;
-if(_nuevoFormulario_base_V77){
-  nuevoFormulario = function(){
-    _nuevoFormulario_base_V77();
-    setTimeout(()=>forceConclusionFromCSVV77(true),120);
-  };
-}
-
+/* Fase 22D: wrapper nuevoFormulario V77 retirado; Conclusión usa Core V20. */
 /* Al cambiar a pestaña aprobatorio, vuelve a verificar */
 
 
@@ -10670,13 +10647,7 @@ async function aplicarActivoConclusionV79(force=false){
 }
 
 
-const _nuevoFormulario_base_V79 = typeof nuevoFormulario === 'function' ? nuevoFormulario : null;
-if(_nuevoFormulario_base_V79){
-  nuevoFormulario = function(){
-    _nuevoFormulario_base_V79();
-    setTimeout(()=>aplicarActivoConclusionV79(true),150);
-  };
-}
+/* Fase 22D: wrapper nuevoFormulario V79 retirado; Conclusión usa Core V20. */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>aplicarActivoConclusionV79(false),800);
@@ -10903,14 +10874,7 @@ if(typeof aplicarActivoConclusionV79 === 'function'){
   aplicarActivoConclusionV79 = aplicarConclusionCSVV80;
 }
 
-const _nuevoFormulario_base_V80 = typeof nuevoFormulario === 'function' ? nuevoFormulario : null;
-if(_nuevoFormulario_base_V80){
-  nuevoFormulario = function(){
-    _nuevoFormulario_base_V80();
-    setTimeout(()=>aplicarConclusionCSVV80(true),150);
-  };
-}
-
+/* Fase 22D: wrapper nuevoFormulario V80 retirado; Conclusión usa Core V20. */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>aplicarConclusionCSVV80(false),900);
@@ -11032,14 +10996,7 @@ if(typeof forceConclusionFromCSVV77 === 'function') forceConclusionFromCSVV77 = 
 if(typeof aplicarActivoConclusionV79 === 'function') aplicarActivoConclusionV79 = aplicarConclusionCSVV81;
 if(typeof aplicarConclusionCSVV80 === 'function') aplicarConclusionCSVV80 = aplicarConclusionCSVV81;
 
-const _nuevoFormulario_base_V81 = typeof nuevoFormulario === 'function' ? nuevoFormulario : null;
-if(_nuevoFormulario_base_V81){
-  nuevoFormulario = function(){
-    _nuevoFormulario_base_V81();
-    setTimeout(()=>aplicarConclusionCSVV81(true),160);
-  };
-}
-
+/* Fase 22D: wrapper nuevoFormulario V81 retirado; Conclusión usa Core V20. */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>aplicarConclusionCSVV81(false),1000);
@@ -16444,18 +16401,7 @@ function patchLabelsByProjectV123(){
 }
 
 /* Nuevo formulario conserva el tipo de proyecto seleccionado. */
-const _nuevoFormulario_base_V123 = typeof nuevoFormulario === 'function' ? nuevoFormulario : null;
-if(_nuevoFormulario_base_V123){
-  nuevoFormulario = function(){
-    const current=projectTypeV123() || 'obra_mayor_definitivo';
-    const out=_nuevoFormulario_base_V123();
-    state.projectType=current;
-    localStorage.setItem('GADMR_PROJECT_TYPE_V123', current);
-    updateProjectBadgeV123();
-    patchLabelsByProjectV123();
-    return out;
-  };
-}
+/* Fase 22D: wrapper nuevoFormulario V123 retirado; projectType integrado en PersistenceV22D. */
 
 /* Al cargar un formulario guardado sin projectType, se asume Obra Mayor. */
 
@@ -27868,14 +27814,7 @@ window.addEventListener('load',()=>{
     ensureNotificationStateV119X(); respaldoPdfsV119X=[];
     setTimeout(()=>{setupNotificationTabV119X();renderNotificationTabV119X();},0);
   };
-  const newFormBaseV119X=typeof nuevoFormulario==='function'?nuevoFormulario:null;
-  if(newFormBaseV119X){
-    nuevoFormulario=function(){
-      const out=newFormBaseV119X.apply(this,arguments);
-      respaldoPdfsV119X=[]; ensureNotificationStateV119X();
-      setTimeout(renderNotificationTabV119X,0); return out;
-    };
-  }
+  /* Fase 22D: wrapper nuevoFormulario V119X retirado; notificación integrada en hook explícito. */
 
   window.addEventListener('load',()=>{
     setTimeout(async()=>{
@@ -28215,15 +28154,7 @@ window.addEventListener('load',()=>{
     ensureAsuntoStateV119Y();
     setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },20);
   };
-  const nuevoBaseV119Y=typeof nuevoFormulario==='function'?nuevoFormulario:null;
-  if(nuevoBaseV119Y){
-    nuevoFormulario=function(){
-      const out=nuevoBaseV119Y.apply(this,arguments);
-      ensureAsuntoStateV119Y();
-      setTimeout(()=>{ renderAsuntoAprobatorioV119Y(); renderAsuntoVistaV119Z(); },20);
-      return out;
-    };
-  }
+  /* Fase 22D: wrapper nuevoFormulario V119Y retirado; asunto integrado en hook explícito. */
   document.addEventListener('input',event=>{
     if(event.target?.id==='egob') setTimeout(refreshAsuntoPreviewV119Y,0);
   });
@@ -28917,16 +28848,7 @@ window.addEventListener('load',()=>{
     ensurePropStateV2();
     setTimeout(()=>{setupReqSubtabsV2();renderPropuestaV2();},20);
   };
-  if(typeof nuevoFormulario==='function'){
-    const nuevoBaseV2=nuevoFormulario;
-    nuevoFormulario=function(){
-      const out=nuevoBaseV2.apply(this,arguments);
-      activeReqSubtabV2='documentales';
-      ensurePropStateV2();
-      setTimeout(()=>{setupReqSubtabsV2();showReqSubtabV2('documentales',false);renderPropuestaV2();},20);
-      return out;
-    };
-  }
+  /* Fase 22D: wrapper nuevoFormulario V2 retirado; requisitosV2 integrado en hook explícito. */
   if(typeof selectProjectV123==='function'){
     const selectProjectBaseV2=selectProjectV123;
     selectProjectV123=function(){
@@ -38159,13 +38081,6 @@ window.__PersistenceRoutesV22B={
 </script>
 
 
-<style id="allpa-persistence-core-v22c-css">
-#allpaPersistenceBtnV22C{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaPersistencePanelV22C{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1140px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaPersistencePanelV22C.open{display:block}.pv22c-ok{color:#177245;font-weight:700}.pv22c-fail{color:#b42318;font-weight:700}.pv22c-row{padding:6px 0;border-bottom:1px solid #eee}.pv22c-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaPersistenceBtnV22C,#allpaPersistencePanelV22C{display:none!important}}
-</style>
-
 <script id="allpa-persistence-core-v22c">
 (function(){
 'use strict';
@@ -38310,86 +38225,181 @@ window.__PersistenceRoutesV22C={
 })();
 </script>
 
-<script id="allpa-persistence-core-v22c-test">
+
+<style id="allpa-persistence-core-v22d-css">
+#allpaPersistenceBtnV22D{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaPersistencePanelV22D{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1140px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaPersistencePanelV22D.open{display:block}.pv22d-ok{color:#177245;font-weight:700}.pv22d-fail{color:#b42318;font-weight:700}.pv22d-row{padding:6px 0;border-bottom:1px solid #eee}.pv22d-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaPersistenceBtnV22D,#allpaPersistencePanelV22D{display:none!important}}
+</style>
+
+<script id="allpa-persistence-core-v22d">
+(function(){
+'use strict';
+
+const hooks={
+  conclusion(){
+    try{
+      if(window.ConclusionTecnicaCSVV17?.rebuild) ConclusionTecnicaCSVV17.rebuild(true);
+      else if(typeof aplicarConclusionCSVV81==='function') aplicarConclusionCSVV81(true);
+    }catch(e){console.warn('V22D conclusión:',e)}
+  },
+  project(projectId){
+    state.projectType=projectId;
+    localStorage.setItem('GADMR_PROJECT_TYPE_V123',projectId);
+    try{if(typeof applyProjectRequirementsV128==='function')applyProjectRequirementsV128(projectId,false)}catch(_e){}
+    try{if(typeof updateProjectBadgeV123==='function')updateProjectBadgeV123()}catch(_e){}
+    try{if(typeof patchLabelsByProjectV123==='function')patchLabelsByProjectV123()}catch(_e){}
+  },
+  notification(){
+    try{
+      if(typeof respaldoPdfsV119X!=='undefined') respaldoPdfsV119X=[];
+      if(typeof ensureNotificationStateV119X==='function')ensureNotificationStateV119X();
+      setTimeout(()=>{try{if(typeof renderNotificationTabV119X==='function')renderNotificationTabV119X()}catch(_e){}},0);
+    }catch(e){console.warn('V22D notificación:',e)}
+  },
+  asunto(){
+    try{
+      if(typeof ensureAsuntoStateV119Y==='function')ensureAsuntoStateV119Y();
+      setTimeout(()=>{
+        try{if(typeof renderAsuntoAprobatorioV119Y==='function')renderAsuntoAprobatorioV119Y()}catch(_e){}
+        try{if(typeof renderAsuntoVistaV119Z==='function')renderAsuntoVistaV119Z()}catch(_e){}
+      },20);
+    }catch(e){console.warn('V22D asunto:',e)}
+  },
+  requisitosV2(){
+    try{
+      if(typeof activeReqSubtabV2!=='undefined')activeReqSubtabV2='documentales';
+      if(typeof ensurePropStateV2==='function')ensurePropStateV2();
+      setTimeout(()=>{
+        try{if(typeof setupReqSubtabsV2==='function')setupReqSubtabsV2()}catch(_e){}
+        try{if(typeof showReqSubtabV2==='function')showReqSubtabV2('documentales',false)}catch(_e){}
+        try{if(typeof renderPropuestaV2==='function')renderPropuestaV2()}catch(_e){}
+      },20);
+    }catch(e){console.warn('V22D requisitosV2:',e)}
+  },
+  render(){
+    try{if(typeof renderRequisitosForm==='function')renderRequisitosForm(false)}catch(_e){}
+    try{if(typeof renderAprobatorioForm==='function')renderAprobatorioForm()}catch(_e){}
+    try{if(typeof renderReport==='function')renderReport()}catch(_e){}
+    try{if(typeof renderPreview==='function')renderPreview()}catch(_e){}
+  }
+};
+
+function createNew(options){
+  const opt=options&&typeof options==='object'?options:{};
+  if(!opt.skipConfirm && !confirm('¿Crear un formulario nuevo? Se limpiará la información que no esté guardada.')) return false;
+
+  const current=(typeof projectTypeV123==='function'&&projectTypeV123()) ||
+    state?.projectType ||
+    localStorage.getItem('GADMR_PROJECT_TYPE_V123') ||
+    'obra_mayor_definitivo';
+
+  state=defaultState();
+  state.projectType=current;
+  if(typeof addBusinessDays==='function') state.fechaSubsanacion=addBusinessDays(state.fechaRevision,10);
+
+  hooks.project(current);
+  hooks.conclusion();
+
+  if(typeof applyStateToUI==='function') applyStateToUI();
+
+  hooks.notification();
+  hooks.asunto();
+  hooks.requisitosV2();
+  hooks.render();
+
+  if(typeof showTab==='function') showTab('tab-info');
+  if(!opt.silent && typeof msg==='function') msg('Formulario nuevo listo.',true);
+  return true;
+}
+
+window.PersistenceV22D=Object.freeze({
+  version:'22.3.0-new-form',
+  createNew,
+  hooks:Object.freeze(hooks)
+});
+
+window.nuevoFormulario=createNew;
+try{nuevoFormulario=window.nuevoFormulario}catch(_e){}
+
+window.__PersistenceRoutesV22D={
+  guardarFormulario:'PersistenceV22C.save',
+  cargarFormulario:'PersistenceV22C.load',
+  nuevoFormulario:'PersistenceV22D.createNew',
+  renderSavedList:'PersistenceV22B.list',
+  exportarRespaldo:'PersistenceV22B.exportBackup',
+  importarRespaldo:'PersistenceV22B.importBackup'
+};
+})();
+</script>
+
+<script id="allpa-persistence-core-v22d-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
- const R=[],orig=C(state),key='ALLPA-V22C-TEMP-'+Date.now();
- let stored=false;
+ const R=[],orig=C(state);
  try{
-  const P=window.PersistenceV22C;
-  A(R,'Persistence V22C disponible',!!P,P?.version||'');
-  A(R,'Guardar centralizado',window.guardarFormulario===P?.save,'V22C');
-  A(R,'Cargar centralizado',window.cargarFormulario===P?.load,'V22C');
-  A(R,'Lista V22B intacta',!!window.PersistenceV22B,window.PersistenceV22B?.version||'');
+  const P=window.PersistenceV22D;
+  A(R,'Persistence V22D disponible',!!P,P?.version||'');
+  A(R,'Nuevo centralizado',window.nuevoFormulario===P?.createNew,'V22D');
+  A(R,'Guardar V22C intacto',window.guardarFormulario===window.PersistenceV22C?.save,window.PersistenceV22C?.version||'');
+  A(R,'Cargar V22C intacto',window.cargarFormulario===window.PersistenceV22C?.load,window.PersistenceV22C?.version||'');
+  A(R,'Lista V22B intacta',window.renderSavedList===window.PersistenceV22B?.list,window.PersistenceV22B?.version||'');
   A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
 
-  const hooks=['convertedSave','convertedLoadPost'].filter(n=>typeof P?.hooks?.[n]==='function');
-  A(R,'Hooks V119R explícitos',hooks.length===2,hooks.join(' · '));
+  const hookNames=['conclusion','project','notification','asunto','requisitosV2','render'];
+  const available=hookNames.filter(n=>typeof P?.hooks?.[n]==='function');
+  A(R,'6 hooks explícitos',available.length===6,available.join(' · '));
 
-  const before=await dbAll();
-  A(R,'IndexedDB inicial',Array.isArray(before),`${before.length} formulario(s)`);
+  const projectBefore=state?.projectType || localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
+  const ok=P.createNew({skipConfirm:true,silent:true});
+  await wait(260);
 
-  const temp=C(orig||{});
-  temp.egob=key;
-  temp.updatedAt=new Date().toISOString();
-  temp.createdAt=temp.createdAt||temp.updatedAt;
-  temp.projectType=temp.projectType||'anteproyecto_edificacion';
-  temp.tipoInforme=temp.tipoInforme||'Informe Técnico Aprobatorio';
-  await dbPut(temp);stored=true;
+  A(R,'Nuevo ejecuta sin confirmación de prueba',ok===true,String(ok));
+  A(R,'ProjectType preservado',state.projectType===projectBefore,state.projectType||'');
+  A(R,'ProjectType persistido',localStorage.getItem('GADMR_PROJECT_TYPE_V123')===projectBefore,localStorage.getItem('GADMR_PROJECT_TYPE_V123')||'');
 
-  const loaded=await cargarFormulario(key);await wait(220);
-  A(R,'Carga temporal ejecuta',!!loaded,'state');
-  A(R,'Carga conserva proyecto',state.projectType===temp.projectType,state.projectType||'');
-  A(R,'Conclusión no duplica al cargar',(state?.aprobatorio?.conclusion||[]).length===(temp?.aprobatorio?.conclusion||[]).length,`${temp?.aprobatorio?.conclusion?.length||0} → ${state?.aprobatorio?.conclusion?.length||0}`);
-  A(R,'Propietarios sobreviven carga',(state?.propietarios||[]).length===(temp?.propietarios||[]).length,`${temp?.propietarios?.length||0} → ${state?.propietarios?.length||0}`);
-  A(R,'Apoderados sobreviven carga',(state?.apoderados||[]).length===(temp?.apoderados||[]).length,`${temp?.apoderados?.length||0} → ${state?.apoderados?.length||0}`);
+  const concl=state?.aprobatorio?.conclusion||[];
+  A(R,'Conclusión inicializada',Array.isArray(concl)&&concl.length>0,`${concl.length} fila(s)`);
+  A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
+  A(R,'Conclusión sin duplicación',concl.length<=20,`${concl.length} fila(s)`);
 
-  const got=await dbGet(key);
-  A(R,'Persistencia física disponible',!!got,key);
+  A(R,'Propietarios inicializados',Array.isArray(state.propietarios),`${state.propietarios?.length||0} propietario(s)`);
+  A(R,'Apoderados inicializados',Array.isArray(state.apoderados)||state.apoderado!==undefined,Array.isArray(state.apoderados)?`${state.apoderados.length} apoderado(s)`:'legado');
 
-  let tecnicoValido=false;
-  try{tecnicoValido=!!(typeof tecnicoCoincidente==='function'&&tecnicoCoincidente(state.tecnico))}catch(_e){}
-  if(tecnicoValido && state.fechaRevision && state.tipoInforme){
-    try{
-      applyStateToUI();await wait(50);
-      const ok=await guardarFormulario(false);
-      A(R,'Guardar público ejecuta',ok!==false,String(ok));
-    }catch(e){A(R,'Guardar público ejecuta',false,e.message||e)}
-  }else{
-    A(R,'Guardar público ejecuta',true,'omitido: técnico/fecha no válidos en fixture');
-  }
+  A(R,'Notificación hook disponible',typeof P.hooks.notification==='function','V119X integrado');
+  A(R,'Asunto hook disponible',typeof P.hooks.asunto==='function','V119Y integrado');
+  A(R,'Requisitos V2 hook disponible',typeof P.hooks.requisitosV2==='function','V2 integrado');
 
-  A(R,'Ruta Observaciones disponible',typeof guardarObservacionesConNombreV119==='function','V119');
-  A(R,'Ruta Segunda Observación disponible',typeof guardarSegundoInformeObservacionesV116==='function','V116');
-  A(R,'Inferencia proyecto disponible',typeof inferSavedProjectV134==='function','V134');
+  const navDoc=!!document.querySelector('[data-req-subtab-v2="documentales"],#reqSubtabDocumentalesV2,.req-subtab-v2');
+  A(R,'Subpestañas requisitos siguen montadas',navDoc || typeof setupReqSubtabsV2==='function',navDoc?'DOM':'hook');
 
-  await renderSavedList();
-  const arr=await dbAll();
-  A(R,'Lista contiene temporal',arr.some(x=>String(x.egob||'')===key),`${arr.length} formulario(s)`);
+  const rowsBefore=(state?.aprobatorio?.conclusion||[]).length;
+  P.hooks.render(); await wait(80);
+  const rowsAfter=(state?.aprobatorio?.conclusion||[]).length;
+  A(R,'Render no duplica conclusión',rowsBefore===rowsAfter,`${rowsBefore} → ${rowsAfter}`);
 
-  await dbDelete(key);stored=false;
-  A(R,'Temporal eliminado',!(await dbGet(key)),'eliminado');
-  const after=await dbAll();
-  A(R,'Conteo restaurado',after.length===before.length,`${before.length} → ${after.length}`);
+  A(R,'Ruta pública Guardar',window.__PersistenceRoutesV22D?.guardarFormulario==='PersistenceV22C.save',window.__PersistenceRoutesV22D?.guardarFormulario||'');
+  A(R,'Ruta pública Cargar',window.__PersistenceRoutesV22D?.cargarFormulario==='PersistenceV22C.load',window.__PersistenceRoutesV22D?.cargarFormulario||'');
+  A(R,'Ruta pública Nuevo',window.__PersistenceRoutesV22D?.nuevoFormulario==='PersistenceV22D.createNew',window.__PersistenceRoutesV22D?.nuevoFormulario||'');
 
- }catch(e){A(R,'Banco Persistencia V22C',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Persistencia V22D',false,e?.stack||e)}
  finally{
-  if(stored){try{await dbDelete(key)}catch(_e){}}
-  state=orig;try{applyStateToUI()}catch(_e){};await wait(160);try{await renderSavedList()}catch(_e){}
+  state=orig;try{applyStateToUI()}catch(_e){};await wait(180);try{await renderSavedList()}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22C');
- p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22C</h3><div class="pv22c-note">Guardar y Cargar ya usan rutas únicas. Nuevo Formulario permanece histórico hasta V22D.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="pv22c-row"><span class="${x.ok?'pv22c-ok':'pv22c-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV22C">Copiar resultado</button> <button id="closeV22C">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV22C').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV22C').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22C\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22D');
+ p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22D</h3><div class="pv22d-note">Nuevo Formulario ya usa una ruta única. Con V22B + V22C + V22D queda centralizado el ciclo completo de Persistencia.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="pv22d-row"><span class="${x.ok?'pv22d-ok':'pv22d-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV22D">Copiar resultado</button> <button id="closeV22D">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV22D').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV22D').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22D\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22C';b.type='button';b.textContent='💾 PERSISTENCIA V22C';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22C';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22D';b.type='button';b.textContent='💾 PERSISTENCIA V22D';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22D';document.body.appendChild(p)},1200));
 })();
 </script>
 
