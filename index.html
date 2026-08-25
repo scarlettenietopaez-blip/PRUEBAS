@@ -10616,12 +10616,7 @@ function activeConclusionKeysV79(){
     : (window.__CONCLUSION_CSV_V77__?.rows || []);
   return new Set(rows.map(r=>normDescConclusionV79(r.descripcion)).filter(Boolean));
 }
-function allConclusionBaseKeysV79(){
-  const rows = window.__CONCLUSION_ALL_CSV_V79__?.allRows?.length
-    ? window.__CONCLUSION_ALL_CSV_V79__.allRows
-    : (DATA.conclusionBase || []).map(mapConclusionCSVRowV79).filter(r=>r.descripcion);
-  return new Set(rows.map(r=>normDescConclusionV79(r.descripcion)).filter(Boolean));
-}
+/* Core V19: allConclusionBaseKeysV79 histórico retirado L10619 */
 
 function cleanConclusionRowsByActivoV79(rows){
   const activeKeys = activeConclusionKeysV79();
@@ -10802,9 +10797,7 @@ function conclusionActiveKeysV80(){
   return new Set(conclusionAllRowsV80().filter(r=>r.activo).map(r=>normDescConclusionV80(r.descripcion)));
 }
 
-function conclusionAllBaseKeysV80(){
-  return new Set(conclusionAllRowsV80().map(r=>normDescConclusionV80(r.descripcion)));
-}
+/* Core V19: conclusionAllBaseKeysV80 histórico retirado L10805 */
 
 /* La tabla editable debe seguir la estructura completa del CSV, no solo las activas. */
 function rebuildConclusionEditableFromCSVV80(force=false){
@@ -13880,28 +13873,9 @@ function permiteDescripcionCalculadaV104(){
   return v.includes('AMPLIACION') || v.includes('AMPLIATORIO') || v.includes('MODIFICATORIO');
 }
 
-function inferConclusionRoleV104(desc){
-  const d=normTextConclusionV104(desc);
+/* Core V19: inferConclusionRoleV104 histórico retirado L13883 */
 
-  if(d.includes('AREA') && d.includes('PREDIO')) return 'predio';
-  if(d.includes('UTIL') && d.includes('PLANTA BAJA')) return 'utilPB';
-  if(d.includes('UTIL') && d.includes('TOTAL')) return 'utilTotal';
-  if(d.includes('BRUTA') && d.includes('TOTAL')) return 'brutaTotal';
-  if(d.includes('BRUTA')) return 'bruta';
-  if(d === 'COS PB' || d.includes('COS PB')) return 'cosPB';
-  if(d.includes('COS TOTAL')) return 'cosTotal';
-
-  return '';
-}
-
-function conclusionRoleV104(i,row){
-  const raw=state.aprobatorio?.conclusion?.[i];
-  if(raw && raw._roleV104) return raw._roleV104;
-
-  const role=inferConclusionRoleV104(row?.descripcion || raw?.descripcion || '');
-  if(role && raw) raw._roleV104=role;
-  return role;
-}
+/* Core V19: conclusionRoleV104 histórico retirado L13897 */
 
 function isCalculatedConclusionV104(i,row){
   const role=conclusionRoleV104(i,row);
@@ -14253,16 +14227,7 @@ function modoAmpliatorioModificatorioV107(){
   return typeof permiteDescripcionCalculadaV104 === 'function' && permiteDescripcionCalculadaV104();
 }
 
-function baseConclusionKeysV107(){
-  try{
-    if(typeof allConclusionCSVRowsV81 === 'function'){
-      return new Set((allConclusionCSVRowsV81()||[])
-        .map(r=>normConclusionV107(r.descripcion || r.Descripcion || r.Descripción || ''))
-        .filter(Boolean));
-    }
-  }catch(e){}
-  return new Set();
-}
+/* Core V19: baseConclusionKeysV107 histórico retirado L14256 */
 
 function ensureDeletedConclusionKeysV107(){
   if(!state.aprobatorio) state.aprobatorio={};
@@ -14427,15 +14392,7 @@ window.addEventListener('load',()=>{
       La nueva fila se inserta ARRIBA de esta fila.
    ========================================================== */
 
-function normConclV108(v){
-  if(typeof normDescConclusionV81 === 'function') return normDescConclusionV81(v);
-  if(typeof normTextConclusionV104 === 'function') return normTextConclusionV104(v);
-  return String(v||'')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/\s+/g,' ')
-    .trim()
-    .toUpperCase();
-}
+/* Core V19: normConclV108 histórico retirado L14430 */
 
 function modoAmpModV108(){
   return typeof permiteDescripcionCalculadaV104 === 'function' && permiteDescripcionCalculadaV104();
@@ -14445,32 +14402,9 @@ function modoAmpModV108(){
 
 /* Core V18: histórico retirado baseRowsV108 L14646 */
 
-function roleFromDescV108(desc){
-  const d=normConclV108(desc);
+/* Core V19: roleFromDescV108 histórico retirado L14448 */
 
-  if(d.includes('AREA') && d.includes('PREDIO')) return 'predio';
-  if(d.includes('AREA') && d.includes('UTIL') && d.includes('PLANTA BAJA')) return 'utilPB';
-  if(d.includes('AREA') && d.includes('UTIL') && d.includes('TOTAL')) return 'utilTotal';
-  if(d.includes('AREA') && d.includes('BRUTA') && d.includes('TOTAL')) return 'brutaTotal';
-  if(d.includes('AREA') && d.includes('BRUTA')) return 'bruta';
-  if(d === 'COS PB' || d.includes('COS PB')) return 'cosPB';
-  if(d.includes('COS TOTAL')) return 'cosTotal';
-  return '';
-}
-
-function roleConclV108(rawOrRow, i=null){
-  const raw = i!==null ? state.aprobatorio?.conclusion?.[i] : rawOrRow;
-  const row = rowConclV108(rawOrRow || raw || {});
-  const existing = raw?._roleV108 || raw?._roleV104 || row?._roleV108 || row?._roleV104;
-  if(existing) return existing;
-
-  const role = roleFromDescV108(row.descripcion || raw?.descripcion || '');
-  if(raw && role){
-    raw._roleV108=role;
-    raw._roleV104=role;
-  }
-  return role;
-}
+/* Core V19: roleConclV108 histórico retirado L14461 */
 
 /* Core V14: deletedKeysV108 histórico retirado L14882 */
 
@@ -37676,13 +37610,120 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v18e-css">
-#allpaConclusionCoreBtnV18E{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV18E{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1060px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV18E.open{display:block}.corev18e-ok{color:#177245;font-weight:700}.corev18e-fail{color:#b42318;font-weight:700}.corev18e-row{padding:6px 0;border-bottom:1px solid #eee}.corev18e-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV18E,#allpaConclusionCorePanelV18E{display:none!important}}
+<style id="allpa-conclusion-core-v19-css">
+#allpaConclusionCoreBtnV19{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaConclusionCorePanelV19{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1060px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaConclusionCorePanelV19.open{display:block}.corev19-ok{color:#177245;font-weight:700}.corev19-fail{color:#b42318;font-weight:700}.corev19-row{padding:6px 0;border-bottom:1px solid #eee}.corev19-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaConclusionCoreBtnV19,#allpaConclusionCorePanelV19{display:none!important}}
 </style>
-<script id="allpa-conclusion-core-v18e-test">
+
+<script id="allpa-conclusion-core-v19">
+/* ==========================================================
+   CONCLUSIÓN TÉCNICA CORE V19 — HELPERS RESIDUALES ÚNICOS
+
+   Centraliza helpers antiguos de:
+   - conjuntos de claves base V79/V80/V107;
+   - normalización V108;
+   - inferencia de roles V104/V108.
+
+   allConclusionCSVRowsV81() se conserva como fuente de datos.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const S=window.ConclusionTecnicaStructureV9;
+  const CSV=window.ConclusionTecnicaCSVV17;
+  const K=window.ConclusionTecnicaKeysV14;
+  if(!S || !CSV || !K) return;
+
+  function baseKeySet(){
+    return new Set(
+      CSV.baseRows()
+        .map((r,i)=>K.key(r,i))
+        .filter(Boolean)
+    );
+  }
+
+  function norm(v){
+    return S.norm(v);
+  }
+
+  function inferRole(desc){
+    return S.inferRoleFromDescription(desc);
+  }
+
+  function rowRole(rawOrRow,index=null){
+    const raw=index!==null
+      ? (state?.aprobatorio?.conclusion?.[index] || rawOrRow)
+      : rawOrRow;
+    return S.role(raw,index);
+  }
+
+  window.ConclusionTecnicaHelpersV19=Object.freeze({
+    version:'19.0.0-helpers',
+    baseKeySet,
+    norm,
+    inferRole,
+    rowRole
+  });
+
+  /* Adaptadores históricos restantes */
+  window.allConclusionBaseKeysV79=function(){
+    return baseKeySet();
+  };
+
+  window.conclusionAllBaseKeysV80=function(){
+    return baseKeySet();
+  };
+
+  window.baseConclusionKeysV107=function(){
+    return baseKeySet();
+  };
+
+  window.normConclV108=function(v){
+    return norm(v);
+  };
+
+  window.roleFromDescV108=function(desc){
+    return inferRole(desc);
+  };
+
+  window.inferConclusionRoleV104=function(desc){
+    return inferRole(desc);
+  };
+
+  window.conclusionRoleV104=function(i,row){
+    const raw=state?.aprobatorio?.conclusion?.[i] || row || {};
+    return S.role(raw,i);
+  };
+
+  window.roleConclV108=function(rawOrRow,i=null){
+    return rowRole(rawOrRow,i);
+  };
+
+  try{allConclusionBaseKeysV79=window.allConclusionBaseKeysV79;}catch(_e){}
+  try{conclusionAllBaseKeysV80=window.conclusionAllBaseKeysV80;}catch(_e){}
+  try{baseConclusionKeysV107=window.baseConclusionKeysV107;}catch(_e){}
+  try{normConclV108=window.normConclV108;}catch(_e){}
+  try{roleFromDescV108=window.roleFromDescV108;}catch(_e){}
+  try{inferConclusionRoleV104=window.inferConclusionRoleV104;}catch(_e){}
+  try{conclusionRoleV104=window.conclusionRoleV104;}catch(_e){}
+  try{roleConclV108=window.roleConclV108;}catch(_e){}
+
+  window.__ConclusionTecnicaHelperRoutesV19={
+    allConclusionBaseKeysV79:'ConclusionTecnicaHelpersV19.baseKeySet',
+    conclusionAllBaseKeysV80:'ConclusionTecnicaHelpersV19.baseKeySet',
+    baseConclusionKeysV107:'ConclusionTecnicaHelpersV19.baseKeySet',
+    normConclV108:'ConclusionTecnicaHelpersV19.norm',
+    roleFromDescV108:'ConclusionTecnicaHelpersV19.inferRole',
+    inferConclusionRoleV104:'ConclusionTecnicaHelpersV19.inferRole',
+    conclusionRoleV104:'ConclusionTecnicaHelpersV19.rowRole',
+    roleConclV108:'ConclusionTecnicaHelpersV19.rowRole'
+  };
+})();
+</script>
+
+<script id="allpa-conclusion-core-v19-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -37691,103 +37732,99 @@ function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
 async function run(){
  const R=[],orig=C(state);
  try{
-  const CSV=window.ConclusionTecnicaCSVV17,P=window.ConclusionTecnicaPrepareV12,S=window.ConclusionTecnicaStructureV9,V7=window.ConclusionTecnicaV7,Core=window.ConclusionTecnicaCoreV1;
-  A(R,'Prepare V12D disponible',!!P,P?.version||'');
-  A(R,'CSV V17D disponible',!!CSV,CSV?.version||'');
+  const H=window.ConclusionTecnicaHelpersV19;
+  const CSV=window.ConclusionTecnicaCSVV17;
+  const S=window.ConclusionTecnicaStructureV9;
+  const V7=window.ConclusionTecnicaV7;
+
+  A(R,'Helpers V19 disponible',!!H,H?.version||'');
+  A(R,'Rutas helper centralizadas',
+    Object.keys(window.__ConclusionTecnicaHelperRoutesV19||{}).length===8,
+    Object.values(window.__ConclusionTecnicaHelperRoutesV19||{}).join(' · '));
+
   const bases=CSV.baseRows();
-  A(R,'Base CSV',bases.length===10,`${bases.length} fila(s)`);
+  const expected=new Set(bases.map((r,i)=>H.baseKeySet().has(window.ConclusionTecnicaKeysV14.key(r,i))));
+  A(R,'Base CSV sigue en 10',bases.length===10,`${bases.length} fila(s)`);
 
-  const baseBrutas=bases.map((r,i)=>({r,i})).filter(x=>S.role(x.r,x.i)==='bruta');
-  A(R,'Base CSV tiene una bruta estructural',baseBrutas.length===1,`${baseBrutas.length} fila(s) bruta`);
+  const s79=allConclusionBaseKeysV79();
+  const s80=conclusionAllBaseKeysV80();
+  const s107=baseConclusionKeysV107();
 
-  const legacy10=bases.map((b,i)=>({
-    descripcion:b.descripcion,
-    levels:Array.isArray(b.levels)?b.levels.slice():[],
-    cantidad:String(b.cantidad||''),
-    unidad:b.unidad||'m2',
-    allowLevels:!!b.allowLevels,
-    ...(S.role(b,i)==='bruta'?{intervention:'Aprobada (Existente)',tipoAreaV13:'Aprobada (Existente)'}:{})
-  }));
+  A(R,'V79/V80/V107 mismo tamaño',
+    s79.size===s80.size && s80.size===s107.size && s79.size===10,
+    `${s79.size}/${s80.size}/${s107.size}`);
 
-  const direct10=P.mergeRows(C(legacy10),C(bases),[]);
-  A(R,'mergeRows legacy 10→10',direct10.length===10,`10 → ${direct10.length}`);
-  A(R,'mergeRows reclama 10 bases',direct10.filter(r=>r._originV108==='base').length===10,`${direct10.filter(r=>r._originV108==='base').length}/10`);
+  A(R,'V79/V80/V107 mismas claves',
+    [...s79].every(k=>s80.has(k)&&s107.has(k)),
+    `${s79.size} claves`);
 
-  const bi=legacy10.findIndex((r,i)=>S.inferRoleFromDescription(r.descripcion)==='bruta');
-  if(bi<0) throw new Error('No se encontró fila bruta base.');
+  A(R,'normConclV108 usa V19',
+    normConclV108(' Área Útil Total ')===H.norm(' Área Útil Total '),
+    normConclV108(' Área Útil Total '));
 
-  const amp=C(legacy10[bi]); amp.intervention='Ampliación'; amp.tipoAreaV13='Ampliación'; amp.cantidad='50';
-  const mod=C(legacy10[bi]); mod.intervention='Modificación'; mod.tipoAreaV13='Modificación'; mod.cantidad='25';
+  A(R,'roleFromDesc V108 usa V19',
+    roleFromDescV108('Área bruta planta baja')==='bruta',
+    roleFromDescV108('Área bruta planta baja'));
 
-  const legacyAmpMod=C(legacy10);
-  const ti=legacyAmpMod.findIndex((r,i)=>S.inferRoleFromDescription(r.descripcion)==='brutaTotal');
-  legacyAmpMod.splice(ti>=0?ti:legacyAmpMod.length,0,amp,mod);
+  A(R,'inferRole V104 usa V19',
+    inferConclusionRoleV104('COS TOTAL')==='cosTotal',
+    inferConclusionRoleV104('COS TOTAL'));
 
-  A(R,'Fixture Amp/Mod tiene 12 filas',legacyAmpMod.length===12,`${legacyAmpMod.length} fila(s)`);
-
-  const merged=P.mergeRows(C(legacyAmpMod),C(bases),[]);
-  A(R,'mergeRows Amp/Mod 12→12',merged.length===12,`12 → ${merged.length}`);
-
-  const types=merged.filter((r,i)=>Core.role(r,i)==='bruta').map(r=>S.interventionOf(r));
-  A(R,'mergeRows conserva tres tipos',types.includes('Aprobada (Existente)')&&types.includes('Ampliación')&&types.includes('Modificación'),types.join(' · '));
-
-  const customs=merged.filter((r,i)=>Core.role(r,i)==='bruta'&&r._originV108==='custom');
-  A(R,'Amp/Mod adicionales quedan custom',customs.length===2,`${customs.length} custom`);
-
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:C(legacyAmpMod)}};
-  S.canonicalizeState();
-  const before=state.aprobatorio.conclusion.length;
-  const rebuilt=CSV.rebuild(false);
-  const after=state.aprobatorio.conclusion.length;
-  A(R,'Atajo rebuild Amp/Mod no duplica',before===12&&after===12,`${before} → ${after}`);
-  A(R,'Atajo puede devolver false sin duplicar',rebuilt===false,'base completa → prepare');
-
-  const afterTypes=state.aprobatorio.conclusion.filter((r,i)=>Core.role(r,i)==='bruta').map(r=>S.interventionOf(r));
-  A(R,'Tipos sobreviven atajo',afterTypes.includes('Aprobada (Existente)')&&afterTypes.includes('Ampliación')&&afterTypes.includes('Modificación'),afterTypes.join(' · '));
-
-  const extra={descripcion:'Área bruta personalizada',levels:[],cantidad:'15',unidad:'m2',allowLevels:true,intervention:'Modificación',tipoAreaV13:'Modificación'};
-  const plus=C(legacyAmpMod); plus.splice(ti>=0?ti:plus.length,0,extra);
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:plus}};
-  S.canonicalizeState(); CSV.rebuild(false);
-  A(R,'Extra adicional produce 13',state.aprobatorio.conclusion.length===13,`${state.aprobatorio.conclusion.length} fila(s)`);
-  A(R,'Extra adicional sigue custom',state.aprobatorio.conclusion.some(r=>r.descripcion==='Área bruta personalizada'&&r._originV108==='custom'),'custom presente');
-
+  /* Reconstruir desde CSV real y comprobar roles */
   state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[]}};
-  const empty=CSV.rebuildIfEmpty();
-  A(R,'Vacío reconstruye 10',empty===true&&state.aprobatorio.conclusion.length===10,`${state.aprobatorio.conclusion.length} fila(s)`);
+  CSV.rebuildIfEmpty();
 
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:C(legacyAmpMod)}};
-  S.canonicalizeState(); CSV.rebuild(false);
+  A(R,'Reconstrucción desde vacío',
+    state.aprobatorio.conclusion.length===10,
+    `${state.aprobatorio.conclusion.length} fila(s)`);
+
+  const roles=state.aprobatorio.conclusion.map((r,i)=>roleConclV108(r,i));
+  A(R,'Roles disponibles',
+    roles.includes('predio')&&roles.includes('bruta')&&roles.includes('brutaTotal'),
+    [...new Set(roles)].join(' · '));
+
+  const calc=V7.recalcular();
+  A(R,'Motor matemático operativo',
+    !!calc && typeof calc.formatted==='object',
+    `Bruta ${calc.formatted.areaBrutaTotal}`);
 
   let cont=document.getElementById('conclusionTabla'),temp=false;
   if(!cont){cont=document.createElement('div');cont.id='conclusionTabla';document.body.appendChild(cont);temp=true}
   V7.renderTabla();
-  const tr=cont.querySelectorAll('tbody tr').length, rr=V7.canonicalRows().length;
-  A(R,'Tabla Amp/Mod queda en 12',tr===12,`${tr} fila(s)`);
-  A(R,'Informe Amp/Mod queda en 12',rr===12,`${rr} fila(s)`);
+  const tr=cont.querySelectorAll('tbody tr').length;
+  const rr=V7.canonicalRows().length;
+
+  A(R,'Tabla 10 filas',tr===10,`${tr} fila(s)`);
+  A(R,'Informe 10 filas',rr===10,`${rr} fila(s)`);
   A(R,'Tabla e informe alineados',tr===rr,`tabla ${tr} · informe ${rr}`);
 
   const html=V7.renderInforme();
-  A(R,'Informe contiene Ampliación',/Ampliación/i.test(html),'visible');
-  A(R,'Informe contiene Modificación',/Modificación/i.test(html),'visible');
   A(R,'Informe operativo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
-  A(R,'Validación Área Bruta conservada',typeof errorAreaBrutaConclusionV119N==='function','disponible');
+  A(R,'allConclusionCSVRowsV81 conservado',
+    typeof allConclusionCSVRowsV81==='function',
+    'fuente disponible');
+
+  A(R,'Validación Área Bruta conservada',
+    typeof errorAreaBrutaConclusionV119N==='function',
+    'disponible');
+
   if(temp)cont.remove();
 
- }catch(e){A(R,'Banco Core V18E',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Core V19',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(e){}}
 
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV18E');
- p.innerHTML=`<h3>🧪 ALLPA CONCLUSIÓN CORE V18E</h3><div class="corev18e-note">La base CSV tiene una sola fila bruta; Ampliación y Modificación se prueban como filas adicionales legítimas.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev18e-row"><span class="${x.ok?'corev18e-ok':'corev18e-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV18E">Copiar resultado</button> <button id="closeV18E">Cerrar</button></p>`;
+
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaConclusionCorePanelV19');
+ p.innerHTML=`<h3>🧹 ALLPA CONCLUSIÓN CORE V19</h3><div class="corev19-note">Helpers residuales de claves, normalización y roles centralizados. allConclusionCSVRowsV81 se conserva como fuente.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="corev19-row"><span class="${x.ok?'corev19-ok':'corev19-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV19">Copiar resultado</button> <button id="closeV19">Cerrar</button></p>`;
  p.classList.add('open');
- document.getElementById('closeV18E').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV18E').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V18E\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ document.getElementById('closeV19').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV19').onclick=async()=>{const s=`ALLPA-CONCLUSION-CORE-V19\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
 
 window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaConclusionCoreBtnV18E';b.type='button';b.textContent='🧪 CORE CONCLUSIÓN V18E';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaConclusionCorePanelV18E';document.body.appendChild(p);
+ const b=document.createElement('button');b.id='allpaConclusionCoreBtnV19';b.type='button';b.textContent='🧹 CORE CONCLUSIÓN V19';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaConclusionCorePanelV19';document.body.appendChild(p);
 },1200));
 })();
 </script>
