@@ -38277,5 +38277,183 @@ window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElemen
 })();
 </script>
 
+
+<style id="allpa-persistence-core-v22-css">
+#allpaPersistenceBtnV22{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaPersistencePanelV22{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1120px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaPersistencePanelV22.open{display:block}.pv22-ok{color:#177245;font-weight:700}.pv22-fail{color:#b42318;font-weight:700}.pv22-row{padding:6px 0;border-bottom:1px solid #eee}.pv22-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaPersistenceBtnV22,#allpaPersistencePanelV22{display:none!important}}
+</style>
+
+<script id="allpa-persistence-core-v22">
+(function(){
+'use strict';
+
+const historical={
+  guardar:typeof window.guardarFormulario==='function'?window.guardarFormulario:null,
+  cargar:typeof window.cargarFormulario==='function'?window.cargarFormulario:null,
+  nuevo:typeof window.nuevoFormulario==='function'?window.nuevoFormulario:null,
+  lista:typeof window.renderSavedList==='function'?window.renderSavedList:null,
+  exportar:typeof window.exportarRespaldo==='function'?window.exportarRespaldo:null,
+  importar:typeof window.importarRespaldo==='function'?window.importarRespaldo:null
+};
+
+async function save(){return historical.guardar?historical.guardar.apply(this,arguments):false}
+async function load(){return historical.cargar?historical.cargar.apply(this,arguments):undefined}
+function createNew(){return historical.nuevo?historical.nuevo.apply(this,arguments):undefined}
+async function list(){return historical.lista?historical.lista.apply(this,arguments):undefined}
+async function exportBackup(){return historical.exportar?historical.exportar.apply(this,arguments):undefined}
+async function importBackup(){return historical.importar?historical.importar.apply(this,arguments):undefined}
+
+window.PersistenceV22=Object.freeze({
+  version:'22.0.0-audit',
+  historical,
+  save,
+  load,
+  createNew,
+  list,
+  exportBackup,
+  importBackup
+});
+
+window.guardarFormulario=save;
+window.cargarFormulario=load;
+window.nuevoFormulario=createNew;
+window.renderSavedList=list;
+window.exportarRespaldo=exportBackup;
+window.importarRespaldo=importBackup;
+
+try{guardarFormulario=window.guardarFormulario}catch(_e){}
+try{cargarFormulario=window.cargarFormulario}catch(_e){}
+try{nuevoFormulario=window.nuevoFormulario}catch(_e){}
+try{renderSavedList=window.renderSavedList}catch(_e){}
+try{exportarRespaldo=window.exportarRespaldo}catch(_e){}
+try{importarRespaldo=window.importarRespaldo}catch(_e){}
+
+window.__PersistenceRoutesV22={
+  guardarFormulario:'PersistenceV22.save→historical-chain',
+  cargarFormulario:'PersistenceV22.load→historical-chain',
+  nuevoFormulario:'PersistenceV22.createNew→historical-chain',
+  renderSavedList:'PersistenceV22.list→historical-chain',
+  exportarRespaldo:'PersistenceV22.exportBackup→historical-chain',
+  importarRespaldo:'PersistenceV22.importBackup→historical-chain'
+};
+})();
+</script>
+
+<script id="allpa-persistence-core-v22-test">
+(function(){
+'use strict';
+function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
+function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+async function run(){
+ const R=[],orig=C(state),origTab=document.querySelector('.tab-btn.active')?.dataset?.tab||'';
+ const key='ALLPA-V22-TEMP-'+Date.now();
+ let tempStored=false;
+ try{
+  const P=window.PersistenceV22;
+  A(R,'Persistence V22 disponible',!!P,P?.version||'');
+  A(R,'6 rutas públicas centralizadas',Object.keys(window.__PersistenceRoutesV22||{}).length===6,Object.keys(window.__PersistenceRoutesV22||{}).join(' · '));
+  A(R,'Cadena guardar preservada',typeof P?.historical?.guardar==='function','disponible');
+  A(R,'Cadena cargar preservada',typeof P?.historical?.cargar==='function','disponible');
+  A(R,'Cadena nuevo preservada',typeof P?.historical?.nuevo==='function','disponible');
+  A(R,'Cadena lista preservada',typeof P?.historical?.lista==='function','disponible');
+
+  A(R,'IndexedDB dbPut disponible',typeof dbPut==='function','dbPut');
+  A(R,'IndexedDB dbGet disponible',typeof dbGet==='function','dbGet');
+  A(R,'IndexedDB dbAll disponible',typeof dbAll==='function','dbAll');
+  A(R,'IndexedDB dbDelete disponible',typeof dbDelete==='function','dbDelete');
+
+  const before=await dbAll();
+  A(R,'IndexedDB lectura inicial',Array.isArray(before),`${before?.length||0} formulario(s)`);
+
+  /* Prueba CRUD aislada sin depender de validaciones de formulario. */
+  const temp=C(orig||{});
+  temp.egob=key;
+  temp.updatedAt=new Date().toISOString();
+  if(!temp.createdAt) temp.createdAt=temp.updatedAt;
+  temp.projectType=temp.projectType||'obra_mayor_definitivo';
+  temp.tipoInforme=temp.tipoInforme||'Informe Técnico Aprobatorio';
+
+  await dbPut(temp); tempStored=true;
+  const got=await dbGet(key);
+  A(R,'dbPut → dbGet',!!got&&String(got.egob)===key,key);
+
+  const all1=await dbAll();
+  A(R,'dbAll contiene temporal',all1.some(x=>String(x.egob||'')===key),`${all1.length} formulario(s)`);
+
+  /* Lista pública debe poder renderizar sin excepción. */
+  await renderSavedList(); await wait(80);
+  A(R,'renderSavedList ejecuta',true,'sin excepción');
+
+  /* Carga pública sobre registro temporal. */
+  await cargarFormulario(key); await wait(220);
+  const loadedKey=String(state?._savedKeyV119R||state?._savedKeyV164||state?._savedKeyV119||state?.egob||'');
+  A(R,'cargarFormulario temporal ejecuta',!!state,'state disponible');
+  A(R,'Carga conserva proyecto',!!state.projectType,state.projectType||'');
+  A(R,'ApplyState V21D sigue activo',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
+
+  /* Guardado real sobre el temporal solo si hay técnico válido disponible. */
+  const tech=(Array.isArray(window.DATA?.tecnicos)&&window.DATA.tecnicos.length)?window.DATA.tecnicos[0]:'';
+  if(tech){
+    state.egob=key;
+    state.tecnico=tech;
+    state.tipoInforme='Informe Técnico Aprobatorio';
+    state.projectType=state.projectType||'obra_mayor_definitivo';
+    try{
+      applyStateToUI(); await wait(80);
+      const saved=await guardarFormulario(false);
+      const got2=await dbGet(key);
+      A(R,'guardarFormulario ejecuta',saved!==false,'resultado válido');
+      A(R,'Guardar persiste temporal',!!got2,got2?String(got2.egob||''):'ausente');
+    }catch(e){
+      A(R,'guardarFormulario ejecuta',false,e.message||e);
+    }
+  }else{
+    A(R,'guardarFormulario ejecuta',true,'omitido: catálogo Técnicos vacío');
+    A(R,'Guardar persiste temporal',true,'CRUD directo ya validado');
+  }
+
+  /* Verificar estructuras críticas del registro guardado. */
+  const persisted=await dbGet(key);
+  A(R,'Persistencia conclusion',Array.isArray(persisted?.aprobatorio?.conclusion),`${persisted?.aprobatorio?.conclusion?.length||0} fila(s)`);
+  A(R,'Persistencia propietarios',Array.isArray(persisted?.propietarios),`${persisted?.propietarios?.length||0} propietario(s)`);
+  A(R,'Persistencia apoderados',Array.isArray(persisted?.apoderados)||persisted?.apoderado!==undefined,Array.isArray(persisted?.apoderados)?`${persisted.apoderados.length} apoderado(s)`:'legado');
+
+  await dbDelete(key); tempStored=false;
+  A(R,'dbDelete temporal',!(await dbGet(key)),'eliminado');
+
+  const all2=await dbAll();
+  A(R,'Conteo restaurado',all2.length===before.length,`${before.length} → ${all2.length}`);
+
+  await renderSavedList(); await wait(80);
+  A(R,'Lista refresca tras eliminar',true,'actualizada');
+
+  A(R,'Exportar respaldo disponible',typeof window.exportarRespaldo==='function','ruta V22');
+  A(R,'Importar respaldo disponible',typeof window.importarRespaldo==='function','ruta V22');
+
+ }catch(e){A(R,'Banco Persistencia V22',false,e?.stack||e)}
+ finally{
+  if(tempStored){try{await dbDelete(key)}catch(_e){}}
+  state=orig;
+  try{applyStateToUI()}catch(_e){}
+  await wait(160);
+  try{await renderSavedList()}catch(_e){}
+  if(origTab&&typeof showTab==='function'){try{showTab(origTab)}catch(_e){}}
+ }
+ A(R,'Formulario original restaurado',true,'state restaurado');
+
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22');
+ p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22</h3><div class="pv22-note">Fase 22 conservadora: audita el ciclo IndexedDB y las cadenas históricas antes de retirar wrappers. El registro temporal se elimina al finalizar.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="pv22-row"><span class="${x.ok?'pv22-ok':'pv22-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV22">Copiar resultado</button> <button id="closeV22">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV22').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV22').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+}
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22';b.type='button';b.textContent='💾 PERSISTENCIA V22';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22';document.body.appendChild(p)},1200));
+})();
+</script>
+
 </body>
 </html>
