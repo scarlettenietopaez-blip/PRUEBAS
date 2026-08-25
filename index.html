@@ -38149,5 +38149,230 @@ window.addEventListener('load',()=>setTimeout(()=>{
 })();
 </script>
 
+
+<style id="allpa-apply-state-core-v21-css">
+#allpaApplyStateBtnV21{position:fixed;right:18px;bottom:18px;z-index:1000001;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaApplyStatePanelV21{display:none;position:fixed;right:18px;bottom:68px;z-index:1000001;width:min(1080px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaApplyStatePanelV21.open{display:block}.asv21-ok{color:#177245;font-weight:700}.asv21-fail{color:#b42318;font-weight:700}.asv21-row{padding:6px 0;border-bottom:1px solid #eee}.asv21-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaApplyStateBtnV21,#allpaApplyStatePanelV21{display:none!important}}
+</style>
+
+<script id="allpa-apply-state-core-v21">
+/* ==========================================================
+   FASE 21 — APPLY STATE CENTRAL
+   Centraliza las capas post-Core sin eliminar todavía wrappers
+   históricos. La ruta pública queda en un único controlador.
+   ========================================================== */
+(function(){
+'use strict';
+
+const legacyFinal = typeof window.applyStateToUI==='function' ? window.applyStateToUI : null;
+const core = typeof window.applyStateToUICoreV18==='function' ? window.applyStateToUICoreV18 : null;
+
+function safe(fn,...args){
+  try{ return typeof fn==='function' ? fn(...args) : undefined; }
+  catch(e){ console.warn('[ApplyState V21]',e); return undefined; }
+}
+
+function ensureBefore(){
+  if(!state.projectType){
+    state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
+  }
+  localStorage.setItem('GADMR_PROJECT_TYPE_V123',state.projectType);
+
+  safe(window.applyProjectRequirementsV128,state.projectType||'obra_mayor_definitivo',false);
+  safe(window.ensureAnexosDataV163);
+  safe(window.ensureNotificationStateV119X);
+  safe(window.ensureAsuntoStateV119Y);
+  safe(window.ensurePropStateV2);
+  safe(window.ensureApoderadosV3);
+  safe(window.syncLegacyV3);
+}
+
+function renderImmediate(){
+  safe(window.ensureReportTypesV123);
+  safe(window.updateProjectBadgeV123);
+  safe(window.patchLabelsByProjectV123);
+  safe(window.ensureApoderadosV3);
+}
+
+function renderDeferred(){
+  setTimeout(()=>{
+    safe(window.insertSubsanacion5DiasV55);
+    const cb=document.getElementById('calc5DiasSubsanacionV55');
+    if(cb) cb.checked=!!state.fechaSubsanacionCincoDias;
+
+    safe(window.ensureHeaderProjectControlsV129);
+    safe(window.ensureSideWidgetCarouselV129);
+    safe(window.resizeSideWidgetViewportV129);
+
+    safe(window.renderAnexosV163);
+    safe(window.renderAnexosVistaV163);
+    safe(window.setupNotificationTabV119X);
+    safe(window.renderNotificationTabV119X);
+    safe(window.renderAsuntoAprobatorioV119Y);
+    safe(window.renderAsuntoVistaV119Z);
+    safe(window.setupReqSubtabsV2);
+    safe(window.renderPropuestaV2);
+    safe(window.allpaActualizarNotaNormativaRequisitos);
+
+    if(state?.tipoInforme==='Informe con Observaciones' &&
+       typeof window.isSecondObservationV12==='function' &&
+       safe(window.isSecondObservationV12)){
+      safe(window.refreshSecondObservationV12);
+    }
+  },30);
+}
+
+function apply(){
+  ensureBefore();
+
+  /* V21 llama directamente al Core. Los wrappers históricos quedan
+     disponibles como fallback, pero ya no forman la ruta pública. */
+  let out;
+  if(core) out=core.apply(this,arguments);
+  else if(legacyFinal) out=legacyFinal.apply(this,arguments);
+
+  renderImmediate();
+  renderDeferred();
+  return out;
+}
+
+window.ApplyStateUIV21=Object.freeze({
+  version:'21.0.0-central',
+  apply,
+  ensureBefore,
+  renderImmediate,
+  renderDeferred,
+  legacyFinal,
+  core
+});
+
+window.applyStateToUI=apply;
+try{applyStateToUI=window.applyStateToUI;}catch(_e){}
+
+window.__ApplyStateRouteV21='ApplyStateUIV21.apply';
+})();
+</script>
+
+<script id="allpa-apply-state-core-v21-test">
+(function(){
+'use strict';
+function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
+function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+
+async function run(){
+ const R=[],orig=C(state),active=document.querySelector('.tab-btn.active')?.dataset?.tab||'';
+ try{
+  const V21=window.ApplyStateUIV21;
+  A(R,'Control Central V21 disponible',!!V21,V21?.version||'');
+  A(R,'Ruta pública centralizada',window.applyStateToUI===V21?.apply,window.__ApplyStateRouteV21||'');
+  A(R,'Core V18 disponible',typeof window.applyStateToUICoreV18==='function','core');
+  A(R,'Fallback histórico preservado',typeof V21?.legacyFinal==='function','disponible');
+
+  /* Estado actual real: no se inventan datos del usuario. */
+  const rowsBefore=Array.isArray(state?.aprobatorio?.conclusion)?state.aprobatorio.conclusion.length:0;
+  const propsBefore=Array.isArray(state?.propietarios)?state.propietarios.length:0;
+  const apodBefore=Array.isArray(state?.apoderados)?state.apoderados.length:0;
+
+  applyStateToUI();
+  await wait(120);
+
+  A(R,'ApplyState ejecuta sin excepción',true,'ejecutado');
+  A(R,'ProjectType disponible',!!state.projectType,state.projectType||'');
+  A(R,'Tipo de informe preservado',state.tipoInforme===orig.tipoInforme,state.tipoInforme||'(vacío)');
+
+  const rowsAfter=Array.isArray(state?.aprobatorio?.conclusion)?state.aprobatorio.conclusion.length:0;
+  A(R,'Conclusión no se duplica al aplicar',rowsAfter===rowsBefore,`${rowsBefore} → ${rowsAfter}`);
+
+  applyStateToUI();
+  await wait(120);
+  const rowsSecond=Array.isArray(state?.aprobatorio?.conclusion)?state.aprobatorio.conclusion.length:0;
+  A(R,'Segundo ApplyState idempotente en conclusión',rowsSecond===rowsAfter,`${rowsAfter} → ${rowsSecond}`);
+
+  A(R,'Propietarios preservados',
+    (state?.propietarios||[]).length===propsBefore,
+    `${propsBefore} → ${(state?.propietarios||[]).length}`);
+
+  A(R,'Apoderados preservados',
+    (state?.apoderados||[]).length===apodBefore,
+    `${apodBefore} → ${(state?.apoderados||[]).length}`);
+
+  A(R,'Renderer Requisitos disponible',typeof window.renderRequisitosForm==='function','renderer');
+  A(R,'Renderer Observaciones disponible',typeof window.renderObservacionesForm==='function','renderer');
+  A(R,'Conclusión V20 disponible',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
+  A(R,'Navegación disponible',typeof window.showTab==='function','showTab');
+
+  /* Smoke de pestañas existentes, restaurando la activa. */
+  const candidates=['tab-info','tab-req','tab-obs','tab-apr','tab-des','tab-vista'];
+  let tested=0,failed=[];
+  for(const id of candidates){
+    const btn=document.querySelector(`.tab-btn[data-tab="${id}"]`);
+    const pane=document.getElementById(id);
+    if(!btn||!pane) continue;
+    try{
+      showTab(id);
+      await wait(20);
+      const current=document.querySelector('.tab-btn.active')?.dataset?.tab||'';
+      if(current===id) tested++; else failed.push(`${id}→${current}`);
+    }catch(e){failed.push(`${id}: ${e.message}`)}
+  }
+  A(R,'Navegación de pestañas activas',tested>0&&failed.length===0,failed.length?failed.join(' · '):`${tested} pestaña(s)`);
+
+  if(active && typeof showTab==='function'){
+    try{showTab(active)}catch(_e){}
+  }
+
+  /* Persistencia de campos principales después de reconstruir. */
+  const egob=String(state.egob||'');
+  const tecnico=String(state.tecnico||'');
+  const tipo=String(state.tipoInforme||'');
+  A(R,'eGOB reflejado en UI',(document.getElementById('egob')?.value||'')===egob,egob||'(vacío)');
+  A(R,'Técnico reflejado en UI',(document.getElementById('tecnico')?.value||'')===tecnico,tecnico||'(vacío)');
+  A(R,'Tipo Informe reflejado en UI',(document.getElementById('tipoInforme')?.value||'')===tipo,tipo||'(vacío)');
+
+  A(R,'Anexos hook disponible',typeof window.ensureAnexosDataV163==='function','V163');
+  A(R,'Notificación hook disponible',typeof window.ensureNotificationStateV119X==='function','V119X');
+  A(R,'Asunto hook disponible',typeof window.ensureAsuntoStateV119Y==='function','V119Y');
+  A(R,'Subpestañas requisitos hook disponible',typeof window.setupReqSubtabsV2==='function','V2');
+  A(R,'Nota normativa hook disponible',typeof window.allpaActualizarNotaNormativaRequisitos==='function','actualizador');
+  A(R,'Multi-apoderados hook disponible',typeof window.ensureApoderadosV3==='function','V3');
+
+ }catch(e){
+  A(R,'Banco ApplyState V21',false,e?.stack||e);
+ }finally{
+  state=orig;
+  try{window.ApplyStateUIV21?.apply()}catch(e){}
+  await wait(80);
+  if(active && typeof showTab==='function'){try{showTab(active)}catch(_e){}}
+ }
+
+ A(R,'Formulario original restaurado',true,'state restaurado');
+
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaApplyStatePanelV21');
+ p.innerHTML=`<h3>🧭 ALLPA APPLY STATE V21</h3>
+ <div class="asv21-note">Fase 21 conservadora: la ruta pública ya es única, pero los wrappers históricos se conservan como fallback hasta validar esta regresión.</div>
+ <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="asv21-row"><span class="${x.ok?'asv21-ok':'asv21-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV21">Copiar resultado</button> <button id="closeV21">Cerrar</button></p>`;
+ p.classList.add('open');
+ document.getElementById('closeV21').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV21').onclick=async()=>{
+   const s=`ALLPA-APPLYSTATE-V21\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+   try{await navigator.clipboard.writeText(s)}catch(e){
+     const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();
+     try{document.execCommand('copy')}catch(_){}t.remove();
+   }
+ };
+}
+
+window.addEventListener('load',()=>setTimeout(()=>{
+ const b=document.createElement('button');b.id='allpaApplyStateBtnV21';b.type='button';b.textContent='🧭 APPLY STATE V21';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaApplyStatePanelV21';document.body.appendChild(p);
+},1200));
+})();
+</script>
+
 </body>
 </html>
