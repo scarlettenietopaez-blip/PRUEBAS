@@ -38401,13 +38401,6 @@ window.__RequirementsNavigationRoutesV24D={
 </script>
 
 
-<style id="allpa-report-pipeline-v25-css">
-#allpaReportBtnV25{position:fixed;right:18px;bottom:18px;z-index:1000006;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25{display:none;position:fixed;right:18px;bottom:68px;z-index:1000006;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25.open{display:block}.rp25-ok{color:#177245;font-weight:700}.rp25-fail{color:#b42318;font-weight:700}.rp25-row{padding:6px 0;border-bottom:1px solid #eee}.rp25-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25,#allpaReportPanelV25{display:none!important}}
-</style>
-
 <script id="allpa-report-pipeline-v25">
 (function(){
 'use strict';
@@ -38502,7 +38495,80 @@ window.__ReportRoutesV25={
 })();
 </script>
 
-<script id="allpa-report-pipeline-v25-test">
+
+<style id="allpa-report-pipeline-v25a-css">
+#allpaReportBtnV25A{position:fixed;right:18px;bottom:18px;z-index:1000006;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25A{display:none;position:fixed;right:18px;bottom:68px;z-index:1000006;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25A.open{display:block}.rp25a-ok{color:#177245;font-weight:700}.rp25a-fail{color:#b42318;font-weight:700}.rp25a-row{padding:6px 0;border-bottom:1px solid #eee}.rp25a-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25A,#allpaReportPanelV25A{display:none!important}}
+</style>
+
+<script id="allpa-report-pipeline-v25a">
+(function(){
+'use strict';
+
+const base=window.ReportPipelineV25;
+if(!base)return;
+
+function install(){
+  window.renderInformeAprobatorio=base.renderAprobatorio;
+  try{renderInformeAprobatorio=window.renderInformeAprobatorio}catch(_e){}
+
+  window.renderInformeObservaciones=base.renderObservaciones;
+  try{renderInformeObservaciones=window.renderInformeObservaciones}catch(_e){}
+
+  window.renderInformeDesistimientoV69=base.renderDesistimiento;
+  try{renderInformeDesistimientoV69=window.renderInformeDesistimientoV69}catch(_e){}
+
+  window.renderReport=base.renderCurrent;
+  try{renderReport=window.renderReport}catch(_e){}
+
+  window.validationErrorsV70=base.validate;
+  try{validationErrorsV70=window.validationErrorsV70}catch(_e){}
+
+  window.copiarInformeActualV70=base.copyCurrent;
+  try{copiarInformeActualV70=window.copiarInformeActualV70}catch(_e){}
+
+  window.copiarInformeAprobatorio=base.copyAprobatorio;
+  try{copiarInformeAprobatorio=window.copiarInformeAprobatorio}catch(_e){}
+
+  window.imprimirInforme=base.printCurrent;
+  try{imprimirInforme=window.imprimirInforme}catch(_e){}
+
+  window.aprobatorioInfoTableFromTemplate=base.infoTable;
+  try{aprobatorioInfoTableFromTemplate=window.aprobatorioInfoTableFromTemplate}catch(_e){}
+
+  window.__ReportRoutesV25A={
+    renderInformeAprobatorio:'ReportPipelineV25A→ReportPipelineV25.renderAprobatorio',
+    renderInformeObservaciones:'ReportPipelineV25A→ReportPipelineV25.renderObservaciones',
+    renderInformeDesistimientoV69:'ReportPipelineV25A→ReportPipelineV25.renderDesistimiento',
+    renderReport:'ReportPipelineV25A→ReportPipelineV25.renderCurrent',
+    validationErrorsV70:'ReportPipelineV25A→ReportPipelineV25.validate',
+    copiarInformeActualV70:'ReportPipelineV25A→ReportPipelineV25.copyCurrent',
+    copiarInformeAprobatorio:'ReportPipelineV25A→ReportPipelineV25.copyAprobatorio',
+    imprimirInforme:'ReportPipelineV25A→ReportPipelineV25.printCurrent',
+    aprobatorioInfoTableFromTemplate:'ReportPipelineV25A→ReportPipelineV25.infoTable'
+  };
+}
+
+window.ReportPipelineV25A=Object.freeze({
+  version:'25.0.1-route-fix',
+  install,
+  base
+});
+
+/* Instalar ahora y volver a instalar después de los instaladores históricos
+   diferidos (especialmente V29, que vuelve a envolver renderReport al cargar). */
+install();
+window.addEventListener('load',()=>{
+  setTimeout(install,900);
+  setTimeout(install,1800);
+  setTimeout(install,3200);
+});
+})();
+</script>
+
+<script id="allpa-report-pipeline-v25a-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38511,45 +38577,73 @@ function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
  const R=[],orig=C(state),active=document.querySelector('.tab.active')?.id||'tab-info';
  try{
-  const V=window.ReportPipelineV25;
-  A(R,'ReportPipeline V25 disponible',!!V,V?.version||'');
-  A(R,'9 rutas públicas centralizadas',Object.keys(window.__ReportRoutesV25||{}).length===9,Object.keys(window.__ReportRoutesV25||{}).join(' · '));
+  const V=window.ReportPipelineV25A;
+  V?.install?.();
+  await wait(40);
+  const B=window.ReportPipelineV25;
 
-  A(R,'Aprobatorio centralizado',window.renderInformeAprobatorio===V?.renderAprobatorio,'V25');
-  A(R,'Observaciones centralizado',window.renderInformeObservaciones===V?.renderObservaciones,'V25');
-  A(R,'Desistimiento centralizado',window.renderInformeDesistimientoV69===V?.renderDesistimiento,'V25');
-  A(R,'Render general centralizado',window.renderReport===V?.renderCurrent,'V25');
-  A(R,'Validación centralizada',window.validationErrorsV70===V?.validate,'V25');
-  A(R,'Copiar centralizado',window.copiarInformeActualV70===V?.copyCurrent,'V25');
-  A(R,'PDF centralizado',window.imprimirInforme===V?.printCurrent,'V25');
-  A(R,'Tabla Información General centralizada',window.aprobatorioInfoTableFromTemplate===V?.infoTable,'V25');
+  A(R,'ReportPipeline V25A disponible',!!V,V?.version||'');
+  A(R,'Base V25 preservada',!!B,B?.version||'');
 
-  const legacyNames=['renderAprobatorio','renderObservaciones','renderDesistimiento','renderReport','validation','copyCurrent','copyAprobatorio','print','infoTable'];
-  const available=legacyNames.filter(n=>typeof V?.legacy?.[n]==='function');
-  A(R,'9 cadenas históricas capturadas',available.length===9,available.join(' · '));
+  A(R,'Aprobatorio centralizado',window.renderInformeAprobatorio===B?.renderAprobatorio,'V25A');
+  A(R,'Observaciones centralizado',window.renderInformeObservaciones===B?.renderObservaciones,'V25A');
+  A(R,'Desistimiento centralizado',window.renderInformeDesistimientoV69===B?.renderDesistimiento,'V25A');
+  A(R,'Render general centralizado',window.renderReport===B?.renderCurrent,'V25A');
+  A(R,'Validación centralizada',window.validationErrorsV70===B?.validate,'V25A');
+  A(R,'Copiar centralizado',window.copiarInformeActualV70===B?.copyCurrent,'V25A');
+  A(R,'PDF centralizado',window.imprimirInforme===B?.printCurrent,'V25A');
+  A(R,'Tabla Información General centralizada',window.aprobatorioInfoTableFromTemplate===B?.infoTable,'V25A');
 
-  /* Render directo: no debe mutar Conclusión. */
   const rows0=(state?.aprobatorio?.conclusion||[]).length;
-  const a=String(V.renderAprobatorio()||'');
+
+  const a=String(B.renderAprobatorio()||'');
   A(R,'Informe Aprobatorio genera HTML',a.length>500,`${a.length} caracteres`);
   A(R,'Aprobatorio conserva Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
 
-  const o=String(V.renderObservaciones()||'');
+  const o=String(B.renderObservaciones()||'');
   A(R,'Informe Observaciones genera HTML',o.length>500,`${o.length} caracteres`);
 
-  const d=String(V.renderDesistimiento()||'');
+  const d=String(B.renderDesistimiento()||'');
   A(R,'Informe Desistimiento responde',typeof d==='string',`${d.length} caracteres`);
 
   let info='';
-  try{info=String(V.infoTable('')||'')}catch(_e){}
-  A(R,'Tabla Información General responde',typeof info==='string'&&info.length>50,`${info.length} caracteres`);
+  try{info=String(B.infoTable('')||'')}catch(_e){}
+  A(R,'Tabla Información General responde',info.length>50,`${info.length} caracteres`);
 
-  const errors=V.validate('generar el PDF');
+  const errors=B.validate('generar el PDF');
   A(R,'Validador devuelve arreglo',Array.isArray(errors),`${errors?.length||0} error(es)`);
 
-  /* La prueba no dispara portapapeles ni impresión. */
-  A(R,'Ruta Copiar disponible',typeof V.copyCurrent==='function','sin ejecutar portapapeles');
-  A(R,'Ruta PDF disponible',typeof V.printCurrent==='function','sin ejecutar impresión');
+  /* renderReport depende de tipoInforme; se prueba con un tipo real, no con fixture vacío. */
+  const originalTipo=state.tipoInforme;
+  state.tipoInforme='Informe Técnico Aprobatorio';
+  try{
+    if(document.getElementById('tipoInforme'))document.getElementById('tipoInforme').value=state.tipoInforme;
+    B.renderCurrent();
+    await wait(80);
+    const report=document.getElementById('report');
+    A(R,'Render general Aprobatorio actualiza vista',
+      !!report&&String(report.innerHTML||'').length>500,
+      `${String(report?.innerHTML||'').length} caracteres`);
+  }catch(e){
+    A(R,'Render general Aprobatorio actualiza vista',false,e.message||e);
+  }
+
+  state.tipoInforme='Informe con Observaciones';
+  try{
+    if(document.getElementById('tipoInforme'))document.getElementById('tipoInforme').value=state.tipoInforme;
+    B.renderCurrent();
+    await wait(80);
+    const report=document.getElementById('report');
+    A(R,'Render general Observaciones actualiza vista',
+      !!report&&String(report.innerHTML||'').length>500,
+      `${String(report?.innerHTML||'').length} caracteres`);
+  }catch(e){
+    A(R,'Render general Observaciones actualiza vista',false,e.message||e);
+  }
+  state.tipoInforme=originalTipo;
+
+  A(R,'Ruta Copiar disponible',typeof B.copyCurrent==='function','sin ejecutar portapapeles');
+  A(R,'Ruta PDF disponible',typeof B.printCurrent==='function','sin ejecutar impresión');
 
   A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Requirements V24C intacto',!!window.RequirementsNavigationV24C,window.RequirementsNavigationV24C?.version||'');
@@ -38557,40 +38651,31 @@ async function run(){
   A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
 
-  /* Verifica que renderReport siga escribiendo el informe visible. */
-  try{
-    V.renderCurrent();
-    await wait(100);
-    const report=document.getElementById('report');
-    A(R,'Render general actualiza vista',!!report&&String(report.innerHTML||'').length>100,`${String(report?.innerHTML||'').length} caracteres`);
-  }catch(e){
-    A(R,'Render general actualiza vista',false,e.message||e);
-  }
-
- }catch(e){A(R,'Banco V25',false,e?.stack||e)}
+ }catch(e){A(R,'Banco V25A',false,e?.stack||e)}
  finally{
   state=orig;
   try{applyStateToUI()}catch(_e){}
   await wait(180);
+  try{window.ReportPipelineV25A?.install?.()}catch(_e){}
   try{if(active&&typeof showTab==='function')showTab(active)}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25');
- p.innerHTML=`<h3>📄 ALLPA REPORT PIPELINE V25</h3><div class="rp25-note">Fase puente: centraliza las rutas de informes, validación, Copiar y PDF sin retirar todavía sus cadenas históricas.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25-row"><span class="${x.ok?'rp25-ok':'rp25-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25">Copiar resultado</button> <button id="closeV25">Cerrar</button></p>`;
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25A');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25A</h3><div class="rp25a-note">V25A corrige la estabilidad de las rutas públicas frente a instaladores históricos diferidos y prueba renderReport con tipos de informe reales.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25a-row"><span class="${x.ok?'rp25a-ok':'rp25a-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25A">Copiar resultado</button> <button id="closeV25A">Cerrar</button></p>`;
  p.classList.add('open');
- document.getElementById('closeV25').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25').onclick=async()=>{
-   const s=`ALLPA-REPORT-V25\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+ document.getElementById('closeV25A').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25A').onclick=async()=>{
+   const s=`ALLPA-REPORT-V25A\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
    try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
  };
 }
 window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaReportBtnV25';b.type='button';b.textContent='📄 REPORT V25';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaReportPanelV25';document.body.appendChild(p);
-},1200));
+ const b=document.createElement('button');b.id='allpaReportBtnV25A';b.type='button';b.textContent='📄 REPORT V25A';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaReportPanelV25A';document.body.appendChild(p);
+},1400));
 })();
 </script>
 
