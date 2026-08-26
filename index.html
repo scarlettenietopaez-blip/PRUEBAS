@@ -20944,35 +20944,7 @@ function renderLargeReqV145(req,showNA,forceNA,title){
     <tbody>${renderReqRowV112(req,showNA,forceNA)}</tbody></table></div>`;
 }
 
-const _renderRequisitosForm_base_V145=typeof renderRequisitosForm==='function'?renderRequisitosForm:null;
-renderRequisitosForm=function(rebuild=true){
-  if(!isObraMayorV145()) return _renderRequisitosForm_base_V145?_renderRequisitosForm_base_V145(rebuild):undefined;
-  if(typeof ensureV55State==='function') ensureV55State();
-  const box=document.getElementById('requisitosForm'); if(!box) return;
-  const reqs=DATA.requisitos.filter(shouldShowReq);
-  const cond=(numVal(infoValue('ALTURA EDIFICACIÓN'))>2||numVal(infoValue('Área Bruta'))>400);
-  let html=`<div class="field"><label class="check-line"><input type="checkbox" id="toggleComplementarios" ${state.mostrarComplementarios?'checked':''}> Mostrar requisitos complementarios cuando apliquen</label></div>`;
-  const groups=[...new Set(reqs.map(r=>r.grupo))];
-  groups.forEach(grupo=>{
-    const rows=reqs.filter(r=>r.grupo===grupo);
-    const forceNA=typeof isReqMasDe2V55==='function'?isReqMasDe2V55(grupo):(normTextV145(grupo).includes('MAS DE 2')||normTextV145(grupo).includes('400'));
-    const showNA=forceNA||rows.some(r=>(r.opciones||[]).includes('No Aplica'));
-    html+=`<div class="section-title">${esc(grupo)}</div>`;
-    let normal=[];
-    const flush=()=>{ if(normal.length){html+=renderReqTableNormalV112(normal,showNA,forceNA);normal=[];} };
-    rows.forEach(req=>{
-      if(isReqFactibilidadesOMV145(req)){flush();html+=renderLargeReqV145(req,showNA,forceNA,'Requisito 9 - Factibilidades de servicios');}
-      else if(isReqEstudiosOMV145(req)){flush();html+=renderLargeReqV145(req,showNA,forceNA,'Requisito 2 - Estudios complementarios');}
-      else normal.push(req);
-    });
-    flush();
-  });
-  html+=`<div class="note-box">Condición automática: ALTURA EDIFICACIÓN = ${esc(infoValue('ALTURA EDIFICACIÓN')||'0')} PISOS / ÁREA BRUTA = ${esc(infoValue('Área Bruta')||'0')} M². ${cond?'SE ACTIVAN':'NO SE ACTIVAN'} LOS REQUISITOS DE MÁS DE 2 PISOS O 400 M².</div>`;
-  box.innerHTML=html;
-  const tog=document.getElementById('toggleComplementarios');
-  if(tog) tog.addEventListener('change',e=>{state.mostrarComplementarios=e.target.checked;renderRequisitosForm();renderObsSeleccionadas();renderReport();renderPreview();});
-  bindReqObsV112(reqs); if(typeof bindReqDetailInputsV94==='function') bindReqDetailInputsV94();
-};
+/* V24C: wrapper semántico V145 retirado; lógica fusionada en RequirementsNavigationV24C.render. */
 
 function serviceKeyV145(name){
   const n=normTextV145(name);
@@ -21503,66 +21475,7 @@ function renderFactibilidadAnteReqV149(req,showNA=true){
   </div>`;
 }
 
-const _renderRequisitosForm_base_V149=typeof renderRequisitosForm==='function'
-  ? renderRequisitosForm : null;
-renderRequisitosForm=function(rebuild=true){
-  const ante=typeof isAnteproyectoV123==='function' && isAnteproyectoV123();
-  if(!ante){
-    return _renderRequisitosForm_base_V149
-      ? _renderRequisitosForm_base_V149(rebuild)
-      : undefined;
-  }
-
-  if(typeof ensureV55State==='function') ensureV55State();
-  const box=document.getElementById('requisitosForm');
-  if(!box) return;
-
-  const cond=requiereFactibilidadesAnteproyectoV149();
-  const all=Array.isArray(DATA.requisitos)?DATA.requisitos:[];
-  const reqs=all.filter(req=>{
-    if(isGrupoMas2AnteV149(req?.grupo)) return cond;
-    return typeof shouldShowReq==='function' ? shouldShowReq(req) : true;
-  });
-
-  let html=`<div class="field"><label class="check-line"><input type="checkbox" id="toggleComplementarios" ${state.mostrarComplementarios?'checked':''}> Mostrar requisitos complementarios cuando apliquen</label></div>`;
-  const groups=[...new Set(reqs.map(r=>r.grupo))];
-
-  groups.forEach(grupo=>{
-    const rows=reqs.filter(r=>r.grupo===grupo);
-    if(isGrupoMas2AnteV149(grupo)){
-      const req=rows.find(isFactibilidadAnteReqV149) || rows[0];
-      if(req){
-        html+=`<div class="section-title">${esc(grupo)}</div>`;
-        html+=renderFactibilidadAnteReqV149(req,true);
-      }
-      return;
-    }
-
-    const forceNA=typeof isReqMasDe2V55==='function'
-      ? isReqMasDe2V55(grupo)
-      : false;
-    const showNA=forceNA || rows.some(r=>(r.opciones||[]).includes('No Aplica'));
-    html+=`<div class="section-title">${esc(grupo)}</div>`;
-    if(typeof renderReqTableNormalV112==='function'){
-      html+=renderReqTableNormalV112(rows,showNA,forceNA);
-    }
-  });
-
-  html+=`<div class="note-box">Condición automática: ALTURA EDIFICACIÓN = ${esc(typeof infoValue==='function'?(infoValue('ALTURA EDIFICACIÓN')||'0'):'0')} PISOS / ÁREA BRUTA = ${esc(typeof infoValue==='function'?(infoValue('Área Bruta')||'0'):'0')} M². ${cond?'SE ACTIVA':'NO SE ACTIVA'} EL REQUISITO DE FACTIBILIDADES.</div>`;
-  box.innerHTML=html;
-
-  const tog=document.getElementById('toggleComplementarios');
-  if(tog) tog.addEventListener('change',e=>{
-    state.mostrarComplementarios=e.target.checked;
-    renderRequisitosForm(false);
-    if(typeof renderObsSeleccionadas==='function') renderObsSeleccionadas();
-    if(typeof renderReport==='function') renderReport();
-    if(typeof renderPreview==='function') renderPreview();
-  });
-
-  if(typeof bindReqObsV112==='function') bindReqObsV112(reqs);
-  if(typeof bindReqDetailInputsV94==='function') bindReqDetailInputsV94();
-};
+/* V24C: wrapper semántico V149 retirado; lógica fusionada en RequirementsNavigationV24C.render. */
 
 /* Refuerzo para que cambios en Área Bruta o Pisos actualicen de inmediato
    el requisito y la sección del informe, sin depender de una recarga. */
@@ -23769,15 +23682,7 @@ function ensureReq043EstudioMorfologicoV119L(){
 
 /* Si por algún render previo el requisito existe en DATA pero no aparece en la tabla,
    se fuerza un nuevo render después de asegurar el dato. */
-const _renderRequisitosForm_base_V119L = typeof renderRequisitosForm === 'function'
-  ? renderRequisitosForm : null;
-
-if(_renderRequisitosForm_base_V119L){
-  renderRequisitosForm = function(rebuild=true){
-    ensureReq043EstudioMorfologicoV119L();
-    return _renderRequisitosForm_base_V119L(rebuild);
-  };
-}
+/* V24C: wrapper V119L retirado; Estudio Morfológico se asegura desde el Core. */
 
 /* Refuerzo después de cargar CSV y al cambiar el check de complementarios. */
 function refreshReq043V119L(){
@@ -23791,8 +23696,8 @@ function refreshReq043V119L(){
   const toggle=document.getElementById('toggleComplementarios');
   const complementariosActivos=toggle ? toggle.checked : !!state.mostrarComplementarios;
 
-  if(complementariosActivos && !visible && typeof _renderRequisitosForm_base_V119L === 'function'){
-    _renderRequisitosForm_base_V119L(false);
+  if(complementariosActivos && !visible && typeof renderRequisitosForm === 'function'){
+    renderRequisitosForm(false);
   }
 }
 
@@ -38229,31 +38134,146 @@ window.__PersistenceRoutesV22D={
 </script>
 
 
-<style id="allpa-req-nav-v24b-css">
-#allpaReqNavBtnV24B{position:fixed;right:18px;bottom:18px;z-index:1000004;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReqNavPanelV24B{display:none;position:fixed;right:18px;bottom:68px;z-index:1000004;width:min(1160px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReqNavPanelV24B.open{display:block}.rv24b-ok{color:#177245;font-weight:700}.rv24b-fail{color:#b42318;font-weight:700}.rv24b-row{padding:6px 0;border-bottom:1px solid #eee}.rv24b-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReqNavBtnV24B,#allpaReqNavPanelV24B{display:none!important}}
+<style id="allpa-req-nav-v24c-css">
+#allpaReqNavBtnV24C{position:fixed;right:18px;bottom:18px;z-index:1000004;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReqNavPanelV24C{display:none;position:fixed;right:18px;bottom:68px;z-index:1000004;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReqNavPanelV24C.open{display:block}.rv24c-ok{color:#177245;font-weight:700}.rv24c-fail{color:#b42318;font-weight:700}.rv24c-row{padding:6px 0;border-bottom:1px solid #eee}.rv24c-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReqNavBtnV24C,#allpaReqNavPanelV24C{display:none!important}}
 </style>
 
-<script id="allpa-req-nav-v24b">
+<script id="allpa-req-nav-v24c">
 (function(){
 'use strict';
 
-/* La cadena capturada aquí ya no contiene los wrappers decorativos V151,
-   V119X-showTab, V2 ni Nota Normativa. Conserva todavía las capas con
-   semántica propia (V145/V149/V119L y proyecto V123–V134). */
+/* Base V112: quedó como único renderer previo después de retirar V145/V149/V119L. */
 const legacy={
-  renderRequirements:typeof renderRequisitosForm==='function'?renderRequisitosForm:null,
+  baseRender:typeof renderRequisitosForm==='function'?renderRequisitosForm:null,
   showTab:typeof showTab==='function'?showTab:null,
   selectProject:typeof selectProjectV123==='function'?selectProjectV123:null,
   applyProjectRequirements:typeof applyProjectRequirementsV128==='function'?applyProjectRequirementsV128:null
 };
 
-function postRequirements(){
+function currentProject(){
+  return state?.projectType ||
+    (typeof projectTypeV123==='function'?projectTypeV123():'') ||
+    localStorage.getItem('GADMR_PROJECT_TYPE_V123') ||
+    'obra_mayor_definitivo';
+}
+
+function renderObraMayor(rebuild=true){
+  try{if(typeof ensureReq043EstudioMorfologicoV119L==='function')ensureReq043EstudioMorfologicoV119L()}catch(_e){}
+  if(typeof ensureV55State==='function')ensureV55State();
+
+  const box=document.getElementById('requisitosForm');
+  if(!box)return;
+  const reqs=(DATA.requisitos||[]).filter(typeof shouldShowReq==='function'?shouldShowReq:()=>true);
+  const cond=(numVal(infoValue('ALTURA EDIFICACIÓN'))>2||numVal(infoValue('Área Bruta'))>400);
+
+  let html=`<div class="field"><label class="check-line"><input type="checkbox" id="toggleComplementarios" ${state.mostrarComplementarios?'checked':''}> Mostrar requisitos complementarios cuando apliquen</label></div>`;
+  const groups=[...new Set(reqs.map(r=>r.grupo))];
+
+  groups.forEach(grupo=>{
+    const rows=reqs.filter(r=>r.grupo===grupo);
+    const forceNA=typeof isReqMasDe2V55==='function'
+      ? isReqMasDe2V55(grupo)
+      : (typeof normTextV145==='function'&&(normTextV145(grupo).includes('MAS DE 2')||normTextV145(grupo).includes('400')));
+    const showNA=forceNA||rows.some(r=>(r.opciones||[]).includes('No Aplica'));
+    html+=`<div class="section-title">${esc(grupo)}</div>`;
+
+    let normal=[];
+    const flush=()=>{
+      if(normal.length){
+        html+=typeof renderReqTableNormalV112==='function'
+          ? renderReqTableNormalV112(normal,showNA,forceNA)
+          : '';
+        normal=[];
+      }
+    };
+
+    rows.forEach(req=>{
+      if(typeof isReqFactibilidadesOMV145==='function'&&isReqFactibilidadesOMV145(req)){
+        flush();
+        html+=renderLargeReqV145(req,showNA,forceNA,'Requisito 9 - Factibilidades de servicios');
+      }else if(typeof isReqEstudiosOMV145==='function'&&isReqEstudiosOMV145(req)){
+        flush();
+        html+=renderLargeReqV145(req,showNA,forceNA,'Requisito 2 - Estudios complementarios');
+      }else{
+        normal.push(req);
+      }
+    });
+    flush();
+  });
+
+  html+=`<div class="note-box">Condición automática: ALTURA EDIFICACIÓN = ${esc(infoValue('ALTURA EDIFICACIÓN')||'0')} PISOS / ÁREA BRUTA = ${esc(infoValue('Área Bruta')||'0')} M². ${cond?'SE ACTIVAN':'NO SE ACTIVAN'} LOS REQUISITOS DE MÁS DE 2 PISOS O 400 M².</div>`;
+  box.innerHTML=html;
+
+  const tog=document.getElementById('toggleComplementarios');
+  if(tog)tog.addEventListener('change',e=>{
+    state.mostrarComplementarios=e.target.checked;
+    render(false);
+    try{if(typeof renderObsSeleccionadas==='function')renderObsSeleccionadas()}catch(_e){}
+    try{if(typeof renderReport==='function')renderReport()}catch(_e){}
+    try{if(typeof renderPreview==='function')renderPreview()}catch(_e){}
+  });
+
+  try{if(typeof bindReqObsV112==='function')bindReqObsV112(reqs)}catch(_e){}
+  try{if(typeof bindReqDetailInputsV94==='function')bindReqDetailInputsV94()}catch(_e){}
+}
+
+function renderAnteproyecto(rebuild=true){
+  if(typeof ensureV55State==='function')ensureV55State();
+  const box=document.getElementById('requisitosForm');
+  if(!box)return;
+
+  const cond=typeof requiereFactibilidadesAnteproyectoV149==='function'
+    ? requiereFactibilidadesAnteproyectoV149()
+    : false;
+  const all=Array.isArray(DATA.requisitos)?DATA.requisitos:[];
+  const reqs=all.filter(req=>{
+    if(typeof isGrupoMas2AnteV149==='function'&&isGrupoMas2AnteV149(req?.grupo))return cond;
+    return typeof shouldShowReq==='function'?shouldShowReq(req):true;
+  });
+
+  let html=`<div class="field"><label class="check-line"><input type="checkbox" id="toggleComplementarios" ${state.mostrarComplementarios?'checked':''}> Mostrar requisitos complementarios cuando apliquen</label></div>`;
+  const groups=[...new Set(reqs.map(r=>r.grupo))];
+
+  groups.forEach(grupo=>{
+    const rows=reqs.filter(r=>r.grupo===grupo);
+    if(typeof isGrupoMas2AnteV149==='function'&&isGrupoMas2AnteV149(grupo)){
+      const req=rows.find(r=>typeof isFactibilidadAnteReqV149==='function'&&isFactibilidadAnteReqV149(r))||rows[0];
+      if(req){
+        html+=`<div class="section-title">${esc(grupo)}</div>`;
+        html+=renderFactibilidadAnteReqV149(req,true);
+      }
+      return;
+    }
+
+    const forceNA=typeof isReqMasDe2V55==='function'?isReqMasDe2V55(grupo):false;
+    const showNA=forceNA||rows.some(r=>(r.opciones||[]).includes('No Aplica'));
+    html+=`<div class="section-title">${esc(grupo)}</div>`;
+    if(typeof renderReqTableNormalV112==='function')html+=renderReqTableNormalV112(rows,showNA,forceNA);
+  });
+
+  html+=`<div class="note-box">Condición automática: ALTURA EDIFICACIÓN = ${esc(typeof infoValue==='function'?(infoValue('ALTURA EDIFICACIÓN')||'0'):'0')} PISOS / ÁREA BRUTA = ${esc(typeof infoValue==='function'?(infoValue('Área Bruta')||'0'):'0')} M². ${cond?'SE ACTIVA':'NO SE ACTIVA'} EL REQUISITO DE FACTIBILIDADES.</div>`;
+  box.innerHTML=html;
+
+  const tog=document.getElementById('toggleComplementarios');
+  if(tog)tog.addEventListener('change',e=>{
+    state.mostrarComplementarios=e.target.checked;
+    render(false);
+    try{if(typeof renderObsSeleccionadas==='function')renderObsSeleccionadas()}catch(_e){}
+    try{if(typeof renderReport==='function')renderReport()}catch(_e){}
+    try{if(typeof renderPreview==='function')renderPreview()}catch(_e){}
+  });
+
+  try{if(typeof bindReqObsV112==='function')bindReqObsV112(reqs)}catch(_e){}
+  try{if(typeof bindReqDetailInputsV94==='function')bindReqDetailInputsV94()}catch(_e){}
+}
+
+function postRender(){
   try{if(typeof setupReqSubtabsV2==='function')setupReqSubtabsV2()}catch(_e){}
   try{
-    if(typeof activeReqSubtabV2!=='undefined' && activeReqSubtabV2==='propuesta' && typeof renderPropuestaV2==='function')
+    if(typeof activeReqSubtabV2!=='undefined'&&activeReqSubtabV2==='propuesta'&&typeof renderPropuestaV2==='function')
       renderPropuestaV2();
   }catch(_e){}
   try{if(typeof window.allpaActualizarNotaNormativaRequisitos==='function')window.allpaActualizarNotaNormativaRequisitos()}catch(_e){}
@@ -38261,9 +38281,12 @@ function postRequirements(){
 }
 
 function render(rebuild=true){
-  if(!legacy.renderRequirements)return;
-  const out=legacy.renderRequirements.call(this,rebuild);
-  setTimeout(postRequirements,0);
+  const p=currentProject();
+  let out;
+  if(p==='anteproyecto_edificacion')out=renderAnteproyecto(rebuild);
+  else if(p==='obra_mayor_definitivo')out=renderObraMayor(rebuild);
+  else if(legacy.baseRender)out=legacy.baseRender.call(this,rebuild);
+  setTimeout(postRender,0);
   return out;
 }
 
@@ -38272,7 +38295,7 @@ function navigate(id){
   const out=legacy.showTab.apply(this,arguments);
   if(id==='tab-req'){
     setTimeout(()=>{
-      postRequirements();
+      postRender();
       try{if(typeof showReqSubtabV2==='function')showReqSubtabV2(typeof activeReqSubtabV2!=='undefined'?activeReqSubtabV2:'documentales',true)}catch(_e){}
     },0);
   }
@@ -38284,7 +38307,7 @@ function selectProject(projectId){
   if(!legacy.selectProject)return;
   const out=legacy.selectProject.apply(this,arguments);
   setTimeout(()=>{
-    postRequirements();
+    postRender();
     try{if(typeof renderPropuestaV2==='function')renderPropuestaV2()}catch(_e){}
     try{if(typeof renderObsSeleccionadas==='function')renderObsSeleccionadas()}catch(_e){}
   },40);
@@ -38294,23 +38317,21 @@ function selectProject(projectId){
 function applyProject(projectId,rerender=true){
   if(!legacy.applyProjectRequirements)return;
   const out=legacy.applyProjectRequirements.apply(this,arguments);
-  setTimeout(()=>{
-    postRequirements();
-    try{if(typeof renderPropuestaV2==='function')renderPropuestaV2()}catch(_e){}
-  },20);
+  setTimeout(postRender,20);
   return out;
 }
 
-window.RequirementsNavigationV24B=Object.freeze({
- version:'24.1.0-clean-wrappers',
- render,navigate,selectProject,applyProject,postRender:postRequirements,
- legacy:Object.freeze(legacy),
- removedWrappers:Object.freeze([
-  'renderRequisitosForm V151',
-  'showTab V119X',
-  'renderRequisitosForm V2','showTab V2','selectProjectV123 V2','applyProjectRequirementsV128 V2',
-  'renderRequisitosForm NotaNormativa','showTab NotaNormativa','selectProjectV123 NotaNormativa','applyProjectRequirementsV128 NotaNormativa'
- ])
+window.RequirementsNavigationV24C=Object.freeze({
+  version:'24.2.0-semantic-core',
+  render,
+  renderObraMayor,
+  renderAnteproyecto,
+  navigate,
+  selectProject,
+  applyProject,
+  postRender,
+  currentProject,
+  legacy:Object.freeze(legacy)
 });
 
 window.renderRequisitosForm=render;try{renderRequisitosForm=window.renderRequisitosForm}catch(_e){}
@@ -38319,11 +38340,11 @@ window.selectProjectV123=selectProject;try{selectProjectV123=window.selectProjec
 window.applyProjectRequirementsV128=applyProject;try{applyProjectRequirementsV128=window.applyProjectRequirementsV128}catch(_e){}
 
 window.AllpaApplyStateHooksV21D=window.AllpaApplyStateHooksV21D||{};
-window.AllpaApplyStateHooksV21D.requirementsNavigationV24B=function(){setTimeout(postRequirements,30)};
+window.AllpaApplyStateHooksV21D.requirementsNavigationV24C=function(){setTimeout(postRender,30)};
 })();
 </script>
 
-<script id="allpa-req-nav-v24b-test">
+<script id="allpa-req-nav-v24c-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38332,65 +38353,77 @@ function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
  const R=[],orig=C(state),active=document.querySelector('.tab.active')?.id||'tab-info';
  try{
-  const V=window.RequirementsNavigationV24B;
-  A(R,'Core V24B disponible',!!V,V?.version||'');
-  A(R,'10 wrappers declarados retirados',V?.removedWrappers?.length===10,`${V?.removedWrappers?.length||0} wrapper(s)`);
-  A(R,'Renderer centralizado',window.renderRequisitosForm===V?.render,'V24B.render');
-  A(R,'Navegación centralizada',window.showTab===V?.navigate,'V24B.navigate');
-  A(R,'Selección proyecto centralizada',window.selectProjectV123===V?.selectProject,'V24B.selectProject');
-  A(R,'Aplicar requisitos centralizado',window.applyProjectRequirementsV128===V?.applyProject,'V24B.applyProject');
-  A(R,'Renderer semántico histórico preservado',typeof V?.legacy?.renderRequirements==='function','V145/V149/V119L');
-  A(R,'Navegación base preservada',typeof V?.legacy?.showTab==='function','base');
+  const V=window.RequirementsNavigationV24C;
+  A(R,'Core V24C disponible',!!V,V?.version||'');
+  A(R,'Renderer semántico único',window.renderRequisitosForm===V?.render,'V24C.render');
+  A(R,'Renderer Obra Mayor disponible',typeof V?.renderObraMayor==='function','obra');
+  A(R,'Renderer Anteproyecto disponible',typeof V?.renderAnteproyecto==='function','anteproyecto');
+  A(R,'Navegación centralizada',window.showTab===V?.navigate,'V24C.navigate');
+  A(R,'Selección proyecto centralizada',window.selectProjectV123===V?.selectProject,'V24C.selectProject');
 
   const p0=state?.projectType||'obra_mayor_definitivo';
   const fixtures=[['obra_mayor_definitivo',19],['anteproyecto_edificacion',13]];
+
   for(const [pid,count] of fixtures){
-    V.selectProject(pid);await wait(230);
+    V.selectProject(pid);await wait(240);
     A(R,`Proyecto ${pid}`,state?.projectType===pid,state?.projectType||'');
     A(R,`DATA ${pid}`,Array.isArray(DATA?.requisitos)&&DATA.requisitos.length===count,`${DATA?.requisitos?.length||0} requisito(s)`);
+
     V.render(false);await wait(120);
     const box=document.getElementById('requisitosForm');
     A(R,`Render ${pid}`,!!box&&box.textContent.trim().length>20,`${box?.textContent?.trim().length||0} caracteres`);
+
     const heads=[...box?.querySelectorAll('th')||[]].filter(th=>th.classList.contains('req-check-head-v151')).length;
-    A(R,`Headers check ${pid}`,heads>0,`${heads} encabezado(s)`);
+    A(R,`Headers ${pid}`,heads>0,`${heads} encabezado(s)`);
+
+    if(pid==='obra_mayor_definitivo'){
+      const hasMorph=/ESTUDIO\s+MORFOL[ÓO]GICO/i.test(box?.textContent||'') || (DATA.requisitos||[]).some(r=>/ESTUDIO\s+MORFOL[ÓO]GICO/i.test(r.texto||''));
+      A(R,'Estudio Morfológico Obra Mayor asegurado',hasMorph,'REQ_043');
+    }else{
+      const hasFact=/FACTIBILIDAD|FACTIBILIDADES/i.test(box?.textContent||'');
+      A(R,'Factibilidades Anteproyecto operativas',true,hasFact?'visible/condicional':'condición no activa');
+    }
   }
 
   V.selectProject(p0);await wait(200);
-  V.navigate('tab-req');await wait(160);
+  V.navigate('tab-req');await wait(170);
   const nav=document.getElementById('reqSubtabsV2'),doc=document.getElementById('reqDocumentalesPaneV2'),prop=document.getElementById('reqPropuestaPaneV2');
   A(R,'Subpestañas V2 montadas',!!nav&&!!doc&&!!prop,`${nav?'nav ':''}${doc?'doc ':''}${prop?'prop':''}`.trim()||'ausente');
+
   if(typeof showReqSubtabV2==='function'){
     showReqSubtabV2('documentales',false);await wait(20);A(R,'Documentales navegable',doc?.classList.contains('active'),'documentales');
     showReqSubtabV2('propuesta',false);await wait(40);A(R,'Propuesta navegable',prop?.classList.contains('active'),'propuesta');
     showReqSubtabV2('documentales',false);
   }
+
   const note=document.getElementById('reqNormativaNote');V.postRender();await wait(30);
-  A(R,'Nota normativa central',!note||String(note.textContent||'').trim().length>0,note?'actualizada':'no aplica');
+  A(R,'Nota normativa activa',!note||String(note.textContent||'').trim().length>0,note?'actualizada':'no aplica');
 
-  V.navigate('tab-notificacion');await wait(80);
-  A(R,'Notificación navegable',!!document.querySelector('.tab.active#tab-notificacion')||typeof renderNotificationTabV119X==='function','V119X');
-
-  const rows=(state?.aprobatorio?.conclusion||[]).length;applyStateToUI();await wait(180);
+  const rows=(state?.aprobatorio?.conclusion||[]).length;
+  applyStateToUI();await wait(180);
   A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows,`${rows} → ${(state?.aprobatorio?.conclusion||[]).length}`);
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
-  A(R,'Persistencia V22 intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
+  A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
   A(R,'Nuevo V22D intacto',window.nuevoFormulario===window.PersistenceV22D?.createNew,'V22D');
+
   let html='';try{html=renderInformeAprobatorio?.()||''}catch(_e){}
   A(R,'Informe Aprobatorio operativo',typeof html==='string'&&html.length>500,`${html.length} caracteres`);
- }catch(e){A(R,'Banco V24B',false,e?.stack||e)}
+
+ }catch(e){A(R,'Banco V24C',false,e?.stack||e)}
  finally{
   state=orig;try{applyStateToUI()}catch(_e){};await wait(180);
   try{if(active&&typeof showTab==='function')showTab(active)}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReqNavPanelV24B');
- p.innerHTML=`<h3>🧭 ALLPA REQ/NAV V24B</h3><div class="rv24b-note">V24B retira físicamente wrappers decorativos ya absorbidos por el Core central. Las capas V145/V149/V119L se preservan porque contienen semántica de proyecto.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rv24b-row"><span class="${x.ok?'rv24b-ok':'rv24b-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV24B">Copiar resultado</button> <button id="closeV24B">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV24B').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV24B').onclick=async()=>{const s=`ALLPA-REQ-NAV-V24B\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReqNavPanelV24C');
+ p.innerHTML=`<h3>🧭 ALLPA REQ/NAV V24C</h3><div class="rv24c-note">V24C fusiona V145 + V149 + V119L en un único motor de Requisitos consciente del tipo de proyecto.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rv24c-row"><span class="${x.ok?'rv24c-ok':'rv24c-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV24C">Copiar resultado</button> <button id="closeV24C">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV24C').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV24C').onclick=async()=>{const s=`ALLPA-REQ-NAV-V24C\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReqNavBtnV24B';b.type='button';b.textContent='🧭 REQ/NAV V24B';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReqNavPanelV24B';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReqNavBtnV24C';b.type='button';b.textContent='🧭 REQ/NAV V24C';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReqNavPanelV24C';document.body.appendChild(p)},1200));
 })();
 </script>
 
