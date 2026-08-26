@@ -38341,14 +38341,14 @@ install();window.addEventListener('load',()=>{setTimeout(install,500);setTimeout
 </script>
 
 
-<style id="allpa-report-pipeline-v25f2-css">
-#allpaReportBtnV25F2{position:fixed;right:18px;bottom:18px;z-index:1000010;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25F2{display:none;position:fixed;right:18px;bottom:68px;z-index:1000010;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25F2.open{display:block}.rp25f2-ok{color:#177245;font-weight:700}.rp25f2-fail{color:#b42318;font-weight:700}.rp25f2-row{padding:6px 0;border-bottom:1px solid #eee}.rp25f2-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25F2,#allpaReportPanelV25F2{display:none!important}}
+<style id="allpa-report-pipeline-v25f3-css">
+#allpaReportBtnV25F3{position:fixed;right:18px;bottom:18px;z-index:1000010;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25F3{display:none;position:fixed;right:18px;bottom:68px;z-index:1000010;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25F3.open{display:block}.rp25f3-ok{color:#177245;font-weight:700}.rp25f3-fail{color:#b42318;font-weight:700}.rp25f3-row{padding:6px 0;border-bottom:1px solid #eee}.rp25f3-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25F3,#allpaReportPanelV25F3{display:none!important}}
 </style>
 
-<script id="allpa-report-pipeline-v25f2-test">
+<script id="allpa-report-pipeline-v25f3-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38366,7 +38366,6 @@ async function run(){
   A(R,'Sincronización Conclusión V145 disponible',!!S.syncConclusion,'V145');
   A(R,'Rutas públicas V25F',window.renderInformeAprobatorio===V?.aprobatorio&&window.renderInformeObservaciones===V?.observaciones&&window.renderInformeDesistimientoV69===V?.desistimiento&&window.renderReport===V?.render,'únicas');
 
-  /* Obra Mayor */
   state.projectType='obra_mayor_definitivo';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
   V.prepareStructural();
@@ -38376,16 +38375,23 @@ async function run(){
 
   A(R,'Obra Mayor inicializa estudios',omStudies.length===4,`${omStudies.length} fila(s)`);
   A(R,'Obra Mayor inicializa factibilidades',omFact.length===3,`${omFact.length} fila(s)`);
+
+  const entities=omFact.map(x=>String(x.estudio||'').trim());
+  const first=entities[0]||'';
+  const firstCanonical=/^(RIOBAMBA-EP|EMAPAR|EP-EMAPAR)$/i.test(first);
   A(R,'Factibilidades OM tienen entidades correctas',
-    omFact.map(x=>String(x.estudio||'')).join('|')==='EMAPAR|EERSA|CNT',
-    omFact.map(x=>x.estudio||'').join(' · '));
+    entities.length===3 && firstCanonical && /^EERSA$/i.test(entities[1]||'') && /^CNT$/i.test(entities[2]||''),
+    entities.join(' · '));
+
+  A(R,'Entidad agua usa canon V13',
+    /^RIOBAMBA-EP$/i.test(first),
+    first||'(vacío)');
 
   const omReport=String(S.obraStudiesReport?.()||'');
   A(R,'Reporte combinado Obra Mayor responde',omReport.length>50,`${omReport.length} caracteres`);
   const omA=String(V.aprobatorio()||'');
   A(R,'Aprobatorio Obra Mayor operativo',omA.length>500,`${omA.length} caracteres`);
 
-  /* Anteproyecto */
   state.projectType='anteproyecto_edificacion';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
   V.prepareStructural();
@@ -38406,7 +38412,6 @@ async function run(){
   A(R,'Aprobatorio Anteproyecto operativo',anteA.length>500,`${anteA.length} caracteres`);
   A(R,'Aprobatorio Anteproyecto contiene base legal/factibilidades',/Base t[ée]cnico|Factibilidades/i.test(anteA),'visible');
 
-  /* Dos motivos V145 */
   if(!state.desistimiento)state.desistimiento={};
   state.desistimiento.motivo='Petición del Administrado';
   try{ensureDesistimientoV69()}catch(_e){}
@@ -38434,8 +38439,7 @@ async function run(){
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
   A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
-
- }catch(e){A(R,'Banco V25F2',false,e?.stack||e)}
+ }catch(e){A(R,'Banco V25F3',false,e?.stack||e)}
  finally{
   state=orig;try{applyStateToUI()}catch(_e){};await W(180);
   if(sel){sel.value=sel0;sel.dispatchEvent(new Event('change',{bubbles:true}))}
@@ -38443,22 +38447,22 @@ async function run(){
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25F2');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25F2</h3><div class="rp25f2-note">Corrección del banco: Obra Mayor almacena sus factibilidades en state.aprobatorio.factibilidadesOMV145. No cambia la lógica funcional V25F.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25f2-row"><span class="${x.ok?'rp25f2-ok':'rp25f2-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25F2">Copiar resultado</button> <button id="closeV25F2">Cerrar</button></p>`;
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25F3');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25F3</h3><div class="rp25f3-note">Corrección final del banco estructural: V13 canoniza EMAPAR como RIOBAMBA-EP. Se valida el canon real sin modificar la lógica V25F.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25f3-row"><span class="${x.ok?'rp25f3-ok':'rp25f3-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25F3">Copiar resultado</button> <button id="closeV25F3">Cerrar</button></p>`;
 
  p.classList.add('open');
- document.getElementById('closeV25F2').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25F2').onclick=async()=>{
-  const s=`ALLPA-REPORT-V25F2\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-  try{await navigator.clipboard.writeText(s)}
-  catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
+ document.getElementById('closeV25F3').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25F3').onclick=async()=>{
+   const s=`ALLPA-REPORT-V25F3\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+   try{await navigator.clipboard.writeText(s)}
+   catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
  };
 }
 window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaReportBtnV25F2';b.type='button';b.textContent='📄 REPORT V25F2';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaReportPanelV25F2';document.body.appendChild(p);
+ const b=document.createElement('button');b.id='allpaReportBtnV25F3';b.type='button';b.textContent='📄 REPORT V25F3';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaReportPanelV25F3';document.body.appendChild(p);
 },1400));
 })();
 </script>
