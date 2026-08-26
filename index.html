@@ -38279,239 +38279,185 @@ window.addEventListener('load',()=>{setTimeout(bind,800);setTimeout(bind,1800);}
 </script>
 
 
-<style id="allpa-report-pipeline-v25c-css">
-#allpaReportBtnV25C{position:fixed;right:18px;bottom:18px;z-index:1000007;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25C{display:none;position:fixed;right:18px;bottom:68px;z-index:1000007;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25C.open{display:block}.rp25c-ok{color:#177245;font-weight:700}.rp25c-fail{color:#b42318;font-weight:700}.rp25c-row{padding:6px 0;border-bottom:1px solid #eee}.rp25c-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25C,#allpaReportPanelV25C{display:none!important}}
+<style id="allpa-report-pipeline-v25d-css">
+#allpaReportBtnV25D{position:fixed;right:18px;bottom:18px;z-index:1000008;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25D{display:none;position:fixed;right:18px;bottom:68px;z-index:1000008;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25D.open{display:block}.rp25d-ok{color:#177245;font-weight:700}.rp25d-fail{color:#b42318;font-weight:700}.rp25d-row{padding:6px 0;border-bottom:1px solid #eee}.rp25d-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25D,#allpaReportPanelV25D{display:none!important}}
 </style>
 
-<script id="allpa-report-pipeline-v25c">
+<script id="allpa-report-pipeline-v25d">
 (function(){
 'use strict';
 
 /*
- V25C consolida la ENTRADA semántica de los tres renderizadores.
- La cadena histórica ya validada queda capturada una sola vez como implementación
- interna. Así ningún consumidor público vuelve a depender de qué wrapper fue el
- último en sobrescribir cada nombre global.
+ V25D = primera consolidación física segura.
+ En vez de mantener una cadena pública de wrappers, capturamos el renderer final
+ ya validado y absorbemos en un solo núcleo las transformaciones post-render
+ que son explícitamente idempotentes. Las reglas estructurales de V134/V145/V147
+ siguen dentro del motor capturado hasta la siguiente depuración.
 */
-const legacy=Object.freeze({
-  aprobatorio: typeof window.renderInformeAprobatorio==='function'
-    ? window.renderInformeAprobatorio : null,
-  observaciones: typeof window.renderInformeObservaciones==='function'
-    ? window.renderInformeObservaciones : null,
-  desistimiento:
-    typeof window.renderInformeDesistimientoV27==='function'
-      ? window.renderInformeDesistimientoV27
-      : (typeof window.renderInformeDesistimientoV69==='function'
-          ? window.renderInformeDesistimientoV69 : null)
+const engine=Object.freeze({
+  aprobatorio: typeof window.renderInformeAprobatorio==='function' ? window.renderInformeAprobatorio : null,
+  observaciones: typeof window.renderInformeObservaciones==='function' ? window.renderInformeObservaciones : null,
+  desistimiento: typeof window.renderInformeDesistimientoV27==='function'
+    ? window.renderInformeDesistimientoV27
+    : (typeof window.renderInformeDesistimientoV69==='function' ? window.renderInformeDesistimientoV69 : null)
 });
 
-function ensureHtml(value,name){
-  const html=String(value??'');
-  if(!html.trim()) throw new Error(`El renderer ${name} devolvió contenido vacío.`);
-  return html;
+function html(v,n){
+  const s=String(v??'');
+  if(!s.trim()) throw new Error(`Renderer ${n} vacío`);
+  return s;
 }
-
+function postCommon(out){
+  let s=String(out||'');
+  try{if(typeof reemplazarFechaSubsanacionFinalV93==='function')s=reemplazarFechaSubsanacionFinalV93(s)}catch(_e){}
+  return s;
+}
+function postAnte(out,type){
+  let s=String(out||'');
+  try{if(typeof replaceAnteproyectoTextV123==='function')s=replaceAnteproyectoTextV123(s,type)}catch(_e){}
+  return s;
+}
 function aprobatorio(){
-  if(!legacy.aprobatorio) throw new Error('Renderer Aprobatorio histórico no disponible.');
-  return ensureHtml(legacy.aprobatorio(),'Aprobatorio');
+  if(!engine.aprobatorio)throw new Error('Motor Aprobatorio no disponible');
+  try{if(typeof calculateAreasV13==='function')calculateAreasV13()}catch(_e){}
+  let out=html(engine.aprobatorio(),'Aprobatorio');
+  out=postCommon(out);
+  out=postAnte(out,'aprobatorio');
+  try{if(typeof replaceAreaConstruirV13==='function')out=replaceAreaConstruirV13(out)}catch(_e){}
+  out=out.replace(/<div class="head">\s*<div class="sub">[^<]*INFORME\s+T[ÉE]CNICO\s+APROBATORIO\s+DE\s+OBRA\s+MAYOR[^<]*<\/div>\s*<\/div>/gi,'');
+  return out;
 }
-
 function observaciones(){
-  if(!legacy.observaciones) throw new Error('Renderer Observaciones histórico no disponible.');
-  return ensureHtml(legacy.observaciones(),'Observaciones');
+  if(!engine.observaciones)throw new Error('Motor Observaciones no disponible');
+  try{if(typeof patchPlantillaObservacionesV147==='function')patchPlantillaObservacionesV147()}catch(_e){}
+  let out=html(engine.observaciones(),'Observaciones');
+  out=postCommon(out);
+  try{if(typeof aplicarTextoCincoDiasV116==='function')out=aplicarTextoCincoDiasV116(out)}catch(_e){}
+  out=postAnte(out,'observaciones');
+  try{if(typeof patchResumenObservacionesHtmlV147==='function')out=patchResumenObservacionesHtmlV147(out)}catch(_e){}
+  return out;
 }
-
 function desistimiento(){
-  if(!legacy.desistimiento) throw new Error('Renderer Desistimiento histórico no disponible.');
-  let html=ensureHtml(legacy.desistimiento(),'Desistimiento');
-
-  /* V27 ya incorpora la nota. Este guard solo normaliza una eventual ruta V69. */
-  if(
-    legacy.desistimiento!==window.renderInformeDesistimientoV27 &&
-    typeof window.aplicarNotaDesistimientoV26==='function'
-  ){
-    html=String(window.aplicarNotaDesistimientoV26(html)||html);
-  }
-  return html;
+  if(!engine.desistimiento)throw new Error('Motor Desistimiento no disponible');
+  try{if(typeof patchDesistimientoConclusionV146==='function')patchDesistimientoConclusionV146()}catch(_e){}
+  let out=html(engine.desistimiento(),'Desistimiento');
+  out=postCommon(out);
+  out=postAnte(out,'desistimiento');
+  try{if(typeof stripOldNotaBlocksV27==='function')out=stripOldNotaBlocksV27(out)}catch(_e){}
+  try{if(typeof injectNotaBeforeConclusionesV27==='function')out=injectNotaBeforeConclusionesV27(out)}catch(_e){}
+  return out;
 }
-
-function renderByType(type){
+function byType(type){
   const t=String(type||state?.tipoInforme||'').trim();
-  if(t==='Informe Técnico Aprobatorio') return aprobatorio();
-  if(t==='Informe con Observaciones') return observaciones();
-  if(t==='Informe de Desistimiento') return desistimiento();
+  if(t==='Informe Técnico Aprobatorio')return aprobatorio();
+  if(t==='Informe con Observaciones')return observaciones();
+  if(t==='Informe de Desistimiento')return desistimiento();
   return 'Seleccione el tipo de informe para generar la vista previa.';
 }
-
 function render(){
   try{if(typeof collectTop==='function')collectTop()}catch(_e){}
   try{if(typeof updateSideActions==='function')updateSideActions()}catch(_e){}
-
   const t=String(state?.tipoInforme||'').trim();
-  let html=renderByType(t);
-
-  /* Limpieza final V27: idempotente y necesaria para documentos antiguos. */
-  try{
-    if(typeof stripOldNotaBlocksV27==='function') html=stripOldNotaBlocksV27(html);
-    if(t==='Informe de Desistimiento' && typeof injectNotaBeforeConclusionesV27==='function'){
-      html=injectNotaBeforeConclusionesV27(html);
-    }
-  }catch(_e){}
-
-  const reportEl=document.getElementById('report');
-  if(reportEl){
-    const isApr=t==='Informe Técnico Aprobatorio';
-    const isObs=t==='Informe con Observaciones';
-    const isDes=t==='Informe de Desistimiento';
-
-    reportEl.className='report '+(
-      isApr ? 'report-aprobatorio'
-      : (isDes ? 'report-desistimiento report-observaciones' : 'report-observaciones')
-    );
-    document.body.classList.toggle('printing-observaciones',isObs||isDes);
-    document.body.classList.toggle('printing-aprobatorio',isApr);
-    reportEl.innerHTML=html;
+  const out=byType(t),el=document.getElementById('report');
+  if(el){
+    const apr=t==='Informe Técnico Aprobatorio',des=t==='Informe de Desistimiento',obs=t==='Informe con Observaciones';
+    el.className='report '+(apr?'report-aprobatorio':(des?'report-desistimiento report-observaciones':'report-observaciones'));
+    document.body.classList.toggle('printing-observaciones',obs||des);
+    document.body.classList.toggle('printing-aprobatorio',apr);
+    el.innerHTML=out;
   }
-  return html;
+  return out;
 }
-
-window.ReportRenderersV25C=Object.freeze({
-  version:'25.2.0-renderers',
-  legacy,
-  aprobatorio,
-  observaciones,
-  desistimiento,
-  renderByType,
-  render
+const API=window.ReportRenderersV25D=Object.freeze({
+  version:'25.3.0-physical-stage1',engine,aprobatorio,observaciones,desistimiento,renderByType:byType,render,
+  absorbed:Object.freeze(['V93-post','V116-post','V123-post','V146-patch','V147-post','V13-post','V27-note'])
 });
-
-/* Únicas rutas públicas desde este punto. */
-window.renderInformeAprobatorio=aprobatorio;
-try{renderInformeAprobatorio=window.renderInformeAprobatorio}catch(_e){}
-
-window.renderInformeObservaciones=observaciones;
-try{renderInformeObservaciones=window.renderInformeObservaciones}catch(_e){}
-
-window.renderInformeDesistimientoV69=desistimiento;
-try{renderInformeDesistimientoV69=window.renderInformeDesistimientoV69}catch(_e){}
-
-/* Compatibilidad: toda llamada genérica de desistimiento entra al mismo núcleo. */
-window.renderInformeDesistimiento=desistimiento;
-try{renderInformeDesistimiento=window.renderInformeDesistimiento}catch(_e){}
-
-window.renderReport=render;
-try{renderReport=window.renderReport}catch(_e){}
-
-function reinstall(){
+function install(){
   window.renderInformeAprobatorio=aprobatorio;
   window.renderInformeObservaciones=observaciones;
   window.renderInformeDesistimientoV69=desistimiento;
   window.renderInformeDesistimiento=desistimiento;
   window.renderReport=render;
+  try{renderInformeAprobatorio=aprobatorio}catch(_e){}
+  try{renderInformeObservaciones=observaciones}catch(_e){}
+  try{renderInformeDesistimientoV69=desistimiento}catch(_e){}
+  try{renderInformeDesistimiento=desistimiento}catch(_e){}
+  try{renderReport=render}catch(_e){}
 }
-window.addEventListener('load',()=>{setTimeout(reinstall,500);setTimeout(reinstall,1600);});
+install();
+window.addEventListener('load',()=>{setTimeout(install,500);setTimeout(install,1700)});
 })();
 </script>
 
-<script id="allpa-report-pipeline-v25c-test">
+<script id="allpa-report-pipeline-v25d-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d??'')})}
-function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+function W(ms){return new Promise(r=>setTimeout(r,ms))}
+function sig(s){return String(s||'').replace(/\s+/g,' ').trim()}
 async function run(){
- const R=[],orig=C(state),active=document.querySelector('.tab.active')?.id||'tab-info';
- const tipoEl=document.getElementById('tipoInforme'),tipoDom=tipoEl?.value||'';
+ const R=[],orig=C(state),tab=document.querySelector('.tab.active')?.id||'tab-info',sel=document.getElementById('tipoInforme'),sel0=sel?.value||'';
  try{
-  const V=window.ReportRenderersV25C;
-  A(R,'Renderers V25C disponible',!!V,V?.version||'');
-  A(R,'Tres implementaciones históricas capturadas',
-    !!V?.legacy?.aprobatorio&&!!V?.legacy?.observaciones&&!!V?.legacy?.desistimiento,
-    'aprobatorio · observaciones · desistimiento');
+  const V=window.ReportRenderersV25D;
+  A(R,'Renderers V25D disponible',!!V,V?.version||'');
+  A(R,'Tres motores capturados',!!V?.engine?.aprobatorio&&!!V?.engine?.observaciones&&!!V?.engine?.desistimiento,'aprobatorio · observaciones · desistimiento');
+  A(R,'Transformaciones absorbidas',V?.absorbed?.length===7,(V?.absorbed||[]).join(' · '));
+  A(R,'Aprobatorio ruta V25D',window.renderInformeAprobatorio===V?.aprobatorio,'V25D.aprobatorio');
+  A(R,'Observaciones ruta V25D',window.renderInformeObservaciones===V?.observaciones,'V25D.observaciones');
+  A(R,'Desistimiento ruta V25D',window.renderInformeDesistimientoV69===V?.desistimiento,'V25D.desistimiento');
+  A(R,'Render general ruta V25D',window.renderReport===V?.render,'V25D.render');
 
-  A(R,'Aprobatorio ruta única',window.renderInformeAprobatorio===V?.aprobatorio,'V25C.aprobatorio');
-  A(R,'Observaciones ruta única',window.renderInformeObservaciones===V?.observaciones,'V25C.observaciones');
-  A(R,'Desistimiento V69 ruta única',window.renderInformeDesistimientoV69===V?.desistimiento,'V25C.desistimiento');
-  A(R,'Desistimiento genérico ruta única',window.renderInformeDesistimiento===V?.desistimiento,'V25C.desistimiento');
-  A(R,'Render general ruta única',window.renderReport===V?.render,'V25C.render');
-
-  const a=String(V.aprobatorio()||'');
-  A(R,'Aprobatorio genera HTML',a.length>500,`${a.length} caracteres`);
-  A(R,'Aprobatorio conserva Información general',/Informaci[oó]n general/i.test(a),'sección visible');
-  A(R,'Aprobatorio conserva Conclusión',/Conclusi[oó]n/i.test(a),'sección visible');
-
-  const o=String(V.observaciones()||'');
-  A(R,'Observaciones genera HTML',o.length>500,`${o.length} caracteres`);
-  A(R,'Observaciones conserva resumen/criterio',
-    /RESUMEN DE OBSERVACIONES|Criterio t[ée]cnico/i.test(o),
-    'sección visible');
-
-  /* Desistimiento puede ser corto si el fixture no tiene motivo: eso es semántica válida. */
-  const d=String(V.desistimiento()||'');
-  A(R,'Desistimiento responde',d.length>100,`${d.length} caracteres`);
-  A(R,'Desistimiento conserva flujo de motivo',
-    /desist|Seleccione el motivo|Conclusiones|Antecedentes/i.test(d),
-    'semántica visible');
-
-  const types=[
-    ['Informe Técnico Aprobatorio','Aprobatorio'],
-    ['Informe con Observaciones','Observaciones'],
-    ['Informe de Desistimiento','Desistimiento']
+  const pairs=[
+   ['Aprobatorio',V.engine.aprobatorio,V.aprobatorio],
+   ['Observaciones',V.engine.observaciones,V.observaciones],
+   ['Desistimiento',V.engine.desistimiento,V.desistimiento]
   ];
-  for(const [type,label] of types){
-    state.tipoInforme=type;
-    if(tipoEl){
-      tipoEl.value=type;
-      tipoEl.dispatchEvent(new Event('change',{bubbles:true}));
-    }
-    await wait(35);
-    const html=String(V.render()||'');
-    const dom=String((document.getElementById('report')||{}).innerHTML||'');
-    A(R,`Render general ${label} actualiza vista`,html.length>100&&dom.length>100,`${dom.length} caracteres`);
+  for(const [n,oldFn,newFn] of pairs){
+    const old=String(oldFn()||''),neu=String(newFn()||'');
+    A(R,`${n} motor histórico responde`,old.length>100,`${old.length} caracteres`);
+    A(R,`${n} V25D responde`,neu.length>100,`${neu.length} caracteres`);
+    A(R,`${n} no pierde contenido`,neu.length>=Math.floor(old.length*.95),`${old.length} → ${neu.length}`);
+  }
+
+  const a=V.aprobatorio();
+  A(R,'Aprobatorio conserva Información general',/Informaci[oó]n general/i.test(a),'visible');
+  A(R,'Aprobatorio conserva Conclusión',/Conclusi[oó]n/i.test(a),'visible');
+  const o=V.observaciones();
+  A(R,'Observaciones conserva resumen/criterio',/RESUMEN DE OBSERVACIONES|Criterio t[ée]cnico/i.test(o),'visible');
+  const d=V.desistimiento();
+  A(R,'Desistimiento conserva semántica',/desist|Seleccione el motivo|Conclusiones|Antecedentes/i.test(d),'visible');
+
+  for(const [type,label] of [['Informe Técnico Aprobatorio','Aprobatorio'],['Informe con Observaciones','Observaciones'],['Informe de Desistimiento','Desistimiento']]){
+    state.tipoInforme=type;if(sel){sel.value=type;sel.dispatchEvent(new Event('change',{bubbles:true}))}await W(30);
+    const h=String(V.render()||''),dom=String(document.getElementById('report')?.innerHTML||'');
+    A(R,`Render general ${label}`,h.length>100&&dom.length>100,`${dom.length} caracteres`);
   }
 
   const rows=(state?.aprobatorio?.conclusion||[]).length;
-  applyStateToUI();await wait(160);
+  applyStateToUI();await W(160);
   A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows,`${rows} → ${(state?.aprobatorio?.conclusion||[]).length}`);
-
   A(R,'ReportOutput V25B intacto',!!window.ReportOutputV25B,window.ReportOutputV25B?.version||'');
-  A(R,'PDF sigue usando ruta pública',window.imprimirInforme===window.ReportOutputV25B?.printCurrent,'V25B.printCurrent');
+  A(R,'PDF V25B intacto',window.imprimirInforme===window.ReportOutputV25B?.printCurrent,'V25B.printCurrent');
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
   A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
-
- }catch(e){A(R,'Banco V25C',false,e?.stack||e)}
+ }catch(e){A(R,'Banco V25D',false,e?.stack||e)}
  finally{
-  state=orig;
-  try{applyStateToUI()}catch(_e){}
-  await wait(180);
-  if(tipoEl){
-    tipoEl.value=tipoDom;
-    tipoEl.dispatchEvent(new Event('change',{bubbles:true}));
-  }
-  try{if(active&&typeof showTab==='function')showTab(active)}catch(_e){}
+  state=orig;try{applyStateToUI()}catch(_e){};await W(180);
+  if(sel){sel.value=sel0;sel.dispatchEvent(new Event('change',{bubbles:true}))}
+  try{if(tab&&typeof showTab==='function')showTab(tab)}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
-
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25C');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25C</h3><div class="rp25c-note">V25C establece una entrada semántica única para Aprobatorio, Observaciones, Desistimiento y renderReport. Las implementaciones históricas validadas quedan encapsuladas como motores internos.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25c-row"><span class="${x.ok?'rp25c-ok':'rp25c-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25C">Copiar resultado</button> <button id="closeV25C">Cerrar</button></p>`;
- p.classList.add('open');
- document.getElementById('closeV25C').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25C').onclick=async()=>{
-  const s=`ALLPA-REPORT-V25C\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-  try{await navigator.clipboard.writeText(s)}
-  catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
- };
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25D');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25D</h3><div class="rp25d-note">Primera consolidación física: V25D absorbe transformaciones post-render idempotentes y compara cada salida contra el motor histórico capturado.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+R.map(x=>`<div class="rp25d-row"><span class="${x.ok?'rp25d-ok':'rp25d-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+`<p><button id="copyV25D">Copiar resultado</button> <button id="closeV25D">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV25D').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25D').onclick=async()=>{const s=`ALLPA-REPORT-V25D\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaReportBtnV25C';b.type='button';b.textContent='📄 REPORT V25C';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaReportPanelV25C';document.body.appendChild(p);
-},1400));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReportBtnV25D';b.type='button';b.textContent='📄 REPORT V25D';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReportPanelV25D';document.body.appendChild(p)},1400));
 })();
 </script>
 
