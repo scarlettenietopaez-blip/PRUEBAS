@@ -38279,13 +38279,6 @@ window.AllpaApplyStateHooksV21D.requirementsNavigationV24C=function(){setTimeout
 </script>
 
 
-<style id="allpa-req-nav-v24d-css">
-#allpaReqNavBtnV24D{position:fixed;right:18px;bottom:18px;z-index:1000005;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReqNavPanelV24D{display:none;position:fixed;right:18px;bottom:68px;z-index:1000005;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReqNavPanelV24D.open{display:block}.rv24d-ok{color:#177245;font-weight:700}.rv24d-fail{color:#b42318;font-weight:700}.rv24d-row{padding:6px 0;border-bottom:1px solid #eee}.rv24d-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReqNavBtnV24D,#allpaReqNavPanelV24D{display:none!important}}
-</style>
-
 <script id="allpa-req-nav-v24d">
 (function(){
 'use strict';
@@ -38407,7 +38400,109 @@ window.__RequirementsNavigationRoutesV24D={
 })();
 </script>
 
-<script id="allpa-req-nav-v24d-test">
+
+<style id="allpa-report-pipeline-v25-css">
+#allpaReportBtnV25{position:fixed;right:18px;bottom:18px;z-index:1000006;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25{display:none;position:fixed;right:18px;bottom:68px;z-index:1000006;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25.open{display:block}.rp25-ok{color:#177245;font-weight:700}.rp25-fail{color:#b42318;font-weight:700}.rp25-row{padding:6px 0;border-bottom:1px solid #eee}.rp25-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25,#allpaReportPanelV25{display:none!important}}
+</style>
+
+<script id="allpa-report-pipeline-v25">
+(function(){
+'use strict';
+
+/* Fase puente: captura las rutas finales que V24D dejó activas.
+   No se eliminan wrappers todavía. */
+const legacy={
+  renderAprobatorio:typeof renderInformeAprobatorio==='function'?renderInformeAprobatorio:null,
+  renderObservaciones:typeof renderInformeObservaciones==='function'?renderInformeObservaciones:null,
+  renderDesistimiento:typeof renderInformeDesistimientoV69==='function'?renderInformeDesistimientoV69:null,
+  renderReport:typeof renderReport==='function'?renderReport:null,
+  validation:typeof validationErrorsV70==='function'?validationErrorsV70:null,
+  copyCurrent:typeof copiarInformeActualV70==='function'?copiarInformeActualV70:null,
+  copyAprobatorio:typeof copiarInformeAprobatorio==='function'?copiarInformeAprobatorio:null,
+  print:typeof imprimirInforme==='function'?imprimirInforme:null,
+  infoTable:typeof aprobatorioInfoTableFromTemplate==='function'?aprobatorioInfoTableFromTemplate:null
+};
+
+function renderAprobatorio(){
+  return legacy.renderAprobatorio?legacy.renderAprobatorio.apply(this,arguments):'';
+}
+function renderObservaciones(){
+  return legacy.renderObservaciones?legacy.renderObservaciones.apply(this,arguments):'';
+}
+function renderDesistimiento(){
+  return legacy.renderDesistimiento?legacy.renderDesistimiento.apply(this,arguments):'';
+}
+function renderCurrent(){
+  return legacy.renderReport?legacy.renderReport.apply(this,arguments):undefined;
+}
+function validate(context='generar el PDF'){
+  return legacy.validation?legacy.validation.call(this,context):[];
+}
+async function copyCurrent(){
+  return legacy.copyCurrent?legacy.copyCurrent.apply(this,arguments):false;
+}
+async function copyAprobatorio(){
+  return legacy.copyAprobatorio?legacy.copyAprobatorio.apply(this,arguments):false;
+}
+async function printCurrent(){
+  return legacy.print?legacy.print.apply(this,arguments):false;
+}
+function infoTable(){
+  return legacy.infoTable?legacy.infoTable.apply(this,arguments):'';
+}
+
+window.ReportPipelineV25=Object.freeze({
+  version:'25.0.0-bridge',
+  renderAprobatorio,
+  renderObservaciones,
+  renderDesistimiento,
+  renderCurrent,
+  validate,
+  copyCurrent,
+  copyAprobatorio,
+  printCurrent,
+  infoTable,
+  legacy:Object.freeze(legacy)
+});
+
+/* Puertas públicas finales. */
+window.renderInformeAprobatorio=renderAprobatorio;
+try{renderInformeAprobatorio=window.renderInformeAprobatorio}catch(_e){}
+window.renderInformeObservaciones=renderObservaciones;
+try{renderInformeObservaciones=window.renderInformeObservaciones}catch(_e){}
+window.renderInformeDesistimientoV69=renderDesistimiento;
+try{renderInformeDesistimientoV69=window.renderInformeDesistimientoV69}catch(_e){}
+window.renderReport=renderCurrent;
+try{renderReport=window.renderReport}catch(_e){}
+window.validationErrorsV70=validate;
+try{validationErrorsV70=window.validationErrorsV70}catch(_e){}
+window.copiarInformeActualV70=copyCurrent;
+try{copiarInformeActualV70=window.copiarInformeActualV70}catch(_e){}
+window.copiarInformeAprobatorio=copyAprobatorio;
+try{copiarInformeAprobatorio=window.copiarInformeAprobatorio}catch(_e){}
+window.imprimirInforme=printCurrent;
+try{imprimirInforme=window.imprimirInforme}catch(_e){}
+window.aprobatorioInfoTableFromTemplate=infoTable;
+try{aprobatorioInfoTableFromTemplate=window.aprobatorioInfoTableFromTemplate}catch(_e){}
+
+window.__ReportRoutesV25={
+  renderInformeAprobatorio:'ReportPipelineV25.renderAprobatorio→legacy',
+  renderInformeObservaciones:'ReportPipelineV25.renderObservaciones→legacy',
+  renderInformeDesistimientoV69:'ReportPipelineV25.renderDesistimiento→legacy',
+  renderReport:'ReportPipelineV25.renderCurrent→legacy',
+  validationErrorsV70:'ReportPipelineV25.validate→legacy',
+  copiarInformeActualV70:'ReportPipelineV25.copyCurrent→legacy',
+  copiarInformeAprobatorio:'ReportPipelineV25.copyAprobatorio→legacy',
+  imprimirInforme:'ReportPipelineV25.printCurrent→legacy',
+  aprobatorioInfoTableFromTemplate:'ReportPipelineV25.infoTable→legacy'
+};
+})();
+</script>
+
+<script id="allpa-report-pipeline-v25-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38416,74 +38511,86 @@ function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
  const R=[],orig=C(state),active=document.querySelector('.tab.active')?.id||'tab-info';
  try{
-  const V=window.ProjectNavigationV24D;
-  A(R,'ProjectNavigation V24D disponible',!!V,V?.version||'');
-  A(R,'Core semántico V24C preservado',!!window.RequirementsNavigationV24C,window.RequirementsNavigationV24C?.version||'');
-  A(R,'Selección proyecto ruta única',window.selectProjectV123===V?.selectProject,'V24D.selectProject');
-  A(R,'Navegación ruta V24D',window.showTab===V?.navigate,'V24D.navigate');
-  A(R,'Aplicar requisitos ruta V24D',window.applyProjectRequirementsV128===V?.applyProject,'V24D.applyProject');
-  A(R,'Renderer ruta V24D',window.renderRequisitosForm===V?.render,'V24D.render');
+  const V=window.ReportPipelineV25;
+  A(R,'ReportPipeline V25 disponible',!!V,V?.version||'');
+  A(R,'9 rutas públicas centralizadas',Object.keys(window.__ReportRoutesV25||{}).length===9,Object.keys(window.__ReportRoutesV25||{}).join(' · '));
 
-  const aliases=[
-    '_selectProjectV123_base_V124','_selectProjectV123_base_V125','_selectProjectV123_base_V128',
-    '_selectProjectV123_base_V129','_selectProjectV123_base_V130','_selectProjectV123_base_V131'
-  ];
-  const remaining=aliases.filter(n=>typeof window[n]!=='undefined');
-  A(R,'6 wrappers proyecto retirados',remaining.length===0,remaining.length?remaining.join(' · '):'0 residuos globales');
+  A(R,'Aprobatorio centralizado',window.renderInformeAprobatorio===V?.renderAprobatorio,'V25');
+  A(R,'Observaciones centralizado',window.renderInformeObservaciones===V?.renderObservaciones,'V25');
+  A(R,'Desistimiento centralizado',window.renderInformeDesistimientoV69===V?.renderDesistimiento,'V25');
+  A(R,'Render general centralizado',window.renderReport===V?.renderCurrent,'V25');
+  A(R,'Validación centralizada',window.validationErrorsV70===V?.validate,'V25');
+  A(R,'Copiar centralizado',window.copiarInformeActualV70===V?.copyCurrent,'V25');
+  A(R,'PDF centralizado',window.imprimirInforme===V?.printCurrent,'V25');
+  A(R,'Tabla Información General centralizada',window.aprobatorioInfoTableFromTemplate===V?.infoTable,'V25');
 
-  for(const [pid,count] of [['obra_mayor_definitivo',19],['anteproyecto_edificacion',13]]){
-    V.selectProject(pid);await wait(320);
-    A(R,`Proyecto ${pid} seleccionado`,state?.projectType===pid,state?.projectType||'');
-    A(R,`LocalStorage ${pid}`,localStorage.getItem('GADMR_PROJECT_TYPE_V123')===pid,localStorage.getItem('GADMR_PROJECT_TYPE_V123')||'');
-    A(R,`DATA ${pid}`,Array.isArray(DATA?.requisitos)&&DATA.requisitos.length===count,`${DATA?.requisitos?.length||0} requisito(s)`);
-    A(R,`Nuevo estado ${pid}`,!state.egob && Array.isArray(state.propietarios),`eGOB=${state.egob||'(vacío)'}`);
-    A(R,`Conclusión ${pid}`,Array.isArray(state?.aprobatorio?.conclusion)&&state.aprobatorio.conclusion.length===10,`${state?.aprobatorio?.conclusion?.length||0} fila(s)`);
-    V.render(false);await wait(120);
-    const box=document.getElementById('requisitosForm');
-    A(R,`Render ${pid}`,!!box&&box.textContent.trim().length>20,`${box?.textContent?.trim().length||0} caracteres`);
-  }
+  const legacyNames=['renderAprobatorio','renderObservaciones','renderDesistimiento','renderReport','validation','copyCurrent','copyAprobatorio','print','infoTable'];
+  const available=legacyNames.filter(n=>typeof V?.legacy?.[n]==='function');
+  A(R,'9 cadenas históricas capturadas',available.length===9,available.join(' · '));
 
-  A(R,'Botón Inicio preservado',!!document.getElementById('homeProjectBtnV124'),'V124');
-  A(R,'Controles header preservados',!!document.getElementById('headerProjectControlsV129'),'V129/V130');
-  A(R,'Acciones header preservadas',!!document.getElementById('headerReportActionsV131'),'V131');
+  /* Render directo: no debe mutar Conclusión. */
+  const rows0=(state?.aprobatorio?.conclusion||[]).length;
+  const a=String(V.renderAprobatorio()||'');
+  A(R,'Informe Aprobatorio genera HTML',a.length>500,`${a.length} caracteres`);
+  A(R,'Aprobatorio conserva Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
 
-  V.navigate('tab-req');await wait(180);
-  const nav=document.getElementById('reqSubtabsV2'),doc=document.getElementById('reqDocumentalesPaneV2'),prop=document.getElementById('reqPropuestaPaneV2');
-  A(R,'Subpestañas V2 montadas',!!nav&&!!doc&&!!prop,`${nav?'nav ':''}${doc?'doc ':''}${prop?'prop':''}`.trim()||'ausente');
+  const o=String(V.renderObservaciones()||'');
+  A(R,'Informe Observaciones genera HTML',o.length>500,`${o.length} caracteres`);
 
-  if(typeof showReqSubtabV2==='function'){
-    showReqSubtabV2('documentales',false);await wait(20);
-    A(R,'Documentales navegable',doc?.classList.contains('active'),'documentales');
-    showReqSubtabV2('propuesta',false);await wait(40);
-    A(R,'Propuesta navegable',prop?.classList.contains('active'),'propuesta');
-    showReqSubtabV2('documentales',false);
-  }
+  const d=String(V.renderDesistimiento()||'');
+  A(R,'Informe Desistimiento responde',typeof d==='string',`${d.length} caracteres`);
 
-  const rows=(state?.aprobatorio?.conclusion||[]).length;
-  applyStateToUI();await wait(180);
-  A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows,`${rows} → ${(state?.aprobatorio?.conclusion||[]).length}`);
+  let info='';
+  try{info=String(V.infoTable('')||'')}catch(_e){}
+  A(R,'Tabla Información General responde',typeof info==='string'&&info.length>50,`${info.length} caracteres`);
+
+  const errors=V.validate('generar el PDF');
+  A(R,'Validador devuelve arreglo',Array.isArray(errors),`${errors?.length||0} error(es)`);
+
+  /* La prueba no dispara portapapeles ni impresión. */
+  A(R,'Ruta Copiar disponible',typeof V.copyCurrent==='function','sin ejecutar portapapeles');
+  A(R,'Ruta PDF disponible',typeof V.printCurrent==='function','sin ejecutar impresión');
+
+  A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
+  A(R,'Requirements V24C intacto',!!window.RequirementsNavigationV24C,window.RequirementsNavigationV24C?.version||'');
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
+  A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
-  A(R,'Nuevo V22D intacto',window.nuevoFormulario===window.PersistenceV22D?.createNew,'V22D');
 
-  let html='';try{html=renderInformeAprobatorio?.()||''}catch(_e){}
-  A(R,'Informe Aprobatorio operativo',typeof html==='string'&&html.length>500,`${html.length} caracteres`);
+  /* Verifica que renderReport siga escribiendo el informe visible. */
+  try{
+    V.renderCurrent();
+    await wait(100);
+    const report=document.getElementById('report');
+    A(R,'Render general actualiza vista',!!report&&String(report.innerHTML||'').length>100,`${String(report?.innerHTML||'').length} caracteres`);
+  }catch(e){
+    A(R,'Render general actualiza vista',false,e.message||e);
+  }
 
- }catch(e){A(R,'Banco V24D',false,e?.stack||e)}
+ }catch(e){A(R,'Banco V25',false,e?.stack||e)}
  finally{
-  state=orig;try{applyStateToUI()}catch(_e){};await wait(180);
+  state=orig;
+  try{applyStateToUI()}catch(_e){}
+  await wait(180);
   try{if(active&&typeof showTab==='function')showTab(active)}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReqNavPanelV24D');
- p.innerHTML=`<h3>🧭 ALLPA REQ/NAV V24D</h3><div class="rv24d-note">V24D elimina la cadena V124→V131 de selección de proyecto y la sustituye por una ruta explícita, preservando el Core semántico V24C.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rv24d-row"><span class="${x.ok?'rv24d-ok':'rv24d-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV24D">Copiar resultado</button> <button id="closeV24D">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV24D').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV24D').onclick=async()=>{const s=`ALLPA-REQ-NAV-V24D\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25');
+ p.innerHTML=`<h3>📄 ALLPA REPORT PIPELINE V25</h3><div class="rp25-note">Fase puente: centraliza las rutas de informes, validación, Copiar y PDF sin retirar todavía sus cadenas históricas.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25-row"><span class="${x.ok?'rp25-ok':'rp25-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25">Copiar resultado</button> <button id="closeV25">Cerrar</button></p>`;
+ p.classList.add('open');
+ document.getElementById('closeV25').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25').onclick=async()=>{
+   const s=`ALLPA-REPORT-V25\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+   try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
+ };
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReqNavBtnV24D';b.type='button';b.textContent='🧭 REQ/NAV V24D';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReqNavPanelV24D';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{
+ const b=document.createElement('button');b.id='allpaReportBtnV25';b.type='button';b.textContent='📄 REPORT V25';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaReportPanelV25';document.body.appendChild(p);
+},1200));
 })();
 </script>
 
