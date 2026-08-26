@@ -11090,7 +11090,7 @@ function conclusionDescBlurV84(){
 }
 
 /* Refuerza el render de la tabla para que use blur controlado y no bloquee la escritura. */
-const _renderConclusionTabla_base_V84 = typeof renderConclusionTabla === 'function' ? renderConclusionTabla : null;
+/* V23 limpio: alias huérfano _renderConclusionTabla_base_V84 retirado */
 /* Core V8: histórico retirado renderConclusionTabla */
 window.addEventListener('load',()=>{
   setTimeout(()=>{
@@ -11220,7 +11220,7 @@ function finishConclusionEditingV85(){
 }
 
 /* Evita que funciones externas redibujen la tabla mientras hay foco en un input de Conclusión Técnica. */
-const _renderConclusionTabla_base_V85 = typeof renderConclusionTabla === "function" ? renderConclusionTabla : null;
+/* V23 limpio: alias huérfano _renderConclusionTabla_base_V85 retirado */
 /* Dep11: definición histórica no capturada retirada: renderConclusionTabla */;
 
 /* También bloquea actualizaciones fuertes de reporte mientras se está digitando en la tabla. */
@@ -13859,7 +13859,7 @@ function formatCalcV104(n, dec=2){
 }
 
 /* Mantiene cálculos aun si se modifican las descripciones, usando roles internos. */
-const _recalcAreasCOSV36_base_V104 = typeof recalcAreasCOSV36 === 'function' ? recalcAreasCOSV36 : null;
+/* V23 limpio: alias huérfano _recalcAreasCOSV36_base_V104 retirado */
 /* Core V8: histórico retirado recalcAreasCOSV36 */
 /* Permite cambiar descripción de filas calculadas solo en ampliatorio/modificatorio.
    Mantiene bloqueada la cantidad de las filas calculadas. */
@@ -14138,7 +14138,7 @@ function filterDeletedConclusionRowsV106(){
 /* Refuerzo para el informe: si una fila fue quitada en ampliatorio/modificatorio,
    tampoco debe reaparecer en la vista del informe. */
 if(typeof conclusionRowsForReportV81 === 'function'){
-  const _conclusionRowsForReportV81_base_V106 = conclusionRowsForReportV81;
+  /* V23 limpio: alias huérfano _conclusionRowsForReportV81_base_V106 retirado */
   /* Core V8: histórico retirado conclusionRowsForReportV81 */
 }
 
@@ -14318,7 +14318,7 @@ function prepareConclusionRowsV107(){
 
 /* Refuerzo para que las filas eliminadas tampoco aparezcan en el informe. */
 if(typeof conclusionRowsForReportV81 === 'function'){
-  const _conclusionRowsForReportV81_base_V107 = conclusionRowsForReportV81;
+  /* V23 limpio: alias huérfano _conclusionRowsForReportV81_base_V107 retirado */
   /* Core V8: histórico retirado conclusionRowsForReportV81 */
 }
 
@@ -15683,10 +15683,7 @@ if(_insertSubsanacion5DiasV55_base_V116){
   };
 }
 
-const _guardarFormulario_base_V116 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
-if(_guardarFormulario_base_V116){
-/* Fase 22C: guardarFormulario histórico retirado L15731 */
-}
+/* V23 limpio: carcasa huérfana _guardarFormulario_base_V116 retirada */
 
 function aplicarTextoCincoDiasV116(html){
   let out=String(html||'');
@@ -15880,10 +15877,7 @@ function savedTitleV118(x){
 }
 /* Fase 22B: renderSavedList histórico retirado L15956 */
 
-const _guardarFormulario_base_V118 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
-if(_guardarFormulario_base_V118){
-/* Fase 22C: guardarFormulario histórico retirado L15934 */
-}
+/* V23 limpio: carcasa huérfana _guardarFormulario_base_V118 retirada */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>{
@@ -16043,7 +16037,7 @@ guardarSegundoInformeObservacionesV116 = async function(showMessage=false){
 /* Guardar principal:
    Observaciones usa la nueva regla.
    Aprobatorio / Desistimiento conservan el comportamiento anterior. */
-const _guardarFormulario_noObs_base_V119 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
+/* V23 limpio: alias huérfano _guardarFormulario_noObs_base_V119 retirado */
 /* Fase 22C: guardarFormulario histórico retirado L16109 */
 
 function savedTitleV119(x){
@@ -16069,10 +16063,7 @@ function savedTitleV119(x){
 
 /* Al cargar un registro con nombre largo, el formulario muestra solo el eGOB base,
    pero conserva internamente la llave del registro. */
-const _cargarFormulario_base_V119 = typeof cargarFormulario === 'function' ? cargarFormulario : null;
-if(_cargarFormulario_base_V119){
-/* Fase 22C: cargarFormulario histórico retirado L16117 */
-}
+/* V23 limpio: carcasa huérfana _cargarFormulario_base_V119 retirada */
 
 /* Checkbox Segunda Observación:
    al activarlo guarda el segundo registro con la nueva regla. */
@@ -16535,10 +16526,7 @@ if(_renderReport_base_V123){
 
 
 /* Guardado: persistir tipo de proyecto */
-const _guardarFormulario_base_V123 = typeof guardarFormulario === 'function' ? guardarFormulario : null;
-if(_guardarFormulario_base_V123){
-/* Fase 22C: guardarFormulario histórico retirado L16655 */
-}
+/* V23 limpio: carcasa huérfana _guardarFormulario_base_V123 retirada */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>{
@@ -17594,7 +17582,7 @@ window.applyStateToUICentralV55V129 = function(){
   return out;
 };
 
-const _renderSavedList_base_V129 = typeof renderSavedList==='function' ? renderSavedList : null;
+/* V23 limpio: alias huérfano _renderSavedList_base_V129 retirado */
 /* Fase 22B: renderSavedList histórico retirado L17800 */
 
 window.addEventListener('resize',resizeSideWidgetViewportV129);
@@ -19034,11 +19022,7 @@ function inferSavedProjectV134(record){
 
 /* Migración al cargar: fija primero el proyecto y luego reconstruye requisitos,
    formularios y vista del informe con la estructura correspondiente. */
-const _cargarFormulario_base_V134=typeof cargarFormulario==='function'
-  ? cargarFormulario : null;
-if(_cargarFormulario_base_V134){
-/* Fase 22C: cargarFormulario histórico retirado L19124 */
-}
+/* V23 limpio: carcasa huérfana _cargarFormulario_base_V134 retirada */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>{
@@ -21053,8 +21037,8 @@ function syncConclusionAutoV145(){
 }
 
 /* Core V13: wrapper V145 de prepareRows retirado */
-const _renderConclusionTabla_base_V145=typeof renderConclusionTabla==='function'?renderConclusionTabla:null;
-/* Core V8: histórico retirado renderConclusionTabla */const _conclusionReport_base_V145=typeof conclusionReport==='function'?conclusionReport:null;
+/* V23 limpio: alias huérfano _renderConclusionTabla_base_V145 retirado */
+/* Core V8: histórico retirado renderConclusionTabla *//* V23 limpio: alias huérfano _conclusionReport_base_V145 retirado */
 /* Core V8: histórico retirado conclusionReport */
 const _bindReqDetailInputsV94_base_V145=typeof bindReqDetailInputsV94==='function'?bindReqDetailInputsV94:null;
 bindReqDetailInputsV94=function(){
@@ -24200,7 +24184,7 @@ async function exportarFormularioSeleccionadoV119N(key=null){
   if(typeof msg==='function') msg('Formulario seleccionado exportado correctamente.', true);
 }
 
-const _exportarRespaldo_base_V119N = typeof exportarRespaldo === 'function' ? exportarRespaldo : null;
+/* V23 limpio: alias huérfano _exportarRespaldo_base_V119N retirado */
 /* Fase 22B: exportarRespaldo histórico retirado L24345 */
 
 const _importarRespaldo_base_V119N = typeof importarRespaldo === 'function' ? importarRespaldo : null;
@@ -24433,8 +24417,7 @@ function findAreaUtilTotalStateRowV119O(){
   return (state.aprobatorio?.conclusion || []).find(raw=>isAreaUtilTotalRowV119O(raw)) || null;
 }
 
-const _conclusionRowsForReportV81_base_V119O = typeof conclusionRowsForReportV81 === 'function'
-  ? conclusionRowsForReportV81 : null;
+/* V23 limpio: alias huérfano _conclusionRowsForReportV81_base_V119O retirado */
 
 /* Core V8: histórico retirado conclusionRowsForReportV81 */
 const _conclusionReport_base_V119O = typeof conclusionReport === 'function' ? conclusionReport : null;
@@ -24674,7 +24657,7 @@ setSelectedSavedRecordV119N = function(key){
   updateOpenSelectedButtonV119O();
 };
 
-const _exportarRespaldo_base_V119O = typeof exportarRespaldo === 'function' ? exportarRespaldo : null;
+/* V23 limpio: alias huérfano _exportarRespaldo_base_V119O retirado */
 /* Fase 22B: exportarRespaldo histórico retirado L24831 */
 
 /* La lista lateral se simplifica: se elimina Exportar y flecha por cada registro.
@@ -25588,7 +25571,7 @@ document.addEventListener('click',event=>{
     list.classList.add('open');
   };
 
-  const loadBaseV119R_V22C_REMOVED=true;
+  /* V23 limpio: alias huérfano loadBaseV119R_V22C_REMOVED retirado */
   window.AllpaPersistenceHooksV22C=window.AllpaPersistenceHooksV22C||{};
   window.AllpaPersistenceHooksV22C.convertedLoadPost=function(key,record){
     if((record?.egobBaseV119R || record?.egobBaseV164) && state){
@@ -25611,7 +25594,7 @@ document.addEventListener('click',event=>{
     ensureHeaderConvertV119R();
   };
 
-  const saveBaseV119R_V22C_REMOVED=true;
+  /* V23 limpio: alias huérfano saveBaseV119R_V22C_REMOVED retirado */
   window.AllpaPersistenceHooksV22C=window.AllpaPersistenceHooksV22C||{};
   window.AllpaPersistenceHooksV22C.convertedSave=async function(showMessage=true){
     if(!state?._savedKeyV119R && !state?._savedKeyV164){
@@ -25880,10 +25863,7 @@ if(_renderSavedSearchResultsV131_base_V119T){
   };
 }
 
-const _renderSavedList_base_V119T = typeof renderSavedList === 'function' ? renderSavedList : null;
-if(_renderSavedList_base_V119T){
-/* Fase 22B: renderSavedList histórico retirado L26205 */
-}
+/* V23 limpio: carcasa huérfana _renderSavedList_base_V119T retirada */
 
 window.addEventListener('load',()=>{
   setTimeout(()=>{ actualizarScrollHomeV119T(); aplicarIconosOutlineV119T(); },500);
@@ -29304,7 +29284,7 @@ renderObsSeleccionadas = function(){
       }
     });
   }
-  const recalcBaseV13=typeof recalcAreasCOSV36==='function'?recalcAreasCOSV36:null;
+  /* V23 limpio: alias huérfano recalcBaseV13 retirado */
   /* Core V8: histórico retirado recalcAreasCOSV36 */
   const syncAutoBaseV13=typeof syncConclusionAutoV145==='function'?syncConclusionAutoV145:null;
   if(syncAutoBaseV13){
@@ -38328,103 +38308,114 @@ window.__PersistenceRoutesV22D={
 </script>
 
 
-<style id="allpa-persistence-core-v22e-css">
-#allpaPersistenceBtnV22E{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaPersistencePanelV22E{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1140px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaPersistencePanelV22E.open{display:block}.pv22e-ok{color:#177245;font-weight:700}.pv22e-fail{color:#b42318;font-weight:700}.pv22e-row{padding:6px 0;border-bottom:1px solid #eee}.pv22e-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaPersistenceBtnV22E,#allpaPersistencePanelV22E{display:none!important}}
+<style id="allpa-global-clean-v23-css">
+#allpaGlobalCleanBtnV23{position:fixed;right:18px;bottom:18px;z-index:1000003;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaGlobalCleanPanelV23{display:none;position:fixed;right:18px;bottom:68px;z-index:1000003;width:min(1160px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaGlobalCleanPanelV23.open{display:block}.gv23-ok{color:#177245;font-weight:700}.gv23-fail{color:#b42318;font-weight:700}.gv23-row{padding:6px 0;border-bottom:1px solid #eee}.gv23-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaGlobalCleanBtnV23,#allpaGlobalCleanPanelV23{display:none!important}}
 </style>
 
-<script id="allpa-persistence-core-v22e-test">
+<script id="allpa-global-clean-v23-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
-function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
+function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d??'')})}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
- const R=[],orig=C(state);
+ const R=[],orig=C(state),origTab=document.querySelector('.tab-btn.active')?.dataset?.tab||'';
+ const tempKey='ALLPA-V23-TEMP-'+Date.now();
+ let stored=false;
  try{
-  const P=window.PersistenceV22D;
-  A(R,'Persistence V22D disponible',!!P,P?.version||'');
-  A(R,'Nuevo centralizado',window.nuevoFormulario===P?.createNew,'V22D');
-  A(R,'Guardar V22C intacto',window.guardarFormulario===window.PersistenceV22C?.save,window.PersistenceV22C?.version||'');
-  A(R,'Cargar V22C intacto',window.cargarFormulario===window.PersistenceV22C?.load,window.PersistenceV22C?.version||'');
-  A(R,'Lista V22B intacta',window.renderSavedList===window.PersistenceV22B?.list,window.PersistenceV22B?.version||'');
-  A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
+  A(R,'Conclusión V20 activa',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
+  A(R,'ApplyState V21D activo',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
+  A(R,'Persistencia V22B activa',!!window.PersistenceV22B,window.PersistenceV22B?.version||'');
+  A(R,'Persistencia V22C activa',!!window.PersistenceV22C,window.PersistenceV22C?.version||'');
+  A(R,'Persistencia V22D activa',!!window.PersistenceV22D,window.PersistenceV22D?.version||'');
 
-  const hookNames=['conclusion','project','notification','asunto','requisitosV2','render'];
-  const available=hookNames.filter(n=>typeof P?.hooks?.[n]==='function');
-  A(R,'6 hooks explícitos',available.length===6,available.join(' · '));
+  A(R,'Guardar ruta oficial',window.guardarFormulario===window.PersistenceV22C?.save,'PersistenceV22C.save');
+  A(R,'Cargar ruta oficial',window.cargarFormulario===window.PersistenceV22C?.load,'PersistenceV22C.load');
+  A(R,'Nuevo ruta oficial',window.nuevoFormulario===window.PersistenceV22D?.createNew,'PersistenceV22D.createNew');
+  A(R,'Lista ruta oficial',window.renderSavedList===window.PersistenceV22B?.list,'PersistenceV22B.list');
+  A(R,'Exportar ruta oficial',window.exportarRespaldo===window.PersistenceV22B?.exportBackup,'PersistenceV22B.exportBackup');
+  A(R,'Importar ruta oficial',window.importarRespaldo===window.PersistenceV22B?.importBackup,'PersistenceV22B.importBackup');
 
-  const projectBefore=state?.projectType || localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
-  const ok=P.createNew({skipConfirm:true,silent:true});
-  await wait(300);
+  /* ApplyState idempotente */
+  const rows0=(state?.aprobatorio?.conclusion||[]).length;
+  applyStateToUI(); await wait(150);
+  applyStateToUI(); await wait(150);
+  A(R,'ApplyState no duplica Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
 
-  A(R,'Nuevo ejecuta sin confirmación de prueba',ok===true,String(ok));
-  A(R,'ProjectType preservado',state.projectType===projectBefore,state.projectType||'');
-  A(R,'ProjectType persistido',localStorage.getItem('GADMR_PROJECT_TYPE_V123')===projectBefore,localStorage.getItem('GADMR_PROJECT_TYPE_V123')||'');
+  /* Nuevo formulario silencioso y reversible */
+  const project=state?.projectType||localStorage.getItem('GADMR_PROJECT_TYPE_V123')||'obra_mayor_definitivo';
+  const created=window.PersistenceV22D.createNew({skipConfirm:true,silent:true});
+  await wait(260);
+  A(R,'Nuevo formulario ejecuta',created===true,String(created));
+  A(R,'Nuevo conserva proyecto',state.projectType===project,state.projectType||'');
+  A(R,'Nuevo crea Conclusión',Array.isArray(state?.aprobatorio?.conclusion)&&(state.aprobatorio.conclusion.length===10),`${state?.aprobatorio?.conclusion?.length||0} fila(s)`);
+  A(R,'Nuevo inicializa propietarios',Array.isArray(state?.propietarios),`${state?.propietarios?.length||0} propietario(s)`);
+  A(R,'Nuevo inicializa apoderados',Array.isArray(state?.apoderados)||state?.apoderado!==undefined,Array.isArray(state?.apoderados)?`${state.apoderados.length} apoderado(s)`:'legado');
 
-  const concl=state?.aprobatorio?.conclusion||[];
-  A(R,'Conclusión inicializada',Array.isArray(concl)&&concl.length>0,`${concl.length} fila(s)`);
-  A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
-  A(R,'Conclusión sin duplicación',concl.length<=20,`${concl.length} fila(s)`);
+  /* CRUD mínimo */
+  const rec=C(state);
+  rec.egob=tempKey;
+  rec.updatedAt=new Date().toISOString();
+  rec.createdAt=rec.createdAt||rec.updatedAt;
+  await dbPut(rec); stored=true;
+  A(R,'IndexedDB put/get',!!(await dbGet(tempKey)),tempKey);
 
-  A(R,'Propietarios inicializados',Array.isArray(state.propietarios),`${state.propietarios?.length||0} propietario(s)`);
-  A(R,'Apoderados inicializados',Array.isArray(state.apoderados)||state.apoderado!==undefined,Array.isArray(state.apoderados)?`${state.apoderados.length} apoderado(s)`:'legado');
+  const loaded=await cargarFormulario(tempKey); await wait(200);
+  A(R,'Carga V22C ejecuta',!!loaded,'state');
+  A(R,'Carga mantiene Conclusión',Array.isArray(state?.aprobatorio?.conclusion)&&state.aprobatorio.conclusion.length===10,`${state?.aprobatorio?.conclusion?.length||0} fila(s)`);
 
-  A(R,'Notificación hook disponible',typeof P.hooks.notification==='function','V119X integrado');
-  A(R,'Asunto hook disponible',typeof P.hooks.asunto==='function','V119Y integrado');
-  A(R,'Requisitos V2 hook disponible',typeof P.hooks.requisitosV2==='function','V2 integrado');
+  await renderSavedList();
+  const all=await dbAll();
+  A(R,'Lista incluye temporal',all.some(x=>String(x.egob||'')===tempKey),`${all.length} formulario(s)`);
 
-  /* Validación corregida según DOM real de V21C */
-  const nav=document.getElementById('reqSubtabsV2');
-  const doc=document.getElementById('reqDocumentalesPaneV2');
-  const prop=document.getElementById('reqPropuestaPaneV2');
-  const db=document.getElementById('reqDocBtnV2');
-  const pb=document.getElementById('reqPropBtnV2');
+  await dbDelete(tempKey); stored=false;
+  A(R,'Temporal eliminado',!(await dbGet(tempKey)),'eliminado');
 
-  A(R,'Subpestañas requisitos V2 presentes',
-    !!nav && !!doc && !!prop && !!db && !!pb,
-    `${nav?'nav ':''}${doc?'doc ':''}${prop?'prop ':''}`.trim()||'ausente');
+  /* Renderers transversales */
+  A(R,'Requisitos renderer activo',typeof window.renderRequisitosForm==='function','renderer');
+  A(R,'Observaciones renderer activo',typeof window.renderObservacionesForm==='function','renderer');
+  A(R,'Aprobatorio renderer activo',typeof window.renderInformeAprobatorio==='function','renderer');
+  A(R,'Navegación activa',typeof window.showTab==='function','showTab');
 
-  if(typeof window.showReqSubtabV2==='function' && nav){
-    window.showReqSubtabV2('documentales',false);
-    await wait(20);
-    A(R,'Subpestaña Documentales activa',
-      doc.classList.contains('active') && db.classList.contains('active'),
-      'documentales');
+  let html='';
+  try{html=window.renderInformeAprobatorio?.()||''}catch(_e){}
+  A(R,'Informe Aprobatorio renderiza',typeof html==='string'&&html.length>500,`${html.length} caracteres`);
 
-    window.showReqSubtabV2('propuesta',false);
-    await wait(20);
-    A(R,'Subpestaña Propuesta activa',
-      prop.classList.contains('active') && pb.classList.contains('active'),
-      'propuesta');
+  /* Subpestañas reales V2 */
+  const reqNav=document.getElementById('reqSubtabsV2');
+  const reqDoc=document.getElementById('reqDocumentalesPaneV2');
+  const reqProp=document.getElementById('reqPropuestaPaneV2');
+  A(R,'Subpestañas Requisitos V2 presentes',!!reqNav&&!!reqDoc&&!!reqProp,`${reqNav?'nav ':''}${reqDoc?'doc ':''}${reqProp?'prop':''}`.trim()||'ausente');
 
-    window.showReqSubtabV2('documentales',false);
-  }
-
-  const rowsBefore=(state?.aprobatorio?.conclusion||[]).length;
-  P.hooks.render();await wait(80);
-  const rowsAfter=(state?.aprobatorio?.conclusion||[]).length;
-  A(R,'Render no duplica conclusión',rowsBefore===rowsAfter,`${rowsBefore} → ${rowsAfter}`);
-
-  A(R,'Ruta pública Guardar',window.__PersistenceRoutesV22D?.guardarFormulario==='PersistenceV22C.save',window.__PersistenceRoutesV22D?.guardarFormulario||'');
-  A(R,'Ruta pública Cargar',window.__PersistenceRoutesV22D?.cargarFormulario==='PersistenceV22C.load',window.__PersistenceRoutesV22D?.cargarFormulario||'');
-  A(R,'Ruta pública Nuevo',window.__PersistenceRoutesV22D?.nuevoFormulario==='PersistenceV22D.createNew',window.__PersistenceRoutesV22D?.nuevoFormulario||'');
-
- }catch(e){A(R,'Banco Persistencia V22E',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Global V23',false,e?.stack||e)}
  finally{
-  state=orig;try{applyStateToUI()}catch(_e){};await wait(180);try{await renderSavedList()}catch(_e){}
+  if(stored){try{await dbDelete(tempKey)}catch(_e){}}
+  state=orig;
+  try{applyStateToUI()}catch(_e){}
+  await wait(180);
+  try{await renderSavedList()}catch(_e){}
+  if(origTab&&typeof showTab==='function'){try{showTab(origTab)}catch(_e){}}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22E');
- p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22E</h3><div class="pv22e-note">Banco de cierre de Fase 22. No cambia la lógica de V22D; corrige únicamente la validación DOM de Requisitos V2.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="pv22e-row"><span class="${x.ok?'pv22e-ok':'pv22e-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV22E">Copiar resultado</button> <button id="closeV22E">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV22E').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV22E').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22E\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaGlobalCleanPanelV23');
+ p.innerHTML=`<h3>🧹 ALLPA GLOBAL V23</h3><div class="gv23-note">Fase 23 limpia residuos huérfanos post V20–V22 sin cambiar las rutas funcionales. El banco valida los tres núcleos consolidados y un ciclo CRUD reversible.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="gv23-row"><span class="${x.ok?'gv23-ok':'gv23-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV23">Copiar resultado</button> <button id="closeV23">Cerrar</button></p>`;
+ p.classList.add('open');
+ document.getElementById('closeV23').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV23').onclick=async()=>{
+   const s=`ALLPA-GLOBAL-V23\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+   try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
+ };
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22E';b.type='button';b.textContent='💾 PERSISTENCIA V22E';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22E';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{
+ const b=document.createElement('button');b.id='allpaGlobalCleanBtnV23';b.type='button';b.textContent='🧹 GLOBAL V23';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaGlobalCleanPanelV23';document.body.appendChild(p);
+},1200));
 })();
 </script>
 
