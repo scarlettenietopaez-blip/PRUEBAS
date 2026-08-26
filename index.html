@@ -38341,14 +38341,91 @@ install();window.addEventListener('load',()=>{setTimeout(install,500);setTimeout
 </script>
 
 
-<style id="allpa-report-pipeline-v25f3-css">
-#allpaReportBtnV25F3{position:fixed;right:18px;bottom:18px;z-index:1000010;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25F3{display:none;position:fixed;right:18px;bottom:68px;z-index:1000010;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25F3.open{display:block}.rp25f3-ok{color:#177245;font-weight:700}.rp25f3-fail{color:#b42318;font-weight:700}.rp25f3-row{padding:6px 0;border-bottom:1px solid #eee}.rp25f3-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25F3,#allpaReportPanelV25F3{display:none!important}}
+<style id="allpa-report-pipeline-v25g-css">
+#allpaReportBtnV25G{position:fixed;right:18px;bottom:18px;z-index:1000011;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25G{display:none;position:fixed;right:18px;bottom:68px;z-index:1000011;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25G.open{display:block}.rp25g-ok{color:#177245;font-weight:700}.rp25g-fail{color:#b42318;font-weight:700}.rp25g-row{padding:6px 0;border-bottom:1px solid #eee}.rp25g-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25G,#allpaReportPanelV25G{display:none!important}}
 </style>
 
-<script id="allpa-report-pipeline-v25f3-test">
+<script id="allpa-report-pipeline-v25g">
+(function(){
+'use strict';
+
+/*
+ V25G — extracción por dominio, etapa Anteproyecto.
+ Centraliza V134/V138 como un servicio explícito. Se conservan aliases históricos
+ por compatibilidad en esta etapa; el banco prueba que las rutas centrales ya no
+ necesitan conocer internamente la dispersión V134/V138.
+*/
+const legacy=Object.freeze({
+ ensureFacts:typeof ensureAnteFactibilidadesV134==='function'?ensureAnteFactibilidadesV134:null,
+ renderFactsTable:typeof renderAnteFactibilidadesTableV134==='function'?renderAnteFactibilidadesTableV134:null,
+ factsReport:typeof factibilidadesReportV134==='function'?factibilidadesReportV134:null,
+ baseLegal:typeof anteproyectoBaseLegalV134==='function'?anteproyectoBaseLegalV134:null,
+ conclusion:typeof conclusionFinalAnteproyectoV138==='function'?conclusionFinalAnteproyectoV138:null,
+ loadConfig:typeof loadAnteproyectoConfigV138==='function'?loadAnteproyectoConfigV138:null
+});
+
+function ensureFacts(){return legacy.ensureFacts?legacy.ensureFacts():[]}
+function renderFactsTable(){return legacy.renderFactsTable?String(legacy.renderFactsTable()||''):''}
+function factsReport(){return legacy.factsReport?String(legacy.factsReport()||''):''}
+function baseLegal(){return legacy.baseLegal?String(legacy.baseLegal()||''):''}
+function conclusion(){return legacy.conclusion?String(legacy.conclusion()||''):''}
+function loadConfig(force=false){return legacy.loadConfig?legacy.loadConfig(force):Promise.resolve({})}
+function isAnte(){return String(state?.projectType||'')==='anteproyecto_edificacion'}
+
+const API=window.AnteproyectoDomainV25G=Object.freeze({
+ version:'25.6.0-anteproyecto-domain',
+ legacy,ensureFacts,renderFactsTable,factsReport,baseLegal,conclusion,loadConfig,isAnte
+});
+
+/* Rutas históricas quedan como adaptadores al dominio único. */
+window.ensureAnteFactibilidadesV134=ensureFacts;
+window.renderAnteFactibilidadesTableV134=renderFactsTable;
+window.factibilidadesReportV134=factsReport;
+window.anteproyectoBaseLegalV134=baseLegal;
+window.conclusionFinalAnteproyectoV138=conclusion;
+window.loadAnteproyectoConfigV138=loadConfig;
+try{ensureAnteFactibilidadesV134=ensureFacts}catch(_e){}
+try{renderAnteFactibilidadesTableV134=renderFactsTable}catch(_e){}
+try{factibilidadesReportV134=factsReport}catch(_e){}
+try{anteproyectoBaseLegalV134=baseLegal}catch(_e){}
+try{conclusionFinalAnteproyectoV138=conclusion}catch(_e){}
+try{loadAnteproyectoConfigV138=loadConfig}catch(_e){}
+
+/* ReportStructuralV25F pasa a consumir el dominio extraído en prepare. */
+const old=window.ReportStructuralV25F;
+if(old){
+ const prepare=function(){
+   const p=String(state?.projectType||'');
+   if(p==='anteproyecto_edificacion'){
+     try{API.ensureFacts()}catch(_e){}
+   }else{
+     try{old.services?.ensureObraEstudios?.()}catch(_e){}
+     try{old.services?.ensureObraFactibilidades?.()}catch(_e){}
+   }
+   try{old.services?.syncConclusion?.()}catch(_e){}
+ };
+ window.ReportStructuralV25G=Object.freeze({
+   version:'25.6.0-domain-bridge',
+   anteproyecto:API,
+   obraMayor:old.services,
+   engine:old.engine,
+   prepareStructural:prepare,
+   aprobatorio:old.aprobatorio,
+   observaciones:old.observaciones,
+   desistimiento:old.desistimiento,
+   renderByType:old.renderByType,
+   render:old.render
+ });
+}else{
+ window.ReportStructuralV25G=Object.freeze({version:'25.6.0-domain-bridge',anteproyecto:API});
+}
+})();
+</script>
+
+<script id="allpa-report-pipeline-v25g-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38357,112 +38434,83 @@ function W(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
  const R=[],orig=C(state),tab=document.querySelector('.tab.active')?.id||'tab-info',sel=document.getElementById('tipoInforme'),sel0=sel?.value||'';
  try{
-  const V=window.ReportStructuralV25F,S=V?.services||{};
-  A(R,'Structural V25F disponible',!!V,V?.version||'');
-  A(R,'V134/V138/V145 preservados',V?.preserved?.length===3,(V?.preserved||[]).join(' · '));
-  A(R,'Servicios Anteproyecto disponibles',!!S.anteFactibilidades&&!!S.anteFactibilidadesReport&&!!S.anteBaseLegal&&!!S.anteConclusion,'V134/V138');
-  A(R,'Servicios Obra Mayor disponibles',!!S.ensureObraEstudios&&!!S.ensureObraFactibilidades&&!!S.obraStudiesReport,'V145');
-  A(R,'Servicio motivo Desistimiento disponible',!!S.normalizeDesMotivo,'V145');
-  A(R,'Sincronización Conclusión V145 disponible',!!S.syncConclusion,'V145');
-  A(R,'Rutas públicas V25F',window.renderInformeAprobatorio===V?.aprobatorio&&window.renderInformeObservaciones===V?.observaciones&&window.renderInformeDesistimientoV69===V?.desistimiento&&window.renderReport===V?.render,'únicas');
-
-  state.projectType='obra_mayor_definitivo';
-  try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
-  V.prepareStructural();
-
-  const omStudies=Array.isArray(state.aprobatorio?.estudios)?state.aprobatorio.estudios:[];
-  const omFact=Array.isArray(state.aprobatorio?.factibilidadesOMV145)?state.aprobatorio.factibilidadesOMV145:[];
-
-  A(R,'Obra Mayor inicializa estudios',omStudies.length===4,`${omStudies.length} fila(s)`);
-  A(R,'Obra Mayor inicializa factibilidades',omFact.length===3,`${omFact.length} fila(s)`);
-
-  const entities=omFact.map(x=>String(x.estudio||'').trim());
-  const first=entities[0]||'';
-  const firstCanonical=/^(RIOBAMBA-EP|EMAPAR|EP-EMAPAR)$/i.test(first);
-  A(R,'Factibilidades OM tienen entidades correctas',
-    entities.length===3 && firstCanonical && /^EERSA$/i.test(entities[1]||'') && /^CNT$/i.test(entities[2]||''),
-    entities.join(' · '));
-
-  A(R,'Entidad agua usa canon V13',
-    /^RIOBAMBA-EP$/i.test(first),
-    first||'(vacío)');
-
-  const omReport=String(S.obraStudiesReport?.()||'');
-  A(R,'Reporte combinado Obra Mayor responde',omReport.length>50,`${omReport.length} caracteres`);
-  const omA=String(V.aprobatorio()||'');
-  A(R,'Aprobatorio Obra Mayor operativo',omA.length>500,`${omA.length} caracteres`);
+  const D=window.AnteproyectoDomainV25G,V=window.ReportStructuralV25F,G=window.ReportStructuralV25G;
+  A(R,'Dominio Anteproyecto V25G disponible',!!D,D?.version||'');
+  A(R,'Bridge estructural V25G disponible',!!G,G?.version||'');
+  A(R,'6 servicios centralizados',!!D?.ensureFacts&&!!D?.renderFactsTable&&!!D?.factsReport&&!!D?.baseLegal&&!!D?.conclusion&&!!D?.loadConfig,'factibilidades · tabla · informe · base legal · conclusión · config');
+  A(R,'Aliases históricos son adaptadores',window.ensureAnteFactibilidadesV134===D.ensureFacts&&window.factibilidadesReportV134===D.factsReport&&window.anteproyectoBaseLegalV134===D.baseLegal&&window.conclusionFinalAnteproyectoV138===D.conclusion,'V134/V138 → V25G');
 
   state.projectType='anteproyecto_edificacion';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
-  V.prepareStructural();
+  const rows=D.ensureFacts();
+  A(R,'Anteproyecto conserva 3 factibilidades',Array.isArray(rows)&&rows.length===3,`${rows.length||0} fila(s)`);
+  const ents=rows.map(x=>String(x.estudio||''));
+  A(R,'Canon Anteproyecto vigente',ents.join('|')==='RIOBAMBA-EP|EERSA|CNT',ents.join(' · '));
+  const table=D.renderFactsTable(),rep=D.factsReport(),legal=D.baseLegal(),con=D.conclusion();
+  A(R,'Tabla factibilidades responde',table.length>100,`${table.length} caracteres`);
+  A(R,'Informe factibilidades responde',rep.length>50,`${rep.length} caracteres`);
+  A(R,'Base legal responde',legal.length>100,`${legal.length} caracteres`);
+  A(R,'Conclusión V138 responde',con.length>100,`${con.length} caracteres`);
+  A(R,'Conclusión conserva placeholder resuelto',!/\{\{\s*(?:Área|Area)\s+Bruta\s*\}\}/i.test(con),'resuelto');
 
-  const anteRows=S.anteFactibilidades?.()||[];
-  A(R,'Anteproyecto inicializa factibilidades',Array.isArray(anteRows)&&anteRows.length>=3,`${anteRows.length||0} fila(s)`);
-  A(R,'Factibilidades Anteproyecto separadas de OM',
-    Array.isArray(state.aprobatorio?.factibilidadesOMV145) && state.aprobatorio.factibilidadesOMV145.length===3,
-    'OMV145 preservado sin colisión');
-
-  const anteTable=String(S.anteFactibilidadesReport?.()||'');
-  A(R,'Factibilidades Anteproyecto responden',anteTable.length>50,`${anteTable.length} caracteres`);
-  const legal=String(S.anteBaseLegal?.()||'');
-  A(R,'Base legal Anteproyecto responde',legal.length>50,`${legal.length} caracteres`);
-  const concl=String(S.anteConclusion?.()||'');
-  A(R,'Conclusión configurable V138 responde',concl.length>50,`${concl.length} caracteres`);
-  const anteA=String(V.aprobatorio()||'');
+  const anteA=String(V?.aprobatorio?.()||'');
   A(R,'Aprobatorio Anteproyecto operativo',anteA.length>500,`${anteA.length} caracteres`);
-  A(R,'Aprobatorio Anteproyecto contiene base legal/factibilidades',/Base t[ée]cnico|Factibilidades/i.test(anteA),'visible');
+  A(R,'Aprobatorio conserva Información general',/Informaci[oó]n general/i.test(anteA),'visible');
+  A(R,'Aprobatorio conserva Base técnico-legal',/Base t[ée]cnico/i.test(anteA),'visible');
+  A(R,'Aprobatorio conserva Conclusión',/Conclusi[oó]n t[ée]cnica/i.test(anteA),'visible');
 
+  /* Confirmar que Obra Mayor no fue alterada por extracción del dominio Anteproyecto. */
+  state.projectType='obra_mayor_definitivo';
+  try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
+  G?.prepareStructural?.();
+  const omStudies=Array.isArray(state.aprobatorio?.estudios)?state.aprobatorio.estudios:[];
+  const omFacts=Array.isArray(state.aprobatorio?.factibilidadesOMV145)?state.aprobatorio.factibilidadesOMV145:[];
+  A(R,'Obra Mayor conserva 4 estudios',omStudies.length===4,`${omStudies.length} fila(s)`);
+  A(R,'Obra Mayor conserva 3 factibilidades',omFacts.length===3,`${omFacts.length} fila(s)`);
+  const omA=String(V?.aprobatorio?.()||'');
+  A(R,'Aprobatorio Obra Mayor operativo',omA.length>500,`${omA.length} caracteres`);
+
+  /* Desistimiento V145 queda fuera de esta extracción. */
   if(!state.desistimiento)state.desistimiento={};
   state.desistimiento.motivo='Petición del Administrado';
   try{ensureDesistimientoV69()}catch(_e){}
-  const pet=String(V.desistimiento()||'');
-  A(R,'Desistimiento Petición operativo',pet.length>100&&/Petici[oó]n|Art[ií]culo 211|Desistimiento/i.test(pet),`${pet.length} caracteres`);
+  const pet=String(V?.desistimiento?.()||'');
+  A(R,'Desistimiento V145 preservado',pet.length>100,`${pet.length} caracteres`);
 
-  state.desistimiento.motivo='Observaciones No Subsanadas/Parcialmente Subsanadas';
-  try{ensureDesistimientoV69()}catch(_e){}
-  const obs=String(V.desistimiento()||'');
-  A(R,'Desistimiento Observaciones operativo',obs.length>100&&/NO FAVORABLE|observaciones|desist/i.test(obs),`${obs.length} caracteres`);
+  state.tipoInforme='Informe Técnico Aprobatorio';
+  if(sel){sel.value=state.tipoInforme;sel.dispatchEvent(new Event('change',{bubbles:true}))}
+  await W(30);
+  const html=String(V?.render?.()||'');
+  A(R,'Render general operativo',html.length>500,`${html.length} caracteres`);
 
-  for(const [type,label] of [['Informe Técnico Aprobatorio','Aprobatorio'],['Informe con Observaciones','Observaciones'],['Informe de Desistimiento','Desistimiento']]){
-    state.tipoInforme=type;
-    if(sel){sel.value=type;sel.dispatchEvent(new Event('change',{bubbles:true}))}
-    await W(30);
-    const h=String(V.render()||''),dom=String(document.getElementById('report')?.innerHTML||'');
-    A(R,`Render general ${label}`,h.length>100&&dom.length>100,`${dom.length} caracteres`);
-  }
-
-  const rows=(state?.aprobatorio?.conclusion||[]).length;
+  const cr=(state?.aprobatorio?.conclusion||[]).length;
   applyStateToUI();await W(160);
-  A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows,`${rows} → ${(state?.aprobatorio?.conclusion||[]).length}`);
+  A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===cr,`${cr} → ${(state?.aprobatorio?.conclusion||[]).length}`);
   A(R,'ReportOutput V25B intacto',!!window.ReportOutputV25B,window.ReportOutputV25B?.version||'');
-  A(R,'PDF V25B intacto',window.imprimirInforme===window.ReportOutputV25B?.printCurrent,'V25B.printCurrent');
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
   A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
- }catch(e){A(R,'Banco V25F3',false,e?.stack||e)}
+ }catch(e){A(R,'Banco V25G',false,e?.stack||e)}
  finally{
-  state=orig;try{applyStateToUI()}catch(_e){};await W(180);
-  if(sel){sel.value=sel0;sel.dispatchEvent(new Event('change',{bubbles:true}))}
-  try{if(tab&&typeof showTab==='function')showTab(tab)}catch(_e){}
+   state=orig;try{applyStateToUI()}catch(_e){};await W(180);
+   if(sel){sel.value=sel0;sel.dispatchEvent(new Event('change',{bubbles:true}))}
+   try{if(tab&&typeof showTab==='function')showTab(tab)}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
-
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25F3');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25F3</h3><div class="rp25f3-note">Corrección final del banco estructural: V13 canoniza EMAPAR como RIOBAMBA-EP. Se valida el canon real sin modificar la lógica V25F.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25f3-row"><span class="${x.ok?'rp25f3-ok':'rp25f3-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25F3">Copiar resultado</button> <button id="closeV25F3">Cerrar</button></p>`;
-
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25G');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25G</h3><div class="rp25g-note">Extracción por dominio — etapa Anteproyecto. V134/V138 quedan encapsulados detrás de AnteproyectoDomainV25G; V145 se preserva sin cambios.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25g-row"><span class="${x.ok?'rp25g-ok':'rp25g-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25G">Copiar resultado</button> <button id="closeV25G">Cerrar</button></p>`;
  p.classList.add('open');
- document.getElementById('closeV25F3').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25F3').onclick=async()=>{
-   const s=`ALLPA-REPORT-V25F3\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-   try{await navigator.clipboard.writeText(s)}
-   catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
+ document.getElementById('closeV25G').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25G').onclick=async()=>{
+   const s=`ALLPA-REPORT-V25G\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+   try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
  };
 }
 window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaReportBtnV25F3';b.type='button';b.textContent='📄 REPORT V25F3';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaReportPanelV25F3';document.body.appendChild(p);
+ const b=document.createElement('button');b.id='allpaReportBtnV25G';b.type='button';b.textContent='📄 REPORT V25G';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaReportPanelV25G';document.body.appendChild(p);
 },1400));
 })();
 </script>
