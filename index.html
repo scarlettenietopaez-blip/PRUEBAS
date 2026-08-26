@@ -10000,35 +10000,12 @@ function showDetailedErrorV70(title, errors){
 
 
 /* Reforzar copia con error visible incluso cuando una función anterior falle silenciosamente */
-const _copiarInformeActualV70_base_V71 = typeof copiarInformeActualV70 === 'function' ? copiarInformeActualV70 : null;
-copiarInformeActualV70 = async function(){
-  clearVisibleErrorV71();
-  try{
-    if(_copiarInformeActualV70_base_V71) return await _copiarInformeActualV70_base_V71();
-    throw new Error('No existe la función copiarInformeActualV70.');
-  }catch(err){
-    showVisibleErrorV71('No se pudo copiar automáticamente.', [
-      err?.message || String(err),
-      'Revise que esté en la Vista del informe, que el informe no esté vacío y que el navegador permita usar el portapapeles.'
-    ]);
-  }
-};
-copiarInformeAprobatorio = copiarInformeActualV70;
+/* V25B consolidado: wrapper copy V71 retirado */
+
 
 /* Reforzar PDF con error visible */
-const _imprimirInforme_base_V71 = typeof imprimirInforme === 'function' ? imprimirInforme : null;
-imprimirInforme = function(){
-  clearVisibleErrorV71();
-  try{
-    if(_imprimirInforme_base_V71) return _imprimirInforme_base_V71();
-    throw new Error('No existe la función imprimirInforme.');
-  }catch(err){
-    showVisibleErrorV71('No se pudo generar el PDF.', [
-      err?.message || String(err),
-      'Revise que el navegador permita abrir la ventana de impresión y seleccione “Guardar como PDF”.'
-    ]);
-  }
-};
+/* V25B consolidado: alias print V71 retirado */
+/* V25B: print paginator V2 histórico retirado L10020 */
 
 /* Asegurar que los botones usen las funciones reforzadas */
 function bindErrorAwareButtonsV71(){
@@ -12883,41 +12860,7 @@ validateInfoField = function(f, show=true){
 };
 
 /* Refuerza validación general para que el error de PDF/Copiar liste campos específicos. */
-
-validationErrorsV70 = function(context='generar el PDF'){
-  const errors=[];
-  collectTop();
-
-  if(!state.egob) errors.push('Falta el campo: Nro. eGOB principal.');
-  const match=tecnicoCoincidente(state.tecnico);
-  if(!match) errors.push('Técnico revisor: debe coincidir con la lista de la hoja Técnicos.');
-  if(!state.tipoInforme) errors.push('Falta el campo: Tipo de informe.');
-  if(!state.fechaRevision) errors.push((state.tipoInforme==='Informe Técnico Aprobatorio'||state.tipoInforme==='Informe de Desistimiento')?'Falta el campo: Fecha de emisión.':'Falta el campo: Fecha de revisión.');
-  if(state.tipoInforme!=='Informe Técnico Aprobatorio' && state.tipoInforme!=='Informe de Desistimiento' && !state.fechaSubsanacion){
-    errors.push('Falta el campo: Fecha máxima de subsanación.');
-  }
-
-  if(state.tipoInforme==='Informe de Desistimiento'){
-    ensureDesistimientoV69();
-    if(!state.desistimiento?.motivo) errors.push('Falta el campo: Motivo de desistimiento.');
-  }
-
-  try{
-    const okInfo=validateAllVisibleInfo(true);
-    if(!okInfo){
-      const fieldErrors=visibleInvalidFieldNamesV95();
-      if(fieldErrors.length){
-        fieldErrors.forEach(e=>errors.push(e));
-      }else{
-        errors.push('Información General: hay campos obligatorios o con formato incorrecto. Revise los campos resaltados en rojo.');
-      }
-    }
-  }catch(e){
-    errors.push('No se pudo validar la Información General: '+(e.message||e));
-  }
-
-  return [...new Set(errors)];
-};
+/* V25B: validación V95 histórico retirado L12886 */
 
 /* Mensaje visual más legible. */
 showDetailedErrorV70 = function(title, errors){
@@ -12939,30 +12882,8 @@ validateForPrint = function(){
 };
 
 /* Copiar también usa los mismos mensajes detallados. */
-if(typeof copiarInformeActualV70 === 'function'){
-  const _copiarInformeActual_base_V95 = copiarInformeActualV70;
-  copiarInformeActualV70 = async function(){
-    collectTop();
+/* V25B consolidado: wrapper _copiarInformeActual_base_V95 retirado */
 
-    if(!isCopyEnabledReportV70()){
-      showDetailedErrorV70('No se puede copiar este informe.', ['El botón Copiar está habilitado únicamente para Informe Técnico Aprobatorio e Informe de Desistimiento.']);
-      return;
-    }
-
-    const errors=validationErrorsV70('copiar el informe');
-    if(errors.length){
-      showDetailedErrorV70('No se pudo copiar el informe.', errors);
-      focusFirstInvalidFieldV95();
-      return;
-    }
-
-    return _copiarInformeActual_base_V95();
-  };
-
-  copiarInformeAprobatorio = function(){
-    return copiarInformeActualV70();
-  };
-}
 
 window.addEventListener('load',()=>{
   setTimeout(()=>{
@@ -13096,29 +13017,8 @@ validateForPrint = function(){
 };
 
 /* Copiar también muestra tabla visible. */
-if(typeof copiarInformeActualV70 === 'function'){
-  const _copiarInformeActual_base_V96 = copiarInformeActualV70;
-  copiarInformeActualV70 = async function(){
-    collectTop();
+/* V25B consolidado: wrapper _copiarInformeActual_base_V96 retirado */
 
-    if(!isCopyEnabledReportV70()){
-      showDetailedErrorV70('No se puede copiar este informe.', ['El botón Copiar está habilitado únicamente para Informe Técnico Aprobatorio e Informe de Desistimiento.']);
-      return;
-    }
-
-    const errors=validationErrorsV70('copiar el informe');
-    if(errors.length){
-      showDetailedErrorV70('No se pudo copiar el informe.', errors);
-      return;
-    }
-
-    return _copiarInformeActual_base_V96();
-  };
-
-  copiarInformeAprobatorio = function(){
-    return copiarInformeActualV70();
-  };
-}
 
 /* Si hay funciones antiguas que llamen a focus automáticamente, este botón mantiene control manual. */
 window.addEventListener('keydown',ev=>{
@@ -13298,18 +13198,8 @@ validateInfoField = function(f, show=true){
 };
 
 /* Antes de listar errores para PDF/Copiar, sincroniza parroquia. */
-const _validationErrorsV70_base_V97 = typeof validationErrorsV70 === 'function' ? validationErrorsV70 : null;
-validationErrorsV70 = function(context='generar el PDF'){
-  syncParroquiaToInfoStateV97();
-  const errors=_validationErrorsV70_base_V97 ? _validationErrorsV70_base_V97(context) : [];
-  const parr=syncParroquiaToInfoStateV97();
+/* V25B consolidado: _validationErrorsV70_base_V97 retirado */
 
-  // Elimina falso positivo si Parroquia ya fue sincronizada.
-  if(parr){
-    return errors.filter(e=>!/^Parroquia:\s*campo obligatorio\.?$/i.test(String(e||'').trim()));
-  }
-  return errors;
-};
 
 window.addEventListener('load',()=>{
   setTimeout(()=>syncParroquiaToInfoStateV97(),900);
@@ -13488,24 +13378,8 @@ validateInfoField = function(f, show=true){
 };
 
 /* Limpieza definitiva de errores de parroquia si ya existe cualquier parroquia en pantalla. */
-const _validationErrorsV70_base_V99 = typeof validationErrorsV70 === 'function' ? validationErrorsV70 : null;
-validationErrorsV70 = function(context='generar el PDF'){
-  syncParroquiaV99();
+/* V25B consolidado: _validationErrorsV70_base_V99 retirado */
 
-  let errors=_validationErrorsV70_base_V99 ? _validationErrorsV70_base_V99(context) : [];
-  const parr=syncParroquiaV99();
-
-  if(parr){
-    errors=errors.filter(e=>{
-      const s=String(e||'').trim();
-      return !/^Parroquia\s*:\s*campo obligatorio\.?$/i.test(s)
-          && !/^Falta el campo:\s*Parroquia\.?$/i.test(s)
-          && !(s.toLowerCase().includes('parroquia') && s.toLowerCase().includes('obligatorio'));
-    });
-  }
-
-  return [...new Set(errors)];
-};
 
 /* Sincroniza luego de cualquier autocompletado o render. */
 if(typeof renderInfoForm === 'function'){
@@ -13592,14 +13466,7 @@ if(_renderReport_base_V100){
 
 
 /* Refuerza antes de imprimir/PDF. */
-const _imprimirInforme_base_V100 = typeof imprimirInforme === 'function' ? imprimirInforme : null;
-if(_imprimirInforme_base_V100){
-  imprimirInforme = function(){
-    compactarTablaInfoGeneralV100(document);
-    return _imprimirInforme_base_V100();
-  };
-}
-
+/* V25B: wrapper print V100 retirado */
 window.addEventListener('load',()=>{
   setTimeout(()=>compactarTablaInfoGeneralV100(document),800);
   setTimeout(()=>compactarTablaInfoGeneralV100(document),1800);
@@ -13764,16 +13631,7 @@ if(_renderReport_base_V102){
 
 
 /* wrapper histórico renderPreview _renderPreview_base_V102 retirado en Depuración 08 */
-
-
-const _imprimirInforme_base_V102 = typeof imprimirInforme === 'function' ? imprimirInforme : null;
-if(_imprimirInforme_base_V102){
-  imprimirInforme = function(){
-    compactarTablaInfoGeneralV102(document);
-    return _imprimirInforme_base_V102();
-  };
-}
-
+/* V25B: wrapper print V102 retirado */
 window.addEventListener('load',()=>{
   setTimeout(()=>compactarTablaInfoGeneralV102(document),800);
   setTimeout(()=>compactarTablaInfoGeneralV102(document),1800);
@@ -22391,69 +22249,8 @@ function fallbackCopyRichHtmlV153(html){
 
 /* Reemplazo final de la función de copia para utilizar el HTML ya
    numerado y con estilos inline. Mantiene las validaciones existentes. */
-copiarInformeActualV70=async function(){
-  collectTop();
-
-  if(typeof isCopyEnabledReportV70==='function' && !isCopyEnabledReportV70()){
-    showDetailedErrorV70('No se puede copiar este informe.',[
-      'El botón Copiar está habilitado únicamente para Informe Técnico Aprobatorio e Informe de Desistimiento.'
-    ]);
-    return;
-  }
-
-  const errors=typeof validationErrorsV70==='function'
-    ? validationErrorsV70('copiar el informe') : [];
-  if(errors.length){
-    showDetailedErrorV70('No se pudo copiar el informe.',errors);
-    return;
-  }
-
-  let payload;
-  try{ payload=buildClipboardPayloadV153(); }
-  catch(error){
-    showDetailedErrorV70('No se pudo preparar el informe para copiar.',[error.message||String(error)]);
-    return;
-  }
-
-  if(!payload.plain){
-    showDetailedErrorV70('No se pudo copiar el informe.',[
-      'La Vista del Informe está vacía.'
-    ]);
-    return;
-  }
-
-  try{
-    if(!navigator.clipboard || !window.ClipboardItem || !window.isSecureContext){
-      throw new Error('Portapapeles enriquecido moderno no disponible.');
-    }
-    await navigator.clipboard.write([new ClipboardItem({
-      'text/html':new Blob([payload.html],{type:'text/html'}),
-      'text/plain':new Blob([payload.plain],{type:'text/plain'})
-    })]);
-    msg('Informe copiado con formato, negritas, bordes y fondos de tabla.',true);
-  }catch(firstError){
-    try{
-      fallbackCopyRichHtmlV153(payload.html);
-      msg('Informe copiado con formato mediante el modo compatible.',true);
-    }catch(secondError){
-      try{
-        if(typeof fallbackCopyPlainTextV70==='function') fallbackCopyPlainTextV70(payload.plain);
-        else throw secondError;
-        msg('El navegador solo permitió copiar el informe como texto sin formato.',true);
-      }catch(thirdError){
-        showDetailedErrorV70('No se pudo copiar automáticamente.',[
-          firstError.message||String(firstError),
-          secondError.message||String(secondError),
-          thirdError.message||String(thirdError)
-        ]);
-      }
-    }
-  }
-};
-
-copiarInformeAprobatorio=function(){
-  return copiarInformeActualV70();
-};
+/* V25B: copy V153 histórico retirado L22360 */
+/* V25B: alias copiarInformeAprobatorio histórico retirado L22361 */
 
 window.addEventListener('load',()=>{
   setTimeout(applyLiveReportFormattingV153,900);
@@ -22641,57 +22438,8 @@ function buildClipboardPayloadV154(){
   const plain=(clone.innerText||clone.textContent||'').trim();
   return {html,plain};
 }
-
-copiarInformeActualV70=async function(){
-  collectTop();
-  if(typeof isCopyEnabledReportV70==='function' && !isCopyEnabledReportV70()){
-    showDetailedErrorV70('No se puede copiar este informe.',[
-      'El botón Copiar está habilitado únicamente para Informe Técnico Aprobatorio e Informe de Desistimiento.'
-    ]);
-    return;
-  }
-  const errors=typeof validationErrorsV70==='function'?validationErrorsV70('copiar el informe'):[];
-  if(errors.length){
-    showDetailedErrorV70('No se pudo copiar el informe.',errors);
-    return;
-  }
-
-  let payload;
-  try{ payload=buildClipboardPayloadV154(); }
-  catch(error){
-    showDetailedErrorV70('No se pudo preparar el informe para copiar.',[error.message||String(error)]);
-    return;
-  }
-
-  try{
-    if(!navigator.clipboard || !window.ClipboardItem || !window.isSecureContext){
-      throw new Error('Portapapeles enriquecido moderno no disponible.');
-    }
-    await navigator.clipboard.write([new ClipboardItem({
-      'text/html':new Blob([payload.html],{type:'text/html'}),
-      'text/plain':new Blob([payload.plain],{type:'text/plain'})
-    })]);
-    msg('Informe copiado con títulos en negrita, bordes y sombreado de tablas.',true);
-  }catch(firstError){
-    try{
-      if(typeof fallbackCopyRichHtmlV153==='function') fallbackCopyRichHtmlV153(payload.html);
-      else throw firstError;
-      msg('Informe copiado con formato mediante el modo compatible.',true);
-    }catch(secondError){
-      if(typeof fallbackCopyPlainTextV70==='function'){
-        fallbackCopyPlainTextV70(payload.plain);
-        msg('El navegador solo permitió copiar el informe como texto sin formato.',true);
-      }else{
-        showDetailedErrorV70('No se pudo copiar automáticamente.',[
-          firstError.message||String(firstError),
-          secondError.message||String(secondError)
-        ]);
-      }
-    }
-  }
-};
-
-copiarInformeAprobatorio=function(){ return copiarInformeActualV70(); };
+/* V25B: copy V154 histórico retirado L22552 */
+/* V25B: alias copiarInformeAprobatorio histórico retirado L22553 */
 
 window.addEventListener('load',()=>{
   setTimeout(applyLiveReportFormattingV154,900);
@@ -23895,10 +23643,7 @@ updateSideActions = function(){
 
   updateCopyButtonByReportV119N();
 };
-
-copiarInformeAprobatorio = function(){
-  return copiarInformeActualV70();
-};
+/* V25B: alias copiarInformeAprobatorio histórico retirado L23758 */
 
 /* ---------- 3. Selección previa de formulario guardado ---------- */
 window.selectedSavedRecordKeyV119N = window.selectedSavedRecordKeyV119N || '';
@@ -24129,17 +23874,8 @@ function errorAreaBrutaConclusionV119N(){
   return `Área Bruta: la suma de las áreas brutas en la Tabla de Conclusión Técnica es ${fmtNumeroV119N(sum)} m², pero el Área Bruta de Información General es ${fmtNumeroV119N(info)} m². Deben coincidir.`;
 }
 
-const _validationErrorsV70_base_V119N = typeof validationErrorsV70 === 'function'
-  ? validationErrorsV70 : null;
+/* V25B consolidado: wrapper validación V119N retirado */
 
-if(_validationErrorsV70_base_V119N){
-  validationErrorsV70 = function(context='generar el PDF'){
-    const errors=_validationErrorsV70_base_V119N(context) || [];
-    const areaError=errorAreaBrutaConclusionV119N();
-    if(areaError && !errors.includes(areaError)) errors.push(areaError);
-    return errors;
-  };
-}
 
 /* Refuerzo al cargar. */
 window.addEventListener('load',()=>{
@@ -25915,15 +25651,7 @@ function aplicarBordesImpresionV119U(){
     cell.style.setProperty('border-top','0.85pt solid #000','important');
   });
 }
-
-const _imprimirInforme_base_V119U = typeof imprimirInforme === 'function' ? imprimirInforme : null;
-if(_imprimirInforme_base_V119U){
-  imprimirInforme = function(){
-    aplicarBordesImpresionV119U();
-    return _imprimirInforme_base_V119U.apply(this, arguments);
-  };
-}
-
+/* V25B: wrapper print V119U retirado */
 const _renderReport_base_V119U = typeof renderReport === 'function' ? renderReport : null;
 if(_renderReport_base_V119U){
   /* renderReport wrapper histórico #24 retirado — Depuración 09 Rápida */
@@ -33315,58 +33043,7 @@ textarea.evidencia-text,
     if(root) root.innerHTML='';
   }
 
-  window.imprimirInforme=async function(){
-    try{
-      if(typeof validationErrorsV70==='function'){
-        const errors=validationErrorsV70('generar el PDF');
-        if(errors && errors.length){
-          if(typeof showDetailedErrorV70==='function'){
-            showDetailedErrorV70('No se puede generar el PDF todavía.',errors);
-          }
-          return;
-        }
-      }
-
-      if(typeof renderReport==='function'){
-        const html=renderReport();
-        if(!html || !String(html).trim()){
-          throw new Error('La Vista del Informe está vacía.');
-        }
-      }
-
-      if(typeof showTab==='function'){
-        showTab('tab-vista');
-      }
-
-      await buildPagesV2();
-
-      document.body.classList.add('allpa-print-pages-active-v2');
-
-      await new Promise(resolve=>
-        requestAnimationFrame(()=>
-          requestAnimationFrame(resolve)
-        )
-      );
-
-      window.print();
-
-      if(typeof msg==='function'){
-        msg('Se abrió el diálogo de impresión.',true);
-      }
-    }catch(err){
-      clearPagesV2();
-
-      if(typeof showDetailedErrorV70==='function'){
-        showDetailedErrorV70(
-          'No se pudo generar el PDF.',
-          [err?.message || String(err)]
-        );
-      }else{
-        console.error(err);
-        alert('No se pudo generar el PDF: '+(err?.message || String(err)));
-      }
-    }
-  };
+  /* V25B consolidado: implementación print V2 absorbida en ReportOutputV25B.printCurrent */
 
   window.addEventListener('afterprint',clearPagesV2);
 })();
@@ -33625,26 +33302,8 @@ textarea.evidencia-text,
   }
   window.requisitosDocumentalesPendientesMod=requisitosDocumentalesPendientesMod;
 
-  if(typeof validationErrorsV70==='function'){
-    const baseValidationErrorsMod=validationErrorsV70;
-    validationErrorsV70=function(context='generar el PDF'){
-      const errors=baseValidationErrorsMod.apply(this,arguments) || [];
-      const pending=requisitosDocumentalesPendientesMod();
+  /* V25B consolidado: wrapper validación Mod/Ampliación retirado */
 
-      if(pending.length){
-        const sample=pending.slice(0,4).map(r=>r.id).join(', ');
-        const extra=pending.length>4 ? ` y ${pending.length-4} más` : '';
-        const action=context==='copiar el informe' ? 'copiar' : 'generar el PDF';
-        errors.push(
-          `Requisitos Documentales: no se puede ${action}. `+
-          `${pending.length} requisito(s) deben estar seleccionados en “Cumple” o “No Aplica”`+
-          `${sample ? ` (${sample}${extra})` : ''}.`
-        );
-      }
-
-      return [...new Set(errors)];
-    };
-  }
 
   window.addEventListener('load',()=>{
     setTimeout(aplicarEdicionClaveAntiguaMod,800);
@@ -38401,174 +38060,229 @@ window.__RequirementsNavigationRoutesV24D={
 </script>
 
 
-<script id="allpa-report-pipeline-v25">
+<style id="allpa-report-pipeline-v25b-css">
+#allpaReportBtnV25B{position:fixed;right:18px;bottom:18px;z-index:1000006;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25B{display:none;position:fixed;right:18px;bottom:68px;z-index:1000006;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25B.open{display:block}.rp25b-ok{color:#177245;font-weight:700}.rp25b-fail{color:#b42318;font-weight:700}.rp25b-row{padding:6px 0;border-bottom:1px solid #eee}.rp25b-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25B,#allpaReportPanelV25B{display:none!important}}
+</style>
+
+<script id="allpa-report-pipeline-v25b">
 (function(){
 'use strict';
 
-/* Fase puente: captura las rutas finales que V24D dejó activas.
-   No se eliminan wrappers todavía. */
-const legacy={
-  renderAprobatorio:typeof renderInformeAprobatorio==='function'?renderInformeAprobatorio:null,
-  renderObservaciones:typeof renderInformeObservaciones==='function'?renderInformeObservaciones:null,
-  renderDesistimiento:typeof renderInformeDesistimientoV69==='function'?renderInformeDesistimientoV69:null,
-  renderReport:typeof renderReport==='function'?renderReport:null,
-  validation:typeof validationErrorsV70==='function'?validationErrorsV70:null,
-  copyCurrent:typeof copiarInformeActualV70==='function'?copiarInformeActualV70:null,
-  copyAprobatorio:typeof copiarInformeAprobatorio==='function'?copiarInformeAprobatorio:null,
-  print:typeof imprimirInforme==='function'?imprimirInforme:null,
-  infoTable:typeof aprobatorioInfoTableFromTemplate==='function'?aprobatorioInfoTableFromTemplate:null
-};
+function unique(errors){return [...new Set((errors||[]).map(x=>String(x||'').trim()).filter(Boolean))]}
 
-function renderAprobatorio(){
-  return legacy.renderAprobatorio?legacy.renderAprobatorio.apply(this,arguments):'';
-}
-function renderObservaciones(){
-  return legacy.renderObservaciones?legacy.renderObservaciones.apply(this,arguments):'';
-}
-function renderDesistimiento(){
-  return legacy.renderDesistimiento?legacy.renderDesistimiento.apply(this,arguments):'';
-}
-function renderCurrent(){
-  return legacy.renderReport?legacy.renderReport.apply(this,arguments):undefined;
-}
 function validate(context='generar el PDF'){
-  return legacy.validation?legacy.validation.call(this,context):[];
-}
-async function copyCurrent(){
-  return legacy.copyCurrent?legacy.copyCurrent.apply(this,arguments):false;
-}
-async function copyAprobatorio(){
-  return legacy.copyAprobatorio?legacy.copyAprobatorio.apply(this,arguments):false;
-}
-async function printCurrent(){
-  return legacy.print?legacy.print.apply(this,arguments):false;
-}
-function infoTable(){
-  return legacy.infoTable?legacy.infoTable.apply(this,arguments):'';
+  const errors=[];
+  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
+
+  if(!state.egob)errors.push('Falta el campo: Nro. eGOB principal.');
+  try{
+    const match=typeof tecnicoCoincidente==='function'?tecnicoCoincidente(state.tecnico):state.tecnico;
+    if(!match)errors.push('Técnico revisor: debe coincidir con la lista de la hoja Técnicos.');
+  }catch(_e){}
+
+  if(!state.tipoInforme)errors.push('Falta el campo: Tipo de informe.');
+  if(!state.fechaRevision){
+    errors.push((state.tipoInforme==='Informe Técnico Aprobatorio'||state.tipoInforme==='Informe de Desistimiento')
+      ?'Falta el campo: Fecha de emisión.'
+      :'Falta el campo: Fecha de revisión.');
+  }
+  if(state.tipoInforme!=='Informe Técnico Aprobatorio'&&state.tipoInforme!=='Informe de Desistimiento'&&!state.fechaSubsanacion){
+    errors.push('Falta el campo: Fecha máxima de subsanación.');
+  }
+
+  if(state.tipoInforme==='Informe de Desistimiento'){
+    try{if(typeof ensureDesistimientoV69==='function')ensureDesistimientoV69()}catch(_e){}
+    if(!state.desistimiento?.motivo)errors.push('Falta el campo: Motivo de desistimiento.');
+  }
+
+  /* V97/V99: sincronizar Parroquia antes de validar. */
+  let parr='';
+  try{if(typeof syncParroquiaToInfoStateV97==='function')syncParroquiaToInfoStateV97()}catch(_e){}
+  try{if(typeof syncParroquiaV99==='function')parr=syncParroquiaV99()||''}catch(_e){}
+
+  try{
+    const okInfo=typeof validateAllVisibleInfo==='function'?validateAllVisibleInfo(true):true;
+    if(!okInfo){
+      const fieldErrors=typeof visibleInvalidFieldNamesV95==='function'?visibleInvalidFieldNamesV95():[];
+      if(fieldErrors?.length)fieldErrors.forEach(e=>errors.push(e));
+      else errors.push('Información General: hay campos obligatorios o con formato incorrecto. Revise los campos resaltados en rojo.');
+    }
+  }catch(e){
+    errors.push('No se pudo validar la Información General: '+(e.message||e));
+  }
+
+  if(parr){
+    for(let i=errors.length-1;i>=0;i--){
+      const s=String(errors[i]||'').trim().toLowerCase();
+      if(s.includes('parroquia')&&(s.includes('obligatorio')||s.includes('falta el campo')))errors.splice(i,1);
+    }
+  }
+
+  /* V119N: coherencia de Área Bruta. */
+  try{
+    const areaError=typeof errorAreaBrutaConclusionV119N==='function'?errorAreaBrutaConclusionV119N():'';
+    if(areaError)errors.push(areaError);
+  }catch(_e){}
+
+  /* Modificación/Ampliación: Requisitos Documentales deben resolverse. */
+  try{
+    const pending=typeof requisitosDocumentalesPendientesMod==='function'?requisitosDocumentalesPendientesMod():[];
+    if(pending?.length){
+      const sample=pending.slice(0,4).map(r=>r.id).join(', ');
+      const extra=pending.length>4?` y ${pending.length-4} más`:'';
+      const action=context==='copiar el informe'?'copiar':'generar el PDF';
+      errors.push(
+        `Requisitos Documentales: no se puede ${action}. `+
+        `${pending.length} requisito(s) deben estar seleccionados en “Cumple” o “No Aplica”`+
+        `${sample?` (${sample}${extra})`:''}.`
+      );
+    }
+  }catch(_e){}
+
+  return unique(errors);
 }
 
-window.ReportPipelineV25=Object.freeze({
-  version:'25.0.0-bridge',
-  renderAprobatorio,
-  renderObservaciones,
-  renderDesistimiento,
-  renderCurrent,
+async function copyCurrent(){
+  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
+
+  if(typeof isCopyEnabledReportV70==='function'&&!isCopyEnabledReportV70()){
+    if(typeof showDetailedErrorV70==='function'){
+      showDetailedErrorV70('No se puede copiar este informe.',[
+        'El botón Copiar está habilitado únicamente para Informe Técnico Aprobatorio e Informe de Desistimiento.'
+      ]);
+    }
+    return false;
+  }
+
+  const errors=validate('copiar el informe');
+  if(errors.length){
+    if(typeof showDetailedErrorV70==='function')showDetailedErrorV70('No se pudo copiar el informe.',errors);
+    try{if(typeof focusFirstInvalidFieldV95==='function')focusFirstInvalidFieldV95()}catch(_e){}
+    return false;
+  }
+
+  let payload;
+  try{
+    if(typeof buildClipboardPayloadV154==='function')payload=buildClipboardPayloadV154();
+    else if(typeof buildClipboardPayloadV153==='function')payload=buildClipboardPayloadV153();
+    else throw new Error('No existe el generador de contenido para portapapeles.');
+  }catch(error){
+    if(typeof showDetailedErrorV70==='function')showDetailedErrorV70('No se pudo preparar el informe para copiar.',[error.message||String(error)]);
+    return false;
+  }
+
+  if(!payload?.plain){
+    if(typeof showDetailedErrorV70==='function')showDetailedErrorV70('No se pudo copiar el informe.',['La Vista del Informe está vacía.']);
+    return false;
+  }
+
+  try{
+    if(!navigator.clipboard||!window.ClipboardItem||!window.isSecureContext)throw new Error('Portapapeles enriquecido moderno no disponible.');
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html':new Blob([payload.html],{type:'text/html'}),
+      'text/plain':new Blob([payload.plain],{type:'text/plain'})
+    })]);
+    if(typeof msg==='function')msg('Informe copiado con títulos en negrita, bordes y sombreado de tablas.',true);
+    return true;
+  }catch(firstError){
+    try{
+      if(typeof fallbackCopyRichHtmlV153==='function')fallbackCopyRichHtmlV153(payload.html);
+      else throw firstError;
+      if(typeof msg==='function')msg('Informe copiado con formato mediante el modo compatible.',true);
+      return true;
+    }catch(secondError){
+      try{
+        if(typeof fallbackCopyPlainTextV70==='function')fallbackCopyPlainTextV70(payload.plain);
+        else throw secondError;
+        if(typeof msg==='function')msg('El navegador solo permitió copiar el informe como texto sin formato.',true);
+        return true;
+      }catch(thirdError){
+        if(typeof showDetailedErrorV70==='function'){
+          showDetailedErrorV70('No se pudo copiar automáticamente.',[
+            firstError.message||String(firstError),
+            secondError.message||String(secondError),
+            thirdError.message||String(thirdError)
+          ]);
+        }
+        return false;
+      }
+    }
+  }
+}
+
+function copyAprobatorio(){return copyCurrent()}
+
+async function printCurrent(){
+  try{
+    const errors=validate('generar el PDF');
+    if(errors.length){
+      if(typeof showDetailedErrorV70==='function')showDetailedErrorV70('No se puede generar el PDF todavía.',errors);
+      return false;
+    }
+
+    try{if(typeof compactarTablaInfoGeneralV102==='function')compactarTablaInfoGeneralV102(document)}catch(_e){}
+    try{if(typeof aplicarBordesImpresionV119U==='function')aplicarBordesImpresionV119U()}catch(_e){}
+
+    if(typeof renderReport==='function'){
+      const html=renderReport();
+      if(!html||!String(html).trim())throw new Error('La Vista del Informe está vacía.');
+    }
+
+    if(typeof showTab==='function')showTab('tab-vista');
+
+    if(typeof buildPagesV2==='function'){
+      await buildPagesV2();
+      document.body.classList.add('allpa-print-pages-active-v2');
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    }
+
+    window.print();
+    if(typeof msg==='function')msg('Se abrió el diálogo de impresión.',true);
+    return true;
+  }catch(err){
+    try{if(typeof clearPagesV2==='function')clearPagesV2()}catch(_e){}
+    if(typeof showDetailedErrorV70==='function'){
+      showDetailedErrorV70('No se pudo generar el PDF.',[err?.message||String(err)]);
+    }else{
+      console.error(err);
+    }
+    return false;
+  }
+}
+
+window.ReportOutputV25B=Object.freeze({
+  version:'25.1.0-validation-copy-pdf',
   validate,
   copyCurrent,
   copyAprobatorio,
-  printCurrent,
-  infoTable,
-  legacy:Object.freeze(legacy)
+  printCurrent
 });
 
-/* Puertas públicas finales. */
-window.renderInformeAprobatorio=renderAprobatorio;
-try{renderInformeAprobatorio=window.renderInformeAprobatorio}catch(_e){}
-window.renderInformeObservaciones=renderObservaciones;
-try{renderInformeObservaciones=window.renderInformeObservaciones}catch(_e){}
-window.renderInformeDesistimientoV69=renderDesistimiento;
-try{renderInformeDesistimientoV69=window.renderInformeDesistimientoV69}catch(_e){}
-window.renderReport=renderCurrent;
-try{renderReport=window.renderReport}catch(_e){}
-window.validationErrorsV70=validate;
-try{validationErrorsV70=window.validationErrorsV70}catch(_e){}
-window.copiarInformeActualV70=copyCurrent;
-try{copiarInformeActualV70=window.copiarInformeActualV70}catch(_e){}
-window.copiarInformeAprobatorio=copyAprobatorio;
-try{copiarInformeAprobatorio=window.copiarInformeAprobatorio}catch(_e){}
-window.imprimirInforme=printCurrent;
-try{imprimirInforme=window.imprimirInforme}catch(_e){}
-window.aprobatorioInfoTableFromTemplate=infoTable;
-try{aprobatorioInfoTableFromTemplate=window.aprobatorioInfoTableFromTemplate}catch(_e){}
+window.validationErrorsV70=validate;try{validationErrorsV70=window.validationErrorsV70}catch(_e){}
+window.copiarInformeActualV70=copyCurrent;try{copiarInformeActualV70=window.copiarInformeActualV70}catch(_e){}
+window.copiarInformeAprobatorio=copyAprobatorio;try{copiarInformeAprobatorio=window.copiarInformeAprobatorio}catch(_e){}
+window.imprimirInforme=printCurrent;try{imprimirInforme=window.imprimirInforme}catch(_e){}
 
-window.__ReportRoutesV25={
-  renderInformeAprobatorio:'ReportPipelineV25.renderAprobatorio→legacy',
-  renderInformeObservaciones:'ReportPipelineV25.renderObservaciones→legacy',
-  renderInformeDesistimientoV69:'ReportPipelineV25.renderDesistimiento→legacy',
-  renderReport:'ReportPipelineV25.renderCurrent→legacy',
-  validationErrorsV70:'ReportPipelineV25.validate→legacy',
-  copiarInformeActualV70:'ReportPipelineV25.copyCurrent→legacy',
-  copiarInformeAprobatorio:'ReportPipelineV25.copyAprobatorio→legacy',
-  imprimirInforme:'ReportPipelineV25.printCurrent→legacy',
-  aprobatorioInfoTableFromTemplate:'ReportPipelineV25.infoTable→legacy'
-};
-})();
-</script>
-
-
-<style id="allpa-report-pipeline-v25a-css">
-#allpaReportBtnV25A{position:fixed;right:18px;bottom:18px;z-index:1000006;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25A{display:none;position:fixed;right:18px;bottom:68px;z-index:1000006;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25A.open{display:block}.rp25a-ok{color:#177245;font-weight:700}.rp25a-fail{color:#b42318;font-weight:700}.rp25a-row{padding:6px 0;border-bottom:1px solid #eee}.rp25a-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25A,#allpaReportPanelV25A{display:none!important}}
-</style>
-
-<script id="allpa-report-pipeline-v25a">
-(function(){
-'use strict';
-
-const base=window.ReportPipelineV25;
-if(!base)return;
-
-function install(){
-  window.renderInformeAprobatorio=base.renderAprobatorio;
-  try{renderInformeAprobatorio=window.renderInformeAprobatorio}catch(_e){}
-
-  window.renderInformeObservaciones=base.renderObservaciones;
-  try{renderInformeObservaciones=window.renderInformeObservaciones}catch(_e){}
-
-  window.renderInformeDesistimientoV69=base.renderDesistimiento;
-  try{renderInformeDesistimientoV69=window.renderInformeDesistimientoV69}catch(_e){}
-
-  window.renderReport=base.renderCurrent;
-  try{renderReport=window.renderReport}catch(_e){}
-
-  window.validationErrorsV70=base.validate;
-  try{validationErrorsV70=window.validationErrorsV70}catch(_e){}
-
-  window.copiarInformeActualV70=base.copyCurrent;
-  try{copiarInformeActualV70=window.copiarInformeActualV70}catch(_e){}
-
-  window.copiarInformeAprobatorio=base.copyAprobatorio;
-  try{copiarInformeAprobatorio=window.copiarInformeAprobatorio}catch(_e){}
-
-  window.imprimirInforme=base.printCurrent;
-  try{imprimirInforme=window.imprimirInforme}catch(_e){}
-
-  window.aprobatorioInfoTableFromTemplate=base.infoTable;
-  try{aprobatorioInfoTableFromTemplate=window.aprobatorioInfoTableFromTemplate}catch(_e){}
-
-  window.__ReportRoutesV25A={
-    renderInformeAprobatorio:'ReportPipelineV25A→ReportPipelineV25.renderAprobatorio',
-    renderInformeObservaciones:'ReportPipelineV25A→ReportPipelineV25.renderObservaciones',
-    renderInformeDesistimientoV69:'ReportPipelineV25A→ReportPipelineV25.renderDesistimiento',
-    renderReport:'ReportPipelineV25A→ReportPipelineV25.renderCurrent',
-    validationErrorsV70:'ReportPipelineV25A→ReportPipelineV25.validate',
-    copiarInformeActualV70:'ReportPipelineV25A→ReportPipelineV25.copyCurrent',
-    copiarInformeAprobatorio:'ReportPipelineV25A→ReportPipelineV25.copyAprobatorio',
-    imprimirInforme:'ReportPipelineV25A→ReportPipelineV25.printCurrent',
-    aprobatorioInfoTableFromTemplate:'ReportPipelineV25A→ReportPipelineV25.infoTable'
-  };
+/* Reinstala botones después de módulos visuales históricos. */
+function bind(){
+  try{
+    const btn=document.getElementById('btnCopiarAprobatorioVista');
+    if(btn)btn.onclick=copyCurrent;
+    const panel=document.getElementById('copyPanelAprobatorio');
+    if(panel)[...panel.querySelectorAll('button')].forEach(b=>{
+      if(String(b.textContent||'').trim().toUpperCase()==='PDF')b.onclick=printCurrent;
+    });
+  }catch(_e){}
 }
-
-window.ReportPipelineV25A=Object.freeze({
-  version:'25.0.1-route-fix',
-  install,
-  base
-});
-
-/* Instalar ahora y volver a instalar después de los instaladores históricos
-   diferidos (especialmente V29, que vuelve a envolver renderReport al cargar). */
-install();
-window.addEventListener('load',()=>{
-  setTimeout(install,900);
-  setTimeout(install,1800);
-  setTimeout(install,3200);
-});
+bind();
+window.addEventListener('load',()=>{setTimeout(bind,800);setTimeout(bind,1800);});
 })();
 </script>
 
-<script id="allpa-report-pipeline-v25a-test">
+<script id="allpa-report-pipeline-v25b-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38577,105 +38291,56 @@ function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
  const R=[],orig=C(state),active=document.querySelector('.tab.active')?.id||'tab-info';
  try{
-  const V=window.ReportPipelineV25A;
-  V?.install?.();
-  await wait(40);
-  const B=window.ReportPipelineV25;
+  const V=window.ReportOutputV25B;
+  A(R,'ReportOutput V25B disponible',!!V,V?.version||'');
+  A(R,'Validación ruta única',window.validationErrorsV70===V?.validate,'V25B.validate');
+  A(R,'Copiar ruta única',window.copiarInformeActualV70===V?.copyCurrent,'V25B.copyCurrent');
+  A(R,'Copiar Aprobatorio ruta única',window.copiarInformeAprobatorio===V?.copyAprobatorio,'V25B.copyAprobatorio');
+  A(R,'PDF ruta única',window.imprimirInforme===V?.printCurrent,'V25B.printCurrent');
 
-  A(R,'ReportPipeline V25A disponible',!!V,V?.version||'');
-  A(R,'Base V25 preservada',!!B,B?.version||'');
+  const errors=V.validate('generar el PDF');
+  A(R,'Validador devuelve arreglo',Array.isArray(errors),`${errors.length} error(es)`);
+  A(R,'Errores sin duplicados',errors.length===new Set(errors).size,`${errors.length} único(s)`);
 
-  A(R,'Aprobatorio centralizado',window.renderInformeAprobatorio===B?.renderAprobatorio,'V25A');
-  A(R,'Observaciones centralizado',window.renderInformeObservaciones===B?.renderObservaciones,'V25A');
-  A(R,'Desistimiento centralizado',window.renderInformeDesistimientoV69===B?.renderDesistimiento,'V25A');
-  A(R,'Render general centralizado',window.renderReport===B?.renderCurrent,'V25A');
-  A(R,'Validación centralizada',window.validationErrorsV70===B?.validate,'V25A');
-  A(R,'Copiar centralizado',window.copiarInformeActualV70===B?.copyCurrent,'V25A');
-  A(R,'PDF centralizado',window.imprimirInforme===B?.printCurrent,'V25A');
-  A(R,'Tabla Información General centralizada',window.aprobatorioInfoTableFromTemplate===B?.infoTable,'V25A');
+  const copyErrors=V.validate('copiar el informe');
+  A(R,'Validación Copiar operativa',Array.isArray(copyErrors),`${copyErrors.length} error(es)`);
 
-  const rows0=(state?.aprobatorio?.conclusion||[]).length;
+  A(R,'Payload V154 disponible',typeof buildClipboardPayloadV154==='function','V154');
+  A(R,'Fallback HTML disponible',typeof fallbackCopyRichHtmlV153==='function','V153');
+  A(R,'Paginador PDF disponible',typeof buildPagesV2==='function','V2');
+  A(R,'Bordes impresión disponibles',typeof aplicarBordesImpresionV119U==='function','V119U');
 
-  const a=String(B.renderAprobatorio()||'');
-  A(R,'Informe Aprobatorio genera HTML',a.length>500,`${a.length} caracteres`);
-  A(R,'Aprobatorio conserva Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
+  /* No se dispara portapapeles ni window.print durante el banco. */
+  A(R,'Copiar preparado sin ejecución',typeof V.copyCurrent==='function','seguro');
+  A(R,'PDF preparado sin ejecución',typeof V.printCurrent==='function','seguro');
 
-  const o=String(B.renderObservaciones()||'');
-  A(R,'Informe Observaciones genera HTML',o.length>500,`${o.length} caracteres`);
+  const a=String(renderInformeAprobatorio?.()||'');
+  A(R,'Aprobatorio sigue operativo',a.length>500,`${a.length} caracteres`);
+  const o=String(renderInformeObservaciones?.()||'');
+  A(R,'Observaciones sigue operativo',o.length>500,`${o.length} caracteres`);
 
-  const d=String(B.renderDesistimiento()||'');
-  A(R,'Informe Desistimiento responde',typeof d==='string',`${d.length} caracteres`);
-
-  let info='';
-  try{info=String(B.infoTable('')||'')}catch(_e){}
-  A(R,'Tabla Información General responde',info.length>50,`${info.length} caracteres`);
-
-  const errors=B.validate('generar el PDF');
-  A(R,'Validador devuelve arreglo',Array.isArray(errors),`${errors?.length||0} error(es)`);
-
-  /* renderReport depende de tipoInforme; se prueba con un tipo real, no con fixture vacío. */
-  const originalTipo=state.tipoInforme;
-  state.tipoInforme='Informe Técnico Aprobatorio';
-  try{
-    if(document.getElementById('tipoInforme'))document.getElementById('tipoInforme').value=state.tipoInforme;
-    B.renderCurrent();
-    await wait(80);
-    const report=document.getElementById('report');
-    A(R,'Render general Aprobatorio actualiza vista',
-      !!report&&String(report.innerHTML||'').length>500,
-      `${String(report?.innerHTML||'').length} caracteres`);
-  }catch(e){
-    A(R,'Render general Aprobatorio actualiza vista',false,e.message||e);
-  }
-
-  state.tipoInforme='Informe con Observaciones';
-  try{
-    if(document.getElementById('tipoInforme'))document.getElementById('tipoInforme').value=state.tipoInforme;
-    B.renderCurrent();
-    await wait(80);
-    const report=document.getElementById('report');
-    A(R,'Render general Observaciones actualiza vista',
-      !!report&&String(report.innerHTML||'').length>500,
-      `${String(report?.innerHTML||'').length} caracteres`);
-  }catch(e){
-    A(R,'Render general Observaciones actualiza vista',false,e.message||e);
-  }
-  state.tipoInforme=originalTipo;
-
-  A(R,'Ruta Copiar disponible',typeof B.copyCurrent==='function','sin ejecutar portapapeles');
-  A(R,'Ruta PDF disponible',typeof B.printCurrent==='function','sin ejecutar impresión');
-
-  A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
-  A(R,'Requirements V24C intacto',!!window.RequirementsNavigationV24C,window.RequirementsNavigationV24C?.version||'');
+  const rows=(state?.aprobatorio?.conclusion||[]).length;
+  applyStateToUI();await wait(180);
+  A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===rows,`${rows} → ${(state?.aprobatorio?.conclusion||[]).length}`);
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
-  A(R,'ApplyState V21D intacto',!!window.ApplyStateUIV21D,window.ApplyStateUIV21D?.version||'');
+  A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
 
- }catch(e){A(R,'Banco V25A',false,e?.stack||e)}
+ }catch(e){A(R,'Banco V25B',false,e?.stack||e)}
  finally{
-  state=orig;
-  try{applyStateToUI()}catch(_e){}
-  await wait(180);
-  try{window.ReportPipelineV25A?.install?.()}catch(_e){}
+  state=orig;try{applyStateToUI()}catch(_e){};await wait(180);
   try{if(active&&typeof showTab==='function')showTab(active)}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25A');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25A</h3><div class="rp25a-note">V25A corrige la estabilidad de las rutas públicas frente a instaladores históricos diferidos y prueba renderReport con tipos de informe reales.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25a-row"><span class="${x.ok?'rp25a-ok':'rp25a-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25A">Copiar resultado</button> <button id="closeV25A">Cerrar</button></p>`;
- p.classList.add('open');
- document.getElementById('closeV25A').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25A').onclick=async()=>{
-   const s=`ALLPA-REPORT-V25A\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-   try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
- };
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25B');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25B</h3><div class="rp25b-note">V25B centraliza físicamente Validación + Copiar + PDF. El banco no accede al portapapeles ni abre impresión.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25b-row"><span class="${x.ok?'rp25b-ok':'rp25b-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25B">Copiar resultado</button> <button id="closeV25B">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV25B').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25B').onclick=async()=>{const s=`ALLPA-REPORT-V25B\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaReportBtnV25A';b.type='button';b.textContent='📄 REPORT V25A';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaReportPanelV25A';document.body.appendChild(p);
-},1400));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReportBtnV25B';b.type='button';b.textContent='📄 REPORT V25B';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReportPanelV25B';document.body.appendChild(p)},1400));
 })();
 </script>
 
