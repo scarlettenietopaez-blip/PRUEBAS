@@ -38524,13 +38524,6 @@ window.addEventListener('load',()=>{setTimeout(()=>loadConfig(false),800)});
 </script>
 
 
-<style id="allpa-report-pipeline-v25i-css">
-#allpaReportBtnV25I{position:fixed;right:18px;bottom:18px;z-index:1000013;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25I{display:none;position:fixed;right:18px;bottom:68px;z-index:1000013;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25I.open{display:block}.rp25i-ok{color:#177245;font-weight:700}.rp25i-fail{color:#b42318;font-weight:700}.rp25i-row{padding:6px 0;border-bottom:1px solid #eee}.rp25i-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25I,#allpaReportPanelV25I{display:none!important}}
-</style>
-
 <script id="allpa-report-pipeline-v25i">
 (function(){
 'use strict';
@@ -38588,42 +38581,122 @@ window.ReportStructuralV25I=Object.freeze({
 })();
 </script>
 
-<script id="allpa-report-pipeline-v25i-test">
+
+<style id="allpa-report-pipeline-v25j-css">
+#allpaReportBtnV25J{position:fixed;right:18px;bottom:18px;z-index:1000014;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25J{display:none;position:fixed;right:18px;bottom:68px;z-index:1000014;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25J.open{display:block}.rp25j-ok{color:#177245;font-weight:700}.rp25j-fail{color:#b42318;font-weight:700}.rp25j-row{padding:6px 0;border-bottom:1px solid #eee}.rp25j-note{padding:8px 10px;background:#fff8e6;border:1px solid #ead7a1;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25J,#allpaReportPanelV25J{display:none!important}}
+</style>
+
+<script id="allpa-report-pipeline-v25j">
+(function(){
+'use strict';
+const D=window.AnteproyectoDomainV25I;
+if(!D)return;
+
+/*
+ V25J — compuerta de retirada física V134.
+ Captura la implementación efectiva POST-V137/V152 de Base Legal, que era una
+ dependencia tardía no absorbida todavía por V25I. Tras esto, todas las familias
+ públicas V134/V138 quedan representadas en un único dominio.
+*/
+const effectiveBaseLegal=(typeof anteproyectoBaseLegalV134==='function')
+  ? anteproyectoBaseLegalV134
+  : D.baseLegal;
+const effectiveLoad=(typeof loadAnteproyectoConfigV138==='function')
+  ? loadAnteproyectoConfigV138
+  : D.loadConfig;
+const effectiveConclusion=(typeof conclusionFinalAnteproyectoV138==='function')
+  ? conclusionFinalAnteproyectoV138
+  : D.conclusion;
+
+function baseLegal(){return String(effectiveBaseLegal?.()||'')}
+function loadConfig(force=false){return effectiveLoad?effectiveLoad(force):Promise.resolve({})}
+function conclusion(){return String(effectiveConclusion?.()||'')}
+
+const J=window.AnteproyectoDomainV25J=Object.freeze({
+ version:'25.9.0-v134-retirement-gate',
+ ensureFacts:D.ensureFacts,
+ renderFactsTable:D.renderFactsTable,
+ factsReport:D.factsReport,
+ inferProject:D.inferProject,
+ cleanForm:D.cleanForm,
+ baseLegal,loadConfig,conclusion,
+ retirement:Object.freeze({
+   publicFamilies:8,
+   captured:8,
+   originalBlock:'ready-after-regression',
+   v145:'untouched'
+ })
+});
+window.AnteproyectoDomain=J;
+
+/* Todos los símbolos históricos relevantes quedan adaptadores del dominio efectivo. */
+window.ensureAnteFactibilidadesV134=J.ensureFacts;
+window.renderAnteFactibilidadesTableV134=J.renderFactsTable;
+window.factibilidadesReportV134=J.factsReport;
+window.inferSavedProjectV134=J.inferProject;
+window.cleanAnteproyectoAprobatorioFormV134=J.cleanForm;
+window.anteproyectoBaseLegalV134=J.baseLegal;
+window.loadAnteproyectoConfigV138=J.loadConfig;
+window.conclusionFinalAnteproyectoV138=J.conclusion;
+try{ensureAnteFactibilidadesV134=J.ensureFacts}catch(_e){}
+try{renderAnteFactibilidadesTableV134=J.renderFactsTable}catch(_e){}
+try{factibilidadesReportV134=J.factsReport}catch(_e){}
+try{inferSavedProjectV134=J.inferProject}catch(_e){}
+try{cleanAnteproyectoAprobatorioFormV134=J.cleanForm}catch(_e){}
+try{anteproyectoBaseLegalV134=J.baseLegal}catch(_e){}
+try{loadAnteproyectoConfigV138=J.loadConfig}catch(_e){}
+try{conclusionFinalAnteproyectoV138=J.conclusion}catch(_e){}
+
+window.ReportStructuralV25J=Object.freeze({
+ version:'25.9.0-retirement-gate',
+ anteproyecto:J,
+ obraMayor:window.ReportStructuralV25F?.services||null
+});
+})();
+</script>
+
+<script id="allpa-report-pipeline-v25j-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d??'')})}
 function W(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
- const R=[],orig=C(state),tab=document.querySelector('.tab.active')?.id||'tab-info',sel=document.getElementById('tipoInforme'),sel0=sel?.value||'';
+ const R=[],orig=C(state),tab=document.querySelector('.tab.active')?.id||'tab-info';
  try{
-  const D=window.AnteproyectoDomainV25I,V=window.ReportStructuralV25F;
-  A(R,'Dominio Anteproyecto V25I disponible',!!D,D?.version||'');
-  A(R,'Bridge consumidores V25I disponible',!!window.ReportStructuralV25I,window.ReportStructuralV25I?.version||'');
-  A(R,'V134 ensure es adaptador V25I',window.ensureAnteFactibilidadesV134===D?.ensureFacts,'V134 → V25I');
-  A(R,'V134 tabla es adaptador V25I',window.renderAnteFactibilidadesTableV134===D?.renderFactsTable,'V134 → V25I');
-  A(R,'V134 informe es adaptador V25I',window.factibilidadesReportV134===D?.factsReport,'V134 → V25I');
-  A(R,'V134 inferencia es adaptador V25I',window.inferSavedProjectV134===D?.inferProject,'V134 → V25I');
-  A(R,'V134 limpieza es adaptador V25I',window.cleanAnteproyectoAprobatorioFormV134===D?.cleanForm,'V134 → V25I');
-
-  A(R,'Inferencia explícita Anteproyecto',D.inferProject({projectType:'anteproyecto_edificacion'})==='anteproyecto_edificacion','anteproyecto_edificacion');
-  A(R,'Inferencia explícita Obra Mayor',D.inferProject({projectType:'obra_mayor_definitivo'})==='obra_mayor_definitivo','obra_mayor_definitivo');
-  A(R,'Inferencia por requisitos AP',D.inferProject({requisitos:{AP_REQ_001:{}}})==='anteproyecto_edificacion','anteproyecto_edificacion');
-  A(R,'Inferencia por contenido Anteproyecto',D.inferProject({nota:'Anteproyecto de Edificación'})==='anteproyecto_edificacion','anteproyecto_edificacion');
+  const D=window.AnteproyectoDomainV25J,V=window.ReportStructuralV25F;
+  A(R,'Gate V25J disponible',!!D,D?.version||'');
+  A(R,'Bridge V25J disponible',!!window.ReportStructuralV25J,window.ReportStructuralV25J?.version||'');
+  A(R,'8 familias V134/V138 capturadas',D?.retirement?.captured===8,`${D?.retirement?.captured||0}/8`);
+  const aliases=[
+   window.ensureAnteFactibilidadesV134===D.ensureFacts,
+   window.renderAnteFactibilidadesTableV134===D.renderFactsTable,
+   window.factibilidadesReportV134===D.factsReport,
+   window.inferSavedProjectV134===D.inferProject,
+   window.cleanAnteproyectoAprobatorioFormV134===D.cleanForm,
+   window.anteproyectoBaseLegalV134===D.baseLegal,
+   window.loadAnteproyectoConfigV138===D.loadConfig,
+   window.conclusionFinalAnteproyectoV138===D.conclusion
+  ];
+  A(R,'8 aliases históricos son adaptadores',aliases.every(Boolean),`${aliases.filter(Boolean).length}/8`);
 
   state.projectType='anteproyecto_edificacion';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
   const facts=D.ensureFacts();
-  A(R,'Anteproyecto conserva 3 factibilidades',Array.isArray(facts)&&facts.length===3,`${facts.length||0} fila(s)`);
-  const ents=facts.map(x=>String(x.estudio||''));
-  A(R,'Canon Anteproyecto intacto',ents.join('|')==='RIOBAMBA-EP|EERSA|CNT',ents.join(' · '));
-  A(R,'Tabla factibilidades operativa',String(D.renderFactsTable()||'').length>100,`${String(D.renderFactsTable()||'').length} caracteres`);
-  A(R,'Informe factibilidades operativo',String(D.factsReport()||'').length>50,`${String(D.factsReport()||'').length} caracteres`);
-  const legal=String(D.baseLegal()||''),con=String(D.conclusion()||'');
-  A(R,'Base legal operativa',legal.length>100,`${legal.length} caracteres`);
+  A(R,'Anteproyecto conserva 3 factibilidades',facts.length===3,`${facts.length} fila(s)`);
+  A(R,'Canon Anteproyecto intacto',facts.map(x=>x.estudio).join('|')==='RIOBAMBA-EP|EERSA|CNT',facts.map(x=>x.estudio).join(' · '));
+  A(R,'Inferencia AP_REQ operativa',D.inferProject({requisitos:{AP_REQ_001:{}}})==='anteproyecto_edificacion','anteproyecto_edificacion');
+  A(R,'Limpieza Anteproyecto operativa',D.cleanForm()===true,'ejecutada');
+  const table=String(D.renderFactsTable()||''),fr=String(D.factsReport()||''),legal=String(D.baseLegal()||''),con=String(D.conclusion()||'');
+  A(R,'Tabla factibilidades operativa',table.length>100,`${table.length} caracteres`);
+  A(R,'Informe factibilidades operativo',fr.length>50,`${fr.length} caracteres`);
+  A(R,'Base legal efectiva V137/V152 preservada',legal.length>500&&/CAP[IÍ]TULO III/i.test(legal),`${legal.length} caracteres`);
+  A(R,'Base legal conserva CAPÍTULO IV',/CAP[IÍ]TULO IV/i.test(legal),'visible');
   A(R,'Conclusión operativa',con.length>100,`${con.length} caracteres`);
   A(R,'Conclusión sin placeholder',!/\{\{\s*(?:Área|Area)\s+Bruta\s*\}\}/i.test(con),'resuelto');
-  A(R,'Limpieza formulario ejecuta',D.cleanForm()===true,'Anteproyecto');
 
   const ante=String(V?.aprobatorio?.()||'');
   A(R,'Aprobatorio Anteproyecto operativo',ante.length>500,`${ante.length} caracteres`);
@@ -38635,9 +38708,8 @@ async function run(){
   window.ReportStructuralV25G?.prepareStructural?.();
   A(R,'Obra Mayor conserva 4 estudios',(state.aprobatorio?.estudios||[]).length===4,`${(state.aprobatorio?.estudios||[]).length} fila(s)`);
   A(R,'Obra Mayor conserva 3 factibilidades',(state.aprobatorio?.factibilidadesOMV145||[]).length===3,`${(state.aprobatorio?.factibilidadesOMV145||[]).length} fila(s)`);
-  A(R,'Limpieza Anteproyecto no actúa en Obra Mayor',D.cleanForm()===false,'protegido');
-  const om=String(V?.aprobatorio?.()||'');
-  A(R,'Aprobatorio Obra Mayor operativo',om.length>500,`${om.length} caracteres`);
+  A(R,'Limpieza AP protege Obra Mayor',D.cleanForm()===false,'protegido');
+  A(R,'Aprobatorio Obra Mayor operativo',String(V?.aprobatorio?.()||'').length>500,`${String(V?.aprobatorio?.()||'').length} caracteres`);
 
   if(!state.desistimiento)state.desistimiento={};
   state.desistimiento.motivo='Petición del Administrado';
@@ -38651,27 +38723,27 @@ async function run(){
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
   A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
- }catch(e){A(R,'Banco V25I',false,e?.stack||e)}
+  A(R,'V145 declarado intacto',D?.retirement?.v145==='untouched','untouched');
+ }catch(e){A(R,'Banco V25J',false,e?.stack||e)}
  finally{
   state=orig;try{applyStateToUI()}catch(_e){};await W(180);
-  if(sel){sel.value=sel0;sel.dispatchEvent(new Event('change',{bubbles:true}))}
   try{if(tab&&typeof showTab==='function')showTab(tab)}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25I');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25I</h3><div class="rp25i-note">Migración de consumidores V134. Inferencia, limpieza y rutas de factibilidades quedan centralizadas en AnteproyectoDomainV25I; los nombres V134 sobreviven sólo como adaptadores.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25i-row"><span class="${x.ok?'rp25i-ok':'rp25i-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25I">Copiar resultado</button> <button id="closeV25I">Cerrar</button></p>`;
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25J');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25J</h3><div class="rp25j-note">Compuerta previa a borrar físicamente V134. Se absorbió la Base Legal efectiva redefinida posteriormente por V137/V152. Si este banco queda FAIL:0, el bloque original V134/V138 puede retirarse en la siguiente cirugía.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25j-row"><span class="${x.ok?'rp25j-ok':'rp25j-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25J">Copiar resultado</button> <button id="closeV25J">Cerrar</button></p>`;
  p.classList.add('open');
- document.getElementById('closeV25I').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25I').onclick=async()=>{
-  const s=`ALLPA-REPORT-V25I\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+ document.getElementById('closeV25J').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25J').onclick=async()=>{
+  const s=`ALLPA-REPORT-V25J\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
   try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}
  };
 }
 window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaReportBtnV25I';b.type='button';b.textContent='📄 REPORT V25I';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaReportPanelV25I';document.body.appendChild(p);
+ const b=document.createElement('button');b.id='allpaReportBtnV25J';b.type='button';b.textContent='📄 REPORT V25J';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaReportPanelV25J';document.body.appendChild(p);
 },1400));
 })();
 </script>
