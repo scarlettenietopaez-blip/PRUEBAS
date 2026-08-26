@@ -38279,23 +38279,28 @@ window.addEventListener('load',()=>{setTimeout(bind,800);setTimeout(bind,1800);}
 </script>
 
 
-<style id="allpa-report-pipeline-v25b2-css">
-#allpaReportBtnV25B2{position:fixed;right:18px;bottom:18px;z-index:1000006;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25B2{display:none;position:fixed;right:18px;bottom:68px;z-index:1000006;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25B2.open{display:block}.rp25b2-ok{color:#177245;font-weight:700}.rp25b2-fail{color:#b42318;font-weight:700}.rp25b2-row{padding:6px 0;border-bottom:1px solid #eee}.rp25b2-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25B2,#allpaReportPanelV25B2{display:none!important}}
+<style id="allpa-report-pipeline-v25b3-css">
+#allpaReportBtnV25B3{position:fixed;right:18px;bottom:18px;z-index:1000006;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25B3{display:none;position:fixed;right:18px;bottom:68px;z-index:1000006;width:min(1180px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25B3.open{display:block}.rp25b3-ok{color:#177245;font-weight:700}.rp25b3-fail{color:#b42318;font-weight:700}.rp25b3-row{padding:6px 0;border-bottom:1px solid #eee}.rp25b3-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25B3,#allpaReportPanelV25B3{display:none!important}}
 </style>
 
-<script id="allpa-report-pipeline-v25b2-test">
+<script id="allpa-report-pipeline-v25b3-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
 function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d??'')})}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+
 async function run(){
  const R=[],orig=C(state),active=document.querySelector('.tab.active')?.id||'tab-info';
+ const tipoEl=document.getElementById('tipoInforme');
+ const tipoDomOriginal=tipoEl?.value||'';
+
  try{
   const V=window.ReportOutputV25B;
+
   A(R,'ReportOutput V25B disponible',!!V,V?.version||'');
   A(R,'Validación ruta única',window.validationErrorsV70===V?.validate,'V25B.validate');
   A(R,'Copiar ruta única',window.copiarInformeActualV70===V?.copyCurrent,'V25B.copyCurrent');
@@ -38305,7 +38310,9 @@ async function run(){
   const errors=V.validate('generar el PDF');
   A(R,'Validador devuelve arreglo',Array.isArray(errors),`${errors.length} error(es)`);
   A(R,'Errores sin duplicados',errors.length===new Set(errors).size,`${errors.length} único(s)`);
-  A(R,'Validación Copiar operativa',Array.isArray(V.validate('copiar el informe')),`${V.validate('copiar el informe').length} error(es)`);
+
+  const copyErrors=V.validate('copiar el informe');
+  A(R,'Validación Copiar operativa',Array.isArray(copyErrors),`${copyErrors.length} error(es)`);
 
   A(R,'Payload V154 disponible',typeof buildClipboardPayloadV154==='function','V154');
   A(R,'Fallback HTML disponible',typeof fallbackCopyRichHtmlV153==='function','V153');
@@ -38313,20 +38320,46 @@ async function run(){
   A(R,'Limpiador PDF exportado',typeof window.clearPagesV2==='function','window.clearPagesV2');
   A(R,'Bordes impresión disponibles',typeof aplicarBordesImpresionV119U==='function','V119U');
 
-  /* Validar el paginador sin abrir impresión. */
-  const oldTipo=state.tipoInforme;
+  /* Fixture correcto: state y UI deben coincidir porque renderReport() ejecuta collectTop(). */
   state.tipoInforme='Informe Técnico Aprobatorio';
+  if(tipoEl){
+    tipoEl.value='Informe Técnico Aprobatorio';
+    tipoEl.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  await wait(40);
+
+  let reportHtml='';
   try{
-    renderReport();
-    await wait(80);
+    const out=renderReport();
+    await wait(100);
+    const report=document.getElementById('report')||document.querySelector('.report');
+    reportHtml=String(report?.innerHTML||out||'');
+    A(R,'Fixture Aprobatorio visible antes de paginar',
+      reportHtml.length>500,
+      `${reportHtml.length} caracteres`);
+  }catch(e){
+    A(R,'Fixture Aprobatorio visible antes de paginar',false,e.message||e);
+  }
+
+  try{
     const root=await window.buildPagesV2();
-    A(R,'Paginador construye páginas',!!root && root.querySelectorAll('.allpa-print-page-v2').length>0,`${root?.querySelectorAll('.allpa-print-page-v2').length||0} página(s)`);
+    const pages=root?[...root.querySelectorAll('.allpa-print-page-v2')]:[];
+    const meaningful=pages.filter(p=>{
+      const shell=p.querySelector('.allpa-report-shell-v2');
+      return !!String(shell?.textContent||'').trim() || !!shell?.querySelector('table,img,svg,canvas');
+    });
+
+    A(R,'Paginador construye páginas',pages.length>0,`${pages.length} página(s)`);
+    A(R,'Páginas contienen informe',meaningful.length>0,`${meaningful.length}/${pages.length} con contenido`);
+
     window.clearPagesV2();
-    A(R,'Paginador limpia páginas',!document.body.classList.contains('allpa-print-pages-active-v2') && (document.getElementById('allpaPrintPagesV2')?.innerHTML||'')==='', 'limpio');
+    A(R,'Paginador limpia páginas',
+      !document.body.classList.contains('allpa-print-pages-active-v2') &&
+      (document.getElementById('allpaPrintPagesV2')?.innerHTML||'')==='',
+      'limpio');
   }catch(e){
     A(R,'Paginador construye páginas',false,e.message||e);
   }
-  state.tipoInforme=oldTipo;
 
   A(R,'Copiar preparado sin ejecución',typeof V.copyCurrent==='function','seguro');
   A(R,'PDF preparado sin window.print',typeof V.printCurrent==='function','seguro');
@@ -38343,22 +38376,56 @@ async function run(){
   A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
 
- }catch(e){A(R,'Banco V25B2',false,e?.stack||e)}
- finally{
+ }catch(e){
+  A(R,'Banco V25B3',false,e?.stack||e);
+ }finally{
   try{window.clearPagesV2?.()}catch(_e){}
-  state=orig;try{applyStateToUI()}catch(_e){};await wait(180);
+  state=orig;
+  try{applyStateToUI()}catch(_e){}
+  await wait(180);
+
+  if(tipoEl){
+    tipoEl.value=tipoDomOriginal;
+    tipoEl.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+
   try{if(active&&typeof showTab==='function')showTab(active)}catch(_e){}
  }
+
  A(R,'Formulario original restaurado',true,'state restaurado');
 
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25B2');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25B2</h3><div class="rp25b2-note">Corrección puntual: el paginador A4 V2 existía, pero estaba encapsulado dentro de un IIFE. Ahora se expone como servicio y se prueba sin abrir la ventana de impresión.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25b2-row"><span class="${x.ok?'rp25b2-ok':'rp25b2-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25B2">Copiar resultado</button> <button id="closeV25B2">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV25B2').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25B2').onclick=async()=>{const s=`ALLPA-REPORT-V25B2\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25B3');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25B3</h3><div class="rp25b3-note">Banco corregido: sincroniza Tipo de informe en state + DOM antes de renderizar y recién después prueba el paginador A4.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25b3-row"><span class="${x.ok?'rp25b3-ok':'rp25b3-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25B3">Copiar resultado</button> <button id="closeV25B3">Cerrar</button></p>`;
+
+ p.classList.add('open');
+ document.getElementById('closeV25B3').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25B3').onclick=async()=>{
+   const s=`ALLPA-REPORT-V25B3\nOK:${ok} FAIL:${fail}\n`+
+     R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
+   try{await navigator.clipboard.writeText(s)}
+   catch(e){
+     const t=document.createElement('textarea');
+     t.value=s;document.body.appendChild(t);t.select();
+     try{document.execCommand('copy')}catch(_){}
+     t.remove();
+   }
+ };
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReportBtnV25B2';b.type='button';b.textContent='📄 REPORT V25B2';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReportPanelV25B2';document.body.appendChild(p)},1400));
+
+window.addEventListener('load',()=>setTimeout(()=>{
+ const b=document.createElement('button');
+ b.id='allpaReportBtnV25B3';
+ b.type='button';
+ b.textContent='📄 REPORT V25B3';
+ b.onclick=run;
+ document.body.appendChild(b);
+
+ const p=document.createElement('div');
+ p.id='allpaReportPanelV25B3';
+ document.body.appendChild(p);
+},1400));
 })();
 </script>
 
