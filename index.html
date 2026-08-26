@@ -38226,13 +38226,6 @@ window.__PersistenceRoutesV22C={
 </script>
 
 
-<style id="allpa-persistence-core-v22d-css">
-#allpaPersistenceBtnV22D{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaPersistencePanelV22D{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1140px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaPersistencePanelV22D.open{display:block}.pv22d-ok{color:#177245;font-weight:700}.pv22d-fail{color:#b42318;font-weight:700}.pv22d-row{padding:6px 0;border-bottom:1px solid #eee}.pv22d-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaPersistenceBtnV22D,#allpaPersistencePanelV22D{display:none!important}}
-</style>
-
 <script id="allpa-persistence-core-v22d">
 (function(){
 'use strict';
@@ -38334,7 +38327,15 @@ window.__PersistenceRoutesV22D={
 })();
 </script>
 
-<script id="allpa-persistence-core-v22d-test">
+
+<style id="allpa-persistence-core-v22e-css">
+#allpaPersistenceBtnV22E{position:fixed;right:18px;bottom:18px;z-index:1000002;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaPersistencePanelV22E{display:none;position:fixed;right:18px;bottom:68px;z-index:1000002;width:min(1140px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaPersistencePanelV22E.open{display:block}.pv22e-ok{color:#177245;font-weight:700}.pv22e-fail{color:#b42318;font-weight:700}.pv22e-row{padding:6px 0;border-bottom:1px solid #eee}.pv22e-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+@media print{#allpaPersistenceBtnV22E,#allpaPersistencePanelV22E{display:none!important}}
+</style>
+
+<script id="allpa-persistence-core-v22e-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38357,7 +38358,7 @@ async function run(){
 
   const projectBefore=state?.projectType || localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
   const ok=P.createNew({skipConfirm:true,silent:true});
-  await wait(260);
+  await wait(300);
 
   A(R,'Nuevo ejecuta sin confirmación de prueba',ok===true,String(ok));
   A(R,'ProjectType preservado',state.projectType===projectBefore,state.projectType||'');
@@ -38375,11 +38376,35 @@ async function run(){
   A(R,'Asunto hook disponible',typeof P.hooks.asunto==='function','V119Y integrado');
   A(R,'Requisitos V2 hook disponible',typeof P.hooks.requisitosV2==='function','V2 integrado');
 
-  const navDoc=!!document.querySelector('[data-req-subtab-v2="documentales"],#reqSubtabDocumentalesV2,.req-subtab-v2');
-  A(R,'Subpestañas requisitos siguen montadas',navDoc || typeof setupReqSubtabsV2==='function',navDoc?'DOM':'hook');
+  /* Validación corregida según DOM real de V21C */
+  const nav=document.getElementById('reqSubtabsV2');
+  const doc=document.getElementById('reqDocumentalesPaneV2');
+  const prop=document.getElementById('reqPropuestaPaneV2');
+  const db=document.getElementById('reqDocBtnV2');
+  const pb=document.getElementById('reqPropBtnV2');
+
+  A(R,'Subpestañas requisitos V2 presentes',
+    !!nav && !!doc && !!prop && !!db && !!pb,
+    `${nav?'nav ':''}${doc?'doc ':''}${prop?'prop ':''}`.trim()||'ausente');
+
+  if(typeof window.showReqSubtabV2==='function' && nav){
+    window.showReqSubtabV2('documentales',false);
+    await wait(20);
+    A(R,'Subpestaña Documentales activa',
+      doc.classList.contains('active') && db.classList.contains('active'),
+      'documentales');
+
+    window.showReqSubtabV2('propuesta',false);
+    await wait(20);
+    A(R,'Subpestaña Propuesta activa',
+      prop.classList.contains('active') && pb.classList.contains('active'),
+      'propuesta');
+
+    window.showReqSubtabV2('documentales',false);
+  }
 
   const rowsBefore=(state?.aprobatorio?.conclusion||[]).length;
-  P.hooks.render(); await wait(80);
+  P.hooks.render();await wait(80);
   const rowsAfter=(state?.aprobatorio?.conclusion||[]).length;
   A(R,'Render no duplica conclusión',rowsBefore===rowsAfter,`${rowsBefore} → ${rowsAfter}`);
 
@@ -38387,19 +38412,19 @@ async function run(){
   A(R,'Ruta pública Cargar',window.__PersistenceRoutesV22D?.cargarFormulario==='PersistenceV22C.load',window.__PersistenceRoutesV22D?.cargarFormulario||'');
   A(R,'Ruta pública Nuevo',window.__PersistenceRoutesV22D?.nuevoFormulario==='PersistenceV22D.createNew',window.__PersistenceRoutesV22D?.nuevoFormulario||'');
 
- }catch(e){A(R,'Banco Persistencia V22D',false,e?.stack||e)}
+ }catch(e){A(R,'Banco Persistencia V22E',false,e?.stack||e)}
  finally{
   state=orig;try{applyStateToUI()}catch(_e){};await wait(180);try{await renderSavedList()}catch(_e){}
  }
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22D');
- p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22D</h3><div class="pv22d-note">Nuevo Formulario ya usa una ruta única. Con V22B + V22C + V22D queda centralizado el ciclo completo de Persistencia.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="pv22d-row"><span class="${x.ok?'pv22d-ok':'pv22d-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV22D">Copiar resultado</button> <button id="closeV22D">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV22D').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV22D').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22D\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaPersistencePanelV22E');
+ p.innerHTML=`<h3>💾 ALLPA PERSISTENCIA V22E</h3><div class="pv22e-note">Banco de cierre de Fase 22. No cambia la lógica de V22D; corrige únicamente la validación DOM de Requisitos V2.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="pv22e-row"><span class="${x.ok?'pv22e-ok':'pv22e-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV22E">Copiar resultado</button> <button id="closeV22E">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV22E').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV22E').onclick=async()=>{const s=`ALLPA-PERSISTENCE-V22E\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22D';b.type='button';b.textContent='💾 PERSISTENCIA V22D';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22D';document.body.appendChild(p)},1200));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaPersistenceBtnV22E';b.type='button';b.textContent='💾 PERSISTENCIA V22E';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaPersistencePanelV22E';document.body.appendChild(p)},1200));
 })();
 </script>
 
