@@ -38421,11 +38421,7 @@ window.AllpaBaselineV28=Object.freeze({
 .allpa-native-map-v12.dragging{cursor:grabbing}.allpa-native-map-v12{cursor:grab}
 .planos-aprobados-report-v12{font-weight:600}
 .ref-sustento-v12{font-style:italic}
-#allpaV12TestBtn{position:fixed;right:18px;bottom:18px;z-index:1000030;border:0;border-radius:999px;padding:10px 14px;font:700 12px system-ui;background:#fff;color:#17324d;box-shadow:0 4px 18px #0003}
-#allpaV12TestPanel{display:none;position:fixed;right:18px;bottom:65px;z-index:1000030;width:min(900px,calc(100vw - 36px));max-height:78vh;overflow:auto;background:white;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:12px/1.4 system-ui}
-#allpaV12TestPanel.open{display:block}.v12ok{color:#177245;font-weight:800}.v12fail{color:#b42318;font-weight:800}.v12row{padding:5px 0;border-bottom:1px solid #eee}
 @media(max-width:800px){.planos-aprobados-v12 .planos-grid-v12,.planos-aprobados-v12 .planos-grid-v12.two{grid-template-columns:1fr}}
-@media print{#allpaV12TestBtn,#allpaV12TestPanel{display:none!important}}
 </style>
 
 <script id="allpa-postv28-v1-2">
@@ -38824,73 +38820,7 @@ window.addEventListener('load',()=>{
  setTimeout(()=>{installFinalRoutesV12();bindRMV12();mountPlanosV12();},5200);
 });
 
-/* ================== BANCO V1.2 ================== */
-async function runTestsV12(){
- const R=[],orig=cloneV12(state),origProject=localStorage.getItem('GADMR_PROJECT_TYPE_V123');
- const A=(n,ok,d='')=>R.push({n,ok:!!ok,d:String(d)});
- try{
-   A('V1.2 instalada',window.AllpaFunctionalV12?.version===VERSION,window.AllpaFunctionalV12?.version||'');
-   A('Mapa nativo no depende de Leaflet',typeof createNativeMapV12==='function','motor propio');
-   A('Ruta Aprobatorio final V1.2',window.renderInformeAprobatorio===finalAprobatorioV12,'activa');
-   A('Ruta Observaciones final V1.2',window.renderInformeObservaciones===finalObservacionesV12,'activa');
-   A('Ruta render final V1.2',window.renderReport===finalRenderV12,'activa');
 
-   state.projectType='obra_mayor_definitivo';
-   const panel=String(anteproyectoPanelHtml?.()||'');
-   A('OM usa APROBACIÓN DE ANTEPROYECTO',/Aprobaci[oó]n de Anteproyecto/i.test(panel)&&!/Resoluci[oó]n de Anteproyecto/i.test(panel),panel.slice(0,100));
-
-   const p1176=exactRMV12('1176');
-   A('RM 1176 no fuerza coincidencia',!p1176,p1176?.nombre||'sin coincidencia exacta');
-
-   const pf=(DATA.infoFields||[]).find(x=>normV12(x.label).includes('PROYECTO DEFINITIVO'));
-   if(pf){
-     state.info[pf.key]='AMPLIACIÓN';state.tipoInforme='Informe Técnico Aprobatorio';
-     const pel=document.getElementById('info_'+pf.key);
-     if(pel)pel.value='AMPLIACIÓN';
-     try{renderAprobatorioForm()}catch(_e){}
-     await new Promise(r=>setTimeout(r,120));
-     const planosVisible=!!document.getElementById('planosAprobadosV12');
-     A('Planos Aprobados aparece en Ampliación',planosVisible,planosVisible?'visible':'no montado');
-     const pp=ensurePlanosV12();pp.licencia=true;pp.resolucion='RESOLUCIÓN TEST';pp.fecha='2026-09-01';
-     A('Texto Licencia generado',/El Proyecto cuenta con RESOLUCIÓN TEST emitida con fecha/i.test(planosTextV12()),planosTextV12());
-     pp.licencia=false;pp.fechaAprobacion='2026-09-01';pp.entidad='GADMR';
-     A('Texto aprobación previa generado',/El Proyecto fue aprobado con fecha.*por GADMR/i.test(planosTextV12()),planosTextV12());
-     pp.licencia=false;pp.fechaAprobacion='2026-09-17';pp.entidad='Colegio de Arquitectos';
-     mountPlanosV12();
-     const ent=document.getElementById('planosEntidadV12');
-     A('Planos conserva datos al reconstruir',ent?.value==='Colegio de Arquitectos',ent?.value||'');
-     pp.licencia=true;mountPlanosV12();
-     A('Check Licencia cambia campos',!!document.getElementById('planosResolucionV12')&&!document.getElementById('planosEntidadV12'),'rama licencia');
-   }
-
-   const fake=formatPropRowV12({source:'prop_req',id:'__V12_TEST__',articulo:'Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.',texto:'Ubicación que debe abarcar una zona de 300 m. de radio'});
-   A('Propuesta une Artículo + Requisito',/Artículo 95[\s\S]*Ubicación que debe abarcar/i.test(fake.articulo),fake.articulo);
-   A('Propuesta vacía imprime No Cumple',fake.observacion==='No Cumple',fake.observacion);
-
-   state.mostrarTextosTecnicos=false;
-   const off=referenceV12(`<h2>2. RESUMEN DE OBSERVACIONES</h2><table><tr><td>x</td></tr></table><p>${REF}</p><h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>`);
-   A('Check OFF elimina referencia',!off.includes('puede encontrar el detalle'),'referencia ausente');
-   state.mostrarTextosTecnicos=true;
-   const on=referenceV12('<h2>2. RESUMEN DE OBSERVACIONES</h2><table><tr><td>x</td></tr></table><h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>');
-   A('Check ON agrega referencia',on.includes(REF),'referencia presente');
-   const onSinSustento=referenceV12('<h2>2. RESUMEN DE OBSERVACIONES</h2><table><tr><td>x</td></tr></table><h2>5. CONCLUSIONES</h2>');
-   A('Check ON garantiza Acápite 4',/SUSTENTO T[ÉE]CNICO DE LAS OBSERVACIONES/i.test(onSinSustento),'acápite presente');
- }catch(e){A('Banco V1.2',false,e?.stack||e)}
- finally{
-   state=orig;
-   try{if(origProject===null)localStorage.removeItem('GADMR_PROJECT_TYPE_V123');else localStorage.setItem('GADMR_PROJECT_TYPE_V123',origProject)}catch(_e){}
-   try{applyStateToUI?.()}catch(_e){}
-   setTimeout(()=>{installFinalRoutesV12();bindRMV12();mountPlanosV12()},100);
- }
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaV12TestPanel');
- p.innerHTML=`<h3>ALLPA POST-V28 V1.2.1</h3><p><b>OK:${ok} FAIL:${fail}</b></p>`+R.map(x=>`<div class="v12row"><span class="${x.ok?'v12ok':'v12fail'}">${x.ok?'OK':'FAIL'} | ${x.n}</span><div>${escV12(x.d)}</div></div>`).join('')+'<p><button type="button" onclick="this.closest(\'#allpaV12TestPanel\').classList.remove(\'open\')">Cerrar</button></p>';
- p.classList.add('open');
-}
-window.addEventListener('load',()=>setTimeout(()=>{
- if(document.getElementById('allpaV12TestBtn'))return;
- const b=document.createElement('button');b.id='allpaV12TestBtn';b.type='button';b.textContent='🧪 TEST V1.2.3';b.onclick=runTestsV12;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaV12TestPanel';document.body.appendChild(p);
-},5400));
 })();
 </script>
 
@@ -39208,7 +39138,10 @@ function sustentoRowsV125(){
 function buildSustentoV125(){
   if(!state?.mostrarTextosTecnicos)return '';
   const rows=sustentoRowsV125();
-  if(!rows.length)return '';
+  if(!rows.length){
+    return `<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>
+    <p class="sustento-v126-empty">No se registran textos técnicos adicionales para este informe. Los requisitos de Propuesta Arquitectónica se encuentran desarrollados en la Tabla 2. Resumen de Observaciones.</p>`;
+  }
   return `<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>
   <table class="tech-note-table">
     <thead><tr><th>Nro.</th><th>Texto del artículo</th></tr></thead>
@@ -39367,6 +39300,42 @@ window.AllpaFunctionalV125=Object.freeze({
 });
 installV125();
 window.addEventListener('load',()=>{setTimeout(installV125,7100);setTimeout(installV125,7800)});
+})();
+</script>
+
+
+<script id="allpa-postv28-v1-2-6">
+(function(){
+'use strict';
+const VERSION='1.2.6-sustento-visible-no-test';
+
+/*
+ Regla final:
+ - Check ON: Acápite 4 SIEMPRE visible.
+   * Si existen textos técnicos reales, muestra su tabla/imágenes.
+   * Si no existen textos técnicos adicionales, muestra un mensaje explicativo.
+ - Check OFF: desaparecen Acápite 4 y el texto de referencia.
+ - prop_req no se duplica: permanece en Tabla 2.
+*/
+function installV126(){
+  const F=window.AllpaFunctionalV125;
+  if(!F)return;
+  window.renderInformeObservaciones=F.observaciones;
+  window.renderInformeAprobatorio=F.aprobatorio;
+  window.renderReport=F.render;
+  try{
+    renderInformeObservaciones=F.observaciones;
+    renderInformeAprobatorio=F.aprobatorio;
+    renderReport=F.render;
+  }catch(_e){}
+}
+window.AllpaFunctionalV126=Object.freeze({
+  version:VERSION,
+  install:installV126,
+  noVisibleTestUI:true
+});
+installV126();
+window.addEventListener('load',()=>{setTimeout(installV126,7900);setTimeout(installV126,8500)});
 })();
 </script>
 
