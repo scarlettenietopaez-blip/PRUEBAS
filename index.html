@@ -20398,15 +20398,17 @@ window.addEventListener('load',()=>{
 }
 </style>
 
-<script>
+<script id="allpa-v25m-physical-domains">
+
 /* ==========================================================
-   V145 SOBRE V144
+   V25M — NÚCLEO FÍSICO OBRA MAYOR + DESISTIMIENTO
    1. Dos motivos de desistimiento.
    2. Estudios Complementarios en REQ_034 y Factibilidades en REQ_032.
    3. Tabla combinada en la Vista del Informe.
    4. Área del predio (IPRUS) y autocompletado de Conclusión Técnica.
    ========================================================== */
 
+/* === DOMINIO DESISTIMIENTO V25M === */
 const DES_MOTIVO_OBS_V145='Observaciones No Subsanadas/Parcialmente Subsanadas';
 const DES_MOTIVO_PET_V145='Petición del Administrado';
 
@@ -20506,6 +20508,7 @@ renderInformeDesistimientoV69=function(){
     <h2>Conclusiones</h2><p>${nl2br(conclusionText)}</p>${firmaTecnicoSection()}`;
 };
 
+/* === DOMINIO OBRA MAYOR V25M === */
 function isObraMayorV145(){
   return !(typeof isAnteproyectoV123==='function' && isAnteproyectoV123());
 }
@@ -20683,6 +20686,9 @@ bindReqDetailInputsV94=function(){
 const _renderReport_base_V145=typeof renderReport==='function'?renderReport:null;
 if(_renderReport_base_V145) /* renderReport wrapper histórico #14 retirado — Depuración 09 Rápida */
 
+window.DesistimientoPhysicalV25M=Object.freeze({version:'25.12.0-desistimiento-physical',normalize:normalizeDesMotivoV145,ensure:ensureDesistimientoV69,renderForm:renderDesistimientoFormV69,renderReport:renderInformeDesistimientoV69,constants:Object.freeze({observation:DES_MOTIVO_OBS_V145,petition:DES_MOTIVO_PET_V145})});
+window.ObraMayorPhysicalV25M=Object.freeze({version:'25.12.0-obra-mayor-physical',ensureStudies:ensureEstudiosOMV145,ensureFacts:ensureFactibilidadesOMV145,updateFact:updateFactibilidadOMV145,renderFacts:renderFactibilidadesOMV145,renderStudies:renderEstudiosOMV145,combinedReport:combinedStudiesReportV145,syncConclusion:syncConclusionAutoV145});
+
 window.addEventListener('load',()=>{
   setTimeout(()=>{
     ensureDesistimientoV69();
@@ -20695,6 +20701,7 @@ window.addEventListener('load',()=>{
     if(typeof renderPreview==='function') renderPreview();
   },1500);
 });
+
 </script>
 
 
@@ -38569,13 +38576,6 @@ window.ReportStructuralV25K=Object.freeze({version:'25.10.0-physical-retirement'
 </script>
 
 
-<style id="allpa-report-pipeline-v25l-css">
-#allpaReportBtnV25L{position:fixed;right:18px;bottom:18px;z-index:1000016;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25L{display:none;position:fixed;right:18px;bottom:68px;z-index:1000016;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25L.open{display:block}.rp25l-ok{color:#177245;font-weight:700}.rp25l-fail{color:#b42318;font-weight:700}.rp25l-row{padding:6px 0;border-bottom:1px solid #eee}.rp25l-note{padding:8px 10px;background:#f8fafc;border:1px solid #d8e1ea;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25L,#allpaReportPanelV25L{display:none!important}}
-</style>
-
 <script id="allpa-report-pipeline-v25l">
 (function(){
 'use strict';
@@ -38630,7 +38630,88 @@ window.ReportStructuralV25L=Object.freeze({
 })();
 </script>
 
-<script id="allpa-report-pipeline-v25l-test">
+
+<style id="allpa-report-pipeline-v25m-css">
+#allpaReportBtnV25M{position:fixed;right:18px;bottom:18px;z-index:1000017;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaReportPanelV25M{display:none;position:fixed;right:18px;bottom:68px;z-index:1000017;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaReportPanelV25M.open{display:block}.rp25m-ok{color:#177245;font-weight:700}.rp25m-fail{color:#b42318;font-weight:700}.rp25m-row{padding:6px 0;border-bottom:1px solid #eee}.rp25m-note{padding:8px 10px;background:#eefbf3;border:1px solid #b7dfc5;border-radius:8px;margin:8px 0}
+@media print{#allpaReportBtnV25M,#allpaReportPanelV25M{display:none!important}}
+</style>
+<script id="allpa-report-pipeline-v25m">
+(function(){
+'use strict';
+/* Captura de las implementaciones EFECTIVAS tras V146/V13/V27/V34/V61/V145A. */
+const eff={
+ ensureStudies:typeof ensureEstudiosOMV145==='function'?ensureEstudiosOMV145:null,
+ ensureFacts:typeof ensureFactibilidadesOMV145==='function'?ensureFactibilidadesOMV145:null,
+ updateFact:typeof updateFactibilidadOMV145==='function'?updateFactibilidadOMV145:null,
+ renderFacts:typeof renderFactibilidadesOMV145==='function'?renderFactibilidadesOMV145:null,
+ renderStudies:typeof renderEstudiosOMV145==='function'?renderEstudiosOMV145:null,
+ combinedReport:typeof combinedStudiesReportV145==='function'?combinedStudiesReportV145:null,
+ syncConclusion:typeof syncConclusionAutoV145==='function'?syncConclusionAutoV145:null,
+ normalizeReason:typeof normalizeDesMotivoV145==='function'?normalizeDesMotivoV145:null,
+ ensureWithdrawal:typeof ensureDesistimientoV69==='function'?ensureDesistimientoV69:null,
+ renderWithdrawalForm:typeof renderDesistimientoFormV69==='function'?renderDesistimientoFormV69:null,
+ renderWithdrawal:typeof renderInformeDesistimientoV69==='function'?renderInformeDesistimientoV69:null
+};
+const call=(name,args=[])=>typeof eff[name]==='function'?eff[name](...args):null;
+
+const OM=window.ObraMayorDomainV25M=Object.freeze({
+ version:'25.12.0-obra-mayor-domain',
+ ensureStudies:()=>call('ensureStudies'),
+ ensureFacts:()=>call('ensureFacts'),
+ updateFact:(i,f,v)=>call('updateFact',[i,f,v]),
+ renderFacts:()=>call('renderFacts'),
+ renderStudies:()=>call('renderStudies'),
+ combinedReport:()=>call('combinedReport'),
+ syncConclusion:()=>call('syncConclusion')
+});
+const DS=window.DesistimientoDomainV25M=Object.freeze({
+ version:'25.12.0-desistimiento-domain',
+ normalize:v=>call('normalizeReason',[v]),
+ ensure:()=>call('ensureWithdrawal'),
+ renderForm:()=>call('renderWithdrawalForm'),
+ renderReport:()=>call('renderWithdrawal'),
+ constants:Object.freeze({
+   observation:'Observaciones No Subsanadas/Parcialmente Subsanadas',
+   petition:'Petición del Administrado'
+ })
+});
+window.ReportDomainsV25M=Object.freeze({
+ version:'25.12.0-phase25-final',
+ obraMayor:OM,desistimiento:DS,
+ anteproyecto:window.AnteproyectoDomainV25K||null,
+ physical:Object.freeze({v145OriginalRemoved:true,v134OriginalRemoved:true}),
+ compatibility:Object.freeze({legacyV145Aliases:true})
+});
+
+/* Compatibilidad: las rutas históricas ya no son autoridad; delegan al dominio final. */
+window.ensureEstudiosOMV145=OM.ensureStudies;
+window.ensureFactibilidadesOMV145=OM.ensureFacts;
+window.updateFactibilidadOMV145=OM.updateFact;
+window.renderFactibilidadesOMV145=OM.renderFacts;
+window.renderEstudiosOMV145=OM.renderStudies;
+window.combinedStudiesReportV145=OM.combinedReport;
+window.syncConclusionAutoV145=OM.syncConclusion;
+window.normalizeDesMotivoV145=DS.normalize;
+window.ensureDesistimientoV69=DS.ensure;
+window.renderDesistimientoFormV69=DS.renderForm;
+window.renderInformeDesistimientoV69=DS.renderReport;
+try{ensureEstudiosOMV145=OM.ensureStudies}catch(_e){}
+try{ensureFactibilidadesOMV145=OM.ensureFacts}catch(_e){}
+try{updateFactibilidadOMV145=OM.updateFact}catch(_e){}
+try{renderFactibilidadesOMV145=OM.renderFacts}catch(_e){}
+try{renderEstudiosOMV145=OM.renderStudies}catch(_e){}
+try{combinedStudiesReportV145=OM.combinedReport}catch(_e){}
+try{syncConclusionAutoV145=OM.syncConclusion}catch(_e){}
+try{normalizeDesMotivoV145=DS.normalize}catch(_e){}
+try{ensureDesistimientoV69=DS.ensure}catch(_e){}
+try{renderDesistimientoFormV69=DS.renderForm}catch(_e){}
+try{renderInformeDesistimientoV69=DS.renderReport}catch(_e){}
+})();
+</script>
+
+<script id="allpa-report-pipeline-v25m-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38639,73 +38720,77 @@ function W(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
  const R=[],orig=C(state),tab=document.querySelector('.tab.active')?.id||'tab-info';
  try{
-  const D=window.ObraMayorDesistimientoDomainV25L,V=window.ReportStructuralV25F;
-  A(R,'Dominio V145 V25L disponible',!!D,D?.version||'');
-  A(R,'Bridge V25L disponible',!!window.ReportStructuralV25L,window.ReportStructuralV25L?.version||'');
-  A(R,'10 familias V145 capturadas',D?.audit?.captured===10,`${D?.audit?.captured||0}/10`);
-  A(R,'V145 físico preservado',D?.audit?.v145Physical==='preserved','preserved');
-  A(R,'Anteproyecto V25K preservado',!!window.AnteproyectoDomainV25K,window.AnteproyectoDomainV25K?.version||'');
+  const X=window.ReportDomainsV25M,OM=window.ObraMayorDomainV25M,DS=window.DesistimientoDomainV25M,V=window.ReportStructuralV25F;
+  A(R,'Cierre Fase 25 V25M disponible',!!X,X?.version||'');
+  A(R,'Dominio Obra Mayor separado',!!OM,OM?.version||'');
+  A(R,'Dominio Desistimiento separado',!!DS,DS?.version||'');
+  A(R,'Anteproyecto V25K preservado',!!X?.anteproyecto,X?.anteproyecto?.version||'');
+  A(R,'V145 original retirado físicamente',X?.physical?.v145OriginalRemoved===true,'retirado');
+  A(R,'V134 original continúa retirado',X?.physical?.v134OriginalRemoved===true,'retirado');
+  const aliases=[
+   window.ensureEstudiosOMV145===OM.ensureStudies,window.ensureFactibilidadesOMV145===OM.ensureFacts,
+   window.updateFactibilidadOMV145===OM.updateFact,window.renderFactibilidadesOMV145===OM.renderFacts,
+   window.renderEstudiosOMV145===OM.renderStudies,window.combinedStudiesReportV145===OM.combinedReport,
+   window.syncConclusionAutoV145===OM.syncConclusion,window.normalizeDesMotivoV145===DS.normalize,
+   window.ensureDesistimientoV69===DS.ensure,window.renderDesistimientoFormV69===DS.renderForm,
+   window.renderInformeDesistimientoV69===DS.renderReport
+  ];
+  A(R,'11 aliases legacy delegan a V25M',aliases.every(Boolean),`${aliases.filter(Boolean).length}/11`);
 
   state.projectType='obra_mayor_definitivo';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
-  const studies=D.ensureStudies()||[];
-  const facts=D.ensureFacts()||[];
-  A(R,'Obra Mayor inicializa 4 estudios',studies.length===4,`${studies.length} fila(s)`);
-  A(R,'Obra Mayor inicializa 3 factibilidades',facts.length===3,`${facts.length} fila(s)`);
-  const ents=facts.map(x=>String(x.estudio||''));
-  A(R,'Canon factibilidades OM',ents.join('|')==='RIOBAMBA-EP|EERSA|CNT',ents.join(' · '));
-  const rf=String(D.renderFacts()||''),rs=String(D.renderStudies()||''),cr=String(D.combinedReport()||'');
-  A(R,'Renderer factibilidades OM responde',rf.length>100,`${rf.length} caracteres`);
-  A(R,'Renderer estudios OM responde',rs.length>100,`${rs.length} caracteres`);
-  A(R,'Reporte combinado OM responde',cr.length>50,`${cr.length} caracteres`);
-  D.syncConclusion();
-  A(R,'Sincronización Conclusión V145 ejecuta',Array.isArray(state.aprobatorio?.conclusion),'conclusión disponible');
+  const studies=OM.ensureStudies()||[],facts=OM.ensureFacts()||[];
+  A(R,'Obra Mayor conserva 4 estudios',studies.length===4,`${studies.length} fila(s)`);
+  A(R,'Obra Mayor conserva 3 factibilidades',facts.length===3,`${facts.length} fila(s)`);
+  A(R,'Canon OM vigente',facts.map(x=>String(x.estudio||'')).join('|')==='RIOBAMBA-EP|EERSA|CNT',facts.map(x=>x.estudio).join(' · '));
+  const rf=String(OM.renderFacts()||''),rs=String(OM.renderStudies()||''),comb=String(OM.combinedReport()||'');
+  A(R,'Renderer factibilidades OM operativo',rf.length>100,`${rf.length} caracteres`);
+  A(R,'Renderer estudios OM operativo',rs.length>100,`${rs.length} caracteres`);
+  A(R,'Reporte combinado OM operativo',comb.length>50,`${comb.length} caracteres`);
+  OM.syncConclusion();
+  A(R,'Sincronización Conclusión OM operativa',Array.isArray(state.aprobatorio?.conclusion),'conclusión disponible');
   const om=String(V?.aprobatorio?.()||'');
   A(R,'Aprobatorio Obra Mayor operativo',om.length>500,`${om.length} caracteres`);
   A(R,'Aprobatorio OM conserva Conclusión',/Conclusi[oó]n/i.test(om),'visible');
 
   if(!state.desistimiento)state.desistimiento={};
-  state.desistimiento.motivo='Peticion del Administrado';
-  D.ensureWithdrawal();
-  A(R,'Motivo Petición normalizado',state.desistimiento.motivo===D.constants.petition,state.desistimiento.motivo||'');
-  const pet=String(D.renderWithdrawal()||'');
+  state.desistimiento.motivo='Peticion del Administrado';DS.ensure();
+  A(R,'Petición normalizada',state.desistimiento.motivo===DS.constants.petition,state.desistimiento.motivo||'');
+  const pet=String(DS.renderReport()||'');
   A(R,'Desistimiento Petición operativo',pet.length>500,`${pet.length} caracteres`);
   A(R,'Petición conserva Art. 211',/211/.test(pet),'visible');
 
-  state.desistimiento.motivo='Observaciones';
-  D.ensureWithdrawal();
-  A(R,'Motivo Observaciones normalizado',state.desistimiento.motivo===D.constants.observation,state.desistimiento.motivo||'');
-  const obs=String(D.renderWithdrawal()||'');
+  state.desistimiento.motivo='Observaciones';DS.ensure();
+  A(R,'Observaciones normalizadas',state.desistimiento.motivo===DS.constants.observation,state.desistimiento.motivo||'');
+  const obs=String(DS.renderReport()||'');
   A(R,'Desistimiento Observaciones operativo',obs.length>500,`${obs.length} caracteres`);
   A(R,'Observaciones conserva criterio técnico',/Criterio t[ée]cnico/i.test(obs),'visible');
 
   state.projectType='anteproyecto_edificacion';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
-  const AP=window.AnteproyectoDomainV25K;
-  const af=AP?.ensureFacts?.()||[];
+  const AP=X.anteproyecto,af=AP?.ensureFacts?.()||[];
   A(R,'Anteproyecto conserva 3 factibilidades',af.length===3,`${af.length} fila(s)`);
   A(R,'Anteproyecto Base Legal preservada',String(AP?.baseLegal?.()||'').length>500,`${String(AP?.baseLegal?.()||'').length} caracteres`);
   const ante=String(V?.aprobatorio?.()||'');
   A(R,'Aprobatorio Anteproyecto operativo',ante.length>500,`${ante.length} caracteres`);
 
-  const n=(state?.aprobatorio?.conclusion||[]).length;
-  applyStateToUI();await W(160);
+  const n=(state?.aprobatorio?.conclusion||[]).length;applyStateToUI();await W(160);
   A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===n,`${n} → ${(state?.aprobatorio?.conclusion||[]).length}`);
   A(R,'ReportOutput V25B intacto',!!window.ReportOutputV25B,window.ReportOutputV25B?.version||'');
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
   A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
   A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
- }catch(e){A(R,'Banco V25L',false,e?.stack||e)}
+ }catch(e){A(R,'Banco V25M',false,e?.stack||e)}
  finally{state=orig;try{applyStateToUI()}catch(_e){};await W(180);try{if(tab&&typeof showTab==='function')showTab(tab)}catch(_e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25L');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25L</h3><div class="rp25l-note">Auditoría y encapsulación V145. Se capturan 10 responsabilidades efectivas de Obra Mayor + Desistimiento sin retirar todavía el bloque físico.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25l-row"><span class="${x.ok?'rp25l-ok':'rp25l-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25L">Copiar resultado</button> <button id="closeV25L">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV25L').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25L').onclick=async()=>{const s=`ALLPA-REPORT-V25L\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25M');
+ p.innerHTML=`<h3>📄 ALLPA REPORT V25M</h3><div class="rp25m-note">Cierre de Fase 25: V145 fue retirado físicamente y sus responsabilidades quedaron separadas en ObraMayorDomainV25M y DesistimientoDomainV25M. Los nombres históricos permanecen sólo como compatibilidad.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="rp25m-row"><span class="${x.ok?'rp25m-ok':'rp25m-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV25M">Copiar resultado</button> <button id="closeV25M">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV25M').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV25M').onclick=async()=>{const s=`ALLPA-REPORT-V25M\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){}};
 }
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReportBtnV25L';b.type='button';b.textContent='📄 REPORT V25L';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReportPanelV25L';document.body.appendChild(p)},1400));
+window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaReportBtnV25M';b.type='button';b.textContent='📄 REPORT V25M';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaReportPanelV25M';document.body.appendChild(p)},1400));
 })();
 </script>
 
