@@ -38731,12 +38731,7 @@ function referenceV12(html){
  if(!state.mostrarTextosTecnicos){
    return s.replace(/<h2[^>]*>\s*(?:\d+\s*\.\s*)?SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES\s*<\/h2>[\s\S]*?(?=<h2[^>]*>|$)/gi,'');
  }
- if(!hasSustentoV12(s)){
-   const sust=typeof textosTecnicosSectionV12==='function'?String(textosTecnicosSectionV12()||''):'';
-   const block=sust.trim()?sust:'<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>';
-   const concl=/<h2[^>]*>\s*(?:\d+\s*\.\s*)?CONCLUSIONES\s*<\/h2>/i;
-   s=concl.test(s)?s.replace(concl,block+'$&'):s+block;
- }
+ if(!hasSustentoV12(s))return s;
  const head=/((?:<h2[^>]*>\s*(?:\d+\s*\.\s*)?RESUMEN\s+DE\s+OBSERVACIONES\s*<\/h2>)[\s\S]*?<\/table>)/i;
  if(head.test(s))s=s.replace(head,`$1<p class="ref-sustento-v12">${REF}</p>`);
  return s;
@@ -39015,6 +39010,159 @@ function installV122(){
 }
 installV122();
 window.addEventListener('load',()=>{setTimeout(installV122,5300);setTimeout(installV122,6100)});
+})();
+</script>
+
+
+<script id="allpa-postv28-v1-2-4-sustento-restore">
+(function(){
+'use strict';
+const VERSION='1.2.4-sustento-restored';
+const REF124='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
+
+/* =========================================================
+   RESTAURACIÓN DEL ACÁPITE DE TEXTOS TÉCNICOS
+   Se recupera la lógica estable V113:
+   - toma las observaciones seleccionadas,
+   - muestra artículo/texto técnico,
+   - conserva múltiples imágenes,
+   - excluye únicamente prop_req, porque esos requisitos ya
+     fueron trasladados a Tabla 2 en Post-V28.
+   ========================================================= */
+function obsImagesV124(o){
+  try{
+    if(typeof obsImagesV113==='function')return obsImagesV113(o)||[];
+  }catch(_e){}
+  const arr=Array.isArray(o?.imagenes)?o.imagenes:[];
+  const one=String(o?.imagen||'').trim();
+  return [...new Set([...arr,one].filter(Boolean))];
+}
+
+function sustentoRowsV124(){
+  const all=typeof combinedObsRows==='function'?(combinedObsRows()||[]):[];
+  return all
+    .filter(o=>o?.source!=='prop_req')
+    .map((o,i)=>({
+      num:i+1,
+      obs:o,
+      articulo:o?.articulo||o?.norma||'',
+      texto:typeof formatArticleTextV55==='function'
+        ? formatArticleTextV55(o?.texto||'')
+        : String(o?.texto||''),
+      imagenes:obsImagesV124(o)
+    }))
+    .filter(r=>String(r.texto||'').trim()||r.imagenes.length);
+}
+
+function restoredTextosTecnicosV124(){
+  if(!state?.mostrarTextosTecnicos)return '';
+  const rows=sustentoRowsV124();
+  if(!rows.length)return '';
+
+  const escx=v=>typeof esc==='function'?esc(String(v??'')):String(v??'');
+  return `<h2>Sustento técnico de las observaciones</h2>
+  <table class="tech-note-table">
+    <thead><tr><th>Nro.</th><th>Texto del artículo</th></tr></thead>
+    <tbody>${rows.map(r=>{
+      const art=typeof articleCellForObsV68==='function'
+        ? articleCellForObsV68(r.obs)
+        : escx(r.articulo);
+      const imgs=r.imagenes.length
+        ? `<tr class="sustento-img-row-v55"><td colspan="2"><div class="sustento-img-gallery-v113">${r.imagenes.map(src=>`<img class="sustento-img-v55" src="${escx(src)}">`).join('')}</div></td></tr>`
+        : '';
+      return `<tr><td>${r.num}</td><td><strong>${art}</strong><br><div class="article-text-v55">${escx(r.texto)}</div></td></tr>${imgs}`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+/* Ruta global efectiva usada por el renderer histórico. */
+window.textosTecnicosSection=restoredTextosTecnicosV124;
+try{textosTecnicosSection=restoredTextosTecnicosV124}catch(_e){}
+
+/* =========================================================
+   REFERENCIA CONDICIONAL
+   No inventa un Acápite vacío.
+   Solo aparece si:
+   1) el check está activo, Y
+   2) el Acápite real fue generado.
+   Al apagar el check, se eliminan tanto Acápite como referencia.
+   ========================================================= */
+function stripRefV124(html){
+  return String(html||'')
+    .replace(/<p\b[^>]*class=["'][^"']*(?:ref-sustento-v12|obs-summary-reference-v147)[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'')
+    .replace(/<p\b[^>]*>[\s\S]*?En\s+el\s+Ac[aá]pite\s+4\.\s*SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES[\s\S]*?aqu[ií]\s+descritas\.?[\s\S]*?<\/p>/gi,'');
+}
+function hasRealSustentoV124(html){
+  const s=String(html||'');
+  return /<h2[^>]*>\s*(?:\d+\s*\.\s*)?Sustento\s+t[ée]cnico\s+de\s+las\s+observaciones\s*<\/h2>/i.test(s)
+    && /class=["'][^"']*tech-note-table[^"']*["']/i.test(s);
+}
+function removeSustentoV124(html){
+  return String(html||'').replace(
+    /<h2[^>]*>\s*(?:\d+\s*\.\s*)?Sustento\s+t[ée]cnico\s+de\s+las\s+observaciones\s*<\/h2>[\s\S]*?(?=<h2[^>]*>|$)/gi,
+    ''
+  );
+}
+function applySustentoConditionV124(html){
+  let s=stripRefV124(html);
+  if(!state?.mostrarTextosTecnicos)return removeSustentoV124(s);
+  if(!hasRealSustentoV124(s))return s;
+
+  const resumen=/((?:<h2[^>]*>\s*(?:\d+\s*\.\s*)?RESUMEN\s+DE\s+OBSERVACIONES\s*<\/h2>)[\s\S]*?<\/table>)/i;
+  if(resumen.test(s)){
+    s=s.replace(resumen,`$1<p class="ref-sustento-v12">${REF124}</p>`);
+  }
+  return s;
+}
+
+/* =========================================================
+   RUTA FINAL DE INFORME
+   Se deja que el motor V25F vuelva a construir el Acápite con
+   la función restaurada. Después solo aplicamos la condición.
+   ========================================================= */
+function renderObsV124(){
+  let s=window.ReportStructuralV25F?.observaciones?.()||'';
+  return applySustentoConditionV124(s);
+}
+function renderReportV124(){
+  const t=String(state?.tipoInforme||'').trim();
+  if(t!=='Informe con Observaciones'){
+    return window.AllpaFunctionalV12?.render?.() ?? '';
+  }
+  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
+  try{if(typeof updateSideActions==='function')updateSideActions()}catch(_e){}
+  const s=renderObsV124();
+  const el=document.getElementById('report');
+  if(el){
+    el.className='report report-observaciones';
+    document.body.classList.add('printing-observaciones');
+    document.body.classList.remove('printing-aprobatorio');
+    el.innerHTML=s;
+  }
+  return s;
+}
+
+function installV124(){
+  window.textosTecnicosSection=restoredTextosTecnicosV124;
+  try{textosTecnicosSection=restoredTextosTecnicosV124}catch(_e){}
+  window.renderInformeObservaciones=renderObsV124;
+  window.renderReport=renderReportV124;
+  try{
+    renderInformeObservaciones=renderObsV124;
+    renderReport=renderReportV124;
+  }catch(_e){}
+}
+window.AllpaFunctionalV124=Object.freeze({
+  version:VERSION,
+  rows:sustentoRowsV124,
+  section:restoredTextosTecnicosV124,
+  condition:applySustentoConditionV124,
+  renderObservaciones:renderObsV124,
+  install:installV124
+});
+
+installV124();
+window.addEventListener('load',()=>{setTimeout(installV124,6200);setTimeout(installV124,7000)});
 })();
 </script>
 
