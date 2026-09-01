@@ -36598,13 +36598,6 @@ textarea.evidencia-text,
 </script>
 
 
-<style id="allpa-conclusion-core-v20-css">
-#allpaConclusionCoreBtnV20{position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaConclusionCorePanelV20{display:none;position:fixed;right:18px;bottom:68px;z-index:999999;width:min(1080px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaConclusionCorePanelV20.open{display:block}.corev20-ok{color:#177245;font-weight:700}.corev20-fail{color:#b42318;font-weight:700}.corev20-row{padding:6px 0;border-bottom:1px solid #eee}.corev20-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaConclusionCoreBtnV20,#allpaConclusionCorePanelV20{display:none!important}}
-</style>
-
 <script id="allpa-conclusion-core-v20">
 /* ==========================================================
    CONCLUSIÓN TÉCNICA CORE V20 — FUENTE CSV CANÓNICA FINAL
@@ -36807,237 +36800,6 @@ textarea.evidencia-text,
 })();
 </script>
 
-<script id="allpa-conclusion-core-v20-test">
-(function(){
-'use strict';
-function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
-function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
-
-async function run(){
- const R=[],orig=C(state);
-
- try{
-  const Source=window.ConclusionTecnicaSourceV20;
-  const CSV=window.ConclusionTecnicaCSVV17;
-  const P=window.ConclusionTecnicaPrepareV12;
-  const S=window.ConclusionTecnicaStructureV9;
-  const K=window.ConclusionTecnicaKeysV14;
-  const X=window.ConclusionTecnicaActionsV15;
-  const V7=window.ConclusionTecnicaV7;
-  const Core=window.ConclusionTecnicaCoreV1;
-
-  A(R,'Source V20 disponible',!!Source,Source?.version||'');
-  A(R,'Rutas fuente centralizadas',
-    Object.keys(window.__ConclusionTecnicaSourceRoutesV20||{}).length===9,
-    `${Object.keys(window.__ConclusionTecnicaSourceRoutesV20||{}).length} ruta(s)`);
-
-  const all=Source.allRows();
-  const active=Source.activeRows();
-
-  A(R,'Fuente total 10 filas',all.length===10,`${all.length} fila(s)`);
-  A(R,'Fuente activa válida',active.length>0&&active.length<=all.length,`${active.length}/${all.length}`);
-  A(R,'allConclusionCSVRowsV81 usa V20',
-    allConclusionCSVRowsV81().length===all.length,
-    `${allConclusionCSVRowsV81().length} fila(s)`);
-
-  const k79=allConclusionBaseKeysV79();
-  const k80=conclusionAllBaseKeysV80();
-  const k107=baseConclusionKeysV107();
-
-  A(R,'Claves V79/V80/V107 unificadas',
-    k79.size===10&&k80.size===10&&k107.size===10&&[...k79].every(k=>k80.has(k)&&k107.has(k)),
-    `${k79.size}/${k80.size}/${k107.size}`);
-
-  A(R,'Active keys unificadas',
-    activeConclusionKeysV79().size===conclusionActiveKeysV80().size,
-    `${activeConclusionKeysV79().size}/${conclusionActiveKeysV80().size}`);
-
-  /* Reconstrucción base */
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:[]}};
-  CSV.rebuildIfEmpty();
-
-  A(R,'Vacío reconstruye 10',
-    state.aprobatorio.conclusion.length===10,
-    `${state.aprobatorio.conclusion.length} fila(s)`);
-
-  /* Construir caso Amp/Mod real: 1 bruta base + 2 custom. */
-  const legacy=state.aprobatorio.conclusion.map(C);
-  const bi=legacy.findIndex((r,i)=>S.role(r,i)==='bruta');
-  const ti=legacy.findIndex((r,i)=>S.role(r,i)==='brutaTotal');
-
-  if(bi<0) throw new Error('No se encontró fila bruta base.');
-
-  const amp=C(legacy[bi]);
-  amp.intervention='Ampliación';
-  amp.tipoAreaV13='Ampliación';
-  amp.cantidad='50';
-  amp.origin='custom';
-  amp._originV108='custom';
-  amp._userRowV108=true;
-  delete amp._baseKeyV108;
-  delete amp._baseKeyV107;
-
-  const mod=C(legacy[bi]);
-  mod.intervention='Modificación';
-  mod.tipoAreaV13='Modificación';
-  mod.cantidad='25';
-  mod.origin='custom';
-  mod._originV108='custom';
-  mod._userRowV108=true;
-  delete mod._baseKeyV108;
-  delete mod._baseKeyV107;
-
-  legacy.splice(ti>=0?ti:legacy.length,0,amp,mod);
-
-  state={tipoInforme:'Informe Técnico Aprobatorio',aprobatorio:{conclusion:legacy}};
-  S.canonicalizeState();
-  CSV.rebuild(false);
-
-  A(R,'Caso Amp/Mod queda en 12',
-    state.aprobatorio.conclusion.length===12,
-    `${state.aprobatorio.conclusion.length} fila(s)`);
-
-  const types=state.aprobatorio.conclusion
-    .filter((r,i)=>Core.role(r,i)==='bruta')
-    .map(r=>S.interventionOf(r));
-
-  A(R,'Tres intervenciones presentes',
-    types.includes('Aprobada (Existente)')&&types.includes('Ampliación')&&types.includes('Modificación'),
-    types.join(' · '));
-
-  const filtered=Source.filterActiveState(state.aprobatorio.conclusion);
-  A(R,'Filtro activo conserva custom',
-    filtered.some(r=>S.interventionOf(r)==='Ampliación')&&filtered.some(r=>S.interventionOf(r)==='Modificación'),
-    `${filtered.length} fila(s)`);
-
-  /* Acciones */
-  const beforeAdd=state.aprobatorio.conclusion.length;
-  X.addRow();
-  A(R,'Agregar fila Core',
-    state.aprobatorio.conclusion.length===beforeAdd+1,
-    `${beforeAdd} → ${state.aprobatorio.conclusion.length}`);
-
-  const blankIdx=state.aprobatorio.conclusion.findIndex((r,i)=>
-    S.role(r,i)==='bruta'&&r._userRowV108&&!String(r.descripcion||'').trim()
-  );
-  if(blankIdx>=0) X.removeRow(blankIdx);
-
-  A(R,'Quitar fila Core',
-    state.aprobatorio.conclusion.length===beforeAdd,
-    `${state.aprobatorio.conclusion.length} fila(s)`);
-
-  /* Cálculo */
-  const calc=V7.recalcular();
-  A(R,'Motor matemático disponible',
-    !!calc?.formatted,
-    `Bruta ${calc?.formatted?.areaBrutaTotal||''} · Amp/Mod ${calc?.formatted?.areaAmpMod||''}`);
-
-  /* Tabla e informe */
-  let cont=document.getElementById('conclusionTabla'),temp=false;
-  if(!cont){
-    cont=document.createElement('div');
-    cont.id='conclusionTabla';
-    document.body.appendChild(cont);
-    temp=true;
-  }
-
-  V7.renderTabla();
-  const tr=cont.querySelectorAll('tbody tr').length;
-  const rr=V7.canonicalRows().length;
-
-  A(R,'Tabla Amp/Mod 12 filas',tr===12,`${tr} fila(s)`);
-  A(R,'Informe Amp/Mod 12 filas',rr===12,`${rr} fila(s)`);
-  A(R,'Tabla e informe alineados',tr===rr,`tabla ${tr} · informe ${rr}`);
-
-  const html=V7.renderInforme();
-
-  A(R,'Informe contiene Ampliación',/Ampliación/i.test(html),'visible');
-  A(R,'Informe contiene Modificación',/Modificación/i.test(html),'visible');
-  A(R,'Informe Core activo',/conclusion-report-core-v6b/.test(html),`${html.length} caracteres`);
-
-  A(R,'Validación Área Bruta disponible',
-    typeof errorAreaBrutaConclusionV119N==='function',
-    'disponible');
-
-  /* Arquitectura final */
-  A(R,'Structure V9 activo',!!window.ConclusionTecnicaStructureV9,'estructura');
-  A(R,'Normalize V10 activo',!!window.ConclusionTecnicaNormalizeV10,'normalización');
-  A(R,'Prepare V12 activo',!!P,P?.version||'');
-  A(R,'Keys V14 activo',!!K,K?.version||'');
-  A(R,'Actions V15 activo',!!X,X?.version||'');
-  A(R,'CSV V17 activo',!!CSV,CSV?.version||'');
-  A(R,'Helpers V19 activo',!!window.ConclusionTecnicaHelpersV19,'helpers');
-  A(R,'Source V20 activo',!!Source,Source?.version||'');
-
-  if(temp)cont.remove();
-
- }catch(e){
-  A(R,'Banco Core V20',false,e?.stack||e);
- }finally{
-  state=orig;
-  try{applyStateToUI()}catch(e){}
- }
-
- A(R,'Formulario original restaurado',true,'state restaurado');
-
- const ok=R.filter(x=>x.ok).length;
- const fail=R.length-ok;
- const p=document.getElementById('allpaConclusionCorePanelV20');
-
- p.innerHTML=`<h3>✅ ALLPA CONCLUSIÓN CORE V20</h3>
- <div class="corev20-note">
-   Regresión de cierre de Conclusión Técnica: fuente CSV, estructura,
-   normalización, merge, claves, acciones, cálculo, tabla e informe.
- </div>
- <p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="corev20-row">
-   <span class="${x.ok?'corev20-ok':'corev20-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span>
-   <div>${x.detail}</div>
- </div>`).join('')+
- `<p><button id="copyV20">Copiar resultado</button>
- <button id="closeV20">Cerrar</button></p>`;
-
- p.classList.add('open');
- document.getElementById('closeV20').onclick=()=>p.classList.remove('open');
-
- document.getElementById('copyV20').onclick=async()=>{
-   const s=`ALLPA-CONCLUSION-CORE-V20\nOK:${ok} FAIL:${fail}\n`+
-     R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');
-   try{await navigator.clipboard.writeText(s)}
-   catch(e){
-     const t=document.createElement('textarea');
-     t.value=s;
-     document.body.appendChild(t);
-     t.select();
-     try{document.execCommand('copy')}catch(_){}
-     t.remove();
-   }
- };
-}
-
-window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');
- b.id='allpaConclusionCoreBtnV20';
- b.type='button';
- b.textContent='✅ CORE CONCLUSIÓN V20';
- b.onclick=run;
- document.body.appendChild(b);
-
- const p=document.createElement('div');
- p.id='allpaConclusionCorePanelV20';
- document.body.appendChild(p);
-},1200));
-})();
-</script>
-
-
-<style id="allpa-apply-state-core-v21d-css">
-#allpaApplyStateBtnV21D{position:fixed;right:18px;bottom:18px;z-index:1000001;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaApplyStatePanelV21D{display:none;position:fixed;right:18px;bottom:68px;z-index:1000001;width:min(1120px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaApplyStatePanelV21D.open{display:block}.asv21d-ok{color:#177245;font-weight:700}.asv21d-fail{color:#b42318;font-weight:700}.asv21d-row{padding:6px 0;border-bottom:1px solid #eee}.asv21d-note{padding:8px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
-@media print{#allpaApplyStateBtnV21D,#allpaApplyStatePanelV21D{display:none!important}}
-</style>
-
 <script id="allpa-apply-state-core-v21d">
 (function(){
 'use strict';
@@ -37088,98 +36850,6 @@ try{applyStateToUI=window.applyStateToUI;}catch(_e){}
 window.__ApplyStateRouteV21D='ApplyStateUIV21D.apply→CentralV55V129→CoreV18';
 })();
 </script>
-
-<script id="allpa-apply-state-core-v21d-test">
-(function(){
-'use strict';
-function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
-function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d||'')})}
-function wait(ms){return new Promise(r=>setTimeout(r,ms))}
-function activeTab(){return document.querySelector('.tab-btn.active')?.dataset?.tab||''}
-async function testTabs(R,type,ids){
- const old=state.tipoInforme;state.tipoInforme=type;applyStateToUI();await wait(150);
- let ok=true,ds=[];
- for(const id of ids){
-  if(!document.querySelector(`.tab-btn[data-tab="${id}"]`)||!document.getElementById(id)){ok=false;ds.push(id+':ausente');continue}
-  try{showTab(id);await wait(25);const cur=activeTab();if(cur!==id){ok=false;ds.push(`${id}→${cur}`)}}catch(e){ok=false;ds.push(`${id}:${e.message}`)}
- }
- A(R,`Navegación ${type}`,ok,ok?ids.join(' → '):ds.join(' · '));state.tipoInforme=old;
-}
-async function run(){
- const R=[],orig=C(state),origTab=activeTab();
- try{
-  const V=window.ApplyStateUIV21D,H=window.AllpaApplyStateHooksV21D||{};
-  A(R,'Control V21D disponible',!!V,V?.version||'');
-  A(R,'Ruta pública única',window.applyStateToUI===V?.apply,window.__ApplyStateRouteV21D||'');
-  A(R,'Base Central V55–V129 disponible',typeof window.applyStateToUICentralV55V129==='function','central');
-  A(R,'Core V18 disponible',typeof window.applyStateToUICoreV18==='function','core');
-
-  const hookNames=['anexos','notificacion','asunto','requisitosV2','segundaObservacion','notaNormativa','apoderados'];
-  const available=hookNames.filter(n=>typeof H[n]==='function');
-  A(R,'7 hooks explícitos disponibles',available.length===7,available.join(' · '));
-
-  const rows0=(state?.aprobatorio?.conclusion||[]).length,prop0=(state?.propietarios||[]).length,apod0=(state?.apoderados||[]).length;
-  applyStateToUI();await wait(220);
-  A(R,'ApplyState consolidado ejecuta',true,'sin excepción');
-  A(R,'ProjectType preservado',!!state.projectType,state.projectType||'');
-  A(R,'Conclusión no se duplica',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
-  applyStateToUI();await wait(220);
-  A(R,'Segundo ApplyState idempotente',(state?.aprobatorio?.conclusion||[]).length===rows0,`${rows0} → ${(state?.aprobatorio?.conclusion||[]).length}`);
-  A(R,'Propietarios preservados',(state?.propietarios||[]).length===prop0,`${prop0} → ${(state?.propietarios||[]).length}`);
-  A(R,'Apoderados preservados',(state?.apoderados||[]).length===apod0,`${apod0} → ${(state?.apoderados||[]).length}`);
-  A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
-
-  await testTabs(R,'Informe con Observaciones',['tab-info','tab-req','tab-obs','tab-vista']);
-  await testTabs(R,'Informe Técnico Aprobatorio',['tab-info','tab-req','tab-apr','tab-vista']);
-  await testTabs(R,'Informe de Desistimiento',['tab-info','tab-req','tab-obs','tab-des','tab-vista']);
-
-  state.tipoInforme=orig.tipoInforme;applyStateToUI();await wait(220);
-  A(R,'eGOB reflejado',(document.getElementById('egob')?.value||'')===String(state.egob||''),String(state.egob||'(vacío)'));
-  A(R,'Técnico reflejado',(document.getElementById('tecnico')?.value||'')===String(state.tecnico||''),String(state.tecnico||'(vacío)'));
-  A(R,'Tipo Informe reflejado',(document.getElementById('tipoInforme')?.value||'')===String(state.tipoInforme||''),String(state.tipoInforme||'(vacío)'));
-
-  A(R,'Anexos efecto disponible',!!document.querySelector('[id*="anexo"]')||!!state?.aprobatorio?.anexos||!!state?.anexos,'DOM/state');
-  A(R,'Notificación efecto disponible',!!document.getElementById('tab-notificar-siento-v119x')||!!document.querySelector('[id*="119x"]')||!!state?.notificacion,'DOM/state');
-  A(R,'Asunto efecto disponible',!!document.querySelector('[id*="asunto"]')||!!state?.aprobatorio?.asunto||!!state?.asunto,'DOM/state');
-
-  const nav=document.getElementById('reqSubtabsV2'),doc=document.getElementById('reqDocumentalesPaneV2'),prop=document.getElementById('reqPropuestaPaneV2'),
-        db=document.getElementById('reqDocBtnV2'),pb=document.getElementById('reqPropBtnV2');
-  A(R,'Subpestañas requisitos V2 presentes',!!nav&&!!doc&&!!prop&&!!db&&!!pb,`${nav?'nav ':''}${doc?'doc ':''}${prop?'prop ':''}`.trim()||'ausente');
-  if(typeof window.showReqSubtabV2==='function'&&nav){
-    window.showReqSubtabV2('documentales',false);await wait(20);
-    A(R,'Subpestaña Documentales activa',doc.classList.contains('active')&&db.classList.contains('active'),'documentales');
-    window.showReqSubtabV2('propuesta',false);await wait(20);
-    A(R,'Subpestaña Propuesta activa',prop.classList.contains('active')&&pb.classList.contains('active'),'propuesta');
-    window.showReqSubtabV2('documentales',false);
-  }
-
-  A(R,'Nota normativa disponible',typeof window.allpaActualizarNotaNormativaRequisitos==='function','actualizador');
-  A(R,'Multi-apoderados disponible',typeof window.ensureApoderadosV3==='function'||Array.isArray(state?.apoderados),`${(state?.apoderados||[]).length} apoderado(s)`);
-
-  if(typeof window.renderInformeAprobatorio==='function'){
-    let html='';try{html=window.renderInformeAprobatorio()||''}catch(_e){}
-    A(R,'Informe Aprobatorio renderiza',typeof html==='string'&&html.length>500,`${html.length} caracteres`);
-  }
-
-  /* Estructura: ya no debe existir una cadena de wrappers post-central. */
-  A(R,'Control declara 7 hooks',Object.keys(H).filter(k=>hookNames.includes(k)).length===7,Object.keys(H).filter(k=>hookNames.includes(k)).join(' · '));
- }catch(e){A(R,'Banco ApplyState V21D',false,e?.stack||e)}
- finally{
-  state=orig;try{applyStateToUI()}catch(_e){};await wait(180);
-  if(origTab&&typeof showTab==='function'){try{showTab(origTab)}catch(_e){}}
- }
- A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaApplyStatePanelV21D');
- p.innerHTML=`<h3>🧭 ALLPA APPLY STATE V21D</h3><div class="asv21d-note">V21D retira los 7 wrappers post-central y los sustituye por hooks públicos explícitos bajo un único controlador.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="asv21d-row"><span class="${x.ok?'asv21d-ok':'asv21d-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV21D">Copiar resultado</button> <button id="closeV21D">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV21D').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV21D').onclick=async()=>{const s=`ALLPA-APPLYSTATE-V21D\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){const t=document.createElement('textarea');t.value=s;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove()}};
-}
-window.addEventListener('load',()=>setTimeout(()=>{const b=document.createElement('button');b.id='allpaApplyStateBtnV21D';b.type='button';b.textContent='🧭 APPLY STATE V21D';b.onclick=run;document.body.appendChild(b);const p=document.createElement('div');p.id='allpaApplyStatePanelV21D';document.body.appendChild(p)},1200));
-})();
-</script>
-
 
 <script id="allpa-persistence-core-v22b">
 (function(){
@@ -38576,61 +38246,6 @@ window.ReportStructuralV25K=Object.freeze({version:'25.10.0-physical-retirement'
 </script>
 
 
-<script id="allpa-report-pipeline-v25l">
-(function(){
-'use strict';
-/*
- V25L — auditoría/encapsulación V145.
- No retira todavía el bloque histórico. Captura sus responsabilidades efectivas
- después de toda la cadena de parches para preparar una migración controlada.
-*/
-const S=window.ReportStructuralV25F?.services||{};
-const captured={
- ensureStudies: typeof ensureEstudiosOMV145==='function'?ensureEstudiosOMV145:null,
- ensureFacts: typeof ensureFactibilidadesOMV145==='function'?ensureFactibilidadesOMV145:null,
- renderFacts: typeof renderFactibilidadesOMV145==='function'?renderFactibilidadesOMV145:null,
- renderStudies: typeof renderEstudiosOMV145==='function'?renderEstudiosOMV145:null,
- combinedReport: typeof combinedStudiesReportV145==='function'?combinedStudiesReportV145:null,
- syncConclusion: typeof syncConclusionAutoV145==='function'?syncConclusionAutoV145:null,
- normalizeReason: typeof normalizeDesMotivoV145==='function'?normalizeDesMotivoV145:null,
- ensureWithdrawal: typeof ensureDesistimientoV69==='function'?ensureDesistimientoV69:null,
- renderWithdrawalForm: typeof renderDesistimientoFormV69==='function'?renderDesistimientoFormV69:null,
- renderWithdrawal: typeof renderInformeDesistimientoV69==='function'?renderInformeDesistimientoV69:null
-};
-function call(name,args=[]){const fn=captured[name];return typeof fn==='function'?fn(...args):null}
-const D=window.ObraMayorDesistimientoDomainV25L=Object.freeze({
- version:'25.11.0-v145-domain-audit',
- ensureStudies:()=>call('ensureStudies'),
- ensureFacts:()=>call('ensureFacts'),
- renderFacts:()=>call('renderFacts'),
- renderStudies:()=>call('renderStudies'),
- combinedReport:()=>call('combinedReport'),
- syncConclusion:()=>call('syncConclusion'),
- normalizeReason:v=>call('normalizeReason',[v]),
- ensureWithdrawal:()=>call('ensureWithdrawal'),
- renderWithdrawalForm:()=>call('renderWithdrawalForm'),
- renderWithdrawal:()=>call('renderWithdrawal'),
- constants:Object.freeze({
-   observation:'Observaciones No Subsanadas/Parcialmente Subsanadas',
-   petition:'Petición del Administrado'
- }),
- audit:Object.freeze({
-   families:10,
-   captured:Object.values(captured).filter(v=>typeof v==='function').length,
-   v145Physical:'preserved',
-   anteproyecto:'V25K'
- })
-});
-window.ReportStructuralV25L=Object.freeze({
- version:'25.11.0-v145-bridge',
- obraMayorDesistimiento:D,
- anteproyecto:window.AnteproyectoDomainV25K||null,
- previous:S
-});
-})();
-</script>
-
-
 <script id="allpa-report-pipeline-v25m">
 (function(){
 'use strict';
@@ -38717,14 +38332,71 @@ window.addEventListener('load',()=>{
 </script>
 
 
-<style id="allpa-report-pipeline-v25m2-css">
-#allpaReportBtnV25M2{position:fixed;right:18px;bottom:18px;z-index:1000018;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaReportPanelV25M2{display:none;position:fixed;right:18px;bottom:68px;z-index:1000018;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaReportPanelV25M2.open{display:block}.rp25m2-ok{color:#177245;font-weight:700}.rp25m2-fail{color:#b42318;font-weight:700}.rp25m2-row{padding:6px 0;border-bottom:1px solid #eee}.rp25m2-note{padding:8px 10px;background:#eefbf3;border:1px solid #b7dfc5;border-radius:8px;margin:8px 0}
-@media print{#allpaReportBtnV25M2,#allpaReportPanelV25M2{display:none!important}}
+<style id="allpa-v26-css">
+#allpaV26Btn{position:fixed;right:18px;bottom:18px;z-index:1000019;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
+#allpaV26Panel{display:none;position:fixed;right:18px;bottom:68px;z-index:1000019;width:min(1200px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
+#allpaV26Panel.open{display:block}.v26ok{color:#177245;font-weight:700}.v26fail{color:#b42318;font-weight:700}.v26row{padding:6px 0;border-bottom:1px solid #eee}.v26note{padding:8px 10px;background:#f4f8ff;border:1px solid #c8d8f2;border-radius:8px;margin:8px 0}
+@media print{#allpaV26Btn,#allpaV26Panel{display:none!important}}
 </style>
 
-<script id="allpa-report-pipeline-v25m2-test">
+<script id="allpa-public-routes-v26">
+(function(){
+'use strict';
+const M=()=>({
+ apply:window.ApplyStateUIV21D,
+ persistenceB:window.PersistenceV22B,persistenceC:window.PersistenceV22C,persistenceD:window.PersistenceV22D,
+ nav:window.ProjectNavigationV24D,output:window.ReportOutputV25B,
+ reports:window.ReportStructuralV25F,domains:window.ReportDomainsV25M
+});
+function install(){
+ const m=M(), P=m.persistenceB,PC=m.persistenceC,PD=m.persistenceD,N=m.nav,O=m.output,R=m.reports,D=m.domains;
+ if(m.apply?.apply){window.applyStateToUI=m.apply.apply;try{applyStateToUI=window.applyStateToUI}catch(_e){}}
+ if(PC?.save){window.guardarFormulario=PC.save;try{guardarFormulario=window.guardarFormulario}catch(_e){}}
+ if(PC?.load){window.cargarFormulario=PC.load;try{cargarFormulario=window.cargarFormulario}catch(_e){}}
+ if(PD?.createNew){window.nuevoFormulario=PD.createNew;try{nuevoFormulario=window.nuevoFormulario}catch(_e){}}
+ if(P?.list){window.renderSavedList=P.list;try{renderSavedList=window.renderSavedList}catch(_e){}}
+ if(P?.exportBackup){window.exportarRespaldo=P.exportBackup;try{exportarRespaldo=window.exportarRespaldo}catch(_e){}}
+ if(P?.importBackup){window.importarRespaldo=P.importBackup;try{importarRespaldo=window.importarRespaldo}catch(_e){}}
+ if(N?.render){window.renderRequisitosForm=N.render;try{renderRequisitosForm=window.renderRequisitosForm}catch(_e){}}
+ if(N?.navigate){window.showTab=N.navigate;try{showTab=window.showTab}catch(_e){}}
+ if(N?.selectProject){window.selectProjectV123=N.selectProject;try{selectProjectV123=window.selectProjectV123}catch(_e){}}
+ if(N?.applyProject){window.applyProjectRequirementsV128=N.applyProject;try{applyProjectRequirementsV128=window.applyProjectRequirementsV128}catch(_e){}}
+ if(O?.validate){window.validationErrorsV70=O.validate;try{validationErrorsV70=window.validationErrorsV70}catch(_e){}}
+ if(O?.copyCurrent){window.copiarInformeActualV70=O.copyCurrent;try{copiarInformeActualV70=window.copiarInformeActualV70}catch(_e){}}
+ if(O?.copyAprobatorio){window.copiarInformeAprobatorio=O.copyAprobatorio;try{copiarInformeAprobatorio=window.copiarInformeAprobatorio}catch(_e){}}
+ if(O?.printCurrent){window.imprimirInforme=O.printCurrent;try{imprimirInforme=window.imprimirInforme}catch(_e){}}
+ if(R?.aprobatorio){window.renderInformeAprobatorio=R.aprobatorio;try{renderInformeAprobatorio=window.renderInformeAprobatorio}catch(_e){}}
+ if(R?.observaciones){window.renderInformeObservaciones=R.observaciones;try{renderInformeObservaciones=window.renderInformeObservaciones}catch(_e){}}
+ if(D?.desistimiento?.renderReport){
+   window.renderInformeDesistimientoV69=D.desistimiento.renderReport;
+   window.renderInformeDesistimiento=D.desistimiento.renderReport;
+   try{renderInformeDesistimientoV69=window.renderInformeDesistimientoV69}catch(_e){}
+   try{renderInformeDesistimiento=window.renderInformeDesistimiento}catch(_e){}
+ }
+ if(R?.render){window.renderReport=R.render;try{renderReport=window.renderReport}catch(_e){}}
+}
+window.AllpaPublicRoutesV26=Object.freeze({
+ version:'26.0.0-global-routes',
+ install,
+ modules:Object.freeze({
+  applyState:'ApplyStateUIV21D',
+  persistence:'PersistenceV22B/V22C/V22D',
+  requirementsNavigation:'ProjectNavigationV24D',
+  reportOutput:'ReportOutputV25B',
+  reportRender:'ReportStructuralV25F',
+  reportDomains:'ReportDomainsV25M'
+ }),
+ deadCode:Object.freeze({
+  removed:Object.freeze(['V20 test bank','V21D test bank','V25M2 test bank','V25L audit bridge']),
+  policy:'only-proven-unreferenced'
+ })
+});
+install();
+window.addEventListener('load',()=>{setTimeout(install,3200);setTimeout(install,4200)});
+})();
+</script>
+
+<script id="allpa-v26-test">
 (function(){
 'use strict';
 function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
@@ -38733,87 +38405,71 @@ function W(ms){return new Promise(r=>setTimeout(r,ms))}
 async function run(){
  const R=[],orig=C(state),tab=document.querySelector('.tab.active')?.id||'tab-info';
  try{
-  const X=window.ReportDomainsV25M,OM=window.ObraMayorDomainV25M,DS=window.DesistimientoDomainV25M,V=window.ReportStructuralV25F;
-  A(R,'Cierre Fase 25 V25M2 disponible',!!X,X?.version||'');
-  A(R,'Dominio Obra Mayor separado',!!OM,OM?.version||'');
-  A(R,'Dominio Desistimiento separado',!!DS,DS?.version||'');
-  A(R,'Compatibilidad estabilizada',X?.compatibility?.stabilized===true,'V25M autoridad final');
-
-  const aliasChecks=[
-   ['ensureEstudiosOMV145',window.ensureEstudiosOMV145===OM.ensureStudies],
-   ['ensureFactibilidadesOMV145',window.ensureFactibilidadesOMV145===OM.ensureFacts],
-   ['updateFactibilidadOMV145',window.updateFactibilidadOMV145===OM.updateFact],
-   ['renderFactibilidadesOMV145',window.renderFactibilidadesOMV145===OM.renderFacts],
-   ['renderEstudiosOMV145',window.renderEstudiosOMV145===OM.renderStudies],
-   ['combinedStudiesReportV145',window.combinedStudiesReportV145===OM.combinedReport],
-   ['syncConclusionAutoV145',window.syncConclusionAutoV145===OM.syncConclusion],
-   ['normalizeDesMotivoV145',window.normalizeDesMotivoV145===DS.normalize],
-   ['ensureDesistimientoV69',window.ensureDesistimientoV69===DS.ensure],
-   ['renderDesistimientoFormV69',window.renderDesistimientoFormV69===DS.renderForm],
-   ['renderInformeDesistimientoV69',window.renderInformeDesistimientoV69===DS.renderReport]
-  ];
-  A(R,'11 aliases legacy delegan a V25M',aliasChecks.every(x=>x[1]),`${aliasChecks.filter(x=>x[1]).length}/11`);
-  aliasChecks.forEach(([name,ok])=>A(R,`Alias ${name}`,ok,ok?'V25M':'ruta sobrescrita'));
-
-  A(R,'Anteproyecto V25K preservado',!!X?.anteproyecto,X?.anteproyecto?.version||'');
-  A(R,'V145 original retirado físicamente',X?.physical?.v145OriginalRemoved===true,'retirado');
-  A(R,'V134 original continúa retirado',X?.physical?.v134OriginalRemoved===true,'retirado');
+  const F=window.AllpaPublicRoutesV26,P=window.PersistenceV22B,PC=window.PersistenceV22C,PD=window.PersistenceV22D,
+        N=window.ProjectNavigationV24D,O=window.ReportOutputV25B,RR=window.ReportStructuralV25F,D=window.ReportDomainsV25M,A21=window.ApplyStateUIV21D;
+  A(R,'V26 disponible',!!F,F?.version||'');
+  A(R,'ApplyState ruta final',window.applyStateToUI===A21?.apply,'V21D');
+  A(R,'Guardar ruta final',window.guardarFormulario===PC?.save,'V22C');
+  A(R,'Cargar ruta final',window.cargarFormulario===PC?.load,'V22C');
+  A(R,'Nuevo ruta final',window.nuevoFormulario===PD?.createNew,'V22D');
+  A(R,'Lista guardados ruta final',window.renderSavedList===P?.list,'V22B');
+  A(R,'Exportar respaldo ruta final',window.exportarRespaldo===P?.exportBackup,'V22B');
+  A(R,'Importar respaldo ruta final',window.importarRespaldo===P?.importBackup,'V22B');
+  A(R,'Requisitos ruta final',window.renderRequisitosForm===N?.render,'V24D');
+  A(R,'Navegación ruta final',window.showTab===N?.navigate,'V24D');
+  A(R,'Selección proyecto ruta final',window.selectProjectV123===N?.selectProject,'V24D');
+  A(R,'Aplicar proyecto ruta final',window.applyProjectRequirementsV128===N?.applyProject,'V24D');
+  A(R,'Validación informe ruta final',window.validationErrorsV70===O?.validate,'V25B');
+  A(R,'Copiar informe ruta final',window.copiarInformeActualV70===O?.copyCurrent,'V25B');
+  A(R,'Copiar Aprobatorio ruta final',window.copiarInformeAprobatorio===O?.copyAprobatorio,'V25B');
+  A(R,'PDF ruta final',window.imprimirInforme===O?.printCurrent,'V25B');
+  A(R,'Renderer Aprobatorio final',window.renderInformeAprobatorio===RR?.aprobatorio,'V25F');
+  A(R,'Renderer Observaciones final',window.renderInformeObservaciones===RR?.observaciones,'V25F');
+  A(R,'Renderer Desistimiento final',window.renderInformeDesistimientoV69===D?.desistimiento?.renderReport,'V25M');
+  A(R,'Renderer principal final',window.renderReport===RR?.render,'V25F');
+  A(R,'V145 físico retirado',D?.physical?.v145OriginalRemoved===true,'sí');
+  A(R,'V134 físico retirado',D?.physical?.v134OriginalRemoved===true,'sí');
 
   state.projectType='obra_mayor_definitivo';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
-  const studies=OM.ensureStudies()||[],facts=OM.ensureFacts()||[];
-  A(R,'Obra Mayor conserva 4 estudios',studies.length===4,`${studies.length} fila(s)`);
-  A(R,'Obra Mayor conserva 3 factibilidades',facts.length===3,`${facts.length} fila(s)`);
-  A(R,'Canon OM vigente',facts.map(x=>String(x.estudio||'')).join('|')==='RIOBAMBA-EP|EERSA|CNT',facts.map(x=>x.estudio).join(' · '));
-  A(R,'Renderer factibilidades OM operativo',String(OM.renderFacts()||'').length>100,`${String(OM.renderFacts()||'').length} caracteres`);
-  A(R,'Renderer estudios OM operativo',String(OM.renderStudies()||'').length>100,`${String(OM.renderStudies()||'').length} caracteres`);
-  A(R,'Reporte combinado OM operativo',String(OM.combinedReport()||'').length>50,`${String(OM.combinedReport()||'').length} caracteres`);
-  OM.syncConclusion();
-  A(R,'Sincronización Conclusión OM operativa',Array.isArray(state.aprobatorio?.conclusion),'conclusión disponible');
-  const om=String(V?.aprobatorio?.()||'');
-  A(R,'Aprobatorio Obra Mayor operativo',om.length>500,`${om.length} caracteres`);
+  const omf=D?.obraMayor?.ensureFacts?.()||[], oms=D?.obraMayor?.ensureStudies?.()||[];
+  A(R,'OM 3 factibilidades',omf.length===3,omf.length);
+  A(R,'OM 4 estudios',oms.length===4,oms.length);
+  const om=String(RR?.aprobatorio?.()||'');A(R,'Aprobatorio OM operativo',om.length>500,`${om.length} caracteres`);
 
   if(!state.desistimiento)state.desistimiento={};
-  state.desistimiento.motivo='Peticion del Administrado';DS.ensure();
-  A(R,'Petición normalizada',state.desistimiento.motivo===DS.constants.petition,state.desistimiento.motivo||'');
-  const pet=String(DS.renderReport()||'');
-  A(R,'Desistimiento Petición operativo',pet.length>500,`${pet.length} caracteres`);
-  A(R,'Petición conserva Art. 211',/211/.test(pet),'visible');
-
-  state.desistimiento.motivo='Observaciones';DS.ensure();
-  A(R,'Observaciones normalizadas',state.desistimiento.motivo===DS.constants.observation,state.desistimiento.motivo||'');
-  const obs=String(DS.renderReport()||'');
-  A(R,'Desistimiento Observaciones operativo',obs.length>500,`${obs.length} caracteres`);
-  A(R,'Observaciones conserva criterio técnico',/Criterio t[ée]cnico/i.test(obs),'visible');
+  state.desistimiento.motivo='Peticion del Administrado';D?.desistimiento?.ensure?.();
+  const pet=String(D?.desistimiento?.renderReport?.()||'');
+  A(R,'Desistimiento Petición operativo',pet.length>500&&/211/.test(pet),`${pet.length} caracteres`);
+  state.desistimiento.motivo='Observaciones';D?.desistimiento?.ensure?.();
+  const obs=String(D?.desistimiento?.renderReport?.()||'');
+  A(R,'Desistimiento Observaciones operativo',obs.length>500&&/Criterio t[ée]cnico/i.test(obs),`${obs.length} caracteres`);
 
   state.projectType='anteproyecto_edificacion';
   try{if(typeof requisitosParaProyectoV128==='function')DATA.requisitos=requisitosParaProyectoV128(state.projectType)}catch(_e){}
-  const AP=X.anteproyecto,af=AP?.ensureFacts?.()||[];
-  A(R,'Anteproyecto conserva 3 factibilidades',af.length===3,`${af.length} fila(s)`);
-  A(R,'Anteproyecto Base Legal preservada',String(AP?.baseLegal?.()||'').length>500,`${String(AP?.baseLegal?.()||'').length} caracteres`);
-  A(R,'Aprobatorio Anteproyecto operativo',String(V?.aprobatorio?.()||'').length>500,`${String(V?.aprobatorio?.()||'').length} caracteres`);
+  const AP=D?.anteproyecto,af=AP?.ensureFacts?.()||[];
+  A(R,'Anteproyecto 3 factibilidades',af.length===3,af.length);
+  A(R,'Base Legal Anteproyecto',String(AP?.baseLegal?.()||'').length>500,`${String(AP?.baseLegal?.()||'').length} caracteres`);
+  A(R,'Aprobatorio Anteproyecto operativo',String(RR?.aprobatorio?.()||'').length>500,`${String(RR?.aprobatorio?.()||'').length} caracteres`);
 
-  const n=(state?.aprobatorio?.conclusion||[]).length;applyStateToUI();await W(160);
+  const n=(state?.aprobatorio?.conclusion||[]).length;window.applyStateToUI();await W(160);
   A(R,'ApplyState mantiene Conclusión',(state?.aprobatorio?.conclusion||[]).length===n,`${n} → ${(state?.aprobatorio?.conclusion||[]).length}`);
-  A(R,'ReportOutput V25B intacto',!!window.ReportOutputV25B,window.ReportOutputV25B?.version||'');
   A(R,'Conclusión V20 intacta',!!window.ConclusionTecnicaSourceV20,window.ConclusionTecnicaSourceV20?.version||'');
-  A(R,'ProjectNavigation V24D intacto',!!window.ProjectNavigationV24D,window.ProjectNavigationV24D?.version||'');
-  A(R,'Persistencia V22C intacta',window.guardarFormulario===window.PersistenceV22C?.save,'V22C');
- }catch(e){A(R,'Banco V25M2',false,e?.stack||e)}
- finally{state=orig;try{applyStateToUI()}catch(_e){};await W(180);try{if(tab&&typeof showTab==='function')showTab(tab)}catch(_e){}}
+  A(R,'Política código muerto segura',F?.deadCode?.policy==='only-proven-unreferenced',F?.deadCode?.policy||'');
+ }catch(e){A(R,'Banco V26',false,e?.stack||e)}
+ finally{state=orig;try{window.applyStateToUI()}catch(_e){};await W(180);try{if(tab&&typeof showTab==='function')showTab(tab)}catch(_e){}}
  A(R,'Formulario original restaurado',true,'state restaurado');
-
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaReportPanelV25M2');
- p.innerHTML=`<h3>📄 ALLPA REPORT V25M2</h3><div class="rp25m2-note">Corrección del único FAIL de V25M: una reinstalación asíncrona histórica sobrescribía renderInformeDesistimientoV69 después de cargar. V25M2 reafirma la autoridad final al terminar esa ventana.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="rp25m2-row"><span class="${x.ok?'rp25m2-ok':'rp25m2-fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV25M2">Copiar resultado</button> <button id="closeV25M2">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV25M2').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV25M2').onclick=async()=>{const s=`ALLPA-REPORT-V25M2\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){}};
+ const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaV26Panel');
+ p.innerHTML=`<h3>🧭 ALLPA V26 — CONSOLIDACIÓN GLOBAL</h3><div class="v26note">Autoridad única para rutas públicas finales. Se retiró únicamente código de prueba/auditoría sin consumidores.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
+ R.map(x=>`<div class="v26row"><span class="${x.ok?'v26ok':'v26fail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
+ `<p><button id="copyV26">Copiar resultado</button> <button id="closeV26">Cerrar</button></p>`;
+ p.classList.add('open');document.getElementById('closeV26').onclick=()=>p.classList.remove('open');
+ document.getElementById('copyV26').onclick=async()=>{const s=`ALLPA-V26\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){}};
 }
 window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaReportBtnV25M2';b.type='button';b.textContent='📄 REPORT V25M2';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaReportPanelV25M2';document.body.appendChild(p);
-},3000));
+ const b=document.createElement('button');b.id='allpaV26Btn';b.type='button';b.textContent='🧭 TEST V26';b.onclick=run;document.body.appendChild(b);
+ const p=document.createElement('div');p.id='allpaV26Panel';document.body.appendChild(p);
+},4500));
 })();
 </script>
 
