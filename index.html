@@ -39166,5 +39166,209 @@ window.addEventListener('load',()=>{setTimeout(installV124,6200);setTimeout(inst
 })();
 </script>
 
+
+<style id="allpa-postv28-v1-2-5-css">
+.report .nota-conclusion-v125{margin-top:10px}
+.report .planos-conclusion-v125{margin-top:10px}
+</style>
+<script id="allpa-postv28-v1-2-5">
+(function(){
+'use strict';
+const VERSION='1.2.5-sustento-directo-conclusion-ampmod';
+const REF125='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
+
+function esc125(v){
+  return typeof esc==='function'
+    ? esc(String(v??''))
+    : String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* =========================================================
+   1. SUSTENTO TÉCNICO — INYECCIÓN DIRECTA EN EL HTML FINAL
+   No dependemos de que el renderer histórico vuelva a llamar
+   una función global que pudo haber sido capturada antes.
+   ========================================================= */
+function sustentoRowsV125(){
+  const rows=typeof combinedObsRows==='function'?(combinedObsRows()||[]):[];
+  return rows
+    .filter(o=>o?.source!=='prop_req')
+    .map((o,i)=>{
+      let imgs=[];
+      try{
+        if(typeof obsImagesV113==='function')imgs=obsImagesV113(o)||[];
+        else imgs=[...(Array.isArray(o?.imagenes)?o.imagenes:[]),o?.imagen||''].filter(Boolean);
+      }catch(_e){}
+      const texto=typeof formatArticleTextV55==='function'
+        ? formatArticleTextV55(o?.texto||'')
+        : String(o?.texto||'');
+      return {num:i+1,obs:o,articulo:o?.articulo||o?.norma||'',texto,imagenes:[...new Set(imgs.filter(Boolean))]};
+    })
+    .filter(r=>String(r.texto||'').trim()||r.imagenes.length);
+}
+function buildSustentoV125(){
+  if(!state?.mostrarTextosTecnicos)return '';
+  const rows=sustentoRowsV125();
+  if(!rows.length)return '';
+  return `<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>
+  <table class="tech-note-table">
+    <thead><tr><th>Nro.</th><th>Texto del artículo</th></tr></thead>
+    <tbody>${rows.map(r=>{
+      const art=typeof articleCellForObsV68==='function'?articleCellForObsV68(r.obs):esc125(r.articulo);
+      const imgs=r.imagenes.length
+        ? `<tr class="sustento-img-row-v55"><td colspan="2"><div class="sustento-img-gallery-v113">${r.imagenes.map(src=>`<img class="sustento-img-v55" src="${esc125(src)}">`).join('')}</div></td></tr>`
+        : '';
+      return `<tr><td>${r.num}</td><td><strong>${art}</strong><br><div class="article-text-v55">${esc125(r.texto)}</div></td></tr>${imgs}`;
+    }).join('')}</tbody>
+  </table>`;
+}
+function stripSustentoV125(html){
+  return String(html||'')
+    .replace(/<h2[^>]*>\s*(?:\d+\s*\.\s*)?SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES\s*<\/h2>[\s\S]*?(?=<h2[^>]*>|$)/gi,'')
+    .replace(/<p\b[^>]*class=["'][^"']*(?:ref-sustento-v12|obs-summary-reference-v147)[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'')
+    .replace(/<p\b[^>]*>[\s\S]*?En\s+el\s+Ac[aá]pite\s+4\.\s*SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES[\s\S]*?aqu[ií]\s+descritas\.?[\s\S]*?<\/p>/gi,'');
+}
+function applySustentoV125(html){
+  let s=stripSustentoV125(html);
+  if(!state?.mostrarTextosTecnicos)return s;
+
+  const section=buildSustentoV125();
+  if(!section)return s;
+
+  /* Ubicación histórica: después de Base Legal y antes de Conclusiones/Nota. */
+  const concl=/<h2[^>]*>\s*(?:\d+\s*\.\s*)?CONCLUSIONES\s*<\/h2>/i;
+  const nota=/<h2[^>]*>\s*(?:\d+\s*\.\s*)?NOTA\s*<\/h2>/i;
+  if(concl.test(s))s=s.replace(concl,section+'$&');
+  else if(nota.test(s))s=s.replace(nota,section+'$&');
+  else s+=section;
+
+  /* La tabla 2 puede llamarse RESUMEN DE OBSERVACIONES o CRITERIO TÉCNICO
+     según qué renderer histórico haya quedado activo. */
+  const table2=/((?:<h2[^>]*>\s*(?:\d+\s*\.\s*)?(?:RESUMEN\s+DE\s+OBSERVACIONES|CRITERIO\s+T[ÉE]CNICO)\s*<\/h2>)[\s\S]*?<\/table>)/i;
+  if(table2.test(s)){
+    s=s.replace(table2,`$1<p class="ref-sustento-v12">${REF125}</p>`);
+  }
+  return s;
+}
+
+/* =========================================================
+   2. TEXTO FINAL DE CONCLUSIÓN PARA AMPLIACIÓN/MODIFICACIÓN
+   Sustituye el párrafo genérico y evita agregar una frase
+   separada de "Planos Aprobados".
+   ========================================================= */
+function proyectoTipoV125(){
+  try{return String(typeof projectDefV12==='function'?projectDefV12():(infoValue?.('PROYECTO DEFINITIVO')||''));}
+  catch(_e){return ''}
+}
+function areaBrutaV125(){
+  try{return String(typeof infoValue==='function'?(infoValue('Área Bruta')||''):'');}
+  catch(_e){return ''}
+}
+function planosStateV125(){
+  try{return typeof ensurePlanosV12==='function'?ensurePlanosV12():(state?.aprobatorio?.planosAprobadosV12||{});}
+  catch(_e){return state?.aprobatorio?.planosAprobadosV12||{}}
+}
+function fmt125(v){
+  try{return typeof fmtV12==='function'?fmtV12(v):(typeof fmtDate==='function'?fmtDate(v):String(v||''));}
+  catch(_e){return String(v||'')}
+}
+function conclusionAmpModV125(){
+  if(typeof ampModV12==='function'&&!ampModV12())return '';
+  const tipo=proyectoTipoV125().trim();
+  const area=areaBrutaV125().trim();
+  const p=planosStateV125();
+  const base=`${esc125(tipo)}, tiene un área a construir de ${esc125(area)}, valor a tomar en cuenta para efecto del cálculo para el pago de la tasa administrativa.`;
+
+  let detalle='';
+  if(p.licencia){
+    const resol=String(p.resolucion||'').trim();
+    const fecha=fmt125(p.fecha);
+    const egob=String(p.egob||'').trim();
+    detalle=` El Proyecto cuenta con Licencia Urbanística ${esc125(resol)} emitida con fecha ${esc125(fecha)}`;
+    if(egob)detalle+=`, relacionada al número eGOB ${esc125(egob)}`;
+    detalle+='.';
+  }else{
+    const entidad=String(p.entidad||'').trim();
+    const fecha=fmt125(p.fechaAprobacion);
+    detalle=` El Proyecto cuenta con Planos Aprobador por ${esc125(entidad)} con fecha ${esc125(fecha)}.`;
+  }
+
+  const nota='<p class="nota-conclusion-v125"><strong>Nota.</strong> - La información y datos que están en el proyecto son de exclusiva responsabilidad del proyectista y propietario, en el caso de existir datos erróneos, ocultos, la aprobación quedará automáticamente insubsistente.</p>';
+  return `<p class="planos-conclusion-v125">${base}${detalle}</p>${nota}`;
+}
+function replaceConclusionAmpModV125(html){
+  let s=String(html||'');
+  if(typeof ampModV12!=='function'||!ampModV12())return s;
+
+  /* Quita la frase independiente agregada en V1.2.x. */
+  s=s.replace(/<p\b[^>]*class=["'][^"']*planos-aprobados-report-v12[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'');
+
+  const block=conclusionAmpModV125();
+  if(!block)return s;
+
+  /* Sustituye el párrafo genérico de plantilla ("El PROYECTO DEFINITIVO...Nota..."). */
+  const generic=/<p\b[^>]*>[\s\S]*?tiene\s+un\s+[áa]rea\s+a\s+construir\s+de[\s\S]*?aprobaci[oó]n\s+quedar[aá]\s+autom[aá]ticamente\s+insubsistente\.?[\s\S]*?<\/p>/i;
+  if(generic.test(s))return s.replace(generic,block);
+
+  /* Guardia: si la plantilla histórica cambió, insertar al final de Conclusión
+     sin destruir la tabla. */
+  return s+block;
+}
+
+/* =========================================================
+   3. RUTAS FINALES
+   ========================================================= */
+function renderObsV125(){
+  const base=window.ReportStructuralV25F?.observaciones?.()||'';
+  return applySustentoV125(base);
+}
+function renderAprV125(){
+  let s=window.ReportStructuralV25F?.aprobatorio?.()||'';
+  if(typeof isOMV12==='function'&&isOMV12())s=String(s).replace(/Resoluci[oó]n de Anteproyecto/gi,'Aprobación de Anteproyecto');
+  return replaceConclusionAmpModV125(s);
+}
+function renderV125(){
+  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
+  try{if(typeof updateSideActions==='function')updateSideActions()}catch(_e){}
+  const t=String(state?.tipoInforme||'').trim();
+  let s=t==='Informe con Observaciones'?renderObsV125():
+        t==='Informe Técnico Aprobatorio'?renderAprV125():
+        t==='Informe de Desistimiento'?(window.ReportDomainsV25M?.desistimiento?.renderReport?.()||''):
+        'Seleccione el tipo de informe para generar la vista previa.';
+  const el=document.getElementById('report');
+  if(el){
+    const a=t==='Informe Técnico Aprobatorio',d=t==='Informe de Desistimiento',o=t==='Informe con Observaciones';
+    el.className='report '+(a?'report-aprobatorio':(d?'report-desistimiento report-observaciones':'report-observaciones'));
+    document.body.classList.toggle('printing-observaciones',o||d);
+    document.body.classList.toggle('printing-aprobatorio',a);
+    el.innerHTML=s;
+  }
+  return s;
+}
+function installV125(){
+  window.renderInformeObservaciones=renderObsV125;
+  window.renderInformeAprobatorio=renderAprV125;
+  window.renderReport=renderV125;
+  try{
+    renderInformeObservaciones=renderObsV125;
+    renderInformeAprobatorio=renderAprV125;
+    renderReport=renderV125;
+  }catch(_e){}
+}
+window.AllpaFunctionalV125=Object.freeze({
+  version:VERSION,
+  sustentoRows:sustentoRowsV125,
+  sustentoHtml:buildSustentoV125,
+  applySustento:applySustentoV125,
+  conclusionAmpMod:conclusionAmpModV125,
+  observaciones:renderObsV125,
+  aprobatorio:renderAprV125,
+  render:renderV125,
+  install:installV125
+});
+installV125();
+window.addEventListener('load',()=>{setTimeout(installV125,7100);setTimeout(installV125,7800)});
+})();
+</script>
+
 </body>
 </html>
