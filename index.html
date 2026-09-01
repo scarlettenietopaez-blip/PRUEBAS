@@ -38654,10 +38654,10 @@ function mountPlanosV12(){
  const titles=[...box.querySelectorAll('.section-title')],anchor=titles.find(x=>/CONCLUSI[ÓO]N T[ÉE]CNICA/i.test(x.textContent||''));
  if(anchor)anchor.insertAdjacentHTML('beforebegin',planosHtmlV12());else box.insertAdjacentHTML('beforeend',planosHtmlV12());
  const p=ensurePlanosV12(),sw=document.getElementById('planosLicenciaV12');
- if(sw)sw.onchange=()=>{p.licencia=!!sw.checked;setTimeout(()=>{mountPlanosV12();refreshV12()},0)};
+ if(sw)sw.onchange=()=>{p.licencia=!!sw.checked;mountPlanosV12();refreshV12()};
  [['planosResolucionV12','resolucion'],['planosEgobV12','egob'],['planosFechaV12','fecha'],['planosFechaAprobacionV12','fechaAprobacion'],['planosEntidadV12','entidad']].forEach(([id,k])=>{
    const el=document.getElementById(id);if(!el)return;
-   el.oninput=()=>{let v=el.value;if(k==='egob')v=el.value=String(v).replace(/\D/g,'');p[k]=v};el.onchange=()=>{p[k]=el.value;refreshV12()};
+   el.oninput=()=>{let v=el.value;if(k==='egob')v=el.value=String(v).replace(/\D/g,'');p[k]=v};el.onchange=()=>{p[k]=el.value;refreshV12()};el.onblur=()=>{p[k]=el.value;refreshV12()};
  });
 }
 function planosTextV12(){
@@ -38668,7 +38668,10 @@ function planosTextV12(){
 }
 function injectPlanosV12(html){
  const t=planosTextV12();if(!t)return String(html||'');
- return String(html||'').replace(/(<h2[^>]*>\s*(?:\d+\s*\.\s*)?Conclusi[oó]n t[ée]cnica\s*<\/h2>)/i,`$1<p class="planos-aprobados-report-v12">${escV12(t)}</p>`);
+ let s=String(html||'');
+ const block=`<p class="planos-aprobados-report-v12">${escV12(t)}</p>`;
+ if(/<h2[^>]*>\s*Nota\s*<\/h2>/i.test(s))return s.replace(/(<h2[^>]*>\s*Nota\s*<\/h2>)/i,block+'$1');
+ return s+block;
 }
 
 /* =========================================================
@@ -38725,10 +38728,17 @@ function stripReferenceV12(html){
 function hasSustentoV12(html){return /<h2[^>]*>[\s\S]*?SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES[\s\S]*?<\/h2>/i.test(String(html||''))}
 function referenceV12(html){
  let s=stripReferenceV12(html);
- if(!state.mostrarTextosTecnicos||!hasSustentoV12(s))return s;
- /* Insertar después de la tabla del Resumen y antes del siguiente h2. */
+ if(!state.mostrarTextosTecnicos){
+   return s.replace(/<h2[^>]*>\s*(?:\d+\s*\.\s*)?SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES\s*<\/h2>[\s\S]*?(?=<h2[^>]*>|$)/gi,'');
+ }
+ if(!hasSustentoV12(s)){
+   const sust=typeof textosTecnicosSectionV12==='function'?String(textosTecnicosSectionV12()||''):'';
+   const block=sust.trim()?sust:'<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>';
+   const concl=/<h2[^>]*>\s*(?:\d+\s*\.\s*)?CONCLUSIONES\s*<\/h2>/i;
+   s=concl.test(s)?s.replace(concl,block+'$&'):s+block;
+ }
  const head=/((?:<h2[^>]*>\s*(?:\d+\s*\.\s*)?RESUMEN\s+DE\s+OBSERVACIONES\s*<\/h2>)[\s\S]*?<\/table>)/i;
- if(head.test(s))return s.replace(head,`$1<p class="ref-sustento-v12">${REF}</p>`);
+ if(head.test(s))s=s.replace(head,`$1<p class="ref-sustento-v12">${REF}</p>`);
  return s;
 }
 
@@ -38850,6 +38860,12 @@ async function runTestsV12(){
      A('Texto Licencia generado',/El Proyecto cuenta con RESOLUCIÓN TEST emitida con fecha/i.test(planosTextV12()),planosTextV12());
      pp.licencia=false;pp.fechaAprobacion='2026-09-01';pp.entidad='GADMR';
      A('Texto aprobación previa generado',/El Proyecto fue aprobado con fecha.*por GADMR/i.test(planosTextV12()),planosTextV12());
+     pp.licencia=false;pp.fechaAprobacion='2026-09-17';pp.entidad='Colegio de Arquitectos';
+     mountPlanosV12();
+     const ent=document.getElementById('planosEntidadV12');
+     A('Planos conserva datos al reconstruir',ent?.value==='Colegio de Arquitectos',ent?.value||'');
+     pp.licencia=true;mountPlanosV12();
+     A('Check Licencia cambia campos',!!document.getElementById('planosResolucionV12')&&!document.getElementById('planosEntidadV12'),'rama licencia');
    }
 
    const fake=formatPropRowV12({source:'prop_req',id:'__V12_TEST__',articulo:'Ordenanza No. 016-2023, Artículo 95. Contenido del Proyecto Técnico de Edificación de Obras Mayores.',texto:'Ubicación que debe abarcar una zona de 300 m. de radio'});
@@ -38862,6 +38878,8 @@ async function runTestsV12(){
    state.mostrarTextosTecnicos=true;
    const on=referenceV12('<h2>2. RESUMEN DE OBSERVACIONES</h2><table><tr><td>x</td></tr></table><h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>');
    A('Check ON agrega referencia',on.includes(REF),'referencia presente');
+   const onSinSustento=referenceV12('<h2>2. RESUMEN DE OBSERVACIONES</h2><table><tr><td>x</td></tr></table><h2>5. CONCLUSIONES</h2>');
+   A('Check ON garantiza Acápite 4',/SUSTENTO T[ÉE]CNICO DE LAS OBSERVACIONES/i.test(onSinSustento),'acápite presente');
  }catch(e){A('Banco V1.2',false,e?.stack||e)}
  finally{
    state=orig;
@@ -38875,7 +38893,7 @@ async function runTestsV12(){
 }
 window.addEventListener('load',()=>setTimeout(()=>{
  if(document.getElementById('allpaV12TestBtn'))return;
- const b=document.createElement('button');b.id='allpaV12TestBtn';b.type='button';b.textContent='🧪 TEST V1.2.1';b.onclick=runTestsV12;document.body.appendChild(b);
+ const b=document.createElement('button');b.id='allpaV12TestBtn';b.type='button';b.textContent='🧪 TEST V1.2.3';b.onclick=runTestsV12;document.body.appendChild(b);
  const p=document.createElement('div');p.id='allpaV12TestPanel';document.body.appendChild(p);
 },5400));
 })();
@@ -38890,7 +38908,7 @@ window.addEventListener('load',()=>setTimeout(()=>{
 <script id="allpa-postv28-v1-2-2">
 (function(){
 'use strict';
-const VERSION='1.2.2-map-planos-sustento';
+const VERSION='1.2.3-map-marker-planos-state-sustento';
 
 /* 1) MAPA
    La captura mostró "Map data not yet available" al superar el nivel con
@@ -38925,7 +38943,8 @@ function enableSatelliteOverzoomV122(containerId){
  const apply=()=>{
    const tiles=el.querySelector('.tiles-v12'),ov=el.querySelector('.overlay-v12');
    const scale=Math.pow(2,extra);
-   [tiles,ov].forEach(x=>{if(x){x.style.transformOrigin='50% 50%';x.style.transform=`scale(${scale})`}});
+   if(tiles){tiles.style.transformOrigin='50% 50%';tiles.style.transform=`scale(${scale})`}
+   if(ov){ov.style.transform='none';ov.style.transformOrigin='50% 50%'}
  };
  el.addEventListener('wheel',e=>{
    const M=el.__allpaMapV12;if(!M||M.layer!=='sat')return;
@@ -38947,10 +38966,7 @@ function enableSatelliteOverzoomV122(containerId){
 function stabilizePlanosV122(){
  const F=window.AllpaFunctionalV12;if(!F)return;
  const root=document.getElementById('planosAprobadosV12');
- if(root){
-   root.addEventListener('input',e=>e.stopPropagation(),true);
-   root.addEventListener('change',e=>e.stopPropagation(),true);
- }
+ if(root)root.dataset.stableV123='1';
 }
 const obs=new MutationObserver(()=>{
  clearTimeout(window.__v122PlanosTimer);
@@ -38971,20 +38987,7 @@ const obs=new MutationObserver(()=>{
    trasladados a Tabla 2. Si no quedan otros textos, se conserva el encabezado
    para mantener la estructura solicitada y permitir la referencia. */
 function ensureSustentoV122(html){
- let s=String(html||'');
- if(!state?.mostrarTextosTecnicos)return s
-   .replace(/<p\b[^>]*class=["'][^"']*ref-sustento-v12[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'')
-   .replace(/<h2[^>]*>\s*(?:\d+\.\s*)?Sustento\s+t[ée]cnico\s+de\s+las\s+observaciones\s*<\/h2>\s*(?=<h2|$)/gi,'');
- if(!/<h2[^>]*>[\s\S]*?Sustento\s+t[ée]cnico\s+de\s+las\s+observaciones[\s\S]*?<\/h2>/i.test(s)){
-   const marker=/<h2[^>]*>\s*(?:\d+\.\s*)?Conclusiones\s*<\/h2>/i;
-   const head='<h2>Sustento técnico de las observaciones</h2>';
-   s=marker.test(s)?s.replace(marker,head+'$&'):s+head;
- }
- const REF='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
- s=s.replace(/<p\b[^>]*class=["'][^"']*ref-sustento-v12[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'');
- const resumen=/((?:<h2[^>]*>\s*(?:\d+\.\s*)?RESUMEN\s+DE\s+OBSERVACIONES\s*<\/h2>)[\s\S]*?<\/table>)/i;
- if(resumen.test(s))s=s.replace(resumen,`$1<p class="ref-sustento-v12">${REF}</p>`);
- return s;
+ return typeof referenceV12==='function'?referenceV12(String(html||'')):String(html||'');
 }
 function installReportFixV122(){
  if(window.__ALLPA_V122_REPORT__)return;
