@@ -33987,20 +33987,6 @@ textarea.evidencia-text,
 .editable-conclusion-core-v4 td{vertical-align:top}
 .editable-conclusion-core-v4 .core-v4-type{min-width:150px}
 .core-v4-help{margin-bottom:8px}
-#allpaConclusionCoreBtnV4{
- position:fixed;right:18px;bottom:18px;z-index:999999;border:0;border-radius:999px;
- padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer
-}
-#allpaConclusionCorePanelV4{
- display:none;position:fixed;right:18px;bottom:68px;z-index:999999;
- width:min(900px,calc(100vw - 36px));max-height:86vh;overflow:auto;
- background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;
- box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui
-}
-#allpaConclusionCorePanelV4.open{display:block}
-.corev4-ok{color:#177245;font-weight:700}.corev4-fail{color:#b42318;font-weight:700}
-.corev4-row{padding:6px 0;border-bottom:1px solid #eee}
-@media print{#allpaConclusionCoreBtnV4,#allpaConclusionCorePanelV4{display:none!important}}
 </style>
 
 <script id="allpa-conclusion-core-v4">
@@ -38390,161 +38376,26 @@ window.addEventListener('load',()=>{setTimeout(install,3200);setTimeout(install,
 </script>
 
 
-<style id="allpa-v27b-css">
-#allpaV27BBtn{position:fixed;right:18px;bottom:18px;z-index:1000021;border:0;border-radius:999px;padding:11px 15px;font:700 13px system-ui;background:#fff;box-shadow:0 4px 18px #0003;cursor:pointer}
-#allpaV27BPanel{display:none;position:fixed;right:18px;bottom:68px;z-index:1000021;width:min(1250px,calc(100vw - 36px));max-height:88vh;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:12px;padding:14px;box-shadow:0 10px 34px #0004;font:13px/1.45 system-ui}
-#allpaV27BPanel.open{display:block}.v27bok{color:#177245;font-weight:700}.v27bfail{color:#b42318;font-weight:700}.v27brow{padding:6px 0;border-bottom:1px solid #eee}.v27bnote{padding:8px 10px;background:#fff8e7;border:1px solid #ead28c;border-radius:8px;margin:8px 0}
-@media print{#allpaV27BBtn,#allpaV27BPanel{display:none!important}}
-</style>
-
-<script id="allpa-regression-v27b">
+<script id="allpa-final-baseline-v28">
 (function(){
 'use strict';
-window.AllpaRegressionV27B=Object.freeze({
- version:'27.1.0-integral-regression-corrected',
- correction:'REQ_043 is injected by ensureReq043EstudioMorfologicoV119L into DATA after project application'
+window.AllpaBaselineV28=Object.freeze({
+ version:'28.0.0-final-baseline',
+ status:'FROZEN',
+ validatedRegression:Object.freeze({phase:'V27B',result:'66 OK / 0 FAIL'}),
+ authorities:Object.freeze({
+  conclusion:'ConclusionTecnicaSourceV20',
+  applyState:'ApplyStateUIV21D',
+  persistence:'PersistenceV22B/V22C/V22D',
+  requirementsNavigation:'ProjectNavigationV24D',
+  reportOutput:'ReportOutputV25B',
+  reportRender:'ReportStructuralV25F',
+  anteproyecto:'AnteproyectoDomainV25K',
+  obraMayorDesistimiento:'ReportDomainsV25M',
+  publicRoutes:'AllpaPublicRoutesV26'
+ }),
+ policy:Object.freeze({noTestUI:true,noArchitectureChanges:true,baselineForFutureFeatures:true})
 });
-function C(v){try{return structuredClone(v)}catch(e){return JSON.parse(JSON.stringify(v))}}
-function A(R,n,ok,d){R.push({name:n,ok:!!ok,detail:String(d??'')})}
-function W(ms){return new Promise(r=>setTimeout(r,ms))}
-function setType(t){state.tipoInforme=t;const el=document.getElementById('tipoInforme');if(el)el.value=t}
-function activeTab(){return document.querySelector('.tab-btn.active')?.dataset?.tab||document.querySelector('.tab.active')?.id||''}
-
-async function run(){
- const R=[],orig=C(state),origTab=activeTab(),origProject=localStorage.getItem('GADMR_PROJECT_TYPE_V123');let tempKey='';
- try{
-  const F=window.AllpaPublicRoutesV26,A21=window.ApplyStateUIV21D,PB=window.PersistenceV22B,PC=window.PersistenceV22C,
-        PD=window.PersistenceV22D,N=window.ProjectNavigationV24D,O=window.ReportOutputV25B,RR=window.ReportStructuralV25F,
-        D=window.ReportDomainsV25M,CS=window.ConclusionTecnicaSourceV20;
-
-  A(R,'V27B disponible',window.AllpaRegressionV27B?.version==='27.1.0-integral-regression-corrected',window.AllpaRegressionV27B?.version||'');
-  A(R,'V26 preservada',F?.version==='26.0.0-global-routes',F?.version||'');
-  A(R,'ApplyState final',window.applyStateToUI===A21?.apply,'V21D');
-  A(R,'Guardar final',window.guardarFormulario===PC?.save,'V22C');
-  A(R,'Cargar final',window.cargarFormulario===PC?.load,'V22C');
-  A(R,'Nuevo final',window.nuevoFormulario===PD?.createNew,'V22D');
-  A(R,'Lista final',window.renderSavedList===PB?.list,'V22B');
-  A(R,'Exportar final',window.exportarRespaldo===PB?.exportBackup,'V22B');
-  A(R,'Importar final',window.importarRespaldo===PB?.importBackup,'V22B');
-  A(R,'Requisitos final',window.renderRequisitosForm===N?.render,'V24D');
-  A(R,'Navegación final',window.showTab===N?.navigate,'V24D');
-  A(R,'Proyecto final',window.selectProjectV123===N?.selectProject,'V24D');
-  A(R,'Validación final',window.validationErrorsV70===O?.validate,'V25B');
-  A(R,'Copiar final',window.copiarInformeActualV70===O?.copyCurrent,'V25B');
-  A(R,'PDF final',window.imprimirInforme===O?.printCurrent,'V25B');
-  A(R,'Renderer principal final',window.renderReport===RR?.render,'V25F');
-  A(R,'Desistimiento final',window.renderInformeDesistimientoV69===D?.desistimiento?.renderReport,'V25M');
-
-  const fresh=defaultState();
-  A(R,'defaultState disponible',!!fresh,'estado nuevo');
-  A(R,'Textos Técnicos activos por defecto',fresh?.mostrarTextosTecnicos===true,String(fresh?.mostrarTextosTecnicos));
-  A(R,'Persistencia IndexedDB disponible',typeof openDB==='function'&&typeof dbPut==='function'&&typeof dbGet==='function'&&typeof dbDelete==='function','openDB/dbPut/dbGet/dbDelete');
-  tempKey='V27B_TEST_'+Date.now();await openDB();await dbPut({...C(fresh),egob:tempKey,projectType:'obra_mayor_definitivo',_v27bProbe:true});
-  const got=await dbGet(tempKey);A(R,'IndexedDB escritura/lectura',got?.egob===tempKey&&got?._v27bProbe===true,got?.egob||'');
-  await dbDelete(tempKey);A(R,'IndexedDB limpieza temporal',!(await dbGet(tempKey)),'registro temporal eliminado');tempKey='';
-
-  /* Corrección del falso negativo V27:
-     la colección base OM tiene 18 filas. REQ_043 se añade intencionalmente
-     por ensureReq043EstudioMorfologicoV119L al aplicar/renderizar el proyecto. */
-  const omBase=typeof requisitosParaProyectoV128==='function'?requisitosParaProyectoV128('obra_mayor_definitivo'):[];
-  const apBase=typeof requisitosParaProyectoV128==='function'?requisitosParaProyectoV128('anteproyecto_edificacion'):[];
-  A(R,'Base OM conserva 18 requisitos antes de extensión',omBase.length===18,`${omBase.length}`);
-  A(R,'Base Anteproyecto conserva 13 requisitos',apBase.length===13,`${apBase.length}`);
-
-  state.projectType='obra_mayor_definitivo';
-  applyProjectRequirementsV128(state.projectType,false);
-  if(typeof ensureReq043EstudioMorfologicoV119L==='function')ensureReq043EstudioMorfologicoV119L();
-  window.renderRequisitosForm?.(false);
-  const omApplied=DATA.requisitos||[];
-  A(R,'OM aplicado conserva 19 requisitos',omApplied.length===19,`${omApplied.length}`);
-  A(R,'OM aplicado contiene Estudio Morfológico',omApplied.some(r=>String(r?.id||'')==='REQ_043'),'REQ_043');
-  A(R,'REQ_043 es documental',omApplied.find(r=>String(r?.id||'')==='REQ_043')?.seccion==='DOCUMENTAL',omApplied.find(r=>String(r?.id||'')==='REQ_043')?.seccion||'');
-  A(R,'REQ_043 orden 19',Number(omApplied.find(r=>String(r?.id||'')==='REQ_043')?.orden)===19,String(omApplied.find(r=>String(r?.id||'')==='REQ_043')?.orden||''));
-
-  state.projectType='anteproyecto_edificacion';applyProjectRequirementsV128(state.projectType,false);window.renderRequisitosForm?.(false);
-  A(R,'Dataset Anteproyecto aplicado',(DATA.requisitos||[]).length===13,`${(DATA.requisitos||[]).length}`);
-  A(R,'Proyecto OM válido',N?.validProject?.('obra_mayor_definitivo')==='obra_mayor_definitivo','obra_mayor_definitivo');
-  A(R,'Proyecto Anteproyecto válido',N?.validProject?.('anteproyecto_edificacion')==='anteproyecto_edificacion','anteproyecto_edificacion');
-
-  state.propietarios=[{nombre:'PROPIETARIO V27B A',ci:'0600000001'},{nombre:'PROPIETARIO V27B B',ci:'0600000002'}];
-  ensurePropietarios();const propHtml=String(propietariosHtml()||'');
-  A(R,'Múltiples propietarios preservados',state.propietarios.length===2,`${state.propietarios.length}`);
-  A(R,'Renderer propietarios contiene ambos',/PROPIETARIO V27B A/.test(propHtml)&&/PROPIETARIO V27B B/.test(propHtml),`${propHtml.length} caracteres`);
-  state.apoderados=[{nombre:'APODERADO V27B A',ci:'0600000003'},{nombre:'APODERADO V27B B',ci:'0600000004'}];
-  const aps=window.ensureApoderadosV3?.()||[],apHtml=String(window.apoderadosRowsInformeV3?.()||'');
-  A(R,'Múltiples apoderados preservados',aps.length===2,`${aps.length}`);
-  A(R,'Informe contiene ambos apoderados',/APODERADO V27B A/.test(apHtml)&&/APODERADO V27B B/.test(apHtml),`${apHtml.length} caracteres`);
-
-  const rows=CS?.allRows?.()||[];A(R,'Conclusión fuente V20 disponible',CS?.version==='20.0.0-source',CS?.version||'');
-  A(R,'Conclusión conserva 10 filas fuente',rows.length===10,`${rows.length}`);
-  const n=(state.aprobatorio?.conclusion||[]).length;window.applyStateToUI?.();await W(180);
-  A(R,'ApplyState no destruye Conclusión',(state.aprobatorio?.conclusion||[]).length===n,`${n} → ${(state.aprobatorio?.conclusion||[]).length}`);
-
-  state.projectType='obra_mayor_definitivo';applyProjectRequirementsV128(state.projectType,false);
-  const omFacts=D?.obraMayor?.ensureFacts?.()||[],omStudies=D?.obraMayor?.ensureStudies?.()||[];
-  A(R,'OM conserva 3 factibilidades',omFacts.length===3,`${omFacts.length}`);
-  A(R,'OM canon factibilidades',omFacts.map(x=>String(x.estudio||'')).join('|')==='RIOBAMBA-EP|EERSA|CNT',omFacts.map(x=>x.estudio).join(' · '));
-  A(R,'OM conserva 4 estudios',omStudies.length===4,`${omStudies.length}`);
-  A(R,'Renderer factibilidades OM',String(D?.obraMayor?.renderFacts?.()||'').length>100,`${String(D?.obraMayor?.renderFacts?.()||'').length} caracteres`);
-  A(R,'Renderer estudios OM',String(D?.obraMayor?.renderStudies?.()||'').length>100,`${String(D?.obraMayor?.renderStudies?.()||'').length} caracteres`);
-  setType('Informe Técnico Aprobatorio');const omApr=String(RR?.aprobatorio?.()||'');
-  A(R,'Aprobatorio OM operativo',omApr.length>500,`${omApr.length} caracteres`);
-  A(R,'Aprobatorio OM contiene Conclusión',/Conclusi[oó]n/i.test(omApr),'visible');
-  setType('Informe con Observaciones');A(R,'Informe Observaciones operativo',String(RR?.observaciones?.()||'').length>500,`${String(RR?.observaciones?.()||'').length} caracteres`);
-
-  if(!state.desistimiento)state.desistimiento={};
-  state.desistimiento.motivo='Peticion del Administrado';D?.desistimiento?.ensure?.();const pet=String(D?.desistimiento?.renderReport?.()||'');
-  A(R,'Desistimiento Petición normalizado',state.desistimiento.motivo===D?.desistimiento?.constants?.petition,state.desistimiento.motivo||'');
-  A(R,'Desistimiento Petición operativo',pet.length>500&&/211/.test(pet),`${pet.length} caracteres`);
-  state.desistimiento.motivo='Observaciones';D?.desistimiento?.ensure?.();const dob=String(D?.desistimiento?.renderReport?.()||'');
-  A(R,'Desistimiento Observaciones normalizado',state.desistimiento.motivo===D?.desistimiento?.constants?.observation,state.desistimiento.motivo||'');
-  A(R,'Desistimiento Observaciones operativo',dob.length>500&&/Criterio t[ée]cnico/i.test(dob),`${dob.length} caracteres`);
-
-  state.projectType='anteproyecto_edificacion';applyProjectRequirementsV128(state.projectType,false);
-  const AP=D?.anteproyecto,af=AP?.ensureFacts?.()||[];
-  A(R,'Anteproyecto dominio V25K',AP?.version==='25.10.0-v134-removed',AP?.version||'');
-  A(R,'Anteproyecto 3 factibilidades',af.length===3,`${af.length}`);
-  A(R,'Anteproyecto Base Legal',String(AP?.baseLegal?.()||'').length>500,`${String(AP?.baseLegal?.()||'').length} caracteres`);
-  setType('Informe Técnico Aprobatorio');const ante=String(RR?.aprobatorio?.()||'');
-  A(R,'Aprobatorio Anteproyecto operativo',ante.length>500,`${ante.length} caracteres`);
-  const rendered=String(RR?.render?.()||'');A(R,'Render principal actualiza Vista',rendered.length>500&&String(document.getElementById('report')?.innerHTML||'').length>500,`${rendered.length} caracteres`);
-
-  A(R,'Paginador PDF exportado',typeof window.buildPagesV2==='function'&&typeof window.clearPagesV2==='function','buildPagesV2/clearPagesV2');
-  const root=await window.buildPagesV2(),pages=root?.querySelectorAll?.('.allpa-print-page-v2')?.length||0;
-  A(R,'Paginación PDF genera páginas',pages>=1,`${pages} página(s)`);window.clearPagesV2();
-  A(R,'Paginación PDF limpia páginas',document.querySelectorAll('#allpaPrintPagesV2 .allpa-print-page-v2').length===0,'0 páginas');
-
-  const tabs=['tab-info','tab-req','tab-obs','tab-apr','tab-vista'];let navOK=true,seen=[];
-  for(const id of tabs){try{window.showTab?.(id);await W(35);const cur=activeTab();seen.push(`${id}:${cur}`);if(cur!==id)navOK=false}catch(e){navOK=false}}
-  A(R,'Navegación 5 pestañas',navOK,seen.join(' · '));
-
-  A(R,'V134 sigue retirado',D?.physical?.v134OriginalRemoved===true,'sí');
-  A(R,'V145 sigue retirado',D?.physical?.v145OriginalRemoved===true,'sí');
-  A(R,'ReportOutput V25B intacto',O?.version==='25.1.0-validation-copy-pdf',O?.version||'');
-  A(R,'ProjectNavigation V24D intacto',N?.version==='24.3.0-project-nav',N?.version||'');
-  A(R,'Persistencia V22C intacta',PC?.version==='22.2.0-save-load',PC?.version||'');
-  A(R,'Persistencia V22D intacta',PD?.version==='22.3.0-new-form',PD?.version||'');
- }catch(e){A(R,'Banco V27B',false,e?.stack||e)}
- finally{
-  if(tempKey){try{await openDB();await dbDelete(tempKey)}catch(_e){}}
-  state=orig;
-  try{if(origProject===null)localStorage.removeItem('GADMR_PROJECT_TYPE_V123');else localStorage.setItem('GADMR_PROJECT_TYPE_V123',origProject)}catch(_e){}
-  try{window.applyStateToUI?.()}catch(_e){};await W(220);
-  try{if(origTab)window.showTab?.(origTab)}catch(_e){}
-  try{window.clearPagesV2?.()}catch(_e){}
- }
- A(R,'Formulario original restaurado',true,'state restaurado');
- const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaV27BPanel');
- p.innerHTML=`<h3>🧪 ALLPA V27B — REGRESIÓN CORREGIDA</h3><div class="v27bnote">Los 2 FAIL de V27 eran falsos negativos del banco: OM parte de 18 requisitos base y REQ_043 se inyecta al aplicar el proyecto, dejando 19 en DATA. No se modificó la lógica funcional.</div><p><b>OK ${ok} · FAIL ${fail}</b></p>`+
- R.map(x=>`<div class="v27brow"><span class="${x.ok?'v27bok':'v27bfail'}">${x.ok?'✅ OK':'❌ FAIL'} | ${x.name}</span><div>${x.detail}</div></div>`).join('')+
- `<p><button id="copyV27B">Copiar resultado</button> <button id="closeV27B">Cerrar</button></p>`;
- p.classList.add('open');document.getElementById('closeV27B').onclick=()=>p.classList.remove('open');
- document.getElementById('copyV27B').onclick=async()=>{const s=`ALLPA-V27B\nOK:${ok} FAIL:${fail}\n`+R.map(x=>`${x.ok?'OK':'FAIL'} | ${x.name} | ${x.detail}`).join('\n');try{await navigator.clipboard.writeText(s)}catch(e){}};
-}
-window.addEventListener('load',()=>setTimeout(()=>{
- const b=document.createElement('button');b.id='allpaV27BBtn';b.type='button';b.textContent='🧪 TEST V27B';b.onclick=run;document.body.appendChild(b);
- const p=document.createElement('div');p.id='allpaV27BPanel';document.body.appendChild(p);
-},4700));
 })();
 </script>
 
