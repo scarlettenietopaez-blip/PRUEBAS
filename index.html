@@ -38431,7 +38431,7 @@ window.AllpaBaselineV28=Object.freeze({
 <script id="allpa-postv28-v1-2">
 (function(){
 'use strict';
-const VERSION='1.2.0-functional-corrected';
+const VERSION='1.2.1-planos-project-sync';
 const REF='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
 
 function normV12(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase()}
@@ -38481,7 +38481,7 @@ function createNativeMapV12(containerId,isModal=false){
  const data=mapDataV12();
  const M=old||{lat:data.lat,lon:data.lon,z:isModal?18:17,layer:'sat',drag:false,lastX:0,lastY:0};
  if(!old){M.lat=data.lat;M.lon=data.lon}
- M.isModal=!!isModal;M.data=data;M.z=Math.max(12,Math.min(21,Number(M.z)||17));
+ M.isModal=!!isModal;M.data=data;M.z=Math.max(12,Math.min(M.layer==='sat'?18:19,Number(M.z)||17));
  el.classList.add('allpa-native-map-v12');
  el.innerHTML='<div class="tiles-v12"></div><svg class="overlay-v12" aria-label="Polígono PIT y punto consultado"></svg><div class="map-controls-v12"><button type="button" data-map-act="in">+</button><button type="button" data-map-act="out">−</button></div><div class="layer-control-v12"><button type="button" data-map-act="layer"></button></div><div class="attrib-v12"></div>';
  el.__allpaMapV12=M;
@@ -38513,7 +38513,7 @@ function createNativeMapV12(containerId,isModal=false){
   el.querySelector('.attrib-v12').textContent=M.layer==='sat'?'Imágenes © Esri':'© OpenStreetMap';
  }
  function zoom(delta,cx=(el.clientWidth||320)/2,cy=(el.clientHeight||260)/2){
-   const oldZ=M.z,newZ=Math.max(12,Math.min(21,oldZ+delta));if(newZ===oldZ)return;
+   const oldZ=M.z,newZ=Math.max(12,Math.min(M.layer==='sat'?18:19,oldZ+delta));if(newZ===oldZ)return;
    const w=el.clientWidth||320,h=el.clientHeight||260,c=worldXYV12(M.lat,M.lon,oldZ);
    const before={x:c.x+(cx-w/2),y:c.y+(cy-h/2)};
    const geo=latLonFromWorldV12(before.x,before.y,oldZ);
@@ -38615,7 +38615,15 @@ function bindRMV12(){
 function projectDefV12(){
  try{
    const f=(DATA.infoFields||[]).find(x=>normV12(x.label).includes('PROYECTO DEFINITIVO'));
-   return f?String(state.info?.[f.key]||document.getElementById('info_'+f.key)?.value||''):'';
+   if(!f)return '';
+   const el=document.getElementById('info_'+f.key);
+   const live=String(el?.value||'').trim();
+   if(live){
+     state.info=state.info||{};
+     state.info[f.key]=live;
+     return live;
+   }
+   return String(state.info?.[f.key]||'');
  }catch(_e){return ''}
 }
 function ampModV12(){
@@ -38646,10 +38654,10 @@ function mountPlanosV12(){
  const titles=[...box.querySelectorAll('.section-title')],anchor=titles.find(x=>/CONCLUSI[ÓO]N T[ÉE]CNICA/i.test(x.textContent||''));
  if(anchor)anchor.insertAdjacentHTML('beforebegin',planosHtmlV12());else box.insertAdjacentHTML('beforeend',planosHtmlV12());
  const p=ensurePlanosV12(),sw=document.getElementById('planosLicenciaV12');
- if(sw)sw.onchange=()=>{p.licencia=sw.checked;mountPlanosV12();refreshV12()};
+ if(sw)sw.onchange=()=>{p.licencia=!!sw.checked;setTimeout(()=>{mountPlanosV12();refreshV12()},0)};
  [['planosResolucionV12','resolucion'],['planosEgobV12','egob'],['planosFechaV12','fecha'],['planosFechaAprobacionV12','fechaAprobacion'],['planosEntidadV12','entidad']].forEach(([id,k])=>{
    const el=document.getElementById(id);if(!el)return;
-   el.oninput=()=>{let v=el.value;if(k==='egob')v=el.value=String(v).replace(/\D/g,'');p[k]=v;refreshV12()};
+   el.oninput=()=>{let v=el.value;if(k==='egob')v=el.value=String(v).replace(/\D/g,'');p[k]=v};el.onchange=()=>{p[k]=el.value;refreshV12()};
  });
 }
 function planosTextV12(){
@@ -38769,11 +38777,18 @@ if(typeof renderInfoForm==='function'&&!renderInfoForm.__allpaV12){
  const wrap=function(){const out=base.apply(this,arguments);setTimeout(bindRMV12,20);return out};
  wrap.__allpaV12=true;renderInfoForm=wrap;try{window.renderInfoForm=wrap}catch(_e){}
 }
-const mo=new MutationObserver(()=>{clearTimeout(window.__allpaV12Mut);window.__allpaV12Mut=setTimeout(()=>{bindRMV12();mountPlanosV12()},25)});
+const mo=new MutationObserver(()=>{clearTimeout(window.__allpaV12Mut);window.__allpaV12Mut=setTimeout(()=>{bindRMV12();const should=ampModV12()&&state.tipoInforme==='Informe Técnico Aprobatorio';const exists=!!document.getElementById('planosAprobadosV12');if(should&&!exists)mountPlanosV12();},25)});
 window.addEventListener('load',()=>{try{mo.observe(document.body,{childList:true,subtree:true})}catch(_e){}}, {once:true});
 
 document.addEventListener('change',e=>{
- if(e.target?.id&&/^info_/.test(e.target.id))setTimeout(()=>{mountPlanosV12();refreshV12()},30);
+ const pf=(DATA.infoFields||[]).find(x=>normV12(x.label).includes('PROYECTO DEFINITIVO'));
+ if(pf && e.target?.id==='info_'+pf.key){
+   state.info=state.info||{};
+   state.info[pf.key]=e.target.value;
+   setTimeout(()=>{mountPlanosV12();refreshV12()},30);
+ }else if(e.target?.id&&/^info_/.test(e.target.id)){
+   setTimeout(()=>{mountPlanosV12();refreshV12()},30);
+ }
  const lab=String(e.target?.closest('label')?.textContent||'');
  if(/Mostrar\s+Ac[aá]pite\s+de\s+Textos\s+T[ée]cnicos\s+para\s+el\s+Informe/i.test(lab))setTimeout(refreshV12,20);
 },true);
@@ -38825,9 +38840,12 @@ async function runTestsV12(){
    const pf=(DATA.infoFields||[]).find(x=>normV12(x.label).includes('PROYECTO DEFINITIVO'));
    if(pf){
      state.info[pf.key]='AMPLIACIÓN';state.tipoInforme='Informe Técnico Aprobatorio';
+     const pel=document.getElementById('info_'+pf.key);
+     if(pel)pel.value='AMPLIACIÓN';
      try{renderAprobatorioForm()}catch(_e){}
-     await new Promise(r=>setTimeout(r,80));
-     A('Planos Aprobados aparece en Ampliación',!!document.getElementById('planosAprobadosV12'),'visible');
+     await new Promise(r=>setTimeout(r,120));
+     const planosVisible=!!document.getElementById('planosAprobadosV12');
+     A('Planos Aprobados aparece en Ampliación',planosVisible,planosVisible?'visible':'no montado');
      const pp=ensurePlanosV12();pp.licencia=true;pp.resolucion='RESOLUCIÓN TEST';pp.fecha='2026-09-01';
      A('Texto Licencia generado',/El Proyecto cuenta con RESOLUCIÓN TEST emitida con fecha/i.test(planosTextV12()),planosTextV12());
      pp.licencia=false;pp.fechaAprobacion='2026-09-01';pp.entidad='GADMR';
@@ -38852,14 +38870,148 @@ async function runTestsV12(){
    setTimeout(()=>{installFinalRoutesV12();bindRMV12();mountPlanosV12()},100);
  }
  const ok=R.filter(x=>x.ok).length,fail=R.length-ok,p=document.getElementById('allpaV12TestPanel');
- p.innerHTML=`<h3>ALLPA POST-V28 V1.2</h3><p><b>OK:${ok} FAIL:${fail}</b></p>`+R.map(x=>`<div class="v12row"><span class="${x.ok?'v12ok':'v12fail'}">${x.ok?'OK':'FAIL'} | ${x.n}</span><div>${escV12(x.d)}</div></div>`).join('')+'<p><button type="button" onclick="this.closest(\'#allpaV12TestPanel\').classList.remove(\'open\')">Cerrar</button></p>';
+ p.innerHTML=`<h3>ALLPA POST-V28 V1.2.1</h3><p><b>OK:${ok} FAIL:${fail}</b></p>`+R.map(x=>`<div class="v12row"><span class="${x.ok?'v12ok':'v12fail'}">${x.ok?'OK':'FAIL'} | ${x.n}</span><div>${escV12(x.d)}</div></div>`).join('')+'<p><button type="button" onclick="this.closest(\'#allpaV12TestPanel\').classList.remove(\'open\')">Cerrar</button></p>';
  p.classList.add('open');
 }
 window.addEventListener('load',()=>setTimeout(()=>{
  if(document.getElementById('allpaV12TestBtn'))return;
- const b=document.createElement('button');b.id='allpaV12TestBtn';b.type='button';b.textContent='🧪 TEST V1.2';b.onclick=runTestsV12;document.body.appendChild(b);
+ const b=document.createElement('button');b.id='allpaV12TestBtn';b.type='button';b.textContent='🧪 TEST V1.2.1';b.onclick=runTestsV12;document.body.appendChild(b);
  const p=document.createElement('div');p.id='allpaV12TestPanel';document.body.appendChild(p);
 },5400));
+})();
+</script>
+
+
+<style id="allpa-postv28-v1-2-2-css">
+/* V1.2.2: controles de Planos no deben ser interceptados por capas históricas */
+#planosAprobadosV12,#planosAprobadosV12 *{pointer-events:auto}
+#planosAprobadosV12 input{position:relative;z-index:2}
+</style>
+<script id="allpa-postv28-v1-2-2">
+(function(){
+'use strict';
+const VERSION='1.2.2-map-planos-sustento';
+
+/* 1) MAPA
+   La captura mostró "Map data not yet available" al superar el nivel con
+   cobertura efectiva. Se limita satélite al nivel 18 y se hace overzoom
+   visual: seguimos acercando la imagen disponible, en vez de pedir mosaicos
+   inexistentes. */
+function installMapFixV122(){
+ const F=window.AllpaFunctionalV12;if(!F)return;
+ const old=window.initLeafletPitMapV44;
+ if(typeof old!=='function'||old.__v122)return;
+ const wrap=function(containerId,isModal){
+   const M=old(containerId,isModal);
+   const el=document.getElementById(containerId);
+   if(!M||!el)return M;
+   /* ArcGIS World Imagery no garantiza que cada ubicación tenga mosaico
+      útil en todos los niveles. Si estamos en satélite, nivel operativo 18. */
+   if(M.layer==='sat' && M.z>18){M.z=18; old(containerId,isModal)}
+   return M;
+ };
+ wrap.__v122=true;
+ window.initLeafletPitMapV44=wrap;
+ try{initLeafletPitMapV44=wrap}catch(_e){}
+}
+
+/* En el motor V1.2 original el límite era 21. Cambiamos únicamente los dos
+   clamps del zoom satelital a 18 mediante una protección en los botones/rueda:
+   al llegar a 18, aplicamos escala CSS hasta 8x sobre el mosaico existente. */
+function enableSatelliteOverzoomV122(containerId){
+ const el=document.getElementById(containerId);if(!el||el.dataset.overzoom122==='1')return;
+ el.dataset.overzoom122='1';
+ let extra=0;
+ const apply=()=>{
+   const tiles=el.querySelector('.tiles-v12'),ov=el.querySelector('.overlay-v12');
+   const scale=Math.pow(2,extra);
+   [tiles,ov].forEach(x=>{if(x){x.style.transformOrigin='50% 50%';x.style.transform=`scale(${scale})`}});
+ };
+ el.addEventListener('wheel',e=>{
+   const M=el.__allpaMapV12;if(!M||M.layer!=='sat')return;
+   if(M.z>=18 && e.deltaY<0){e.preventDefault();e.stopImmediatePropagation();extra=Math.min(3,extra+1);apply()}
+   else if(extra>0 && e.deltaY>0){e.preventDefault();e.stopImmediatePropagation();extra=Math.max(0,extra-1);apply()}
+ },true);
+ el.addEventListener('click',e=>{
+   const b=e.target.closest('[data-map-act="in"],[data-map-act="out"]');if(!b)return;
+   const M=el.__allpaMapV12;if(!M||M.layer!=='sat')return;
+   if(b.dataset.mapAct==='in' && M.z>=18){e.preventDefault();e.stopImmediatePropagation();extra=Math.min(3,extra+1);apply()}
+   else if(b.dataset.mapAct==='out' && extra>0){e.preventDefault();e.stopImmediatePropagation();extra=Math.max(0,extra-1);apply()}
+ },true);
+}
+
+/* 2) PLANOS APROBADOS
+   El MutationObserver V1.2 reconstruía la sección cada vez que el informe
+   cambiaba. Eso reemplazaba el input mientras el usuario escribía y hacía que
+   pareciera bloqueado. Ahora solo se monta si falta realmente. */
+function stabilizePlanosV122(){
+ const F=window.AllpaFunctionalV12;if(!F)return;
+ const root=document.getElementById('planosAprobadosV12');
+ if(root){
+   root.addEventListener('input',e=>e.stopPropagation(),true);
+   root.addEventListener('change',e=>e.stopPropagation(),true);
+ }
+}
+const obs=new MutationObserver(()=>{
+ clearTimeout(window.__v122PlanosTimer);
+ window.__v122PlanosTimer=setTimeout(()=>{
+   const F=window.AllpaFunctionalV12;if(!F)return;
+   const should=F.ampMod?.() && state?.tipoInforme==='Informe Técnico Aprobatorio';
+   const exists=!!document.getElementById('planosAprobadosV12');
+   if(should&&!exists)F.mountPlanos?.();
+   stabilizePlanosV122();
+   enableSatelliteOverzoomV122('pitLeafletMapV44');
+   enableSatelliteOverzoomV122('pitMapModalCanvasV44');
+ },80);
+});
+
+/* 3) SUSTENTO TÉCNICO
+   Si el check está activo, el acápite debe existir. Los requisitos de
+   Propuesta Arquitectónica siguen excluidos de este acápite porque ya fueron
+   trasladados a Tabla 2. Si no quedan otros textos, se conserva el encabezado
+   para mantener la estructura solicitada y permitir la referencia. */
+function ensureSustentoV122(html){
+ let s=String(html||'');
+ if(!state?.mostrarTextosTecnicos)return s
+   .replace(/<p\b[^>]*class=["'][^"']*ref-sustento-v12[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'')
+   .replace(/<h2[^>]*>\s*(?:\d+\.\s*)?Sustento\s+t[ée]cnico\s+de\s+las\s+observaciones\s*<\/h2>\s*(?=<h2|$)/gi,'');
+ if(!/<h2[^>]*>[\s\S]*?Sustento\s+t[ée]cnico\s+de\s+las\s+observaciones[\s\S]*?<\/h2>/i.test(s)){
+   const marker=/<h2[^>]*>\s*(?:\d+\.\s*)?Conclusiones\s*<\/h2>/i;
+   const head='<h2>Sustento técnico de las observaciones</h2>';
+   s=marker.test(s)?s.replace(marker,head+'$&'):s+head;
+ }
+ const REF='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
+ s=s.replace(/<p\b[^>]*class=["'][^"']*ref-sustento-v12[^"']*["'][^>]*>[\s\S]*?<\/p>/gi,'');
+ const resumen=/((?:<h2[^>]*>\s*(?:\d+\.\s*)?RESUMEN\s+DE\s+OBSERVACIONES\s*<\/h2>)[\s\S]*?<\/table>)/i;
+ if(resumen.test(s))s=s.replace(resumen,`$1<p class="ref-sustento-v12">${REF}</p>`);
+ return s;
+}
+function installReportFixV122(){
+ if(window.__ALLPA_V122_REPORT__)return;
+ const base=window.renderInformeObservaciones;
+ const renderBase=window.renderReport;
+ if(typeof base!=='function'||typeof renderBase!=='function')return;
+ window.__ALLPA_V122_REPORT__=true;
+ const obsFn=function(){return ensureSustentoV122(base.apply(this,arguments))};
+ const renderFn=function(){
+   const out=renderBase.apply(this,arguments);
+   if(String(state?.tipoInforme||'')!=='Informe con Observaciones')return out;
+   const fixed=ensureSustentoV122(out);
+   const el=document.getElementById('report');if(el)el.innerHTML=fixed;
+   return fixed;
+ };
+ window.renderInformeObservaciones=obsFn;window.renderReport=renderFn;
+ try{renderInformeObservaciones=obsFn;renderReport=renderFn}catch(_e){}
+ window.AllpaFunctionalV122=Object.freeze({version:VERSION,ensureSustento:ensureSustentoV122});
+}
+
+function installV122(){
+ installMapFixV122();installReportFixV122();stabilizePlanosV122();
+ enableSatelliteOverzoomV122('pitLeafletMapV44');enableSatelliteOverzoomV122('pitMapModalCanvasV44');
+ try{obs.observe(document.body,{childList:true,subtree:true})}catch(_e){}
+}
+installV122();
+window.addEventListener('load',()=>{setTimeout(installV122,5300);setTimeout(installV122,6100)});
 })();
 </script>
 
