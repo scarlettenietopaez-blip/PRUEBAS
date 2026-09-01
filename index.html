@@ -1815,6 +1815,7 @@ input,select,textarea{
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
 
 <style>
@@ -38396,6 +38397,326 @@ window.AllpaBaselineV28=Object.freeze({
  }),
  policy:Object.freeze({noTestUI:true,noArchitectureChanges:true,baselineForFutureFeatures:true})
 });
+})();
+</script>
+
+
+<style id="allpa-next-v1-css">
+.planos-aprobados-v1{border:1px solid #c7d5e6;border-radius:12px;background:#f8fbff;padding:12px;margin:14px 0}
+.planos-aprobados-v1 .planos-grid-v1{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;margin-top:10px}
+.planos-aprobados-v1 .planos-grid-v1.two{grid-template-columns:1fr 1fr}
+.planos-aprobados-v1 .check-line{display:flex;align-items:center;gap:8px}
+.planos-aprobados-v1 .check-line input{width:auto}
+@media(max-width:800px){.planos-aprobados-v1 .planos-grid-v1,.planos-aprobados-v1 .planos-grid-v1.two{grid-template-columns:1fr}}
+</style>
+
+<script id="allpa-next-v1">
+(function(){
+'use strict';
+const VERSION='1.0.0-functional-after-v28';
+function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase()}
+function esc1(v){return typeof esc==='function'?esc(String(v??'')):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function fmt1(v){try{return typeof fmtDate==='function'?fmtDate(v):String(v||'')}catch(_e){return String(v||'')}}
+
+/* 1. MAPA: Leaflet real + modal navegable.
+   V28 tenía CSS Leaflet pero no cargaba leaflet.js, por lo que siempre caía al SVG. */
+function initMapV1(containerId,isModal=false){
+ const container=document.getElementById(containerId); if(!container)return;
+ if(!window.L){container.innerHTML='<div class="pit-map-note-v44">No se pudo cargar el motor del mapa. Verifique la conexión a internet.</div>';return}
+ const item=typeof getCurrentPitItemV44==='function'?getCurrentPitItemV44():null;
+ const point=typeof currentPointLatLngV44==='function'?currentPointLatLngV44():null;
+ const mapVar=isModal?'pitLeafletModalMapV44':'pitLeafletMapV44';
+ if(window[mapVar]){try{window[mapVar].remove()}catch(_e){} window[mapVar]=null}
+ const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxNativeZoom:18,maxZoom:23,attribution:'Tiles © Esri'});
+ const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxNativeZoom:19,maxZoom:23,attribution:'© OpenStreetMap'});
+ const map=L.map(containerId,{zoomControl:true,scrollWheelZoom:true,doubleClickZoom:true,dragging:true,layers:[sat],maxZoom:23});
+ window[mapVar]=map;
+ L.control.layers({'Satélite':sat,'Mapa base':osm},null,{collapsed:false}).addTo(map);
+ if(typeof drawPitLeafletV44==='function')drawPitLeafletV44(map,item,point,isModal?'pitModalLayerV44':'pitLayerV44',isModal?'pitModalMarkerV44':'pitMarkerV44');
+ setTimeout(()=>map.invalidateSize(true),100);setTimeout(()=>map.invalidateSize(true),450);
+}
+window.initLeafletPitMapV44=initMapV1;
+try{initLeafletPitMapV44=window.initLeafletPitMapV44}catch(_e){}
+window.openPitMapModalV44=function(){
+ let modal=document.getElementById('pitMapModalV44');
+ if(!modal){
+  modal=document.createElement('div');modal.id='pitMapModalV44';modal.className='map-modal-v44';
+  modal.innerHTML='<div class="map-modal-box-v44"><div class="map-modal-head-v44"><span>Mapa PIT / IPRUS</span><span class="map-hint-v47">Arrastre para navegar; use + / − o la rueda para acercar y alejar</span><button type="button" onclick="closePitMapModalV44()">Cerrar</button></div><div id="pitMapModalCanvasV44"></div></div>';
+  document.body.appendChild(modal);
+ }
+ modal.classList.add('open');setTimeout(()=>initMapV1('pitMapModalCanvasV44',true),100);
+};
+try{openPitMapModalV44=window.openPitMapModalV44}catch(_e){}
+
+/* 2. OM: terminología APROBACIÓN DE ANTEPROYECTO.
+   El cambio se limita visualmente a OM; Anteproyecto conserva su terminología propia. */
+function isOMV1(){return String(state?.projectType||'obra_mayor_definitivo')!=='anteproyecto_edificacion'}
+function patchAnteLabelV1(root=document){
+ if(!isOMV1())return;
+ root.querySelectorAll('.section-title,h2,label,.mini').forEach(el=>{
+  if(el.children.length===0 && /RESOLUCI[ÓO]N DE ANTEPROYECTO/i.test(el.textContent||'')){
+   el.textContent=String(el.textContent).replace(/RESOLUCI[ÓO]N DE ANTEPROYECTO/gi,'APROBACIÓN DE ANTEPROYECTO');
+  }
+ });
+}
+
+/* 3. REGISTRO MUNICIPAL: autocompletar SOLO con coincidencia exacta.
+   Se intercepta antes del listener histórico y se evita que una entrada parcial
+   dispare selección. En ausencia de coincidencia se conserva el valor manual. */
+function exactRMV1(value){
+ const key=String(value||'').replace(/\D/g,''); if(!key)return null;
+ return (DATA.profesionales||[]).find(p=>String(p.registroMunicipal||'').replace(/\D/g,'')===key)||null;
+}
+function bindRMV1(){
+ const f=(DATA.infoFields||[]).find(x=>typeof fieldMeta==='function'&&fieldMeta(x).isRegMun);if(!f)return;
+ const input=document.getElementById('info_'+f.key);if(!input||input.dataset.rmExactV1==='1')return;
+ input.dataset.rmExactV1='1';
+ input.addEventListener('input',ev=>{
+  ev.stopImmediatePropagation();
+  input.value=String(input.value||'').replace(/\D/g,'');
+  state.info[f.key]=input.value;
+  const p=exactRMV1(input.value);
+  const wrap=document.getElementById('rmLookupV13'),status=wrap?.querySelector('.rm-lookup-status-v13');
+  if(status)status.textContent=p?`Coincidencia exacta: ${p.nombre}`:'Sin coincidencia exacta. Puede continuar manualmente.';
+  if(typeof scheduleReportUpdate==='function')scheduleReportUpdate();
+ },true);
+ input.addEventListener('change',ev=>{
+  ev.stopImmediatePropagation();
+  const p=exactRMV1(input.value);
+  if(p && typeof setProfessionalFromRMV13==='function')setProfessionalFromRMV13(input.value,true);
+ },true);
+ input.addEventListener('blur',ev=>{
+  ev.stopImmediatePropagation();
+  const p=exactRMV1(input.value);
+  if(p && typeof setProfessionalFromRMV13==='function')setProfessionalFromRMV13(input.value,false);
+ },true);
+}
+
+/* 4. PLANOS APROBADOS para Ampliatorio/Modificatorio. */
+function projectDefV1(){try{return typeof infoValue==='function'?String(infoValue('PROYECTO DEFINITIVO')||''):''}catch(_e){return ''}}
+function ampModV1(){const v=norm(projectDefV1());return v.includes('AMPLIACION')||v.includes('AMPLIATORIO')||v.includes('MODIFICATORIO')||v.includes('MODIFICACION')}
+function ensurePlanosV1(){
+ if(!state.aprobatorio)state.aprobatorio={};
+ if(!state.aprobatorio.planosAprobadosV1)state.aprobatorio.planosAprobadosV1={licencia:false,resolucion:'',egob:'',fecha:'',fechaAprobacion:'',entidad:''};
+ return state.aprobatorio.planosAprobadosV1;
+}
+function planosHtmlV1(){
+ if(!ampModV1())return '';
+ const p=ensurePlanosV1();
+ return `<div id="planosAprobadosV1"><div class="section-title">Planos aprobados</div><div class="planos-aprobados-v1">
+ <label class="check-line"><input type="checkbox" id="planosLicenciaV1" ${p.licencia?'checked':''}> Cuenta con Licencia Urbanística</label>
+ ${p.licencia?`<div class="planos-grid-v1"><div><label>Resolución</label><input id="planosResolucionV1" value="${esc1(p.resolucion)}"></div><div><label>eGOB (opcional)</label><input id="planosEgobV1" value="${esc1(p.egob)}"></div><div><label>Fecha</label><input type="date" id="planosFechaV1" value="${esc1(p.fecha)}"></div></div>`:
+ `<div class="planos-grid-v1 two"><div><label>Fecha de aprobación</label><input type="date" id="planosFechaAprobacionV1" value="${esc1(p.fechaAprobacion)}"></div><div><label>Entidad</label><input id="planosEntidadV1" value="${esc1(p.entidad)}"></div></div>`}
+ </div></div>`;
+}
+function bindPlanosV1(){
+ const root=document.getElementById('planosAprobadosV1');if(!root)return;
+ const p=ensurePlanosV1(),sw=document.getElementById('planosLicenciaV1');
+ if(sw)sw.onchange=()=>{p.licencia=sw.checked;mountPlanosV1();refreshReportsV1()};
+ const map=[['planosResolucionV1','resolucion'],['planosEgobV1','egob'],['planosFechaV1','fecha'],['planosFechaAprobacionV1','fechaAprobacion'],['planosEntidadV1','entidad']];
+ map.forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.oninput=()=>{p[k]=el.value;if(k==='egob')p[k]=el.value=String(el.value).replace(/\D/g,'');refreshReportsV1()}});
+}
+function mountPlanosV1(){
+ const box=document.getElementById('aprobatorioForm');if(!box)return;
+ document.getElementById('planosAprobadosV1')?.remove();
+ if(!ampModV1())return;
+ const anchor=[...box.querySelectorAll('.section-title')].find(x=>/CONCLUSI[ÓO]N T[ÉE]CNICA/i.test(x.textContent||''));
+ if(anchor)anchor.insertAdjacentHTML('beforebegin',planosHtmlV1());else box.insertAdjacentHTML('beforeend',planosHtmlV1());
+ bindPlanosV1();
+}
+function planosConclusionV1(){
+ if(!ampModV1())return '';
+ const p=ensurePlanosV1();
+ if(p.licencia){
+  const r=String(p.resolucion||'').trim(),f=fmt1(p.fecha);
+  return (r&&f)?`El Proyecto cuenta con ${r} emitida con fecha ${f}`:'';
+ }
+ const f=fmt1(p.fechaAprobacion),e=String(p.entidad||'').trim();
+ return (f&&e)?`El Proyecto fue aprobado con fecha ${f} por ${e}`:'';
+}
+function injectPlanosConclusionV1(html){
+ const t=planosConclusionV1();if(!t)return String(html||'');
+ let s=String(html||'');
+ const marker=/<h2[^>]*>\s*(?:\d+\s*\.\s*)?Conclusi[oó]n t[ée]cnica\s*<\/h2>/i;
+ if(marker.test(s))return s.replace(marker,m=>`${m}<p class="planos-aprobados-report-v1">${esc1(t)}</p>`);
+ return s;
+}
+
+/* 5. Propuesta Arquitectónica:
+   Artículo/Norma + texto completo del requisito en la Tabla 2.
+   No Cumple sin observación escrita => "No Cumple". */
+function proposalRowsPatchV1(){
+ if(typeof combinedObsRows!=='function')return;
+ const base=combinedObsRows;
+ if(base.__allpaV1)return;
+ const wrapped=function(){
+  const rows=base.apply(this,arguments)||[];
+  return rows.map(o=>{
+   if(o?.source!=='prop_req')return o;
+   const obj=state.requisitosPropuestaV2?.[o.id]||state.requisitosPropuesta?.[o.id]||{};
+   const user=String(obj.observacion??o.correccion??'').trim();
+   const reqText=String(o.texto||'').trim();
+   const art=String(o.articulo||o.norma||'').trim();
+   return {...o,articulo:[art,reqText].filter(Boolean).join('. '),norma:[art,reqText].filter(Boolean).join('. '),observacion:user||'No Cumple',correccion:user||'No Cumple',texto:''};
+  });
+ };
+ wrapped.__allpaV1=true;combinedObsRows=wrapped;try{window.combinedObsRows=wrapped}catch(_e){}
+}
+function patchArticleCellV1(){
+ if(typeof articleCellForObsV68!=='function'||articleCellForObsV68.__allpaV1)return;
+ const base=articleCellForObsV68;
+ const wrapped=function(o){if(o?.source==='prop_req')return esc1(o.articulo||o.norma||'');return base.apply(this,arguments)};
+ wrapped.__allpaV1=true;articleCellForObsV68=wrapped;try{window.articleCellForObsV68=wrapped}catch(_e){}
+}
+function patchObsSpecificV1(){
+ if(typeof obsSpecificV55!=='function'||obsSpecificV55.__allpaV1)return;
+ const base=obsSpecificV55;
+ const wrapped=function(o){if(o?.source==='prop_req')return String(o.observacion||'').trim()||'No Cumple';return base.apply(this,arguments)};
+ wrapped.__allpaV1=true;obsSpecificV55=wrapped;try{window.obsSpecificV55=wrapped}catch(_e){}
+}
+
+function refreshReportsV1(){try{window.renderReport?.()}catch(_e){}try{window.renderPreview?.()}catch(_e){}}
+function postFormV1(){patchAnteLabelV1();bindRMV1();mountPlanosV1()}
+function installFormHookV1(){
+ if(typeof window.renderAprobatorioForm==='function'&&!window.renderAprobatorioForm.__allpaV1){
+  const base=window.renderAprobatorioForm;
+  const wrapped=function(){const out=base.apply(this,arguments);setTimeout(postFormV1,0);return out};wrapped.__allpaV1=true;
+  window.renderAprobatorioForm=wrapped;try{renderAprobatorioForm=wrapped}catch(_e){}
+ }
+ if(typeof window.renderInfoForm==='function'&&!window.renderInfoForm.__allpaV1){
+  const base=window.renderInfoForm;
+  const wrapped=function(){const out=base.apply(this,arguments);setTimeout(bindRMV1,0);return out};wrapped.__allpaV1=true;
+  window.renderInfoForm=wrapped;try{renderInfoForm=wrapped}catch(_e){}
+ }
+}
+
+/* Rutas de informe: se envuelven DESPUÉS de V26 para conservar su autoridad como base. */
+function installReportHookV1(){
+ const R=window.ReportStructuralV25F;if(!R||window.__ALLPA_NEXT_REPORT_V1__)return;
+ window.__ALLPA_NEXT_REPORT_V1__=true;
+ const aprBase=R.aprobatorio,obsBase=R.observaciones,renderBase=R.render;
+ const apr=function(){let s=aprBase();if(isOMV1())s=s.replace(/Resoluci[oó]n de Anteproyecto/gi,'Aprobación de Anteproyecto');return injectPlanosConclusionV1(s)};
+ const obs=function(){return obsBase()};
+ const render=function(){
+  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
+  try{if(typeof updateSideActions==='function')updateSideActions()}catch(_e){}
+  const t=String(state?.tipoInforme||'').trim();
+  let s=t==='Informe Técnico Aprobatorio'?apr():(t==='Informe con Observaciones'?obs():(t==='Informe de Desistimiento'?R.desistimiento():renderBase()));
+  const el=document.getElementById('report');
+  if(el){const a=t==='Informe Técnico Aprobatorio',d=t==='Informe de Desistimiento',o=t==='Informe con Observaciones';el.className='report '+(a?'report-aprobatorio':(d?'report-desistimiento report-observaciones':'report-observaciones'));document.body.classList.toggle('printing-observaciones',o||d);document.body.classList.toggle('printing-aprobatorio',a);el.innerHTML=s}
+  return s;
+ };
+ window.AllpaFunctionalV1=Object.freeze({version:VERSION,aprobatorio:apr,observaciones:obs,render,planosConclusion:planosConclusionV1,map:initMapV1});
+ window.renderInformeAprobatorio=apr;window.renderInformeObservaciones=obs;window.renderReport=render;
+ try{renderInformeAprobatorio=apr;renderInformeObservaciones=obs;renderReport=render}catch(_e){}
+}
+
+function installAllV1(){
+ proposalRowsPatchV1();patchArticleCellV1();patchObsSpecificV1();installFormHookV1();installReportHookV1();postFormV1();
+}
+document.addEventListener('input',e=>{
+ const f=(DATA.infoFields||[]).find(x=>typeof fieldMeta==='function'&&fieldMeta(x).isRegMun);
+ if(f&&e.target?.id==='info_'+f.key)return;
+ if(e.target?.id&&/^info_/.test(e.target.id))setTimeout(()=>{mountPlanosV1();patchAnteLabelV1()},40);
+},true);
+document.addEventListener('change',e=>{
+ if(e.target?.id&&/^info_/.test(e.target.id))setTimeout(()=>{mountPlanosV1();patchAnteLabelV1();refreshReportsV1()},40);
+},true);
+installAllV1();
+window.addEventListener('load',()=>{setTimeout(installAllV1,4300);setTimeout(installAllV1,5000)});
+})();
+</script>
+
+
+<script id="allpa-postv28-v1-1-textos-tecnicos">
+(function(){
+'use strict';
+/*
+ Post-V28 V1.1
+ El texto de referencia al acápite "Sustento técnico de las observaciones"
+ depende del mismo estado que controla "Mostrar Acapite de Textos Técnicos para el Informe".
+ Si el check está apagado, no debe quedar ni el acápite ni su texto introductorio/referencial.
+*/
+const VERSION='1.1.0-textos-tecnicos-conditional';
+
+function textosTecnicosActivosV11(){
+  return !!state?.mostrarTextosTecnicos;
+}
+
+function limpiarReferenciaTextosTecnicosV11(html){
+  let s=String(html||'');
+  if(textosTecnicosActivosV11()) return s;
+
+  /* Elimina párrafos completos que remitan al acápite de Sustento Técnico. */
+  s=s.replace(
+    /<p\b[^>]*>[\s\S]*?En\s+el\s+Ac[aá]pite\s+\d+\.\s*SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES[\s\S]*?puede\s+encontrar\s+el\s+detalle\s+de\s+las\s+observaciones\s+aqu[ií]\s+descritas\.?[\s\S]*?<\/p>/gi,
+    ''
+  );
+
+  /* Guardia para la misma frase si históricamente fue emitida sin <p>. */
+  s=s.replace(
+    /En\s+el\s+Ac[aá]pite\s+\d+\.\s*SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES\s+puede\s+encontrar\s+el\s+detalle\s+de\s+las\s+observaciones\s+aqu[ií]\s+descritas\.?/gi,
+    ''
+  );
+  return s;
+}
+
+function instalarV11(){
+  const F=window.AllpaFunctionalV1;
+  if(!F || window.__ALLPA_POSTV28_V11__) return;
+  window.__ALLPA_POSTV28_V11__=true;
+
+  const aprobBase=window.renderInformeAprobatorio;
+  const obsBase=window.renderInformeObservaciones;
+  const reportBase=window.renderReport;
+
+  const aprobatorio=function(){
+    return limpiarReferenciaTextosTecnicosV11(aprobBase.apply(this,arguments));
+  };
+  const observaciones=function(){
+    return limpiarReferenciaTextosTecnicosV11(obsBase.apply(this,arguments));
+  };
+  const render=function(){
+    const out=reportBase.apply(this,arguments);
+    if(textosTecnicosActivosV11()) return out;
+    const clean=limpiarReferenciaTextosTecnicosV11(out);
+    const el=document.getElementById('report');
+    if(el && el.innerHTML!==clean) el.innerHTML=clean;
+    return clean;
+  };
+
+  window.AllpaFunctionalV11=Object.freeze({
+    version:VERSION,
+    textosTecnicosActivos:textosTecnicosActivosV11,
+    limpiarReferencia:limpiarReferenciaTextosTecnicosV11
+  });
+
+  window.renderInformeAprobatorio=aprobatorio;
+  window.renderInformeObservaciones=observaciones;
+  window.renderReport=render;
+  try{
+    renderInformeAprobatorio=aprobatorio;
+    renderInformeObservaciones=observaciones;
+    renderReport=render;
+  }catch(_e){}
+}
+
+/* El check ya actualiza state.mostrarTextosTecnicos en el núcleo histórico.
+   Esta escucha únicamente fuerza la regeneración inmediata del informe. */
+document.addEventListener('change',function(ev){
+  const el=ev.target;
+  if(!el) return;
+  const txt=String(el.closest('label')?.textContent||'');
+  if(/Mostrar\s+Ac[aá]pite\s+de\s+Textos\s+T[ée]cnicos\s+para\s+el\s+Informe/i.test(txt)){
+    setTimeout(function(){
+      try{window.renderReport?.()}catch(_e){}
+      try{window.renderPreview?.()}catch(_e){}
+    },0);
+  }
+},true);
+
+instalarV11();
+window.addEventListener('load',()=>setTimeout(instalarV11,5100));
 })();
 </script>
 
