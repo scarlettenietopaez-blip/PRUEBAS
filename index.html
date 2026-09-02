@@ -5096,7 +5096,7 @@ function ensureAprobatorioData(){
  if(!state.aprobatorio.estudios) state.aprobatorio.estudios=[];
  if(!state.aprobatorio.conclusion) state.aprobatorio.conclusion=[];
 }
-function anteproyectoObligatorio(){ return numVal(infoValue('ALTURA EDIFICACIÓN'))>2 || numVal(infoValue('Área Bruta'))>400; }
+function anteproyectoObligatorio(){ return numVal(infoValue('ALTURA EDIFICACIÓN'))>3 || numVal(infoValue('Área Bruta'))>400; }
 function anteproyectoActivo(){ ensureAprobatorioData(); return !!state.aprobatorio.anteproyecto.activo; }
 function syncAnteproyectoAuto(){
  ensureAprobatorioData();
@@ -14671,7 +14671,7 @@ renderRequisitosForm = function(rebuild=true){
   if(!box) return;
 
   const reqs=DATA.requisitos.filter(shouldShowReq);
-  const cond=(numVal(infoValue('ALTURA EDIFICACIÓN'))>2 || numVal(infoValue('Área Bruta'))>400);
+  const cond=(numVal(infoValue('ALTURA EDIFICACIÓN'))>3 || numVal(infoValue('Área Bruta'))>400);
 
   let html=`<div class="field"><label class="check-line"><input type="checkbox" id="toggleComplementarios" ${state.mostrarComplementarios?'checked':''}> Mostrar requisitos complementarios cuando apliquen</label></div>`;
 
@@ -18681,7 +18681,7 @@ renderInformeAprobatorio=function(){
   const requiereFactibilidadesAnteproyectoV149Informe =
     typeof requiereFactibilidadesAnteproyectoV149==='function'
       ? requiereFactibilidadesAnteproyectoV149()
-      : (numVal(infoValue('ALTURA EDIFICACIÓN')) > 2 || numVal(infoValue('Área Bruta')) > 400);
+      : (numVal(infoValue('ALTURA EDIFICACIÓN')) >3 || numVal(infoValue('Área Bruta')) > 400);
   if(requiereFactibilidadesAnteproyectoV149Informe){
     html+=`<h2>${n++}. Factibilidades</h2>${A.factsReport()}`;
   }
@@ -21017,14 +21017,14 @@ window.addEventListener('load',()=>{
 
 
 <!-- V148: En Anteproyecto, la sección Factibilidades del informe aprobatorio
-     se muestra únicamente cuando ALTURA EDIFICACIÓN > 2 o Área Bruta > 400 m². -->
+     se muestra únicamente cuando ALTURA EDIFICACIÓN > 3 o Área Bruta > 400 m². -->
 
 
 <style>
 /* ==========================================================
    V149 SOBRE V148
    Anteproyecto: requisito condicional de factibilidades con
-   tabla visible únicamente cuando PISOS > 2 o ÁREA BRUTA > 400.
+   tabla visible únicamente cuando PISOS > 3 o ÁREA BRUTA > 400.
    ========================================================== */
 .req-fact-ante-v149 .req-table-v112{
   width:100%!important;
@@ -37262,7 +37262,7 @@ function renderObraMayor(rebuild=true){
   const box=document.getElementById('requisitosForm');
   if(!box)return;
   const reqs=(DATA.requisitos||[]).filter(typeof shouldShowReq==='function'?shouldShowReq:()=>true);
-  const cond=(numVal(infoValue('ALTURA EDIFICACIÓN'))>2||numVal(infoValue('Área Bruta'))>400);
+  const cond=(numVal(infoValue('ALTURA EDIFICACIÓN'))>3||numVal(infoValue('Área Bruta'))>400);
 
   let html=`<div class="field"><label class="check-line"><input type="checkbox" id="toggleComplementarios" ${state.mostrarComplementarios?'checked':''}> Mostrar requisitos complementarios cuando apliquen</label></div>`;
   const groups=[...new Set(reqs.map(r=>r.grupo))];
@@ -39213,6 +39213,14 @@ window.AllpaFunctionalV131=Object.freeze({
   version:'1.3.1-criterio-columnas-iguales',
   base:'1.3.0-clean-report-authority',
   change:'Tabla 2: Artículo/Norma y Aclaración con igual ancho'
+});
+</script>
+
+
+<script id="allpa-v1-3-2-meta">
+window.AllpaFunctionalV132=Object.freeze({
+  version:'1.3.2-anteproyecto-altura-mayor-3',
+  change:'Condición Anteproyecto: ALTURA EDIFICACIÓN > 3; Área Bruta > 400 m² se mantiene'
 });
 </script>
 
