@@ -39188,5 +39188,33 @@ window.addEventListener('load',()=>{
 })();
 </script>
 
+
+<style id="allpa-v1-3-1-criterio-columnas">
+/* V1.3.1 — Tabla 2 / Criterio Técnico:
+   NRO. conserva ancho reducido; ARTÍCULO/NORMA y ACLARACIÓN comparten
+   exactamente el espacio restante (50% / 50%). */
+.report-observaciones table.criterio-simple-v55{
+  table-layout:fixed;
+  width:100%;
+}
+.report-observaciones table.criterio-simple-v55 th:nth-child(1),
+.report-observaciones table.criterio-simple-v55 td:nth-child(1){
+  width:7%;
+}
+.report-observaciones table.criterio-simple-v55 th:nth-child(2),
+.report-observaciones table.criterio-simple-v55 td:nth-child(2),
+.report-observaciones table.criterio-simple-v55 th:nth-child(3),
+.report-observaciones table.criterio-simple-v55 td:nth-child(3){
+  width:46.5%;
+}
+</style>
+<script id="allpa-v1-3-1-meta">
+window.AllpaFunctionalV131=Object.freeze({
+  version:'1.3.1-criterio-columnas-iguales',
+  base:'1.3.0-clean-report-authority',
+  change:'Tabla 2: Artículo/Norma y Aclaración con igual ancho'
+});
+</script>
+
 </body>
 </html>
