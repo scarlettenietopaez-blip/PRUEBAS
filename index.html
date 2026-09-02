@@ -39499,7 +39499,279 @@ window.AllpaFunctionalV127=Object.freeze({
 });
 
 install127();
-window.addEventListener('load',()=>{setTimeout(install127,8600);setTimeout(install127,9200)});
+/* V1.2.8: reinstalaciones tardías V1.2.7 retiradas; autoridad final V1.2.8. */
+})();
+</script>
+
+
+<script id="allpa-postv28-v1-2-8-sustento-fix">
+(function(){
+'use strict';
+const VERSION='1.2.8-sustento-final-normalized';
+const REF128='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
+
+function norm128(v){
+  return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+}
+function esc128(v){
+  return typeof esc==='function'?esc(String(v??'')):String(v??'');
+}
+
+/* =========================================================
+   A. FUENTE ÚNICA DEL SUSTENTO
+   - Observaciones normales: artículo + texto + imágenes.
+   - Propuesta Arquitectónica: NO repite el texto del requisito;
+     solo incorpora las imágenes que el usuario agregó.
+   ========================================================= */
+function images128(o){
+  try{
+    if(typeof obsImagesV113==='function'){
+      const a=obsImagesV113(o)||[];
+      if(a.length)return [...new Set(a.filter(Boolean))];
+    }
+  }catch(_e){}
+  const arr=Array.isArray(o?.imagenes)?o.imagenes:[];
+  const one=String(o?.imagen||'').trim();
+  return [...new Set([...arr,one].filter(Boolean))];
+}
+function sustentoRows128(){
+  const source=typeof combinedObsRows==='function'?(combinedObsRows()||[]):[];
+  const out=[];
+  source.forEach((o)=>{
+    const imgs=images128(o);
+    if(o?.source==='prop_req'){
+      /* El requisito ya está completo en Tabla 2.
+         Aquí únicamente se transportan sus imágenes. */
+      if(!imgs.length)return;
+      out.push({
+        obs:o,
+        articulo:o.articulo||o.norma||'',
+        texto:'',
+        imagenes:imgs,
+        proposalImageOnly:true
+      });
+      return;
+    }
+    const texto=typeof formatArticleTextV55==='function'
+      ? formatArticleTextV55(o?.texto||'')
+      : String(o?.texto||'');
+    if(!String(texto||'').trim()&&!imgs.length)return;
+    out.push({
+      obs:o,
+      articulo:o.articulo||o.norma||'',
+      texto,
+      imagenes:imgs,
+      proposalImageOnly:false
+    });
+  });
+  return out.map((r,i)=>({...r,num:i+1}));
+}
+function sustentoHtml128(){
+  if(!state?.mostrarTextosTecnicos)return '';
+  const rows=sustentoRows128();
+  if(!rows.length){
+    return `<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>
+      <p class="sustento-v128-empty">No se registran textos técnicos o imágenes adicionales para este informe.</p>`;
+  }
+  return `<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2>
+    <table class="tech-note-table">
+      <thead><tr><th>Nro.</th><th>Texto del artículo</th></tr></thead>
+      <tbody>${rows.map(r=>{
+        const art=typeof articleCellForObsV68==='function'
+          ? articleCellForObsV68(r.obs)
+          : esc128(r.articulo);
+        const body=r.proposalImageOnly
+          ? `<strong>${art}</strong>`
+          : `<strong>${art}</strong>${String(r.texto||'').trim()?`<br><div class="article-text-v55">${esc128(r.texto)}</div>`:''}`;
+        const imgs=r.imagenes.length
+          ? `<tr class="sustento-img-row-v55"><td colspan="2">
+               <div class="sustento-img-gallery-v113">
+                 ${r.imagenes.map(src=>`<img class="sustento-img-v55" src="${esc128(src)}">`).join('')}
+               </div>
+             </td></tr>`
+          : '';
+        return `<tr><td>${r.num}</td><td>${body}</td></tr>${imgs}`;
+      }).join('')}</tbody>
+    </table>`;
+}
+
+/* =========================================================
+   B. NORMALIZACIÓN TOTAL DEL HTML FINAL
+   Primero elimina TODAS las tablas/encabezados históricos del Sustento.
+   Luego inserta UNA sola copia antes de Conclusiones.
+   ========================================================= */
+function removeOldSustento128(root){
+  /* 1. Todas las tablas técnicas históricas: solo pertenecen a Sustento. */
+  root.querySelectorAll('table.tech-note-table').forEach(t=>t.remove());
+
+  /* 2. Encabezados del Sustento en cualquier posición/nivel. */
+  [...root.querySelectorAll('h1,h2,h3,h4')].forEach(h=>{
+    if(norm128(h.textContent).includes('SUSTENTO TECNICO DE LAS OBSERVACIONES')){
+      const prev=h.previousElementSibling;
+      const next=h.nextElementSibling;
+      h.remove();
+      if(next && next.matches('.sustento-v126-empty,.sustento-v127-empty,.sustento-v128-empty'))next.remove();
+      if(prev && prev.matches('.ref-sustento-v12,.obs-summary-reference-v147'))prev.remove();
+    }
+  });
+
+  /* 3. Mensajes residuales de correcciones anteriores. */
+  root.querySelectorAll('.sustento-v126-empty,.sustento-v127-empty,.sustento-v128-empty').forEach(x=>x.remove());
+}
+function removeReferences128(root){
+  root.querySelectorAll('.ref-sustento-v12,.obs-summary-reference-v147').forEach(x=>x.remove());
+  [...root.querySelectorAll('p')].forEach(p=>{
+    if(/En\s+el\s+Ac[aá]pite\s+4\.\s*SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES/i.test(p.textContent||'')){
+      p.remove();
+    }
+  });
+}
+function findSection2Table128(root){
+  const heads=[...root.querySelectorAll('h1,h2,h3,h4')];
+  const head=heads.find(h=>{
+    const n=norm128(h.textContent);
+    return n.includes('CRITERIO TECNICO')||n.includes('RESUMEN DE OBSERVACIONES');
+  });
+  if(!head)return null;
+
+  let node=head.nextElementSibling;
+  while(node){
+    if(/^H[1-4]$/.test(node.tagName))break;
+    if(node.tagName==='TABLE')return node;
+    const nested=node.querySelector?.('table');
+    if(nested)return nested;
+    node=node.nextElementSibling;
+  }
+  return null;
+}
+function conclusionHeading128(root){
+  return [...root.querySelectorAll('h1,h2,h3,h4')].find(h=>norm128(h.textContent).includes('CONCLUSIONES'))||null;
+}
+function normalizeReport128(html){
+  const host=document.createElement('div');
+  host.innerHTML=String(html||'');
+
+  removeOldSustento128(host);
+  removeReferences128(host);
+
+  const on=!!state?.mostrarTextosTecnicos;
+  const concl=conclusionHeading128(host);
+
+  if(concl){
+    concl.textContent=(on?'5. ':'4. ')+String(concl.textContent||'').replace(/^\s*\d+\s*\.\s*/,'').trim();
+  }
+
+  if(on){
+    /* Texto de referencia exactamente después de la tabla de Sección 2. */
+    const table2=findSection2Table128(host);
+    if(table2){
+      const p=document.createElement('p');
+      p.className='ref-sustento-v12';
+      p.textContent=REF128;
+      table2.insertAdjacentElement('afterend',p);
+    }
+
+    /* Una única copia del Acápite 4. */
+    const holder=document.createElement('div');
+    holder.innerHTML=sustentoHtml128();
+    const nodes=[...holder.childNodes];
+    if(concl){
+      nodes.forEach(n=>concl.parentNode.insertBefore(n,concl));
+    }else{
+      nodes.forEach(n=>host.appendChild(n));
+    }
+  }
+
+  return host.innerHTML;
+}
+
+/* =========================================================
+   C. RUTA FINAL DEL INFORME DE OBSERVACIONES
+   ========================================================= */
+function renderObs128(){
+  const base=window.ReportStructuralV25F?.observaciones?.()||'';
+  return normalizeReport128(base);
+}
+function render128(){
+  const t=String(state?.tipoInforme||'').trim();
+
+  if(t!=='Informe con Observaciones'){
+    return window.AllpaFunctionalV125?.render?.() ?? '';
+  }
+
+  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
+  try{if(typeof updateSideActions==='function')updateSideActions()}catch(_e){}
+
+  const s=renderObs128();
+  const el=document.getElementById('report');
+  if(el){
+    el.className='report report-observaciones';
+    document.body.classList.add('printing-observaciones');
+    document.body.classList.remove('printing-aprobatorio');
+    el.innerHTML=s;
+  }
+  return s;
+}
+
+/* =========================================================
+   D. GUARDIA PARA PDF / PAGINADOR
+   Si una versión histórica vuelve a introducir un segundo Sustento
+   durante la paginación, se elimina cualquier bloque posterior al primero.
+   ========================================================= */
+function cleanPrintPages128(root){
+  if(!root)return;
+  const heads=[...root.querySelectorAll('h1,h2,h3,h4')].filter(h=>
+    norm128(h.textContent).includes('SUSTENTO TECNICO DE LAS OBSERVACIONES')
+  );
+  if(heads.length<=1)return;
+
+  heads.slice(1).forEach(h=>{
+    let n=h.nextElementSibling;
+    h.remove();
+    while(n){
+      const next=n.nextElementSibling;
+      if(n.matches('table.tech-note-table,.sustento-v126-empty,.sustento-v127-empty,.sustento-v128-empty')){
+        n.remove();
+      }else{
+        break;
+      }
+      n=next;
+    }
+  });
+}
+function installPrintGuard128(){
+  if(typeof window.buildPagesV2!=='function'||window.buildPagesV2.__v128)return;
+  const base=window.buildPagesV2;
+  const wrap=async function(){
+    const root=await base.apply(this,arguments);
+    cleanPrintPages128(root);
+    return root;
+  };
+  wrap.__v128=true;
+  window.buildPagesV2=wrap;
+}
+
+function install128(){
+  window.renderInformeObservaciones=renderObs128;
+  window.renderReport=render128;
+  try{
+    renderInformeObservaciones=renderObs128;
+    renderReport=render128;
+  }catch(_e){}
+  installPrintGuard128();
+}
+window.AllpaFunctionalV128=Object.freeze({
+  version:VERSION,
+  rows:sustentoRows128,
+  html:sustentoHtml128,
+  normalize:normalizeReport128,
+  observaciones:renderObs128,
+  render:render128,
+  cleanPrintPages:cleanPrintPages128,
+  install:install128
+});
+install128();
+window.addEventListener('load',()=>{setTimeout(install128,9300);setTimeout(install128,10000)});
 })();
 </script>
 
