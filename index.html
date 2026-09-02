@@ -39771,7 +39771,230 @@ window.AllpaFunctionalV128=Object.freeze({
   install:install128
 });
 install128();
-window.addEventListener('load',()=>{setTimeout(install128,9300);setTimeout(install128,10000)});
+/* V1.2.9: reinstalaciones tardías V1.2.8 retiradas; autoridad final V1.2.9. */
+})();
+</script>
+
+
+<style id="allpa-postv28-v1-2-9-css">
+#report .sustento-section-v129{display:block}
+@media print{
+  #report .sustento-section-v129,
+  .allpa-print-page-content-v2 .sustento-section-v129{
+    break-before:auto;
+  }
+  #report .sustento-section-v129 > h2,
+  .allpa-print-page-content-v2 .sustento-section-v129 > h2{
+    break-after:avoid;
+    page-break-after:avoid;
+  }
+}
+</style>
+<script id="allpa-postv28-v1-2-9-sustento-dom-authority">
+(function(){
+'use strict';
+const VERSION='1.2.9-sustento-dom-authority';
+const REF129='En el Acápite 4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES puede encontrar el detalle de las observaciones aquí descritas.';
+let busy129=false;
+
+function norm129(v){
+  return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+}
+function isSustentoHeading129(el){
+  return !!el && /^H[1-4]$/.test(el.tagName) &&
+    norm129(el.textContent).includes('SUSTENTO TECNICO DE LAS OBSERVACIONES');
+}
+function isConclusionHeading129(el){
+  return !!el && /^H[1-4]$/.test(el.tagName) &&
+    norm129(el.textContent).includes('CONCLUSIONES');
+}
+function isSection2Heading129(el){
+  if(!el || !/^H[1-4]$/.test(el.tagName))return false;
+  const n=norm129(el.textContent);
+  return n.includes('CRITERIO TECNICO')||n.includes('RESUMEN DE OBSERVACIONES');
+}
+
+/* Elimina cualquier versión anterior del Sustento, incluso si fue insertada
+   después de la firma por una ruta asíncrona histórica. */
+function purgeSustento129(root){
+  if(!root)return;
+
+  root.querySelectorAll('.sustento-section-v129').forEach(x=>x.remove());
+  root.querySelectorAll('table.tech-note-table').forEach(x=>x.remove());
+  root.querySelectorAll('.sustento-v126-empty,.sustento-v127-empty,.sustento-v128-empty').forEach(x=>x.remove());
+
+  [...root.querySelectorAll('h1,h2,h3,h4')].forEach(h=>{
+    if(!isSustentoHeading129(h))return;
+    let n=h.nextElementSibling;
+    h.remove();
+    while(n){
+      const next=n.nextElementSibling;
+      if(n.matches('table.tech-note-table,.sustento-v126-empty,.sustento-v127-empty,.sustento-v128-empty')){
+        n.remove();
+      }else if(n.tagName==='P' && /textos\s+t[ée]cnicos|propuesta\s+arquitect[oó]nica/i.test(n.textContent||'')){
+        n.remove();
+      }else{
+        break;
+      }
+      n=next;
+    }
+  });
+}
+function purgeReferences129(root){
+  if(!root)return;
+  root.querySelectorAll('.ref-sustento-v12,.obs-summary-reference-v147').forEach(x=>x.remove());
+  [...root.querySelectorAll('p')].forEach(p=>{
+    if(/En\s+el\s+Ac[aá]pite\s+4\.\s*SUSTENTO\s+T[ÉE]CNICO\s+DE\s+LAS\s+OBSERVACIONES/i.test(p.textContent||''))p.remove();
+  });
+}
+function section2Table129(root){
+  const head=[...root.querySelectorAll('h1,h2,h3,h4')].find(isSection2Heading129);
+  if(!head)return null;
+  let n=head.nextElementSibling;
+  while(n){
+    if(/^H[1-4]$/.test(n.tagName))break;
+    if(n.tagName==='TABLE')return n;
+    const t=n.querySelector?.('table');
+    if(t)return t;
+    n=n.nextElementSibling;
+  }
+  return null;
+}
+function conclusion129(root){
+  return [...root.querySelectorAll('h1,h2,h3,h4')].find(isConclusionHeading129)||null;
+}
+function canonicalSection129(){
+  const holder=document.createElement('div');
+  holder.className='sustento-section-v129';
+
+  let html='';
+  try{html=window.AllpaFunctionalV128?.html?.()||''}catch(_e){}
+  if(!String(html).trim()){
+    html='<h2>4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES</h2><p class="sustento-v128-empty">No se registran textos técnicos o imágenes adicionales para este informe.</p>';
+  }
+  holder.innerHTML=html;
+
+  const h=holder.querySelector('h1,h2,h3,h4');
+  if(h)h.textContent='4. SUSTENTO TÉCNICO DE LAS OBSERVACIONES';
+  return holder;
+}
+function normalizeDOM129(root){
+  if(!root || busy129)return;
+  if(String(state?.tipoInforme||'').trim()!=='Informe con Observaciones')return;
+
+  busy129=true;
+  try{
+    purgeSustento129(root);
+    purgeReferences129(root);
+
+    const on=!!state?.mostrarTextosTecnicos;
+    const concl=conclusion129(root);
+    if(concl){
+      concl.textContent=(on?'5. ':'4. ')+String(concl.textContent||'').replace(/^\s*\d+\s*\.\s*/,'').trim();
+    }
+
+    if(!on)return;
+
+    /* 1) referencia justo debajo de la tabla de la sección 2 */
+    const t2=section2Table129(root);
+    if(t2){
+      const p=document.createElement('p');
+      p.className='ref-sustento-v12';
+      p.textContent=REF129;
+      t2.insertAdjacentElement('afterend',p);
+    }
+
+    /* 2) UNA sola sección de Sustento, inmediatamente antes de Conclusiones */
+    const sec=canonicalSection129();
+    if(concl)concl.parentNode.insertBefore(sec,concl);
+    else root.appendChild(sec);
+  }finally{
+    busy129=false;
+  }
+}
+function normalizeSoon129(){
+  clearTimeout(window.__allpaSustento129Timer);
+  window.__allpaSustento129Timer=setTimeout(()=>{
+    normalizeDOM129(document.getElementById('report'));
+  },20);
+}
+
+/* Render final: usamos V1.2.8 como base y normalizamos el DOM REAL, no solo
+   una cadena temporal. Esto captura cualquier inserción tardía. */
+function renderObs129(){
+  const html=window.AllpaFunctionalV128?.observaciones?.()||'';
+  const host=document.createElement('div');
+  host.innerHTML=html;
+  normalizeDOM129(host);
+  return host.innerHTML;
+}
+function render129(){
+  const t=String(state?.tipoInforme||'').trim();
+  if(t!=='Informe con Observaciones'){
+    return window.AllpaFunctionalV125?.render?.() ?? '';
+  }
+
+  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
+  try{if(typeof updateSideActions==='function')updateSideActions()}catch(_e){}
+
+  const s=renderObs129();
+  const el=document.getElementById('report');
+  if(el){
+    el.className='report report-observaciones';
+    document.body.classList.add('printing-observaciones');
+    document.body.classList.remove('printing-aprobatorio');
+    el.innerHTML=s;
+    normalizeDOM129(el);
+  }
+  return el?.innerHTML||s;
+}
+
+/* Observador: si cualquier parche histórico vuelve a agregar un Sustento
+   después de la firma, se normaliza nuevamente y queda una sola copia. */
+const mo129=new MutationObserver(()=>{
+  if(busy129)return;
+  normalizeSoon129();
+});
+function observe129(){
+  const report=document.getElementById('report');
+  if(!report)return;
+  try{mo129.disconnect()}catch(_e){}
+  try{mo129.observe(report,{childList:true,subtree:true})}catch(_e){}
+  normalizeSoon129();
+}
+
+/* El paginador siempre recibe primero un #report ya normalizado. */
+function installPrint129(){
+  if(typeof window.buildPagesV2!=='function'||window.buildPagesV2.__v129)return;
+  const base=window.buildPagesV2;
+  const wrap=async function(){
+    normalizeDOM129(document.getElementById('report'));
+    const root=await base.apply(this,arguments);
+    return root;
+  };
+  wrap.__v129=true;
+  window.buildPagesV2=wrap;
+}
+function install129(){
+  window.renderInformeObservaciones=renderObs129;
+  window.renderReport=render129;
+  try{
+    renderInformeObservaciones=renderObs129;
+    renderReport=render129;
+  }catch(_e){}
+  installPrint129();
+  observe129();
+}
+window.AllpaFunctionalV129=Object.freeze({
+  version:VERSION,
+  normalizeDOM:normalizeDOM129,
+  observaciones:renderObs129,
+  render:render129,
+  install:install129
+});
+
+install129();
+window.addEventListener('load',()=>{setTimeout(install129,10100);setTimeout(install129,10800)});
 })();
 </script>
 
