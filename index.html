@@ -40123,5 +40123,156 @@ window.addEventListener('load',function(){setTimeout(mount,400);});
 })();
 </script>
 
+
+
+<!-- ==========================================================
+     ALLPA · COMPROBACIÓN SUPABASE V2
+     Corrección visual: barra amarilla visible en la interfaz V131.
+     No agrega escrituras ni numeración.
+     ========================================================== -->
+<style id="phdu-check-bar-v2-style">
+#phduCheckBarV2{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  width:100%;
+  margin:10px 0 12px;
+  padding:10px 13px;
+  border:1px solid #e6bf55;
+  border-left:5px solid #d69a00;
+  border-radius:12px;
+  background:#fff7d6;
+  color:#5f4700;
+  box-shadow:0 5px 14px rgba(96,72,0,.09);
+  box-sizing:border-box;
+}
+#phduCheckBarV2 .phdu-check-bar-copy-v2{
+  min-width:0;
+  flex:1 1 auto;
+}
+#phduCheckBarV2 .phdu-check-bar-title-v2{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:0 0 2px;
+  color:#5c4300;
+  font-size:11px;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.15px;
+}
+#phduCheckBarV2 .phdu-check-bar-title-v2 .dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#d69a00;
+  flex:0 0 auto;
+}
+#phduCheckBarV2 .phdu-check-bar-text-v2{
+  font-size:10px;
+  line-height:1.35;
+  color:#715600;
+}
+#phduCheckBarV2 .phdu-check-bar-actions-v2{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex:0 0 auto;
+}
+#phduCheckBarV2 button{
+  min-height:34px!important;
+  padding:7px 11px!important;
+  border-radius:9px!important;
+  font-size:10px!important;
+  white-space:nowrap;
+}
+#phduCheckBarV2 .phdu-open-v2{
+  background:#0d4f77!important;
+  color:#fff!important;
+}
+#phduCheckBarV2 .phdu-safe-v2{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  padding:4px 8px;
+  border:1px solid #e6c567;
+  border-radius:999px;
+  background:#fffdf2;
+  color:#725600;
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+body.project-home-open-v130 #phduCheckBarV2{
+  display:none!important;
+}
+/* La tarjeta V1 quedó dentro de un carrusel que V130/V131 fuerza a dos tarjetas.
+   Se oculta para evitar una tercera tarjeta fantasma; el modal y su lógica siguen activos. */
+#phduCheckCardV1{display:none!important;}
+@media(max-width:760px){
+  #phduCheckBarV2{align-items:stretch;flex-direction:column;}
+  #phduCheckBarV2 .phdu-check-bar-actions-v2{justify-content:flex-start;flex-wrap:wrap;}
+}
+</style>
+<script id="phdu-check-bar-v2-script">
+(function(){
+  'use strict';
+  function mountPhduCheckBarV2(){
+    if(document.getElementById('phduCheckBarV2')) return;
+    const main=document.querySelector('main');
+    if(!main) return;
+
+    const bar=document.createElement('div');
+    bar.id='phduCheckBarV2';
+    bar.className='no-print';
+    bar.innerHTML=`
+      <div class="phdu-check-bar-copy-v2">
+        <div class="phdu-check-bar-title-v2"><span class="dot"></span>Comprobación Supabase</div>
+        <div class="phdu-check-bar-text-v2">Modo de prueba: autentica el usuario PHDU y construye el payload localmente. No guarda, no numera y no toca QGIS.</div>
+      </div>
+      <div class="phdu-check-bar-actions-v2">
+        <span class="phdu-safe-v2">Modo seguro · no numera</span>
+        <button type="button" class="phdu-open-v2">Abrir comprobación</button>
+      </div>`;
+
+    const btn=bar.querySelector('.phdu-open-v2');
+    btn?.addEventListener('click',function(){
+      if(window.AllpaSupabaseCheckV1 && typeof window.AllpaSupabaseCheckV1.open==='function'){
+        window.AllpaSupabaseCheckV1.open();
+      }else{
+        alert('El módulo de comprobación todavía no terminó de cargar. Intente nuevamente en unos segundos.');
+      }
+    });
+
+    const msg=document.getElementById('msg');
+    if(msg && msg.parentElement===main){
+      msg.insertAdjacentElement('afterend',bar);
+    }else{
+      const grid=main.querySelector('.grid');
+      if(grid) main.insertBefore(bar,grid);
+      else main.prepend(bar);
+    }
+  }
+
+  function remountPhduCheckBarV2(){
+    const bar=document.getElementById('phduCheckBarV2');
+    if(bar && !bar.isConnected) bar.remove();
+    mountPhduCheckBarV2();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',mountPhduCheckBarV2,{once:true});
+  }else{
+    mountPhduCheckBarV2();
+  }
+  window.addEventListener('load',function(){
+    setTimeout(remountPhduCheckBarV2,300);
+    setTimeout(remountPhduCheckBarV2,1000);
+    setTimeout(remountPhduCheckBarV2,2200);
+  });
+})();
+</script>
 </body>
 </html>
