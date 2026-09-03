@@ -39619,7 +39619,7 @@ window.AllpaFuenteResolucionesOMV1=Object.freeze({
 (function(){
 'use strict';
 
-const VERSION='1.0.0-comprobacion-sin-numerar';
+const VERSION='1.1.0-comprobacion-sin-numerar-seguro';
 const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
 
@@ -39656,11 +39656,64 @@ function numericString(v){
   if(neg) s='-'+s;
   return s;
 }
-function integerString(v){
+function strictIntegerString(v){
   const n=numericString(v);
   if(!n) return '';
-  const x=parseInt(n,10);
-  return Number.isFinite(x)?String(x):'';
+  const x=Number(n);
+  return Number.isFinite(x) && Number.isInteger(x) ? String(x) : '';
+}
+function isStrictIntegerValue(v){
+  const n=numericString(v);
+  if(!n) return false;
+  const x=Number(n);
+  return Number.isFinite(x) && Number.isInteger(x);
+}
+function cleanConclusionRowsForPayload(){
+  return conclusionRows().map(function(r){
+    return {
+      descripcion:String(r?.descripcion||'').trim(),
+      cantidad:String(r?.cantidad||'').trim(),
+      unidad:String(r?.unidad||'').trim(),
+      levels:Array.isArray(r?.levels)?clone(r.levels):[],
+      intervention:String(r?.intervention||r?.tipoAreaV13||'').trim(),
+      role:String(r?.role||r?._ctRoleV9||r?._roleV108||'').trim()
+    };
+  }).filter(r=>r.descripcion||r.cantidad||r.unidad||r.levels.length);
+}
+function sanitizeSnapshotForSupabase(source){
+  const stats={binarios_omitidos:0,caracteres_base64_omitidos:0};
+  function walk(node){
+    if(Array.isArray(node)) return node.map(walk);
+    if(node && typeof node==='object'){
+      const out={};
+      Object.entries(node).forEach(function([k,v]){
+        if(typeof v==='string' && /^data:[^;]+;base64,/i.test(v)){
+          stats.binarios_omitidos++;
+          stats.caracteres_base64_omitidos+=v.length;
+          out[k]=null;
+          out[k+'_omitido_phdu']=true;
+          return;
+        }
+        out[k]=walk(v);
+      });
+      return out;
+    }
+    if(typeof node==='string' && /^data:[^;]+;base64,/i.test(node)){
+      stats.binarios_omitidos++;
+      stats.caracteres_base64_omitidos+=node.length;
+      return '[BINARIO OMITIDO DEL SNAPSHOT PHDU]';
+    }
+    return node;
+  }
+  const value=walk(clone(source));
+  if(value && typeof value==='object' && !Array.isArray(value)){
+    value.__phdu_snapshot={
+      version:'sin-binarios-v1',
+      binarios_omitidos:stats.binarios_omitidos,
+      caracteres_base64_omitidos:stats.caracteres_base64_omitidos
+    };
+  }
+  return {value,stats};
 }
 function info(label){
   try{if(typeof window.infoValue==='function') return String(window.infoValue(label)||'').trim();}catch(_e){}
@@ -39759,7 +39812,8 @@ function buildPayload(){
     ? [String(state.apoderado.nombre||'').trim(),String(state.apoderado.ci||'').trim()].filter(Boolean).join(' · ')
     : '';
 
-  const snapshot=clone(state);
+  const snapshotResult=sanitizeSnapshotForSupabase(state);
+  const snapshot=snapshotResult.value;
   const payload={
     id_informe:ensureInformeId(),
     tipo_tramite:projectType(),
@@ -39792,9 +39846,9 @@ function buildPayload(){
     area_predio:numericString(areaPredio),
     area_construccion:numericString(areaConstruccion),
     area_ampliacion_modificacion:numericString(areaAmpMod),
-    pisos:integerString(pisos),
-    unidades_habitacionales:integerString(hab),
-    unidades_comerciales:integerString(com),
+    pisos:strictIntegerString(pisos),
+    unidades_habitacionales:strictIntegerString(hab),
+    unidades_comerciales:strictIntegerString(com),
     cos_pb:numericString(cosPb),
     cos_total:numericString(cosTotal),
 
@@ -39811,11 +39865,11 @@ function buildPayload(){
     estructural_calculista:String(est.calculista||'').trim(),
     estructural_senescyt:String(est.senescyt||'').trim(),
 
-    conclusion_tecnica:clone(state?.aprobatorio?.conclusion||[]),
+    conclusion_tecnica:cleanConclusionRowsForPayload(),
     datos_informe:snapshot
   };
 
-  return {payload,rows,grav,est};
+  return {payload,rows,grav,est,integerRaw:{pisos,hab,com},snapshotStats:snapshotResult.stats};
 }
 function validate(payload){
   const bad=[],warn=[],good=[];
@@ -39849,7 +39903,16 @@ function validate(payload){
   }
   if(!Array.isArray(payload.conclusion_tecnica)||!payload.conclusion_tecnica.length) warn.push('La tabla de Conclusión Técnica está vacía.');
   if(!payload.area_construccion) warn.push('No se pudo identificar el Área Bruta total de construcción.');
-  if(!payload.pisos) warn.push('No se pudo identificar el Número de pisos.');
+
+  const rawPisos=conclusionAmount(['NUMERO','PISOS']) || conclusionAmount(['NÚMERO','PISOS']) || info('ALTURA EDIFICACIÓN');
+  const rawHab=conclusionAmount(['UNIDADES','HABITACIONALES']);
+  const rawCom=conclusionAmount(['UNIDADES','COMERCIALES']);
+
+  if(rawPisos && !isStrictIntegerValue(rawPisos)) bad.push('Número de pisos contiene un valor no entero: “'+rawPisos+'”. No se truncará automáticamente.');
+  else if(!payload.pisos) warn.push('No se pudo identificar el Número de pisos.');
+
+  if(rawHab && !isStrictIntegerValue(rawHab)) bad.push('Unidades Habitacionales contiene un valor no entero: “'+rawHab+'”. Revise la Conclusión Técnica.');
+  if(rawCom && !isStrictIntegerValue(rawCom)) bad.push('Unidades Comerciales contiene un valor no entero: “'+rawCom+'”. Revise la Conclusión Técnica.');
 
   if(!currentProfile) bad.push('No hay sesión Supabase comprobada.');
   else if(!currentProfile.activo) bad.push('El perfil PHDU está inactivo.');
@@ -39941,8 +40004,12 @@ function displayPayload(p){
   if(val) val.innerHTML=validationHtml(validations);
 
   const snapshotSize=new Blob([JSON.stringify(p.datos_informe||{})]).size;
+  const snapshotMeta=p?.datos_informe?.__phdu_snapshot||{};
   const size=document.getElementById('phduSnapshotSizeV1');
-  if(size) size.textContent=(snapshotSize/1024).toFixed(1)+' KB';
+  if(size){
+    const omitted=Number(snapshotMeta.binarios_omitidos||0);
+    size.textContent=(snapshotSize/1024).toFixed(1)+' KB'+(omitted?' · '+omitted+' binario(s) omitido(s)':'');
+  }
 
   const display=clone(p);
   display.datos_informe='[FOTOGRAFÍA COMPLETA DEL STATE · '+(snapshotSize/1024).toFixed(1)+' KB · ocultada aquí para facilitar la revisión]';
@@ -40032,7 +40099,7 @@ function mount(){
       card.id='phduCheckCardV1';
       card.className='card no-print phdu-check-card-v1';
       card.innerHTML=
-        '<span class="phdu-check-badge-v1">Modo seguro · no numera</span>'
+        '<span class="phdu-check-badge-v1">Comprobar antes de finalizar</span>'
        +'<h2>Comprobación Supabase</h2>'
        +'<div id="phduSideProfileV1" class="mini">Sin sesión Supabase</div>'
        +'<div data-phdu-status-v1 class="phdu-check-status-v1 info">Solo autentica, lee su perfil y prepara los datos localmente.</div>'
@@ -40048,11 +40115,11 @@ function mount(){
     overlay.innerHTML=`
       <div class="phdu-check-modal-v1" role="dialog" aria-modal="true" aria-label="Comprobación Supabase sin numerar">
         <div class="phdu-check-head-v1">
-          <div><h2>ALLPA · COMPROBACIÓN SUPABASE</h2><div style="font-size:11px;color:#dbe7f2;margin-top:3px">NO GUARDA · NO LLAMA RPC · NO ASIGNA NÚMEROS · NO TOCA QGIS</div></div>
+          <div><h2>ALLPA · COMPROBACIÓN SUPABASE</h2><div style="font-size:11px;color:#dbe7f2;margin-top:3px">COMPROBAR NO NUMERA · FINALIZAR SÍ ASIGNA NÚMERO OFICIAL · QGIS AÚN NO SE EJECUTA</div></div>
           <button type="button" onclick="window.AllpaSupabaseCheckV1.close()">Cerrar ×</button>
         </div>
         <div class="phdu-check-body-v1">
-          <div class="phdu-check-note-v1"><strong>Modo de comprobación:</strong> Supabase se utiliza únicamente para autenticar al usuario y leer su propia fila de <code>phdu_profiles</code>. El informe se transforma a un payload <strong>solo en este navegador</strong>. Esta versión no contiene ninguna llamada a <code>phdu_finalizar_informe</code> ni a la función de numeración.</div>
+          <div class="phdu-check-note-v1"><strong>Flujo controlado:</strong> primero compruebe el payload. Cuando todo esté correcto, <strong>Finalizar Informe y asignar número</strong> llamará a <code>phdu_finalizar_informe</code>. Esa acción registra el Informe y consume el siguiente número oficial de la serie correspondiente. QGIS continúa pendiente para una fase posterior.</div>
           <div data-phdu-status-v1 class="phdu-check-status-v1 info" style="margin-top:12px">Pendiente de iniciar sesión.</div>
           <div class="phdu-check-grid-v1">
             <div class="phdu-check-panel-v1">
@@ -40067,7 +40134,7 @@ function mount(){
               <div id="phduProfileV1">${profileHtml()}</div>
               <div class="phdu-check-section-v1" style="margin-top:14px">2. Payload local</div>
               <button type="button" class="success" style="width:100%;margin-top:6px" onclick="window.AllpaSupabaseCheckV1.check()">Comprobar datos para Supabase</button>
-              <div class="mini" style="margin-top:7px">El botón solo lee el <code>state</code> actual de ALLPA. No realiza escrituras.</div>
+              <div class="mini" style="margin-top:7px">La comprobación solo lee el <code>state</code>. La escritura ocurre únicamente al pulsar el botón de finalización y confirmar la acción.</div>
             </div>
             <div class="phdu-check-main-v1">
               <div id="phduPayloadResultV1" style="display:none;gap:12px">
@@ -40114,7 +40181,20 @@ window.AllpaSupabaseCheckV1=Object.freeze({
   check:check,
   copyJson:copyJson,
   buildPayload:function(){return buildPayload().payload;},
-  mode:'READ_PROFILE_AND_BUILD_LOCAL_PAYLOAD_ONLY'
+  validatePayload:function(payload){return validate(payload);},
+  getProfile:function(){return currentProfile?clone(currentProfile):null;},
+  getUser:function(){return currentUser?{id:currentUser.id,email:currentUser.email}:null;},
+  finalizeInformeRpc:async function(payload){
+    if(!client) throw new Error('No se pudo cargar el cliente de Supabase.');
+    if(!currentUser || !currentProfile) throw new Error('Debe iniciar sesión con un usuario PHDU antes de finalizar.');
+    const role=String(currentProfile.rol||'').toUpperCase();
+    if(!currentProfile.activo) throw new Error('El perfil PHDU está inactivo.');
+    if(!['TECNICO','ADMIN'].includes(role)) throw new Error('El rol '+(currentProfile.rol||'—')+' no puede finalizar Informes Técnicos.');
+    const {data,error}=await client.rpc('phdu_finalizar_informe',{p_payload:payload});
+    if(error) throw error;
+    return data;
+  },
+  mode:'CONTROLLED_FINALIZATION_WITH_OFFICIAL_NUMBERING'
 });
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount);
@@ -40126,7 +40206,7 @@ window.addEventListener('load',function(){setTimeout(mount,400);});
 
 
 <!-- ==========================================================
-     ALLPA · COMPROBACIÓN SUPABASE V2
+     ALLPA · COMPROBACIÓN SUPABASE V3
      Corrección visual: barra amarilla visible en la interfaz V131.
      No agrega escrituras ni numeración.
      ========================================================== -->
@@ -40230,10 +40310,10 @@ body.project-home-open-v130 #phduCheckBarV2{
     bar.innerHTML=`
       <div class="phdu-check-bar-copy-v2">
         <div class="phdu-check-bar-title-v2"><span class="dot"></span>Comprobación Supabase</div>
-        <div class="phdu-check-bar-text-v2">Modo de prueba: autentica el usuario PHDU y construye el payload localmente. No guarda, no numera y no toca QGIS.</div>
+        <div class="phdu-check-bar-text-v2">Conexión PHDU activa: la comprobación no asigna números. El botón FINALIZAR sí registra el Informe y asigna el número oficial en Supabase.</div>
       </div>
       <div class="phdu-check-bar-actions-v2">
-        <span class="phdu-safe-v2">Modo seguro · no numera</span>
+        <span class="phdu-safe-v2">Comprobar antes de finalizar</span>
         <button type="button" class="phdu-open-v2">Abrir comprobación</button>
       </div>`;
 
@@ -40272,6 +40352,232 @@ body.project-home-open-v130 #phduCheckBarV2{
     setTimeout(remountPhduCheckBarV2,1000);
     setTimeout(remountPhduCheckBarV2,2200);
   });
+})();
+</script>
+
+
+<!-- ==========================================================
+     ALLPA · PHDU V4
+     Finalización controlada + numeración oficial + asunto automático
+     03-09-2026
+     ========================================================== -->
+<style id="phdu-finalize-v4-style">
+  /* El número ya no se digita manualmente en APROBATORIO. */
+  #asuntoAprobatorioV119Y{display:none!important;}
+  .phdu-finalize-v4{
+    width:100%;margin-top:10px;padding:11px 12px;border:0;border-radius:10px;
+    background:#0b5a7d;color:#fff;font-weight:900;cursor:pointer;
+    box-shadow:0 5px 14px rgba(11,90,125,.18)
+  }
+  .phdu-finalize-v4:hover{filter:brightness(.96)}
+  .phdu-finalize-v4:disabled{background:#98a5b3;cursor:not-allowed;box-shadow:none;filter:none}
+  .phdu-finalized-v4{
+    margin-top:8px;padding:9px 10px;border-radius:9px;border:1px solid #b9dec9;
+    background:#eefaf3;color:#195c37;font-size:12px;font-weight:800;display:none
+  }
+  .phdu-finalized-v4.visible{display:block}
+  .phdu-number-v4{font-size:14px;font-weight:950;color:#0b5a7d}
+  #asuntoVistaV119Z.phdu-asunto-pending-v4{display:none!important;}
+</style>
+<script id="phdu-finalize-v4-script">
+(function(){
+'use strict';
+
+let busy=false;
+
+function pad3(v){
+  const s=String(v==null?'':v).trim();
+  return /^\d+$/.test(s)?s.padStart(3,'0'):s;
+}
+function officialNumber(){
+  const n=Number(state?.phduNumeroInforme||0);
+  return Number.isInteger(n)&&n>0?n:0;
+}
+function historicalAsuntoNumber(){
+  return String(state?.aprobatorio?.asunto?.numero||'').trim();
+}
+function ensureAsuntoNumberFromOfficial(){
+  const n=officialNumber();
+  if(!n) return '';
+  if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
+  if(!state.aprobatorio.asunto || typeof state.aprobatorio.asunto!=='object') state.aprobatorio.asunto={numero:''};
+  state.aprobatorio.asunto.numero=pad3(n);
+  return state.aprobatorio.asunto.numero;
+}
+function syncAsunto(){
+  ensureAsuntoNumberFromOfficial();
+  const available=!!(officialNumber() || historicalAsuntoNumber());
+  const box=document.getElementById('asuntoVistaV119Z');
+  if(box) box.classList.toggle('phdu-asunto-pending-v4',!available);
+}
+
+/* Retiramos completamente la sección manual ASUNTO de APROBATORIO. */
+const baseRenderApr=window.renderAsuntoAprobatorioV119Y;
+window.renderAsuntoAprobatorioV119Y=function(){
+  const box=document.getElementById('asuntoAprobatorioV119Y');
+  if(box) box.remove();
+};
+
+/* Vista del Informe: el asunto aparece cuando existe un número asignado. */
+const baseRenderVista=window.renderAsuntoVistaV119Z;
+if(typeof baseRenderVista==='function'){
+  window.renderAsuntoVistaV119Z=function(){
+    ensureAsuntoNumberFromOfficial();
+    const out=baseRenderVista.apply(this,arguments);
+    syncAsunto();
+    return out;
+  };
+}
+
+function setStatus(text,type){
+  document.querySelectorAll('[data-phdu-status-v1]').forEach(function(el){
+    el.textContent=text;
+    el.className='phdu-check-status-v1 '+(type||'info');
+  });
+}
+function resultRow(data){
+  if(Array.isArray(data)) return data[0]||null;
+  return data&&typeof data==='object'?data:null;
+}
+function finalizeBox(){return document.getElementById('phduFinalizedV4');}
+function finalizeBtn(){return document.getElementById('phduFinalizeV4');}
+
+function updateFinalizeUi(){
+  const btn=finalizeBtn();
+  const box=finalizeBox();
+  const n=officialNumber();
+  if(btn){
+    if(n){
+      btn.disabled=true;
+      btn.textContent='INFORME '+String(state?.phduNumeroFormateado||pad3(n))+' YA ASIGNADO';
+    }else{
+      btn.disabled=busy;
+      btn.textContent=busy?'FINALIZANDO…':'FINALIZAR INFORME Y ASIGNAR NÚMERO';
+    }
+  }
+  if(box){
+    if(n){
+      box.classList.add('visible');
+      box.innerHTML='Número oficial asignado: <span class="phdu-number-v4">'+String(state?.phduNumeroFormateado||pad3(n))+'</span>. El ASUNTO de Vista del Informe ya utiliza automáticamente el Nro. <strong>'+pad3(n)+'</strong>.';
+    }else{
+      box.classList.remove('visible');
+      box.textContent='';
+    }
+  }
+  syncAsunto();
+}
+
+function mountFinalizeButton(){
+  const marker=document.querySelector('#phduOverlayV1 .phdu-check-section-v1');
+  const checkButton=document.querySelector('#phduOverlayV1 button.success');
+  if(!checkButton || document.getElementById('phduFinalizeV4')){updateFinalizeUi();return;}
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.id='phduFinalizeV4';
+  btn.className='phdu-finalize-v4';
+  btn.textContent='FINALIZAR INFORME Y ASIGNAR NÚMERO';
+  btn.addEventListener('click',finalize);
+  checkButton.insertAdjacentElement('afterend',btn);
+  const box=document.createElement('div');
+  box.id='phduFinalizedV4';
+  box.className='phdu-finalized-v4';
+  btn.insertAdjacentElement('afterend',box);
+  updateFinalizeUi();
+}
+
+async function finalize(){
+  if(busy || officialNumber()) return;
+  const api=window.AllpaSupabaseCheckV1;
+  if(!api){alert('No se encuentra el módulo PHDU de Supabase.');return;}
+  const profile=typeof api.getProfile==='function'?api.getProfile():null;
+  if(!profile){
+    setStatus('Primero inicie sesión con un usuario PHDU.','error');
+    api.open?.();
+    return;
+  }
+
+  let payload,validation;
+  try{
+    payload=api.buildPayload();
+    validation=api.validatePayload(payload);
+  }catch(err){
+    setStatus('No se pudo preparar el Informe: '+String(err?.message||err),'error');
+    return;
+  }
+  if(validation.bad.length){
+    api.check?.();
+    setStatus('No se puede finalizar: existen '+validation.bad.length+' error(es) que deben corregirse primero.','error');
+    return;
+  }
+
+  const tipo=payload.tipo_tramite==='ANTEPROYECTO'?'Anteproyecto':'Obra Mayor';
+  const warns=validation.warn.length?('\n\nAdvertencias detectadas: '+validation.warn.length+'. Revise la comprobación antes de continuar.'):'';
+  const ok=window.confirm(
+    'FINALIZAR INFORME Y ASIGNAR NÚMERO OFICIAL\n\n'+
+    'Trámite: '+tipo+'\n'+
+    'eGOB: '+payload.egob+'\n'+
+    'Fecha del informe: '+payload.fecha_informe+'\n\n'+
+    'Supabase asignará el siguiente número oficial disponible. Esta acción registra el Informe y el número no debe reutilizarse.'+warns+'\n\n¿Desea continuar?'
+  );
+  if(!ok) return;
+
+  busy=true;updateFinalizeUi();
+  setStatus('Finalizando Informe y solicitando número oficial a Supabase…','info');
+  try{
+    /* Se reconstruye inmediatamente antes del RPC para enviar el estado más reciente. */
+    payload=api.buildPayload();
+    const data=await api.finalizeInformeRpc(payload);
+    const row=resultRow(data);
+    if(!row || !row.numero) throw new Error('Supabase no devolvió el número del Informe.');
+
+    state.phduNumeroInforme=Number(row.numero);
+    state.phduNumeroFormateado=String(row.numero_formateado||pad3(row.numero));
+    state.phduInformeFinalizado=true;
+    state.phduInformeFinalizadoEn=new Date().toISOString();
+    state.phduInformeYaExistia=!!row.ya_existia;
+    ensureAsuntoNumberFromOfficial();
+
+    try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
+    try{window.refreshAsuntoPreviewV119Y?.();}catch(_e){}
+    updateFinalizeUi();
+
+    const prefix=row.ya_existia?'El Informe ya estaba numerado. Se recuperó':'Informe finalizado correctamente. Se asignó';
+    setStatus(prefix+' '+state.phduNumeroFormateado+'. El ASUNTO ya fue generado con el Nro. '+pad3(row.numero)+'.','ok');
+
+    try{
+      if(typeof window.msg==='function') window.msg('Informe '+state.phduNumeroFormateado+' asignado correctamente.',true);
+      else if(typeof msg==='function') msg('Informe '+state.phduNumeroFormateado+' asignado correctamente.',true);
+    }catch(_e){}
+
+    /* Mostrar Vista del Informe para que el técnico vea/copíe el asunto ya numerado. */
+    try{if(typeof window.showTab==='function') window.showTab('tab-vista'); else if(typeof showTab==='function') showTab('tab-vista');}catch(_e){}
+    setTimeout(function(){try{window.renderAsuntoVistaV119Z?.();updateFinalizeUi();}catch(_e){}},80);
+  }catch(err){
+    setStatus('No se pudo finalizar el Informe: '+String(err?.message||err),'error');
+  }finally{
+    busy=false;updateFinalizeUi();
+  }
+}
+
+window.AllpaPhduFinalizeV4=Object.freeze({finalize,refresh:updateFinalizeUi});
+
+function refreshAll(){
+  const manual=document.getElementById('asuntoAprobatorioV119Y');
+  if(manual) manual.remove();
+  mountFinalizeButton();
+  syncAsunto();
+  updateFinalizeUi();
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(refreshAll,450);});
+else setTimeout(refreshAll,100);
+window.addEventListener('load',function(){setTimeout(refreshAll,1450);});
+document.addEventListener('click',function(ev){
+  if(ev.target?.classList?.contains('phdu-open-v2')) setTimeout(refreshAll,80);
+  if(ev.target?.closest?.('[data-tab="tab-vista"], [onclick*="tab-vista"]')) setTimeout(function(){try{window.renderAsuntoVistaV119Z?.();}catch(_e){} refreshAll();},60);
+});
+
+/* El CSS mantiene oculto cualquier render histórico del campo manual. */
 })();
 </script>
 </body>
