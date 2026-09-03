@@ -3849,6 +3849,7 @@ main{
         <h2>1. Identificación del informe</h2>
         <div class="field"><label>Nro. eGOB Principal *</label><input id="egob" inputmode="numeric" placeholder="Ej.: 1157249" /></div>
         <div class="field"><label>Técnico revisor *</label><input id="tecnico" list="listaTecnicos" placeholder="Buscar o escribir nombre" /><datalist id="listaTecnicos"></datalist><div class="tools-note mini"></div></div>
+        <div class="field" id="fechaIngresoTramiteWrap"><label>Fecha de ingreso del trámite</label><input type="date" id="fechaIngresoTramite" /></div>
         <div class="field"><label>Tipo de informe *</label><select id="tipoInforme"><option value="">Seleccione...</option><option>Informe con Observaciones</option><option>Informe Técnico Aprobatorio</option></select></div>
         <div class="row" id="dateRow">
           <div class="field" id="fechaRevisionWrap"><label id="fechaRevisionLabel">Fecha de revisión *</label><input type="date" id="fechaRevision" /><div class="mini" id="fechaRevisionNote"></div></div>
@@ -39222,6 +39223,347 @@ window.AllpaFunctionalV132=Object.freeze({
   version:'1.3.2-anteproyecto-altura-mayor-3',
   change:'Condición Anteproyecto: ALTURA EDIFICACIÓN > 3; Área Bruta > 400 m² se mantiene'
 });
+</script>
+
+
+<!-- ==========================================================
+     ALLPA - FUENTE PARA RESOLUCIONES DE OBRA MAYOR V1
+     Base: index 2026-09-02
+     Cambios:
+     1) Fecha de ingreso del trámite en Identificación del informe.
+     2) Área total según certificado en Certificado de Gravámenes.
+     3) Fecha del documento en Consideraciones Estructurales,
+        bajo EGOB y en la fila de Técnico Revisor.
+     El Registrador no se captura aquí: se mantendrá fijo en la
+     plantilla de Resolución (ABG. HENRY ENDARA MAZÓN).
+     ========================================================== -->
+<script id="allpa-fuente-resoluciones-om-v1">
+(function(){
+'use strict';
+
+const VERSION='1.0.0-fuente-resoluciones-obra-mayor';
+
+function safeEsc(v){
+  if(typeof window.esc==='function') return window.esc(v);
+  return String(v==null?'':v).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];
+  });
+}
+function fmtFecha(v){
+  if(!v) return '';
+  if(typeof window.fmtDate==='function') return window.fmtDate(v);
+  const p=String(v).split('-');
+  return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : String(v);
+}
+function ensureFuenteState(){
+  if(!window.state) return null;
+  if(typeof state.fechaIngresoTramite==='undefined') state.fechaIngresoTramite='';
+  if(!state.aprobatorio) state.aprobatorio={};
+  if(!state.aprobatorio.estructural) state.aprobatorio.estructural={};
+  if(typeof state.aprobatorio.estructural.fecha==='undefined') state.aprobatorio.estructural.fecha='';
+  if(!state.requisitos) state.requisitos={};
+  return state;
+}
+
+/* ---------- 1. Identificación del informe ---------- */
+function syncFechaIngresoUI(){
+  ensureFuenteState();
+  const el=document.getElementById('fechaIngresoTramite');
+  if(el && document.activeElement!==el) el.value=state?.fechaIngresoTramite||'';
+}
+function bindFechaIngreso(){
+  const el=document.getElementById('fechaIngresoTramite');
+  if(!el || el.dataset.boundFuenteResoluciones==='1') return;
+  el.dataset.boundFuenteResoluciones='1';
+  syncFechaIngresoUI();
+  el.addEventListener('input',function(){
+    ensureFuenteState();
+    state.fechaIngresoTramite=el.value||'';
+  });
+  el.addEventListener('change',function(){
+    ensureFuenteState();
+    state.fechaIngresoTramite=el.value||'';
+  });
+}
+
+/* Amplía defaultState sin afectar formularios antiguos. */
+try{
+  const baseDefault=window.defaultState || (typeof defaultState==='function'?defaultState:null);
+  if(baseDefault && !baseDefault.__fuenteResolucionesV1){
+    const wrapped=function(){
+      const s=baseDefault.apply(this,arguments);
+      if(typeof s.fechaIngresoTramite==='undefined') s.fechaIngresoTramite='';
+      if(!s.aprobatorio) s.aprobatorio={};
+      if(!s.aprobatorio.estructural) s.aprobatorio.estructural={};
+      if(typeof s.aprobatorio.estructural.fecha==='undefined') s.aprobatorio.estructural.fecha='';
+      return s;
+    };
+    wrapped.__fuenteResolucionesV1=true;
+    window.defaultState=wrapped;
+    try{defaultState=wrapped}catch(_e){}
+  }
+}catch(_e){}
+
+/* collectTop guarda la fecha de ingreso junto con el resto del state. */
+try{
+  const baseCollect=window.collectTop || (typeof collectTop==='function'?collectTop:null);
+  if(baseCollect && !baseCollect.__fuenteResolucionesV1){
+    const wrapped=function(){
+      const out=baseCollect.apply(this,arguments);
+      ensureFuenteState();
+      const el=document.getElementById('fechaIngresoTramite');
+      if(el) state.fechaIngresoTramite=el.value||'';
+      return out;
+    };
+    wrapped.__fuenteResolucionesV1=true;
+    window.collectTop=wrapped;
+    try{collectTop=wrapped}catch(_e){}
+  }
+}catch(_e){}
+
+/* Core de carga: restaura el nuevo campo al abrir un formulario guardado. */
+try{
+  const baseApplyCore=window.applyStateToUICoreV18 || (typeof applyStateToUICoreV18==='function'?applyStateToUICoreV18:null);
+  if(baseApplyCore && !baseApplyCore.__fuenteResolucionesV1){
+    const wrapped=function(){
+      ensureFuenteState();
+      const out=baseApplyCore.apply(this,arguments);
+      setTimeout(function(){
+        bindFechaIngreso();
+        syncFechaIngresoUI();
+        mountGravamenArea();
+        mountFechaEstructural();
+      },0);
+      return out;
+    };
+    wrapped.__fuenteResolucionesV1=true;
+    window.applyStateToUICoreV18=wrapped;
+    try{applyStateToUICoreV18=wrapped}catch(_e){}
+  }
+}catch(_e){}
+
+/* ---------- 2. Certificado de Gravámenes ---------- */
+function gravamenStateByInput(input){
+  const id=input?.dataset?.reqDetail||'';
+  if(!id) return null;
+  if(!state.requisitos[id]) state.requisitos[id]={estado:'',observacion:'',detalle:{}};
+  if(!state.requisitos[id].detalle) state.requisitos[id].detalle={};
+  return state.requisitos[id].detalle;
+}
+
+function mountGravamenArea(){
+  ensureFuenteState();
+  const fechas=[...document.querySelectorAll('input[data-field="fechaGravamenes"]')];
+  fechas.forEach(function(fechaInput){
+    const container=fechaInput.closest('.req-detail-v94, .req-detail-gravamenes-v109') || fechaInput.parentElement;
+    if(!container || container.querySelector('[data-field="areaTotalCertificado"]')) return;
+
+    const reqId=fechaInput.dataset.reqDetail||'';
+    const detalle=(state.requisitos?.[reqId]?.detalle)||{};
+
+    const label=document.createElement('label');
+    label.textContent='Área total según certificado';
+    const input=document.createElement('input');
+    input.type='text';
+    input.inputMode='decimal';
+    input.placeholder='Área total según certificado (m²)';
+    input.dataset.reqDetail=reqId;
+    input.dataset.field='areaTotalCertificado';
+    input.value=detalle.areaTotalCertificado||'';
+
+    input.addEventListener('input',function(){
+      const d=gravamenStateByInput(input);
+      if(!d) return;
+      d.areaTotalCertificado=String(input.value||'').replace(',','.');
+      if(typeof window.renderReport==='function') window.renderReport();
+      if(typeof window.renderPreview==='function') window.renderPreview();
+    });
+
+    container.appendChild(label);
+    container.appendChild(input);
+  });
+}
+
+/* Reporte: agrega Área total según certificado al detalle de Gravámenes. */
+try{
+  const baseReqDetailReport=window.reqDetailReportHtmlV119W || (typeof reqDetailReportHtmlV119W==='function'?reqDetailReportHtmlV119W:null);
+  if(baseReqDetailReport && !baseReqDetailReport.__fuenteResolucionesV1){
+    const wrapped=function(req){
+      try{
+        const isGrav=(typeof isGravamenReqV119W==='function' && isGravamenReqV119W(req)) ||
+                     (typeof isGravamenesReqV109==='function' && isGravamenesReqV109(req));
+        if(isGrav){
+          const v=state.requisitos?.[req.id]||{};
+          const d=v.detalle||{};
+          const lines=[
+            {label:'Ficha registral No.:', value:d.fichaRegistralGravamenes||d.fichaRegistral||''},
+            {label:'Certificado No.:', value:d.certificadoGravamenes||d.certificado||''},
+            {label:'Fecha:', value:(d.fechaGravamenes||d.fecha)?fmtFecha(d.fechaGravamenes||d.fecha):''},
+            {label:'Área total según certificado:', value:d.areaTotalCertificado ? String(d.areaTotalCertificado)+' m²' : ''}
+          ];
+          if(typeof detailLinesHtmlV119W==='function'){
+            const html=detailLinesHtmlV119W(lines);
+            return html || safeEsc(v.estado||'');
+          }
+          const valid=lines.filter(x=>String(x.value||'').trim());
+          return valid.map(x=>'<div><strong>'+safeEsc(x.label)+'</strong> '+safeEsc(x.value)+'</div>').join('') || safeEsc(v.estado||'');
+        }
+      }catch(_e){}
+      return baseReqDetailReport.apply(this,arguments);
+    };
+    wrapped.__fuenteResolucionesV1=true;
+    window.reqDetailReportHtmlV119W=wrapped;
+    try{reqDetailReportHtmlV119W=wrapped}catch(_e){}
+  }
+}catch(_e){}
+
+/* Compatibilidad con otras rutas históricas de detalle. */
+try{
+  const baseDefaultDetail=window.reqDefaultDetailV94 || (typeof reqDefaultDetailV94==='function'?reqDefaultDetailV94:null);
+  if(baseDefaultDetail && !baseDefaultDetail.__fuenteResolucionesV1){
+    const wrapped=function(req){
+      let out=baseDefaultDetail.apply(this,arguments);
+      try{
+        const isGrav=(typeof isGravamenReqV119W==='function' && isGravamenReqV119W(req)) ||
+                     (typeof isGravamenesReqV109==='function' && isGravamenesReqV109(req));
+        if(isGrav){
+          const d=state.requisitos?.[req.id]?.detalle||{};
+          if(d.areaTotalCertificado && !/Área total según certificado/i.test(String(out||''))){
+            out=String(out||'').trim();
+            out+=(out?'\n':'')+'Área total según certificado: '+d.areaTotalCertificado+' m²';
+          }
+        }
+      }catch(_e){}
+      return out;
+    };
+    wrapped.__fuenteResolucionesV1=true;
+    window.reqDefaultDetailV94=wrapped;
+    try{reqDefaultDetailV94=wrapped}catch(_e){}
+  }
+}catch(_e){}
+
+/* ---------- 3. Consideraciones Estructurales ---------- */
+function mountFechaEstructural(){
+  ensureFuenteState();
+  const tecnico=document.getElementById('estTecnico');
+  if(!tecnico) return;
+
+  const row=tecnico.closest('tr');
+  if(!row || row.querySelector('#estFechaDocumento')) return;
+
+  const tdValor=tecnico.closest('td');
+  if(!tdValor) return;
+  tdValor.colSpan=2;
+
+  const tdLabel=document.createElement('td');
+  tdLabel.className='label-cell center';
+  tdLabel.textContent='FECHA DEL DOCUMENTO:';
+
+  const tdInput=document.createElement('td');
+  const input=document.createElement('input');
+  input.type='date';
+  input.id='estFechaDocumento';
+  input.value=state.aprobatorio?.estructural?.fecha||'';
+  tdInput.appendChild(input);
+
+  row.appendChild(tdLabel);
+  row.appendChild(tdInput);
+
+  input.addEventListener('input',function(){
+    ensureFuenteState();
+    state.aprobatorio.estructural.fecha=input.value||'';
+    if(typeof window.scheduleReportUpdate==='function') window.scheduleReportUpdate();
+    else if(typeof window.renderReport==='function') window.renderReport();
+  });
+  input.addEventListener('change',function(){
+    ensureFuenteState();
+    state.aprobatorio.estructural.fecha=input.value||'';
+    if(typeof window.scheduleReportUpdate==='function') window.scheduleReportUpdate();
+    else if(typeof window.renderReport==='function') window.renderReport();
+  });
+}
+
+/* Renderer definitivo de Consideraciones Estructurales con la fecha en fila 2. */
+function structuralTableFuenteResoluciones(){
+  ensureFuenteState();
+  const e=state.aprobatorio?.estructural||{};
+  const documento=document.getElementById('estDocumento')?.value || e.documento || '';
+  const egob=document.getElementById('estEgob')?.value || e.egob || state.egob || '';
+  const tecnico=document.getElementById('estTecnico')?.value || e.tecnico || state.tecnico || '';
+  const fecha=document.getElementById('estFechaDocumento')?.value || e.fecha || '';
+  const criterio=document.getElementById('estCriterio')?.value || e.criterio || 'FAVORABLE';
+  const calculista=document.getElementById('estCalculista')?.value || e.calculista || '';
+  const senescyt=document.getElementById('estSenescyt')?.value || e.senescyt || '';
+
+  return '<table class="informe-table structural-table structural-report-v56"><tbody>'+
+    '<tr><td class="label-cell">DOCUMENTO:</td><td class="data-cell highlight" colspan="2">'+safeEsc(documento)+'</td><td class="label-cell center">EGOB</td><td class="data-cell highlight">'+safeEsc(egob)+'</td></tr>'+
+    '<tr><td class="label-cell">TÉCNICO REVISOR:</td><td class="data-cell" colspan="2">'+safeEsc(tecnico)+'</td><td class="label-cell center">FECHA DEL DOCUMENTO:</td><td class="data-cell">'+safeEsc(fmtFecha(fecha))+'</td></tr>'+
+    '<tr><td class="label-cell">CRITERIO TÉCNICO:</td><td class="data-cell bold" colspan="4">'+safeEsc(String(criterio||'FAVORABLE').toUpperCase())+'</td></tr>'+
+    '<tr><td class="label-cell">ING. CALCULISTA:</td><td class="data-cell" colspan="4">'+safeEsc(calculista)+'</td></tr>'+
+    '<tr><td class="label-cell">REG. SENESCYT:</td><td class="data-cell" colspan="4">'+safeEsc(senescyt)+'</td></tr>'+
+    '</tbody></table>';
+}
+structuralTableFuenteResoluciones.__fuenteResolucionesV1=true;
+
+function installStructuralRenderer(){
+  window.aprobatorioStructuralTable=structuralTableFuenteResoluciones;
+  try{aprobatorioStructuralTable=structuralTableFuenteResoluciones}catch(_e){}
+}
+
+/* Mantiene fecha si otros sincronizadores actualizan el bloque estructural. */
+document.addEventListener('input',function(ev){
+  if(ev.target?.id==='estFechaDocumento'){
+    ensureFuenteState();
+    state.aprobatorio.estructural.fecha=ev.target.value||'';
+  }
+},true);
+document.addEventListener('change',function(ev){
+  if(ev.target?.id==='estFechaDocumento'){
+    ensureFuenteState();
+    state.aprobatorio.estructural.fecha=ev.target.value||'';
+  }
+},true);
+
+/* Los renderers reconstruyen varias secciones con innerHTML; el observer
+   vuelve a montar únicamente estos nuevos controles cuando sea necesario. */
+let mountTimer=null;
+function mountAll(){
+  bindFechaIngreso();
+  syncFechaIngresoUI();
+  mountGravamenArea();
+  mountFechaEstructural();
+}
+const observer=new MutationObserver(function(){
+  clearTimeout(mountTimer);
+  mountTimer=setTimeout(mountAll,20);
+});
+try{observer.observe(document.documentElement,{childList:true,subtree:true})}catch(_e){}
+
+ensureFuenteState();
+bindFechaIngreso();
+installStructuralRenderer();
+
+window.addEventListener('load',function(){
+  mountAll();
+  /* Algunos módulos históricos reinstalan el renderer estructural durante
+     los primeros segundos. Se reafirma después de esas ventanas sin tocar
+     ninguna otra función del Generador. */
+  setTimeout(function(){mountAll();installStructuralRenderer();},2200);
+  setTimeout(function(){mountAll();installStructuralRenderer();},7600);
+});
+
+window.AllpaFuenteResolucionesOMV1=Object.freeze({
+  version:VERSION,
+  mount:mountAll,
+  installStructuralRenderer:installStructuralRenderer,
+  fields:Object.freeze({
+    fechaIngresoTramite:'state.fechaIngresoTramite',
+    areaTotalCertificado:'state.requisitos[REQ_GRAVAMEN].detalle.areaTotalCertificado',
+    fechaDocumentoEstructural:'state.aprobatorio.estructural.fecha'
+  }),
+  registradorResolucion:'ABG. HENRY ENDARA MAZÓN'
+});
+})();
 </script>
 
 </body>
