@@ -39566,5 +39566,562 @@ window.AllpaFuenteResolucionesOMV1=Object.freeze({
 })();
 </script>
 
+
+<!-- ==========================================================
+     ALLPA · SUPABASE · MODO DE COMPROBACIÓN SIN NUMERAR
+     2026-09-03
+     - Autentica contra Supabase y lee únicamente el perfil PHDU.
+     - Construye localmente el payload de phdu_finalizar_informe.
+     - NO llama RPC, NO INSERTA, NO ACTUALIZA y NO asigna números.
+     ========================================================== -->
+<style id="allpa-phdu-check-v1-style">
+  .phdu-check-card-v1{border:2px solid #d8a000!important;background:#fffdf5!important}
+  .phdu-check-card-v1 h2{color:#7a5700!important}
+  .phdu-check-badge-v1{display:inline-block;padding:4px 8px;border-radius:999px;background:#fff1b8;color:#6d4c00;font-size:10px;font-weight:900;text-transform:uppercase;margin-bottom:8px}
+  .phdu-check-status-v1{font-size:12px;line-height:1.35;padding:9px 10px;border-radius:10px;background:#fff;border:1px solid #ead8a1;margin:8px 0}
+  .phdu-check-status-v1.ok{background:#ecfdf3;border-color:#badbcc;color:#124c2f}
+  .phdu-check-status-v1.error{background:#fff1f1;border-color:#f2b8b5;color:#8a1c16}
+  .phdu-check-status-v1.info{background:#f8fafc;border-color:#d8dee8;color:#344054}
+  .phdu-check-overlay-v1{position:fixed;inset:0;background:rgba(13,34,56,.64);z-index:100000;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow:auto}
+  .phdu-check-overlay-v1.open{display:flex}
+  .phdu-check-modal-v1{width:min(1180px,96vw);background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.3);overflow:hidden;margin:auto}
+  .phdu-check-head-v1{background:#17324d;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .phdu-check-head-v1 h2{margin:0;color:#fff;font-size:16px}
+  .phdu-check-head-v1 button{background:#ffffff22;border:1px solid #ffffff55;padding:6px 10px}
+  .phdu-check-body-v1{padding:18px}
+  .phdu-check-grid-v1{display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:16px;align-items:start}
+  .phdu-check-panel-v1{border:1px solid #d8dee8;border-radius:12px;padding:14px;background:#fbfcfe}
+  .phdu-check-panel-v1 h3{margin:0 0 10px;color:#17324d;font-size:13px;text-transform:uppercase}
+  .phdu-check-actions-v1{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .phdu-check-actions-v1 button{font-size:11px}
+  .phdu-check-main-v1{display:grid;gap:12px}
+  .phdu-check-note-v1{padding:10px 12px;border:1px solid #f0c66a;background:#fff9e9;border-radius:10px;color:#654900;font-size:12px;line-height:1.4}
+  .phdu-check-note-v1 strong{color:#523b00}
+  .phdu-check-table-v1{width:100%;border-collapse:collapse;font-size:12px}
+  .phdu-check-table-v1 th,.phdu-check-table-v1 td{border:1px solid #d8dee8;padding:7px;vertical-align:top}
+  .phdu-check-table-v1 th{width:31%;background:#edf2f7;color:#17324d;text-transform:none}
+  .phdu-check-table-v1 td{background:#fff;word-break:break-word}
+  .phdu-check-section-v1{font-size:12px;font-weight:900;text-transform:uppercase;color:#17324d;margin:4px 0 2px}
+  .phdu-check-validation-v1{display:grid;gap:6px}
+  .phdu-check-validation-v1 .item{padding:7px 9px;border-radius:8px;font-size:12px}
+  .phdu-check-validation-v1 .good{background:#ecfdf3;color:#124c2f;border:1px solid #badbcc}
+  .phdu-check-validation-v1 .warn{background:#fff8e5;color:#6a4a00;border:1px solid #f7d48a}
+  .phdu-check-validation-v1 .bad{background:#fff1f1;color:#8a1c16;border:1px solid #f2b8b5}
+  .phdu-check-json-v1{max-height:360px;overflow:auto;background:#0e1c2b;color:#e6edf3;border-radius:10px;padding:12px;font:11px/1.45 Consolas,monospace;white-space:pre-wrap;word-break:break-word}
+  .phdu-check-profile-v1{font-size:12px;line-height:1.45}
+  .phdu-check-profile-v1 strong{color:#17324d}
+  .phdu-check-empty-v1{padding:18px;border:1px dashed #b8c3cf;border-radius:10px;text-align:center;color:#667085;font-size:12px;background:#fff}
+  @media(max-width:850px){.phdu-check-grid-v1{grid-template-columns:1fr}.phdu-check-overlay-v1{padding:8px}}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script id="allpa-phdu-check-v1">
+(function(){
+'use strict';
+
+const VERSION='1.0.0-comprobacion-sin-numerar';
+const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
+
+let client=null;
+let currentProfile=null;
+let currentUser=null;
+let lastPayload=null;
+
+function e(v){
+  if(typeof window.esc==='function') return window.esc(v);
+  return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function norm(v){
+  return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+}
+function clone(v){
+  try{return JSON.parse(JSON.stringify(v));}catch(_e){return {};}
+}
+function digits(v){return String(v||'').replace(/\D/g,'');}
+function numericString(v){
+  let s=String(v==null?'':v).trim().replace(/\s+/g,'');
+  if(!s) return '';
+  if(s.includes(',') && s.includes('.')){
+    if(s.lastIndexOf(',')>s.lastIndexOf('.')) s=s.replace(/\./g,'').replace(',','.');
+    else s=s.replace(/,/g,'');
+  }else if(s.includes(',')){
+    s=s.replace(',','.');
+  }
+  s=s.replace(/[^0-9.\-]/g,'');
+  const neg=s.startsWith('-');
+  s=s.replace(/-/g,'');
+  const parts=s.split('.');
+  if(parts.length>1) s=parts.shift()+'.'+parts.join('');
+  if(neg) s='-'+s;
+  return s;
+}
+function integerString(v){
+  const n=numericString(v);
+  if(!n) return '';
+  const x=parseInt(n,10);
+  return Number.isFinite(x)?String(x):'';
+}
+function info(label){
+  try{if(typeof window.infoValue==='function') return String(window.infoValue(label)||'').trim();}catch(_e){}
+  try{if(typeof infoValue==='function') return String(infoValue(label)||'').trim();}catch(_e){}
+  return '';
+}
+function projectType(){
+  try{if(typeof window.isAnteproyectoV123==='function' && window.isAnteproyectoV123()) return 'ANTEPROYECTO';}catch(_e){}
+  try{if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()) return 'ANTEPROYECTO';}catch(_e){}
+  return 'OBRA_MAYOR';
+}
+function ensureInformeId(){
+  if(typeof state==='undefined') return '';
+  let id=String(state.phduInformeId||'').trim();
+  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
+    if(window.crypto && typeof window.crypto.randomUUID==='function') id=window.crypto.randomUUID();
+    else id='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});
+    state.phduInformeId=id;
+  }
+  return id;
+}
+function conclusionRows(){
+  const rows=Array.isArray(state?.aprobatorio?.conclusion)?state.aprobatorio.conclusion:[];
+  return rows.map(function(raw){
+    try{
+      if(typeof window.rowV13==='function') return window.rowV13(raw);
+      if(typeof rowV13==='function') return rowV13(raw);
+      if(typeof normalizeConclusionRow==='function') return normalizeConclusionRow(raw);
+    }catch(_e){}
+    if(Array.isArray(raw)){
+      return {descripcion:String(raw[0]||''),levels:raw.slice(1,-2),cantidad:String(raw.at(-2)||''),unidad:String(raw.at(-1)||'')};
+    }
+    return {
+      descripcion:String(raw?.descripcion||raw?.Descripción||raw?.Descripcion||''),
+      levels:Array.isArray(raw?.levels)?raw.levels:[],
+      cantidad:String(raw?.cantidad||raw?.Cantidad||''),
+      unidad:String(raw?.unidad||raw?.Unidad||'')
+    };
+  });
+}
+function conclusionAmount(labelParts){
+  const parts=labelParts.map(norm);
+  const row=conclusionRows().find(r=>parts.every(p=>norm(r.descripcion).includes(p)));
+  return row?String(row.cantidad||'').trim():'';
+}
+function reqGravamen(){
+  const reqId=(DATA?.requisitos||[]).find(r=>norm(r.texto).includes('CERTIFICADO DE GRAV'))?.id || 'REQ_027';
+  const d=state?.requisitos?.[reqId]?.detalle||{};
+  return {
+    ficha:String(d.fichaRegistralGravamenes||d.fichaRegistral||'').trim(),
+    certificado:String(d.certificadoGravamenes||d.certificado||'').trim(),
+    fecha:String(d.fechaGravamenes||d.fecha||'').trim(),
+    area:String(d.areaTotalCertificado||'').trim()
+  };
+}
+function professionalEmail(){
+  const proyectista=info('PROYECTISTA');
+  if(!proyectista) return '';
+  const rows=Array.isArray(window.__PROF_RAW_V13__)?window.__PROF_RAW_V13__:[];
+  const row=rows.find(r=>norm(r.Nombre||r.Profesional||r.Proyectista||'')===norm(proyectista))
+        || rows.find(r=>norm(r.Nombre||r.Profesional||r.Proyectista||'').includes(norm(proyectista)) || norm(proyectista).includes(norm(r.Nombre||r.Profesional||r.Proyectista||'')));
+  if(!row) return '';
+  const candidates=['Correo electrónico','Correo Electronico','Correo','Email','E-mail','Mail','Correo institucional','Correo Institucional'];
+  for(const k of candidates){if(String(row[k]||'').trim()) return String(row[k]).trim();}
+  for(const [k,v] of Object.entries(row)){if(/correo|email|e-mail|mail/i.test(k) && String(v||'').trim()) return String(v).trim();}
+  return '';
+}
+function buildPayload(){
+  try{if(typeof window.collectTop==='function') window.collectTop(); else if(typeof collectTop==='function') collectTop();}catch(_e){}
+  try{if(typeof window.ensureFuenteState==='function') window.ensureFuenteState();}catch(_e){}
+  try{if(typeof window.ensureAprobatorioData==='function') window.ensureAprobatorioData(); else if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();}catch(_e){}
+  try{if(typeof window.ensureV36State==='function') window.ensureV36State(); else if(typeof ensureV36State==='function') ensureV36State();}catch(_e){}
+  try{if(typeof window.ensurePropietarios==='function') window.ensurePropietarios(); else if(typeof ensurePropietarios==='function') ensurePropietarios();}catch(_e){}
+
+  const owners=(Array.isArray(state?.propietarios)?state.propietarios:[])
+    .map(p=>({nombre:String(p?.nombre||'').trim(),ci:String(p?.ci||'').trim()}))
+    .filter(p=>p.nombre||p.ci);
+
+  const grav=reqGravamen();
+  const est=state?.aprobatorio?.estructural||{};
+  const rows=conclusionRows();
+
+  let areaPredio=conclusionAmount(['AREA','PREDIO']);
+  let areaConstruccion=conclusionAmount(['AREA','BRUTA','TOTAL']);
+  if(!areaConstruccion) areaConstruccion=info('Área Bruta');
+  let areaAmpMod=conclusionAmount(['AREA','AMPLI']);
+  if(!areaAmpMod) areaAmpMod=conclusionAmount(['AREA','MODIF']);
+  let pisos=conclusionAmount(['NUMERO','PISOS']) || conclusionAmount(['NÚMERO','PISOS']) || info('ALTURA EDIFICACIÓN');
+  let hab=conclusionAmount(['UNIDADES','HABITACIONALES']);
+  let com=conclusionAmount(['UNIDADES','COMERCIALES']);
+  let cosPb=conclusionAmount(['COS','PB']);
+  let cosTotal=conclusionAmount(['COS','TOTAL']);
+
+  const cleanClave=digits(info('CLAVE CATASTRAL'));
+  const apoderado=state?.apoderado?.activo
+    ? [String(state.apoderado.nombre||'').trim(),String(state.apoderado.ci||'').trim()].filter(Boolean).join(' · ')
+    : '';
+
+  const snapshot=clone(state);
+  const payload={
+    id_informe:ensureInformeId(),
+    tipo_tramite:projectType(),
+    anio:parseInt(String(state?.fechaRevision||'').slice(0,4),10) || new Date().getFullYear(),
+    egob:digits(state?.egob||info('TRÁMITE EGOB')),
+    fecha_informe:String(state?.fechaRevision||'').trim(),
+    fecha_ingreso_tramite:String(state?.fechaIngresoTramite||'').trim(),
+
+    propietarios:owners,
+    propietarios_texto:owners.map(p=>p.nombre).filter(Boolean).join(' / '),
+    documentos_propietarios:owners.map(p=>p.ci).filter(Boolean).join(' / '),
+    apoderado:apoderado,
+
+    proyectista:info('PROYECTISTA'),
+    proyectista_senescyt:info('REGISTRO SENESCYT'),
+    proyectista_registro_municipal:info('REGISTRO MUNICIPAL'),
+    correo_notificacion_sugerido:professionalEmail(),
+
+    nombre_proyecto:info('NOMBRE DEL PROYECTO'),
+    uso_proyecto:info('USO PRINCIPAL'),
+    tipo_obra:info('PROYECTO DEFINITIVO'),
+    altura_edificacion:info('ALTURA EDIFICACIÓN'),
+
+    parroquia:info('PARROQUIA'),
+    direccion:info('DIRECCIÓN'),
+    codigo_pit:info('CÓDIGO PIT'),
+    clave_catastral:cleanClave,
+    barrio_sector:info('BARRIO/SECTOR'),
+
+    area_predio:numericString(areaPredio),
+    area_construccion:numericString(areaConstruccion),
+    area_ampliacion_modificacion:numericString(areaAmpMod),
+    pisos:integerString(pisos),
+    unidades_habitacionales:integerString(hab),
+    unidades_comerciales:integerString(com),
+    cos_pb:numericString(cosPb),
+    cos_total:numericString(cosTotal),
+
+    gravamen_ficha_registral:grav.ficha,
+    gravamen_certificado:grav.certificado,
+    gravamen_fecha:grav.fecha,
+    gravamen_area_total:numericString(grav.area),
+
+    estructural_documento:String(est.documento||'').trim(),
+    estructural_egob:digits(est.egob||''),
+    estructural_fecha:String(est.fecha||'').trim(),
+    estructural_tecnico:String(est.tecnico||'').trim(),
+    estructural_criterio:String(est.criterio||'').trim(),
+    estructural_calculista:String(est.calculista||'').trim(),
+    estructural_senescyt:String(est.senescyt||'').trim(),
+
+    conclusion_tecnica:clone(state?.aprobatorio?.conclusion||[]),
+    datos_informe:snapshot
+  };
+
+  return {payload,rows,grav,est};
+}
+function validate(payload){
+  const bad=[],warn=[],good=[];
+  if(state?.tipoInforme!=='Informe Técnico Aprobatorio') bad.push('El tipo seleccionado no es “Informe Técnico Aprobatorio”.');
+  else good.push('Tipo de informe: Informe Técnico Aprobatorio.');
+
+  if(!/^\d{1,20}$/.test(payload.egob||'')) bad.push('El eGOB principal está vacío o no es numérico.');
+  else good.push('eGOB válido: '+payload.egob+'.');
+
+  if(!payload.fecha_informe) bad.push('Falta la fecha de emisión del Informe.');
+  else good.push('Fecha de emisión disponible.');
+
+  if(!payload.fecha_ingreso_tramite) warn.push('Falta la Fecha de ingreso del trámite; será necesaria para la Resolución.');
+  else good.push('Fecha de ingreso del trámite disponible.');
+
+  if(!payload.propietarios.length) bad.push('No hay propietarios registrados.');
+  else good.push('Propietarios listos: '+payload.propietarios.length+'.');
+
+  if(payload.clave_catastral && !/^\d{27}$/.test(payload.clave_catastral)) bad.push('La clave catastral no tiene 27 dígitos.');
+  else if(payload.clave_catastral) good.push('Clave catastral de 27 dígitos.');
+
+  if(!payload.proyectista) warn.push('No se encontró Proyectista.');
+  if(!payload.gravamen_ficha_registral) warn.push('Falta Ficha Registral del Certificado de Gravámenes.');
+  if(!payload.gravamen_certificado) warn.push('Falta N.º de Certificado de Gravámenes.');
+  if(!payload.gravamen_fecha) warn.push('Falta fecha del Certificado de Gravámenes.');
+  if(!payload.gravamen_area_total) warn.push('Falta Área total según certificado.');
+  if(payload.tipo_tramite==='OBRA_MAYOR'){
+    if(!payload.estructural_documento) warn.push('Falta Documento en Consideraciones Estructurales.');
+    if(!payload.estructural_fecha) warn.push('Falta Fecha del documento estructural.');
+    if(!payload.estructural_criterio) warn.push('Falta Criterio Técnico Estructural.');
+  }
+  if(!Array.isArray(payload.conclusion_tecnica)||!payload.conclusion_tecnica.length) warn.push('La tabla de Conclusión Técnica está vacía.');
+  if(!payload.area_construccion) warn.push('No se pudo identificar el Área Bruta total de construcción.');
+  if(!payload.pisos) warn.push('No se pudo identificar el Número de pisos.');
+
+  if(!currentProfile) bad.push('No hay sesión Supabase comprobada.');
+  else if(!currentProfile.activo) bad.push('El perfil PHDU está inactivo.');
+  else if(!['TECNICO','ADMIN'].includes(String(currentProfile.rol||'').toUpperCase())) bad.push('El rol '+String(currentProfile.rol||'—')+' no puede finalizar Informes Técnicos.');
+  else good.push('Perfil autorizado para Informes: '+currentProfile.rol+'.');
+
+  return {bad,warn,good};
+}
+function status(text,type='info'){
+  document.querySelectorAll('[data-phdu-status-v1]').forEach(el=>{
+    el.textContent=text;
+    el.className='phdu-check-status-v1 '+type;
+  });
+}
+function profileHtml(){
+  if(!currentProfile) return '<div class="phdu-check-empty-v1">Sin sesión Supabase.</div>';
+  return '<div class="phdu-check-profile-v1">'
+    +'<div><strong>Nombre:</strong> '+e(currentProfile.nombre_completo||'—')+'</div>'
+    +'<div><strong>Correo:</strong> '+e(currentProfile.correo||currentUser?.email||'—')+'</div>'
+    +'<div><strong>Rol:</strong> '+e(currentProfile.rol||'—')+'</div>'
+    +'<div><strong>Activo:</strong> '+(currentProfile.activo?'SÍ':'NO')+'</div>'
+    +'<div><strong>ID:</strong> '+e(currentProfile.id||currentUser?.id||'—')+'</div>'
+    +'</div>';
+}
+function renderProfile(){
+  const el=document.getElementById('phduProfileV1'); if(el) el.innerHTML=profileHtml();
+  const side=document.getElementById('phduSideProfileV1');
+  if(side) side.textContent=currentProfile ? ((currentProfile.nombre_completo||currentUser?.email||'USUARIO')+' · '+(currentProfile.rol||'')) : 'Sin sesión Supabase';
+  const logout=document.getElementById('phduLogoutV1'); if(logout) logout.disabled=!currentUser;
+}
+function rowsHtml(p){
+  const items=[
+    ['ID interno estable',p.id_informe],
+    ['Serie',p.tipo_tramite],
+    ['Año',p.anio],
+    ['eGOB',p.egob],
+    ['Fecha del informe',p.fecha_informe],
+    ['Fecha ingreso trámite',p.fecha_ingreso_tramite],
+    ['Propietarios',p.propietarios.map(x=>[x.nombre,x.ci].filter(Boolean).join(' · ')).join(' / ')],
+    ['Apoderado',p.apoderado],
+    ['Proyectista',p.proyectista],
+    ['SENESCYT proyectista',p.proyectista_senescyt],
+    ['Registro Municipal',p.proyectista_registro_municipal],
+    ['Correo sugerido',p.correo_notificacion_sugerido],
+    ['Proyecto',p.nombre_proyecto],
+    ['Uso',p.uso_proyecto],
+    ['Tipo de obra',p.tipo_obra],
+    ['Altura edificación',p.altura_edificacion],
+    ['Parroquia',p.parroquia],
+    ['Dirección',p.direccion],
+    ['Código PIT',p.codigo_pit],
+    ['Clave catastral',p.clave_catastral],
+    ['Barrio / sector',p.barrio_sector],
+    ['Área predio',p.area_predio],
+    ['Área construcción',p.area_construccion],
+    ['Área ampliación/modificación',p.area_ampliacion_modificacion],
+    ['Pisos',p.pisos],
+    ['Unidades habitacionales',p.unidades_habitacionales],
+    ['Unidades comerciales',p.unidades_comerciales],
+    ['COS PB',p.cos_pb],
+    ['COS Total',p.cos_total],
+    ['Gravamen · Ficha',p.gravamen_ficha_registral],
+    ['Gravamen · Certificado',p.gravamen_certificado],
+    ['Gravamen · Fecha',p.gravamen_fecha],
+    ['Gravamen · Área total',p.gravamen_area_total],
+    ['Estructural · Documento',p.estructural_documento],
+    ['Estructural · eGOB',p.estructural_egob],
+    ['Estructural · Fecha',p.estructural_fecha],
+    ['Estructural · Técnico',p.estructural_tecnico],
+    ['Estructural · Criterio',p.estructural_criterio],
+    ['Estructural · Calculista',p.estructural_calculista],
+    ['Estructural · SENESCYT',p.estructural_senescyt],
+    ['Filas Conclusión Técnica',Array.isArray(p.conclusion_tecnica)?p.conclusion_tecnica.length:0]
+  ];
+  return items.map(([k,v])=>'<tr><th>'+e(k)+'</th><td>'+(String(v??'').trim()?e(v):'<span style="color:#98a2b3">—</span>')+'</td></tr>').join('');
+}
+function validationHtml(v){
+  return [
+    ...v.bad.map(x=>'<div class="item bad">✕ '+e(x)+'</div>'),
+    ...v.warn.map(x=>'<div class="item warn">⚠ '+e(x)+'</div>'),
+    ...v.good.map(x=>'<div class="item good">✓ '+e(x)+'</div>')
+  ].join('');
+}
+function displayPayload(p){
+  const validations=validate(p);
+  const table=document.getElementById('phduPayloadTableV1');
+  if(table) table.innerHTML=rowsHtml(p);
+  const val=document.getElementById('phduValidationV1');
+  if(val) val.innerHTML=validationHtml(validations);
+
+  const snapshotSize=new Blob([JSON.stringify(p.datos_informe||{})]).size;
+  const size=document.getElementById('phduSnapshotSizeV1');
+  if(size) size.textContent=(snapshotSize/1024).toFixed(1)+' KB';
+
+  const display=clone(p);
+  display.datos_informe='[FOTOGRAFÍA COMPLETA DEL STATE · '+(snapshotSize/1024).toFixed(1)+' KB · ocultada aquí para facilitar la revisión]';
+  const pre=document.getElementById('phduJsonV1');
+  if(pre) pre.textContent=JSON.stringify(display,null,2);
+
+  const result=document.getElementById('phduPayloadResultV1');
+  if(result) result.style.display='grid';
+  const empty=document.getElementById('phduPayloadEmptyV1');
+  if(empty) empty.style.display='none';
+
+  if(validations.bad.length){
+    status('Comprobación realizada con '+validations.bad.length+' error(es). No se envió ningún dato y no se asignó ningún número.','error');
+  }else if(validations.warn.length){
+    status('Conexión y mapeo comprobados. Hay '+validations.warn.length+' advertencia(s). No se envió ningún dato y no se asignó ningún número.','info');
+  }else{
+    status('Conexión y mapeo comprobados correctamente. No se envió ningún dato y no se asignó ningún número.','ok');
+  }
+}
+async function login(){
+  const email=String(document.getElementById('phduEmailV1')?.value||'').trim();
+  const password=String(document.getElementById('phduPasswordV1')?.value||'');
+  if(!email||!password){status('Ingrese correo y contraseña PHDU.','error');return;}
+  if(!client){status('No se pudo cargar el cliente de Supabase. Verifique la conexión a Internet.','error');return;}
+  status('Comprobando credenciales…','info');
+  try{
+    const {data,error}=await client.auth.signInWithPassword({email,password});
+    if(error) throw error;
+    currentUser=data.user||null;
+    if(!currentUser) throw new Error('Supabase no devolvió el usuario autenticado.');
+    const {data:profile,error:profileError}=await client
+      .from('phdu_profiles')
+      .select('id, correo, nombre_completo, rol, activo, cargo, firma_nombre, firma_cargo')
+      .eq('id',currentUser.id)
+      .single();
+    if(profileError) throw profileError;
+    currentProfile=profile;
+    renderProfile();
+    document.getElementById('phduPasswordV1').value='';
+    status('Conexión correcta. Perfil PHDU reconocido: '+(profile.nombre_completo||email)+' · '+(profile.rol||'—')+'.','ok');
+  }catch(err){
+    currentUser=null; currentProfile=null; renderProfile();
+    status('No se pudo iniciar sesión: '+String(err?.message||err),'error');
+  }
+}
+async function logout(){
+  try{if(client) await client.auth.signOut();}catch(_e){}
+  currentUser=null; currentProfile=null; lastPayload=null;
+  renderProfile();
+  const result=document.getElementById('phduPayloadResultV1'); if(result) result.style.display='none';
+  const empty=document.getElementById('phduPayloadEmptyV1'); if(empty) empty.style.display='block';
+  status('Sesión Supabase cerrada.','info');
+}
+function check(){
+  if(!currentProfile){
+    status('Primero inicie sesión con un usuario PHDU para comprobar también el rol.','error');
+    return;
+  }
+  try{
+    const built=buildPayload();
+    lastPayload=built.payload;
+    displayPayload(lastPayload);
+  }catch(err){
+    status('No se pudo construir el payload: '+String(err?.message||err),'error');
+  }
+}
+async function copyJson(){
+  if(!lastPayload){status('Primero ejecute la comprobación.','error');return;}
+  try{
+    await navigator.clipboard.writeText(JSON.stringify(lastPayload,null,2));
+    status('JSON completo copiado al portapapeles. Sigue sin enviarse a Supabase.','ok');
+  }catch(err){
+    status('No se pudo copiar el JSON: '+String(err?.message||err),'error');
+  }
+}
+function openModal(){
+  document.getElementById('phduOverlayV1')?.classList.add('open');
+  renderProfile();
+}
+function closeModal(){document.getElementById('phduOverlayV1')?.classList.remove('open');}
+
+function mount(){
+  if(!document.getElementById('phduCheckCardV1')){
+    const aside=document.querySelector('aside.side-stack')||document.querySelector('.side-stack');
+    if(aside){
+      const card=document.createElement('div');
+      card.id='phduCheckCardV1';
+      card.className='card no-print phdu-check-card-v1';
+      card.innerHTML=
+        '<span class="phdu-check-badge-v1">Modo seguro · no numera</span>'
+       +'<h2>Comprobación Supabase</h2>'
+       +'<div id="phduSideProfileV1" class="mini">Sin sesión Supabase</div>'
+       +'<div data-phdu-status-v1 class="phdu-check-status-v1 info">Solo autentica, lee su perfil y prepara los datos localmente.</div>'
+       +'<div class="buttons"><button type="button" onclick="window.AllpaSupabaseCheckV1.open()">Abrir comprobación</button>'
+       +'<button type="button" class="secondary" id="phduLogoutV1" onclick="window.AllpaSupabaseCheckV1.logout()" disabled>Cerrar sesión</button></div>';
+      aside.appendChild(card);
+    }
+  }
+  if(!document.getElementById('phduOverlayV1')){
+    const overlay=document.createElement('div');
+    overlay.id='phduOverlayV1';
+    overlay.className='phdu-check-overlay-v1 no-print';
+    overlay.innerHTML=`
+      <div class="phdu-check-modal-v1" role="dialog" aria-modal="true" aria-label="Comprobación Supabase sin numerar">
+        <div class="phdu-check-head-v1">
+          <div><h2>ALLPA · COMPROBACIÓN SUPABASE</h2><div style="font-size:11px;color:#dbe7f2;margin-top:3px">NO GUARDA · NO LLAMA RPC · NO ASIGNA NÚMEROS · NO TOCA QGIS</div></div>
+          <button type="button" onclick="window.AllpaSupabaseCheckV1.close()">Cerrar ×</button>
+        </div>
+        <div class="phdu-check-body-v1">
+          <div class="phdu-check-note-v1"><strong>Modo de comprobación:</strong> Supabase se utiliza únicamente para autenticar al usuario y leer su propia fila de <code>phdu_profiles</code>. El informe se transforma a un payload <strong>solo en este navegador</strong>. Esta versión no contiene ninguna llamada a <code>phdu_finalizar_informe</code> ni a la función de numeración.</div>
+          <div data-phdu-status-v1 class="phdu-check-status-v1 info" style="margin-top:12px">Pendiente de iniciar sesión.</div>
+          <div class="phdu-check-grid-v1">
+            <div class="phdu-check-panel-v1">
+              <h3>1. Usuario PHDU</h3>
+              <div class="field"><label>Correo</label><input id="phduEmailV1" type="email" autocomplete="username" placeholder="correo@ejemplo.com"></div>
+              <div class="field"><label>Contraseña</label><input id="phduPasswordV1" type="password" autocomplete="current-password" placeholder="Contraseña"></div>
+              <div class="phdu-check-actions-v1">
+                <button type="button" onclick="window.AllpaSupabaseCheckV1.login()">Iniciar sesión y comprobar</button>
+                <button type="button" class="secondary" onclick="window.AllpaSupabaseCheckV1.logout()">Cerrar sesión</button>
+              </div>
+              <div class="phdu-check-section-v1" style="margin-top:14px">Perfil reconocido</div>
+              <div id="phduProfileV1">${profileHtml()}</div>
+              <div class="phdu-check-section-v1" style="margin-top:14px">2. Payload local</div>
+              <button type="button" class="success" style="width:100%;margin-top:6px" onclick="window.AllpaSupabaseCheckV1.check()">Comprobar datos para Supabase</button>
+              <div class="mini" style="margin-top:7px">El botón solo lee el <code>state</code> actual de ALLPA. No realiza escrituras.</div>
+            </div>
+            <div class="phdu-check-main-v1">
+              <div id="phduPayloadResultV1" style="display:none;gap:12px">
+                <div class="phdu-check-panel-v1">
+                  <h3>Validación</h3>
+                  <div id="phduValidationV1" class="phdu-check-validation-v1"></div>
+                </div>
+                <div class="phdu-check-panel-v1">
+                  <h3>Datos que se enviarían al finalizar</h3>
+                  <table class="phdu-check-table-v1"><tbody id="phduPayloadTableV1"></tbody></table>
+                </div>
+                <div class="phdu-check-panel-v1">
+                  <h3>JSON de comprobación</h3>
+                  <div class="mini" style="margin-bottom:7px">La fotografía completa <code>datos_informe</code> ocupa <strong id="phduSnapshotSizeV1">0 KB</strong> y se oculta solo en esta vista para que el JSON sea legible.</div>
+                  <pre id="phduJsonV1" class="phdu-check-json-v1"></pre>
+                  <div class="phdu-check-actions-v1"><button type="button" class="secondary" onclick="window.AllpaSupabaseCheckV1.copyJson()">Copiar JSON completo</button></div>
+                </div>
+              </div>
+              <div id="phduPayloadEmptyV1" class="phdu-check-empty-v1">Inicie sesión y pulse <strong>Comprobar datos para Supabase</strong>. Aquí aparecerá el mapeo del Informe Técnico Aprobatorio actual.</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click',function(ev){if(ev.target===overlay) closeModal();});
+  }
+  renderProfile();
+}
+
+try{
+  if(window.supabase && typeof window.supabase.createClient==='function'){
+    client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+      auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}
+    });
+  }
+}catch(err){console.error('ALLPA Supabase Check:',err);}
+
+window.AllpaSupabaseCheckV1=Object.freeze({
+  version:VERSION,
+  open:openModal,
+  close:closeModal,
+  login:login,
+  logout:logout,
+  check:check,
+  copyJson:copyJson,
+  buildPayload:function(){return buildPayload().payload;},
+  mode:'READ_PROFILE_AND_BUILD_LOCAL_PAYLOAD_ONLY'
+});
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount);
+else mount();
+window.addEventListener('load',function(){setTimeout(mount,400);});
+})();
+</script>
+
 </body>
 </html>
