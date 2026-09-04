@@ -3832,9 +3832,47 @@ header.no-print{padding-left:82px!important}
 .allpa-home-v7:hover{background:#ffffff2b!important}.allpa-home-v7 svg{width:21px;height:21px;display:block}
 @media(max-width:760px){.allpa-home-v7{left:10px;top:10px;width:38px;height:38px}header.no-print{padding-left:62px!important}}
 </style>
+
+<style id="allpa-v8-number-home-style">
+#homeProjectBtnV124{display:none!important}
+#phduCheckBarV2,#phduCheckCardV1{display:none!important}
+#projectBadgeTabsV123{cursor:pointer;user-select:none}
+#projectBadgeTabsV123:hover{background:#edf7fd}
+.phdu-number-trigger-v8{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:48px;height:34px;padding:0 10px;margin-left:7px;
+  border-radius:999px;border:1px solid #0d4f77;background:#0d4f77;color:#fff;
+  font-size:11px;font-weight:1000;letter-spacing:.1px;cursor:pointer;
+  box-shadow:0 3px 9px rgba(13,79,119,.14)
+}
+.phdu-number-trigger-v8:hover{filter:brightness(.96)}
+.phdu-number-trigger-v8:disabled{opacity:.5;cursor:not-allowed}
+#phduOverlayV1 .phdu-check-grid-v1{grid-template-columns:1fr!important}
+#phduOverlayV1 .phdu-login-panel-v8-hidden{display:none!important}
+#phduNumberActionsV8{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  padding:10px 12px;margin-bottom:10px;border:1px solid #d8e1e9;
+  border-radius:10px;background:#f8fbfd
+}
+#phduNumberActionsV8 .phdu-session-v8{flex:1 1 260px;font-size:11px;line-height:1.35;color:#425466}
+#phduNumberActionsV8 .phdu-action-wrap-v8{display:flex;gap:8px;flex-wrap:wrap}
+#phduNumberActionsV8 .phdu-finalize-v4,
+#phduNumberActionsV8 .phdu-update-v5{width:auto!important;margin:0!important;min-height:36px!important;padding:8px 12px!important}
+#phduNumberActionsV8 .phdu-update-note-v5{display:none!important}
+#phduNumberActionsV8 #phduFinalizedV4{flex:1 1 100%;margin-top:2px!important}
+#phduPayloadEmptyV1{display:none!important}
+@media(max-width:760px){
+  .phdu-number-trigger-v8{min-width:44px;padding:0 8px}
+  #phduNumberActionsV8{align-items:stretch}
+  #phduNumberActionsV8 .phdu-action-wrap-v8{width:100%}
+  #phduNumberActionsV8 .phdu-finalize-v4,
+  #phduNumberActionsV8 .phdu-update-v5{flex:1 1 220px}
+}
+</style>
+
 </head>
 <body>
-<a class="allpa-home-v7 no-print" href="../index.html" title="Inicio ALLPA" aria-label="Inicio ALLPA">
+<a id="allpaHomeV8" class="allpa-home-v7 no-print" href="/PRUEBAS/" title="Volver al Portal ALLPA" aria-label="Volver al Portal ALLPA">
 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
 </a>
 
@@ -40067,16 +40105,16 @@ function mount(){
     overlay.id='phduOverlayV1';
     overlay.className='phdu-check-overlay-v1 no-print';
     overlay.innerHTML=`
-      <div class="phdu-check-modal-v1" role="dialog" aria-modal="true" aria-label="Comprobación Supabase sin numerar">
+      <div class="phdu-check-modal-v1" role="dialog" aria-modal="true" aria-label="Control de numeración oficial">
         <div class="phdu-check-head-v1">
-          <div><h2>ALLPA · COMPROBACIÓN SUPABASE</h2><div style="font-size:11px;color:#dbe7f2;margin-top:3px">COMPROBAR NO NUMERA · FINALIZAR SÍ ASIGNA NÚMERO OFICIAL · QGIS AÚN NO SE EJECUTA</div></div>
+          <div><h2>ALLPA · CONTROL DE NUMERACIÓN</h2><div style="font-size:11px;color:#dbe7f2;margin-top:3px">VALIDACIÓN AUTOMÁTICA · NUMERACIÓN OFICIAL DE INFORMES · QGIS AÚN NO SE EJECUTA</div></div>
           <button type="button" onclick="window.AllpaSupabaseCheckV1.close()">Cerrar ×</button>
         </div>
         <div class="phdu-check-body-v1">
-          <div class="phdu-check-note-v1"><strong>Flujo controlado:</strong> primero compruebe el payload. Cuando todo esté correcto, <strong>Finalizar Informe y asignar número</strong> llamará a <code>phdu_finalizar_informe</code>. Esa acción registra el Informe y consume el siguiente número oficial de la serie correspondiente. QGIS continúa pendiente para una fase posterior.</div>
-          <div data-phdu-status-v1 class="phdu-check-status-v1 info" style="margin-top:12px">Pendiente de iniciar sesión.</div>
+          <div class="phdu-check-note-v1"><strong>Control automático:</strong> al abrir este panel desde <strong>Nro.</strong>, ALLPA valida el Informe actual y la sesión PHDU ya iniciada en el Portal. Desde aquí puede finalizar y asignar el número oficial, o actualizar un Informe ya numerado manteniendo su número.</div>
+          <div data-phdu-status-v1 class="phdu-check-status-v1 info" style="margin-top:12px">Validando la sesión PHDU del Portal…</div>
           <div class="phdu-check-grid-v1">
-            <div class="phdu-check-panel-v1">
+            <div class="phdu-check-panel-v1 phdu-login-panel-v8-hidden">
               <h3>1. Usuario PHDU</h3>
               <div class="field"><label>Correo</label><input id="phduEmailV1" type="email" autocomplete="username" placeholder="correo@ejemplo.com"></div>
               <div class="field"><label>Contraseña</label><input id="phduPasswordV1" type="password" autocomplete="current-password" placeholder="Contraseña"></div>
@@ -40542,16 +40580,25 @@ function updateFinalizeUi(){
 }
 
 function mountFinalizeButton(){
-  const marker=document.querySelector('#phduOverlayV1 .phdu-check-section-v1');
-  const checkButton=document.querySelector('#phduOverlayV1 button.success');
-  if(!checkButton || document.getElementById('phduFinalizeV4')){updateFinalizeUi();return;}
+  const overlay=document.getElementById('phduOverlayV1');
+  const main=overlay?.querySelector('.phdu-check-main-v1');
+  if(!main){updateFinalizeUi();return;}
+  let host=document.getElementById('phduNumberActionsV8');
+  if(!host){
+    host=document.createElement('div');
+    host.id='phduNumberActionsV8';
+    host.innerHTML='<div class="phdu-session-v8" id="phduSessionSummaryV8"></div><div class="phdu-action-wrap-v8" id="phduNumberButtonsV8"></div>';
+    main.prepend(host);
+  }
+  const actionHost=document.getElementById('phduNumberButtonsV8')||host;
+  if(document.getElementById('phduFinalizeV4')){updateFinalizeUi();return;}
   const btn=document.createElement('button');
   btn.type='button';
   btn.id='phduFinalizeV4';
   btn.className='phdu-finalize-v4';
   btn.textContent='FINALIZAR INFORME Y ASIGNAR NÚMERO';
   btn.addEventListener('click',finalize);
-  checkButton.insertAdjacentElement('afterend',btn);
+  actionHost.appendChild(btn);
 
   const update=document.createElement('button');
   update.type='button';
@@ -40559,17 +40606,17 @@ function mountFinalizeButton(){
   update.className='phdu-update-v5';
   update.textContent='ACTUALIZAR Y MANTENER NÚMERO REGISTRADO';
   update.addEventListener('click',updateRegisteredInforme);
-  btn.insertAdjacentElement('afterend',update);
+  actionHost.appendChild(update);
 
   const note=document.createElement('div');
   note.className='phdu-update-note-v5';
   note.textContent='Para Informes ya numerados. Si el número no está cargado en este navegador, ALLPA lo verifica y recupera desde Supabase antes de actualizar, sin consumir otro número oficial.';
-  update.insertAdjacentElement('afterend',note);
+  host.appendChild(note);
 
   const box=document.createElement('div');
   box.id='phduFinalizedV4';
   box.className='phdu-finalized-v4';
-  note.insertAdjacentElement('afterend',box);
+  host.appendChild(box);
   updateFinalizeUi();
 }
 
@@ -40579,8 +40626,8 @@ async function updateRegisteredInforme(){
   if(!api){alert('No se encuentra el módulo PHDU de Supabase.');return;}
   const profile=typeof api.getProfile==='function'?api.getProfile():null;
   if(!profile){
-    setStatus('Primero inicie sesión con un usuario PHDU. Luego vuelva a pulsar Actualizar.','error');
-    api.open?.();
+    alert('No existe una sesión PHDU activa. Regrese al Portal ALLPA e inicie sesión nuevamente.');
+    window.location.href='/PRUEBAS/';
     return;
   }
 
@@ -40678,8 +40725,8 @@ async function finalize(){
   if(!api){alert('No se encuentra el módulo PHDU de Supabase.');return;}
   const profile=typeof api.getProfile==='function'?api.getProfile():null;
   if(!profile){
-    setStatus('Primero inicie sesión con un usuario PHDU.','error');
-    api.open?.();
+    alert('No existe una sesión PHDU activa. Regrese al Portal ALLPA e inicie sesión nuevamente.');
+    window.location.href='/PRUEBAS/';
     return;
   }
 
@@ -40780,6 +40827,100 @@ document.addEventListener('click',function(ev){
 
 
 
+
+
+<script id="allpa-v8-number-control-script">
+(function(){
+'use strict';
+function portalV8(){ window.location.href='/PRUEBAS/'; }
+function ensureSingleHomeV8(){
+  document.getElementById('homeProjectBtnV124')?.remove();
+  const homes=[...document.querySelectorAll('.allpa-home-v7')];
+  homes.forEach((el,i)=>{
+    if(i>0){el.remove();return;}
+    el.id='allpaHomeV8';
+    el.setAttribute('href','/PRUEBAS/');
+    el.setAttribute('title','Volver al Portal ALLPA');
+    el.onclick=function(ev){ev.preventDefault();portalV8();};
+  });
+}
+function currentReportTypeV8(){
+  return String(document.getElementById('tipoInforme')?.value||state?.tipoInforme||'').trim();
+}
+function numberButtonV8(){ return document.getElementById('phduNumberTriggerV8'); }
+function syncNumberButtonV8(){
+  const b=numberButtonV8(); if(!b)return;
+  const approved=/Informe Técnico Aprobatorio/i.test(currentReportTypeV8());
+  b.disabled=!approved;
+  b.title=approved?'Validar y gestionar la numeración oficial del Informe Aprobatorio':'Disponible únicamente para Informe Técnico Aprobatorio';
+}
+function ensureNumberButtonV8(){
+  const tabs=document.querySelector('.tabs'); if(!tabs)return;
+  const badge=document.getElementById('projectBadgeTabsV123');
+  if(badge){
+    badge.setAttribute('role','button');
+    badge.setAttribute('tabindex','0');
+    badge.title='Cambiar entre Obra Mayor y Anteproyecto';
+    if(!badge.dataset.v8Switch){
+      const go=()=>{try{if(typeof changeProjectV123==='function')changeProjectV123();}catch(_e){}};
+      badge.addEventListener('click',go);
+      badge.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+      badge.dataset.v8Switch='1';
+    }
+  }
+  if(document.getElementById('phduNumberTriggerV8')){syncNumberButtonV8();return;}
+  const btn=document.createElement('button');
+  btn.type='button'; btn.id='phduNumberTriggerV8'; btn.className='phdu-number-trigger-v8'; btn.textContent='Nro.';
+  btn.addEventListener('click',openNumberControlV8);
+  if(badge) badge.insertAdjacentElement('afterend',btn); else tabs.appendChild(btn);
+  syncNumberButtonV8();
+}
+function sessionSummaryV8(){
+  const p=window.AllpaSupabaseCheckV1?.getProfile?.();
+  const el=document.getElementById('phduSessionSummaryV8'); if(!el)return;
+  if(!p){el.innerHTML='<strong>Sesión PHDU:</strong> no disponible.';return;}
+  el.innerHTML='<strong>Sesión PHDU:</strong> '+String(p.nombre_completo||p.correo||'Usuario')+
+    ' · <strong>'+String(p.rol||'—')+'</strong><br>La validación se ejecutó automáticamente al pulsar <strong>Nro.</strong>.';
+}
+function remodelNumberModalV8(){
+  try{window.AllpaPhduFinalizeV4?.refresh?.();}catch(_e){}
+  sessionSummaryV8();
+}
+function openNumberControlV8(){
+  const api=window.AllpaSupabaseCheckV1;
+  if(!api){alert('El módulo de numeración todavía no terminó de cargar. Intente nuevamente en unos segundos.');return;}
+  const profile=api.getProfile?.();
+  if(!profile){
+    alert('No existe una sesión PHDU activa. Regrese al Portal ALLPA e inicie sesión nuevamente.');
+    portalV8(); return;
+  }
+  if(!/Informe Técnico Aprobatorio/i.test(currentReportTypeV8())){
+    alert('La numeración oficial está disponible únicamente para un Informe Técnico Aprobatorio.'); return;
+  }
+  api.open();
+  try{api.check();}catch(_e){}
+  setTimeout(remodelNumberModalV8,60);
+}
+function observeTypeV8(){
+  const sel=document.getElementById('tipoInforme');
+  if(sel&&!sel.dataset.v8Number){
+    sel.addEventListener('change',syncNumberButtonV8);
+    sel.dataset.v8Number='1';
+  }
+}
+function bootV8(){
+  ensureSingleHomeV8();
+  document.getElementById('phduCheckBarV2')?.remove();
+  document.getElementById('phduCheckCardV1')?.remove();
+  ensureNumberButtonV8();
+  observeTypeV8();
+  syncNumberButtonV8();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(bootV8,500));
+else setTimeout(bootV8,300);
+window.addEventListener('load',()=>{setTimeout(bootV8,900);setTimeout(bootV8,1800);});
+})();
+</script>
 
 </body>
 </html>
