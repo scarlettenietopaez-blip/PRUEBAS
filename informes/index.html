@@ -3824,18 +3824,20 @@ main{
 }
 </style>
 
+
+<style id="allpa-v7-home-style">
+#passwordOverlay,.password-overlay{display:none!important}
+header.no-print{padding-left:82px!important}
+.allpa-home-v7{position:fixed;left:18px;top:16px;z-index:149500;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#ffffff18!important;color:#fff!important;border:1px solid #ffffff55!important;box-shadow:0 5px 16px rgba(0,0,0,.16);padding:0!important;text-decoration:none}
+.allpa-home-v7:hover{background:#ffffff2b!important}.allpa-home-v7 svg{width:21px;height:21px;display:block}
+@media(max-width:760px){.allpa-home-v7{left:10px;top:10px;width:38px;height:38px}header.no-print{padding-left:62px!important}}
+</style>
 </head>
 <body>
+<a class="allpa-home-v7 no-print" href="../index.html" title="Inicio ALLPA" aria-label="Inicio ALLPA">
+<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+</a>
 
-<div id="passwordOverlay" class="password-overlay">
-  <div class="password-box">
-    <h2>Bienvenido a ALLPA</h2>
-    <p>Ingrese la contraseña para continuar.</p>
-    <input id="appPasswordInput" type="password" placeholder="Contraseña" autocomplete="current-password">
-    <button class="success" style="width:100%;margin-top:12px" onclick="unlockAppV36()">Ingresar</button>
-    <div id="passwordErrorV36" class="password-error">Contraseña incorrecta.</div>
-  </div>
-</div>
 
 <header class="no-print">
   <h1>ALLPA</h1>
@@ -5408,25 +5410,6 @@ window.addEventListener('load', init);
    V36 - Observaciones solicitadas por Dirección
    Base: v35 estable. Este bloque agrega funciones sin rehacer el sistema.
    ========================================================== */
-const APP_PASSWORD_V36 = '1234';
-
-function unlockAppV36(){
-  const val=document.getElementById('appPasswordInput')?.value||'';
-  const err=document.getElementById('passwordErrorV36');
-  if(val===APP_PASSWORD_V36){
-    sessionStorage.setItem('OM_AUTH_V36','OK');
-    const o=document.getElementById('passwordOverlay'); if(o) o.style.display='none';
-  }else{
-    if(err) err.style.display='block';
-  }
-}
-window.addEventListener('load',()=>{
-  const o=document.getElementById('passwordOverlay');
-  if(sessionStorage.getItem('OM_AUTH_V36')==='OK' && o) o.style.display='none';
-  const inp=document.getElementById('appPasswordInput');
-  if(inp) inp.addEventListener('keydown',e=>{ if(e.key==='Enter') unlockAppV36(); });
-});
-
 function ensureV36State(){
   if(!state.apoderado) state.apoderado={activo:false,nombre:'',ci:''};
   if(!state.catastral) state.catastral={prov:'06',cant:'01',parro:'',zona:'',sect:'',polg:'',pred:'',urbanoRural:''};
@@ -7422,22 +7405,8 @@ bindCatastralPanelV36 = function(f){
 <script>
 /* ==========================================================
    V51 - Listas sin vacíos, observación manual completa,
-   No Aplica en requisitos >2 pisos/400m2, contraseña form1234
+   No Aplica en requisitos >2 pisos/400m2
    ========================================================== */
-
-// 1) Contraseña nueva
-unlockAppV36 = function(){
-  const val=document.getElementById('appPasswordInput')?.value||'';
-  const err=document.getElementById('passwordErrorV36');
-  if(val==='form1234'){
-    sessionStorage.setItem('OM_AUTH_V36','OK');
-    const o=document.getElementById('passwordOverlay'); 
-    if(o) o.style.display='none';
-  }else{
-    if(err) err.style.display='block';
-  }
-};
-
 // 2) Selects PARR/ZONA sin opciones vacías visibles
 function parroquiasOptionsV49(selected){
   ensureCatDBV46();
@@ -16576,27 +16545,11 @@ body .project-entry-v123 .project-option-v123 .arrow{
 /* ==========================================================
    V125 SOBRE V124
    La portada de proyectos se muestra siempre como página inicial
-   después de validar la contraseña o recargar una sesión autorizada.
+   al ingresar al Generador desde la sesión PHDU del Portal.
    ========================================================== */
 let projectSelectedDuringStartupV125=false;
 
 /* V24D: wrapper V125 retirado; integrado en ProjectNavigationV24D.selectProject. */
-
-unlockAppV36 = function(){
-  const val=document.getElementById('appPasswordInput')?.value||'';
-  const err=document.getElementById('passwordErrorV36');
-  if(val==='form1234'){
-    sessionStorage.setItem('OM_AUTH_V36','OK');
-    const overlay=document.getElementById('passwordOverlay');
-    if(overlay) overlay.style.display='none';
-    if(err) err.style.display='none';
-    ensureProjectEntryV123();
-    showProjectEntryV123();
-    patchProjectEntryTextV124();
-  }else if(err){
-    err.style.display='block';
-  }
-};
 
 window.addEventListener('load',()=>{
   /* Se ejecuta después del bloque V123 que restauraba el último proyecto. */
@@ -40827,20 +40780,6 @@ document.addEventListener('click',function(ev){
 
 
 
-<!-- ALLPA MODULAR · NAVEGACIÓN AL PORTAL -->
-<style id="allpa-modular-back-style">
-#allpaModularBack{
-  position:fixed;right:16px;bottom:16px;z-index:149000;
-  display:inline-flex;align-items:center;gap:7px;
-  padding:10px 13px;border-radius:12px;
-  background:#0b4268;color:#fff;text-decoration:none;
-  font:800 11px/1 Arial,Helvetica,sans-serif;
-  box-shadow:0 7px 20px rgba(11,66,104,.26);
-  border:1px solid rgba(255,255,255,.25)
-}
-#allpaModularBack:hover{background:#073653}
-</style>
-<a id="allpaModularBack" href="../index.html" title="Volver al portal ALLPA">← Portal ALLPA</a>
 
 </body>
 </html>
