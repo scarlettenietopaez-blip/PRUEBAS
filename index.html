@@ -4,69 +4,36 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ALLPA · PHDU</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --blue:#0b4268;--blue2:#0d4f77;--ink:#17324d;--muted:#657689;
-  --line:#d5e0e8;--bg:#eef3f7;--red:#b5162b;--teal:#28aaa5;
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg)}
-body{min-height:100vh;display:grid;grid-template-rows:auto 1fr auto}
-header{padding:22px 24px;background:linear-gradient(135deg,#0a2d4e,#0d4f77);color:#fff;box-shadow:0 4px 18px rgba(12,55,87,.18)}
-.brand{max-width:1100px;margin:auto;display:flex;align-items:center;gap:14px}
-.logo{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;font-weight:1000;font-size:17px;background:#ffffff17;border:1px solid #ffffff38}
-h1{margin:0;font-size:21px;letter-spacing:.2px}.subtitle{font-size:11px;color:#cee1ed;margin-top:4px}
-main{width:min(1100px,calc(100% - 32px));margin:28px auto;align-self:start}
-.intro{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 6px 20px rgba(13,55,85,.06)}
-.intro h2{margin:0 0 5px;font-size:17px}.intro p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
-.modules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
-.card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:15px;min-height:150px;padding:20px;background:#fff;border:1px solid var(--line);border-radius:16px;text-decoration:none;color:var(--ink);box-shadow:0 7px 22px rgba(13,55,85,.07);transition:.18s ease}
-.card:hover{transform:translateY(-2px);box-shadow:0 11px 28px rgba(13,55,85,.12);border-color:#9eb8ca}
-.icon{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:25px;font-weight:900}
-.card.informes .icon{background:#e8f6f5;color:#08746f}.card.resoluciones .icon{background:#fff0f2;color:var(--red)}
-.card h3{margin:0;font-size:16px}.card p{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
-.arrow{font-size:24px;color:#7890a3}
-.badge{display:inline-block;margin-top:10px;padding:4px 8px;border-radius:999px;background:#edf3f7;color:#49657a;font-size:9px;font-weight:900;text-transform:uppercase}
-footer{padding:16px;text-align:center;color:#778899;font-size:10px}
-@media(max-width:720px){.modules{grid-template-columns:1fr}.card{min-height:125px}header{padding:18px}.brand{align-items:flex-start}.logo{width:46px;height:46px}}
+:root{--blue:#06375d;--blue2:#075681;--red:#e73440;--ink:#082f53;--muted:#5d7083;--line:#c9d8e3;--bg:#f4f8fa}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+.top{height:72px;background:linear-gradient(90deg,#072e52,#42192d);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;color:#fff;font-weight:900;font-size:18px;letter-spacing:.4px}
+.portal{min-height:calc(100vh - 72px);display:grid;grid-template-columns:1fr 1fr}.hero{background:#e7353f url('assets/portada_inicio_riobamba.png') center/cover no-repeat;min-height:calc(100vh - 72px)}.panel{display:flex;align-items:center;justify-content:center;padding:46px 54px}.box{width:min(650px,100%)}
+h1{font-size:34px;margin:0 0 8px}.lead{margin:0 0 26px;color:var(--muted);line-height:1.5}.login{background:#fff;border:1px solid var(--line);border-left:5px solid #bf1d34;border-radius:18px;padding:22px;box-shadow:0 10px 28px rgba(18,64,94,.08)}
+.field{display:grid;gap:6px;margin-top:13px}.field label{font-size:10px;font-weight:900;text-transform:uppercase}.field input{width:100%;min-height:46px;border:1px solid #b9cbd9;border-radius:11px;padding:10px 12px;font-size:14px}.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}button,.module{border:0;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer}.primary{background:var(--blue2);color:#fff}.soft{background:#edf4f7;color:var(--blue)}.status{margin-top:14px;padding:10px 12px;border-radius:10px;background:#f3f6f8;color:#52677a;font-size:12px;line-height:1.4}.status.ok{background:#eaf8f0;color:#17623d}.status.error{background:#fff0f0;color:#8d241f}.profile{margin-top:18px;font-size:12px;line-height:1.55}.modules{display:grid;gap:14px;margin-top:22px}.module{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #11648f;text-decoration:none;color:var(--ink);padding:18px 20px;box-shadow:0 7px 18px rgba(12,63,94,.07)}.module .n{width:46px;height:46px;border-radius:14px;background:#075b87;color:#fff;display:grid;place-items:center;font-size:18px}.module .txt{flex:1}.module .txt strong{display:block;font-size:17px}.module .txt span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.module .arr{font-size:24px}.hidden{display:none!important}
+@media(max-width:850px){.portal{grid-template-columns:1fr}.hero{display:none}.panel{padding:28px 20px}.top{height:58px}.portal{min-height:calc(100vh - 58px)}h1{font-size:28px}}
 </style>
 </head>
 <body>
-<header>
-  <div class="brand">
-    <div class="logo">ALLPA</div>
-    <div>
-      <h1>ALLPA · Planificación, Hábitat y Desarrollo Urbanístico</h1>
-      <div class="subtitle">Portal de herramientas PHDU · módulos independientes conectados a Supabase</div>
-    </div>
+<div class="top">ALLPA</div>
+<div class="portal"><section class="hero" aria-label="Identidad institucional"></section><section class="panel"><div class="box">
+  <div id="loginView"><h1>Inicio de sesión</h1><p class="lead">Ingrese con su cuenta PHDU. ALLPA habilitará únicamente los módulos correspondientes a su rol.</p>
+    <div class="login"><div class="field"><label>Correo</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label>Contraseña</label><input id="password" type="password" autocomplete="current-password"></div><div class="actions"><button class="primary" onclick="login()">INGRESAR A ALLPA</button></div><div id="status" class="status">Esperando credenciales PHDU.</div></div>
   </div>
-</header>
-<main>
-  <section class="intro">
-    <h2>Seleccione el módulo de trabajo</h2>
-    <p>Cada módulo carga únicamente la programación que necesita. Los Informes Técnicos y las Resoluciones permanecen vinculados mediante Supabase.</p>
-  </section>
-  <section class="modules">
-    <a class="card informes" href="informes/index.html">
-      <div class="icon">⌂</div>
-      <div>
-        <h3>Informes Técnicos</h3>
-        <p>Generador técnico para Obra Mayor Definitivo y Anteproyecto de Edificación. Incluye comprobación, finalización y numeración oficial de Informes.</p>
-        <span class="badge">Técnico · Admin</span>
-      </div>
-      <div class="arrow">→</div>
-    </a>
-    <a class="card resoluciones" href="resoluciones/index.html">
-      <div class="icon">§</div>
-      <div>
-        <h3>Resoluciones</h3>
-        <p>Licencia Urbanística de Obra Mayor. Consulta Informes finalizados, guarda borradores y asigna el número oficial al finalizar.</p>
-        <span class="badge">Abogada · Dirección · Admin</span>
-      </div>
-      <div class="arrow">→</div>
-    </a>
-  </section>
-</main>
-<footer>ALLPA · GAD Municipal del Cantón Riobamba · Arquitectura modular</footer>
-</body>
-</html>
+  <div id="roleView" class="hidden"><h1 id="welcome">ALLPA</h1><p id="roleText" class="lead"></p><div id="profile" class="profile"></div><div id="modules" class="modules"></div><div class="actions"><button class="soft" onclick="logout()">CERRAR SESIÓN</button></div></div>
+</div></section></div>
+<script>
+const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
+const SUPABASE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});
+let currentProfile=null;
+function s(msg,type=''){const e=document.getElementById('status');e.textContent=msg;e.className='status '+type}
+async function profileFor(user){const {data,error}=await sb.from('phdu_profiles').select('id,correo,nombre_completo,rol,activo,cargo,firma_nombre,firma_cargo').eq('id',user.id).single();if(error)throw error;if(!data?.activo)throw new Error('El perfil PHDU está inactivo.');return data}
+function moduleLink(href,n,title,sub){return `<a class="module" href="${href}"><span class="n">${n}</span><span class="txt"><strong>${title}</strong><span>${sub}</span></span><span class="arr">→</span></a>`}
+function showRole(p){currentProfile=p;document.getElementById('loginView').classList.add('hidden');document.getElementById('roleView').classList.remove('hidden');document.getElementById('welcome').textContent='Bienvenido/a, '+(p.firma_nombre||p.nombre_completo||'');document.getElementById('profile').innerHTML='<strong>Rol:</strong> '+p.rol+(p.cargo?'<br><strong>Cargo:</strong> '+p.cargo:'');const r=String(p.rol||'').toUpperCase();let html='',txt='';if(r==='TECNICO'){txt='Su perfil tiene habilitado el Generador de Informes Técnicos.';html=moduleLink('informes/index.html','1','INFORMES TÉCNICOS','Obra Mayor Definitivo y Anteproyecto de Edificación.');}else if(r==='ABOGADA'){txt='Su perfil tiene habilitado el módulo de Resoluciones.';html=moduleLink('resoluciones/index.html','1','RESOLUCIONES','Seleccione el tipo de resolución. Por ahora: Obra Mayor.');}else if(r==='ADMIN'){txt='Su perfil de Administrador tiene acceso a todos los módulos.';html=moduleLink('informes/index.html','1','INFORMES TÉCNICOS','Generador técnico y numeración oficial.')+moduleLink('resoluciones/index.html','2','RESOLUCIONES','Generación jurídica y numeración oficial.');}else if(r==='DIRECCION'){txt='Su perfil de Dirección mantiene acceso de consulta y seguimiento conforme a los permisos del sistema.';html=moduleLink('resoluciones/index.html','1','RESOLUCIONES','Consulta de Informes y Resoluciones disponibles.');}else{txt='Este rol todavía no tiene una interfaz asignada en el Portal ALLPA.';}document.getElementById('roleText').textContent=txt;document.getElementById('modules').innerHTML=html}
+async function login(){const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;if(!email||!password){s('Ingrese correo y contraseña.','error');return}s('Validando cuenta PHDU…');try{const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;const p=await profileFor(data.user);showRole(p);if(String(p.rol).toUpperCase()==='TECNICO') location.href='informes/index.html';else if(String(p.rol).toUpperCase()==='ABOGADA') location.href='resoluciones/index.html';}catch(e){s('No se pudo iniciar sesión: '+(e.message||e),'error')}}
+async function logout(){await sb.auth.signOut();currentProfile=null;document.getElementById('roleView').classList.add('hidden');document.getElementById('loginView').classList.remove('hidden');document.getElementById('password').value='';s('Sesión cerrada.');}
+(async()=>{try{const {data}=await sb.auth.getSession();if(data?.session?.user){const p=await profileFor(data.session.user);showRole(p)}}catch(e){console.warn('ALLPA Portal V6:',e)}})();
+</script>
+</body></html>
