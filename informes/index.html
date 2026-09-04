@@ -40173,6 +40173,81 @@ try{
   }
 }catch(err){console.error('ALLPA Supabase Check:',err);}
 
+
+async function recoverRegisteredInforme(payload){
+  if(!client) throw new Error('No se pudo cargar el cliente de Supabase.');
+  if(!currentUser || !currentProfile) throw new Error('Debe iniciar sesión con un usuario PHDU antes de buscar el Informe registrado.');
+  const role=String(currentProfile.rol||'').toUpperCase();
+  if(!currentProfile.activo) throw new Error('El perfil PHDU está inactivo.');
+  if(!['TECNICO','ADMIN'].includes(role)) throw new Error('El rol '+(currentProfile.rol||'—')+' no puede actualizar Informes Técnicos.');
+
+  payload=payload&&typeof payload==='object'?payload:{};
+  const validUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  const selectCols='id,numero,numero_formateado,anio,tipo_tramite,egob,estado,tecnico_id,actualizado_en,creado_en';
+  let row=null;
+
+  const idCandidate=String(state?.phduInformeId||payload.id_informe||'').trim();
+  if(validUuid.test(idCandidate)){
+    const exact=await client.from('phdu_informes_aprobatorios')
+      .select(selectCols)
+      .eq('id',idCandidate)
+      .eq('estado','NUMERADO')
+      .maybeSingle();
+    if(exact.error) throw exact.error;
+    if(exact.data) row=exact.data;
+  }
+
+  if(!row){
+    const egob=digits(payload.egob||state?.egob||'');
+    const tipo=String(payload.tipo_tramite||projectType()||'').trim().toUpperCase();
+    if(!egob) throw new Error('No se puede buscar el Informe registrado porque falta el eGOB.');
+    if(!tipo) throw new Error('No se puede buscar el Informe registrado porque falta el tipo de trámite.');
+
+    const found=await client.from('phdu_informes_aprobatorios')
+      .select(selectCols)
+      .eq('egob',egob)
+      .eq('tipo_tramite',tipo)
+      .eq('estado','NUMERADO')
+      .order('creado_en',{ascending:false})
+      .limit(3);
+    if(found.error) throw found.error;
+    const rows=Array.isArray(found.data)?found.data:[];
+    if(rows.length===1){
+      row=rows[0];
+    }else if(rows.length>1){
+      const hist=String(state?.aprobatorio?.asunto?.numero||'').replace(/\D/g,'');
+      if(hist){
+        const matched=rows.filter(r=>String(r.numero||'')===String(Number(hist)));
+        if(matched.length===1) row=matched[0];
+      }
+      if(!row){
+        throw new Error('Se encontraron varios Informes numerados para el eGOB '+egob+'. Para evitar actualizar el documento equivocado, ALLPA no seleccionará uno automáticamente.');
+      }
+    }
+  }
+
+  if(!row) return null;
+
+  state.phduInformeId=String(row.id);
+  state.phduNumeroInforme=Number(row.numero);
+  state.phduNumeroFormateado=String(row.numero_formateado||row.numero||'');
+  state.phduInformeFinalizado=true;
+  state.phduInformeRecuperadoDesdeSupabase=true;
+  state.phduInformeActualizadoEn=String(row.actualizado_en||'');
+  if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
+  if(!state.aprobatorio.asunto || typeof state.aprobatorio.asunto!=='object') state.aprobatorio.asunto={numero:''};
+  state.aprobatorio.asunto.numero=String(row.numero||'').padStart(3,'0');
+
+  try{
+    state.updatedAt=new Date().toISOString();
+    if(typeof dbPut==='function') await dbPut(clone(state));
+    if(typeof renderSavedList==='function') await renderSavedList();
+  }catch(err){
+    console.warn('ALLPA PHDU: no se pudo persistir localmente la numeración recuperada.',err);
+  }
+  return row;
+}
+
 window.AllpaSupabaseCheckV1=Object.freeze({
   version:VERSION,
   open:openModal,
@@ -40195,6 +40270,7 @@ window.AllpaSupabaseCheckV1=Object.freeze({
     if(error) throw error;
     return data;
   },
+  recoverRegisteredInforme:recoverRegisteredInforme,
   updateInformeRpc:async function(payload){
     if(!client) throw new Error('No se pudo cargar el cliente de Supabase.');
     if(!currentUser || !currentProfile) throw new Error('Debe iniciar sesión con un usuario PHDU antes de actualizar.');
@@ -40477,8 +40553,10 @@ function updateFinalizeUi(){
   }
   const ubtn=updateBtn();
   if(ubtn){
-    ubtn.disabled=busy || !n;
-    ubtn.textContent=busy&&n?'ACTUALIZANDO…':'ACTUALIZAR Y MANTENER NÚMERO REGISTRADO';
+    /* V5.1: el botón permanece disponible. Si el número no está cargado en el
+       navegador, al hacer clic ALLPA lo recupera de Supabase por UUID/eGOB. */
+    ubtn.disabled=busy;
+    ubtn.textContent=busy?'VERIFICANDO / ACTUALIZANDO…':'ACTUALIZAR Y MANTENER NÚMERO REGISTRADO';
   }
   if(box){
     if(n){
@@ -40514,7 +40592,7 @@ function mountFinalizeButton(){
 
   const note=document.createElement('div');
   note.className='phdu-update-note-v5';
-  note.textContent='Disponible únicamente para un Informe ya numerado. Actualiza sus datos sin solicitar ni consumir un nuevo número oficial.';
+  note.textContent='Para Informes ya numerados. Si el número no está cargado en este navegador, ALLPA lo verifica y recupera desde Supabase antes de actualizar, sin consumir otro número oficial.';
   update.insertAdjacentElement('afterend',note);
 
   const box=document.createElement('div');
@@ -40526,17 +40604,40 @@ function mountFinalizeButton(){
 
 async function updateRegisteredInforme(){
   if(busy) return;
-  const n=officialNumber();
-  if(!n){
-    setStatus('Primero debe existir un número oficial asignado al Informe.','error');
-    return;
-  }
   const api=window.AllpaSupabaseCheckV1;
   if(!api){alert('No se encuentra el módulo PHDU de Supabase.');return;}
   const profile=typeof api.getProfile==='function'?api.getProfile():null;
   if(!profile){
-    setStatus('Primero inicie sesión con un usuario PHDU.','error');
+    setStatus('Primero inicie sesión con un usuario PHDU. Luego vuelva a pulsar Actualizar.','error');
     api.open?.();
+    return;
+  }
+
+  let n=officialNumber();
+  if(!n){
+    busy=true;updateFinalizeUi();
+    setStatus('Buscando en Supabase el número oficial ya registrado para este Informe…','info');
+    try{
+      const probe=api.buildPayload();
+      const recovered=await api.recoverRegisteredInforme(probe);
+      if(!recovered){
+        setStatus('No se encontró un Informe numerado para este expediente. Si es un Informe nuevo, use FINALIZAR INFORME Y ASIGNAR NÚMERO.','error');
+        return;
+      }
+      n=officialNumber();
+      ensureAsuntoNumberFromOfficial();
+      try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
+      updateFinalizeUi();
+      setStatus('Se recuperó de Supabase el Informe '+String(state?.phduNumeroFormateado||pad3(n))+'. Puede continuar con la actualización manteniendo ese número.','ok');
+    }catch(err){
+      setStatus('No se pudo identificar el Informe numerado: '+String(err?.message||err),'error');
+      return;
+    }finally{
+      busy=false;updateFinalizeUi();
+    }
+  }
+  if(!n){
+    setStatus('No existe un número oficial registrado para este Informe.','error');
     return;
   }
 
@@ -40578,6 +40679,11 @@ async function updateRegisteredInforme(){
     state.phduInformeFinalizado=true;
     state.phduInformeActualizadoEn=String(row.actualizado_en||new Date().toISOString());
     ensureAsuntoNumberFromOfficial();
+    try{
+      state.updatedAt=new Date().toISOString();
+      if(typeof dbPut==='function') await dbPut(JSON.parse(JSON.stringify(state)));
+      if(typeof renderSavedList==='function') await renderSavedList();
+    }catch(err){console.warn('ALLPA PHDU: no se pudo guardar localmente la actualización.',err);}
 
     try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
     try{window.refreshAsuntoPreviewV119Y?.();}catch(_e){}
@@ -40646,6 +40752,13 @@ async function finalize(){
     state.phduInformeFinalizadoEn=new Date().toISOString();
     state.phduInformeYaExistia=!!row.ya_existia;
     ensureAsuntoNumberFromOfficial();
+    /* V5.1: persistimos UUID + número oficial en el formulario local para que
+       al volver a abrirlo el botón Actualizar reconozca inmediatamente el Informe. */
+    try{
+      state.updatedAt=new Date().toISOString();
+      if(typeof dbPut==='function') await dbPut(JSON.parse(JSON.stringify(state)));
+      if(typeof renderSavedList==='function') await renderSavedList();
+    }catch(err){console.warn('ALLPA PHDU: no se pudo guardar localmente la numeración finalizada.',err);}
 
     try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
     try{window.refreshAsuntoPreviewV119Y?.();}catch(_e){}
@@ -40709,7 +40822,7 @@ document.addEventListener('click',function(ev){
 }
 #allpaModularBack:hover{background:#073653}
 </style>
-<a id="allpaModularBack" href="index.html" title="Volver al portal ALLPA">← Portal ALLPA</a>
+<a id="allpaModularBack" href="../index.html" title="Volver al portal ALLPA">← Portal ALLPA</a>
 
 </body>
 </html>
