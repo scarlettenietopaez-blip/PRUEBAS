@@ -35,8 +35,24 @@ button{cursor:pointer}
   @media(max-width:760px){.rv5-body{grid-template-columns:1fr}.rv5-head{position:static;padding:10px}.rv5-report-list{max-height:320px}.rv5-summary-grid{grid-template-columns:1fr}.rv5-kv.span2,.rv5-kv.span4{grid-column:span 1}.rv5-two,.rv5-three{grid-template-columns:1fr}.rv5-page{height:1120px;padding:105px 38px 90px}.rv5-page-content{height:925px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style id="allpa-resoluciones-project-gate-v6">
+.rv6-gate{position:fixed;inset:0;z-index:170000;background:#f4f8fa;display:flex;min-height:100vh;font-family:Arial,Helvetica,sans-serif}.rv6-gate.hidden{display:none}.rv6-brand{width:50%;background:#e7353f url('../assets/portada_inicio_riobamba.png') center/cover no-repeat;min-height:100vh}.rv6-select{width:50%;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:42px}.rv6-box{width:min(650px,100%)}.rv6-box h1{font-size:34px;margin:0 0 10px;color:#052f55}.rv6-box p{color:#52677c;margin:0 0 28px}.rv6-project{width:100%;border:1px solid #12628e;background:#fff;border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:22px;box-shadow:0 8px 20px rgba(12,63,94,.08);cursor:pointer}.rv6-n{width:48px;height:48px;border-radius:15px;background:#0a5c87;color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}.rv6-title{flex:1;text-align:left;font-weight:900;color:#062f55;font-size:18px}.rv6-arrow{font-size:25px;color:#06395d}.rv6-back{margin-top:28px;border:0;background:#0a5c87;color:#fff;border-radius:12px;padding:11px 16px;font-weight:800;cursor:pointer}@media(max-width:850px){.rv6-brand{display:none}.rv6-select{width:100%;padding:24px}.rv6-box h1{font-size:28px}}
+</style>
 </head>
 <body>
+<div id="rv6ProjectGate" class="rv6-gate">
+  <div class="rv6-brand"></div>
+  <div class="rv6-select"><div class="rv6-box">
+    <h1>Resoluciones disponibles</h1>
+    <p>Seleccione el tipo de resolución para continuar.</p>
+    <button class="rv6-project" type="button" onclick="document.getElementById('rv6ProjectGate').classList.add('hidden');window.AllpaResolucionesV5?.open();">
+      <span class="rv6-n">1</span><span class="rv6-title">OBRA MAYOR</span><span class="rv6-arrow">→</span>
+    </button>
+    <button class="rv6-back" type="button" onclick="location.href='../index.html'">← Portal ALLPA</button>
+  </div></div>
+</div>
+
 <noscript>ALLPA Resoluciones requiere JavaScript habilitado.</noscript>
 <script id="allpa-resoluciones-v5-script">
 (function(){
@@ -103,10 +119,17 @@ function cleanMemoNumber(v){
     .replace(/^\s*MEMORANDO\s+/i,'')
     .trim();
 }
+function personTokenKey(v){
+  return norm(v).split(/\s+/).filter(Boolean).sort().join('|');
+}
 function structuralCargo(){
-  const name=norm(selected?.estructural?.tecnico||'');
+  const raw=String(selected?.estructural?.tecnico||'').trim();
+  const name=norm(raw);
   if(!name)return '';
-  const row=STRUCT_TECH_ROWS.find(r=>norm(r.Nombre)===name && !['NO','N','FALSE','0','INACTIVO'].includes(norm(r.Activo)));
+  const key=personTokenKey(raw);
+  const active=r=>!['NO','N','FALSE','0','INACTIVO'].includes(norm(r.Activo));
+  let row=STRUCT_TECH_ROWS.find(r=>norm(r.Nombre)===name && active(r));
+  if(!row) row=STRUCT_TECH_ROWS.find(r=>personTokenKey(r.Nombre)===key && active(r));
   return String(row?.['Cargo para firma']||'').trim();
 }
 function richHtml(text){
@@ -191,7 +214,7 @@ function variables(){
     EGOB:String(selected?.egob||''),NUMERO_RESOLUCION:numRes,DIRECTOR_NOMBRE:cfg('CFG_001'),DIRECTOR_CARGO:cfg('CFG_002'),ACCION_PERSONAL_DIRECTOR:cfg('CFG_003'),FECHA_ACCION_PERSONAL_DIRECTOR:cfg('CFG_004'),REGISTRADOR_PROPIEDAD:cfg('CFG_005'),MEMORANDO_CRITERIO_JURIDICO:cfg('CFG_006'),TEXTO_CRITERIO_JURIDICO:cfg('CFG_007'),
     FECHA_INGRESO_TRAMITE_LARGA:longDate(selected?.fecha_ingreso_tramite),PROYECTISTA_NOMBRE:String(selected?.proyectista?.nombre||''),TRATAMIENTO_PROPIETARIO:treatment,PROPIETARIO_NOMBRE:owners,PROPIETARIO_CEDULA:docs,PROPIETARIOS_CON_DOCUMENTO:ownerDetail,VERBO_PROPIEDAD:ownerVerb(),CALIDAD_PROPIETARIO:ownerQuality(treatment),PARROQUIA:String(u.parroquia||''),AREA_TOTAL_CERTIFICADO_LETRAS:areaWords(g.area_total_certificado),AREA_TOTAL_CERTIFICADO:String(g.area_total_certificado??''),CERTIFICADO_GRAVAMEN:String(g.certificado||''),FICHA_REGISTRAL:String(g.ficha_registral||''),FECHA_GRAVAMEN_LARGA:longDate(g.fecha),
     DOCUMENTO_ESTRUCTURAL:cleanMemoNumber(s.documento),FECHA_DOCUMENTO_ESTRUCTURAL_LARGA:longDate(s.fecha),TECNICO_ESTRUCTURAL:String(s.tecnico||''),CARGO_TECNICO_ESTRUCTURAL:structuralCargo(),CRITERIO_ESTRUCTURAL:String(s.criterio||''),ING_CALCULISTA:String(s.calculista||''),REG_SENESCYT_CALCULISTA:String(s.senescyt||''),
-    NUMERO_MEMORANDO_REMISION:cleanMemoNumber(getEl('rv5MemoNumero')?.value||resolution?.numero_memorando_remision||''),FECHA_MEMORANDO_REMISION_LARGA:longDate(getEl('rv5MemoFecha')?.value||resolution?.fecha_memorando_remision),TECNICO_INFORME:String(t.nombre||''),CARGO_TECNICO_INFORME:String(t.cargo||''),CONCLUSION_TECNICA_INFORME:technicalConclusion(),AREA_CONSTRUCCION:String(a.construccion??''),AREA_PAGO_TASA:areaForFee(),NUMERO_INFORME_APROBATORIO:String(selected?.numero_informe_formateado||selected?.numero_formateado||''),
+    NUMERO_MEMORANDO_REMISION:cleanMemoNumber(getEl('rv5MemoNumero')?.value||resolution?.numero_memorando_remision||''),FECHA_MEMORANDO_REMISION_LARGA:longDate(getEl('rv5MemoFecha')?.value||resolution?.fecha_memorando_remision),TECNICO_INFORME:String(t.nombre||''),CARGO_TECNICO_INFORME:String(t.firma_cargo||t.cargo||''),CONCLUSION_TECNICA_INFORME:technicalConclusion(),AREA_CONSTRUCCION:String(a.construccion??''),AREA_PAGO_TASA:areaForFee(),NUMERO_INFORME_APROBATORIO:String(selected?.numero_informe_formateado||selected?.numero_formateado||''),
     NUMERO_COMPROBANTE:String(getEl('rv5PagoNumero')?.value||resolution?.numero_comprobante||''),FECHA_COMPROBANTE_LARGA:longDate(getEl('rv5PagoFecha')?.value||resolution?.fecha_comprobante),VALOR_COMPROBANTE:money(getEl('rv5PagoValor')?.value||resolution?.valor_comprobante),CONCEPTO_COMPROBANTE:String(getEl('rv5PagoConcepto')?.value||resolution?.concepto_comprobante||''),
     USO_PROYECTO:String(p.uso||''),TIPO_OBRA_RESUELVE_FRAGMENTO:work.resolve,TIPO_OBRA_ARTICULO_FRAGMENTO:work.article,TRATAMIENTO_PROPIETARIO_MAYUS:up,PROPIETARIO_NOMBRE_MAYUS:owners.toUpperCase(),PISOS_LETRAS:intWords(p.pisos||0),PISOS:String(p.pisos??''),SECTOR:String(u.barrio_sector||''),DIRECCION_PREDIO:String(u.direccion||''),CODIGO_PIT:String(u.codigo_pit||''),ZONA_PLANEAMIENTO:String(u.codigo_pit||''),CLAVE_CATASTRAL:String(u.clave_catastral||''),PROYECTISTA_SENESCYT:String(selected?.proyectista?.senescyt||''),PROYECTISTA_REGISTRO_MUNICIPAL:String(selected?.proyectista?.registro_municipal||''),
     TRATAMIENTO_ADMINISTRADO:treatment,CORREO_NOTIFICACION:String(getEl('rv5Correo')?.value||resolution?.correo_notificacion||selected?.correo_notificacion_sugerido||''),CORREO_PERTENECE_A:String(getEl('rv5CorreoPertenece')?.value||ex.correoPertenece||'al proyectista a cargo'),FECHA_RESOLUCION_LARGA:longDate(getEl('rv5FechaResolucion')?.value||resolution?.fecha_resolucion),ABOGADA_FIRMA_NOMBRE:String(profile?.firma_nombre||profile?.nombre_completo||''),ABOGADA_FIRMA_CARGO:String(profile?.firma_cargo||profile?.cargo||'')
@@ -293,7 +316,7 @@ function mount(){if(!getEl('resolucionesOverlayV5')){const ov=document.createEle
 function ensureLaunchers(){}
 function open(){mount();getEl('resolucionesOverlayV5')?.classList.add('open');ensureLaunchers();if(profile)updateProfile();else restoreSession();}
 function close(){window.location.href='../index.html';}
-try{if(window.supabase?.createClient){client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-resoluciones-v5'}});}}catch(err){console.error('ALLPA Resoluciones V5:',err);}
+try{if(window.supabase?.createClient){client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});}}catch(err){console.error('ALLPA Resoluciones V5:',err);}
 window.AllpaResolucionesV5=Object.freeze({version:VERSION,open,close,login,logout,refresh:loadReports,selectInforme,preview:renderPreview,saveDraft:()=>saveDraft(false),finalize:finalizeResolution,copyText,print:printPreview,getProfile:()=>clone(profile),getSelected:()=>clone(selected),getResolution:()=>clone(resolution),getTemplate:()=>clone(TEMPLATE_META),mode:'RESOLUCIONES_V4_FORMATO_INSTITUCIONAL_CSV_EXTERNO'});
 async function boot(){mount();getEl('resolucionesOverlayV5')?.classList.add('open');setStatus('Cargando plantilla oficial de Resolución…');try{await loadTemplate();await loadStructuralTechnicians();setStatus('Plantilla '+TEMPLATE_META.version+' cargada'+(structTechReady?' · técnicos estructurales disponibles.':' · advertencia: no se pudo cargar técnicos estructurales.')+' Inicie sesión para consultar Informes.',structTechReady?'ok':'warn');await restoreSession();renderWorkspace();}catch(err){templateReady=false;setStatus('No se pudo cargar la plantilla: '+String(err?.message||err),'error');renderWorkspace();}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,80));else setTimeout(boot,0);
