@@ -5359,7 +5359,7 @@ function validateTop(){ collectTop(); if(!state.egob){msg('Debe colocar el Nro. 
 function validateForPrint(){ if(!validateTop()) return false; if(!validateAllVisibleInfo(true)){msg('Revise los campos obligatorios o con formato incorrecto antes de imprimir.'); showTab('tab-info'); return false;} return true; }
 async function guardarFormulario(showMessage=true){ if(!validateTop()) return false; state.updatedAt=new Date().toISOString(); if(!state.createdAt) state.createdAt=state.updatedAt; await dbPut(JSON.parse(JSON.stringify(state))); if(showMessage) msg('Formulario guardado correctamente con eGOB '+state.egob, true); renderSavedList(); return true; }
 async function cargarFormulario(egob){ const obj=await dbGet(egob); if(!obj){msg('No se encontró un formulario guardado con ese eGOB.'); return;} state=Object.assign(defaultState(),obj); applyStateToUI(); msg('Formulario cargado: '+egob, true); showTab('tab-info'); }
-function applyStateToUICoreV18(){ ensurePropietarios(); document.getElementById('egob').value=state.egob||''; document.getElementById('tecnico').value=state.tecnico||''; document.getElementById('tipoInforme').value=state.tipoInforme||''; document.getElementById('fechaRevision').value=state.fechaRevision||today(); if(!state.fechaSubsanacion) state.fechaSubsanacion=addBusinessDays(state.fechaRevision||today(),10); document.getElementById('fechaSubsanacion').value=state.fechaSubsanacion||''; renderInfoForm(); setInfoValues(); renderRequisitosForm(); renderObservacionesForm(); renderAprobatorioForm(); updateTabsForType(); updateSideActions(); updateAll(); }
+function applyStateToUICoreV18(){ ensurePropietarios(); document.getElementById('egob').value=state.egob||''; document.getElementById('tecnico').value=state.tecnico||''; document.getElementById('tipoInforme').value=state.tipoInforme||''; const fechaIngresoEl=document.getElementById('fechaIngresoTramite'); if(fechaIngresoEl) fechaIngresoEl.value=state.fechaIngresoTramite||''; document.getElementById('fechaRevision').value=state.fechaRevision||today(); if(!state.fechaSubsanacion) state.fechaSubsanacion=addBusinessDays(state.fechaRevision||today(),10); document.getElementById('fechaSubsanacion').value=state.fechaSubsanacion||''; renderInfoForm(); setInfoValues(); renderRequisitosForm(); renderObservacionesForm(); renderAprobatorioForm(); updateTabsForType(); updateSideActions(); updateAll(); }
 applyStateToUI = applyStateToUICoreV18;
 function nuevoFormulario(){ if(!confirm('¿Crear un formulario nuevo? Se limpiará la información que no esté guardada.')) return; state=defaultState(); state.fechaSubsanacion=addBusinessDays(state.fechaRevision,10); applyStateToUI(); msg('Formulario nuevo listo.', true); }
 function cargarPorBusqueda(origen='tab'){ const el=document.getElementById(origen==='side'?'buscarEgobSide':'buscarEgob'); const e=(el?.value||'').trim(); if(!e) return msg('Ingrese un Nro. eGOB para buscar.'); cargarFormulario(e); }
@@ -40168,11 +40168,29 @@ function mount(){
 try{
   if(window.supabase && typeof window.supabase.createClient==='function'){
     client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
-      auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}
     });
   }
 }catch(err){console.error('ALLPA Supabase Check:',err);}
 
+async function restorePortalSessionV6(){
+  if(!client) return;
+  try{
+    const {data,error}=await client.auth.getSession();
+    if(error) throw error;
+    const u=data?.session?.user;
+    if(!u) return;
+    currentUser=u;
+    const {data:p,error:pe}=await client.from('phdu_profiles')
+      .select('id, correo, nombre_completo, rol, activo, cargo, firma_nombre, firma_cargo')
+      .eq('id',u.id).single();
+    if(pe) throw pe;
+    currentProfile=p;
+    renderProfile();
+  }catch(err){console.warn('ALLPA Informes V6 · sesión del Portal:',err);}
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(restorePortalSessionV6,120));
+else setTimeout(restorePortalSessionV6,120);
 
 async function recoverRegisteredInforme(payload){
   if(!client) throw new Error('No se pudo cargar el cliente de Supabase.');
