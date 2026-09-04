@@ -40195,7 +40195,17 @@ window.AllpaSupabaseCheckV1=Object.freeze({
     if(error) throw error;
     return data;
   },
-  mode:'CONTROLLED_FINALIZATION_WITH_OFFICIAL_NUMBERING'
+  updateInformeRpc:async function(payload){
+    if(!client) throw new Error('No se pudo cargar el cliente de Supabase.');
+    if(!currentUser || !currentProfile) throw new Error('Debe iniciar sesión con un usuario PHDU antes de actualizar.');
+    const role=String(currentProfile.rol||'').toUpperCase();
+    if(!currentProfile.activo) throw new Error('El perfil PHDU está inactivo.');
+    if(!['TECNICO','ADMIN'].includes(role)) throw new Error('El rol '+(currentProfile.rol||'—')+' no puede actualizar Informes Técnicos.');
+    const {data,error}=await client.rpc('phdu_actualizar_informe_numerado',{p_payload:payload});
+    if(error) throw error;
+    return data;
+  },
+  mode:'CONTROLLED_FINALIZATION_AND_UPDATE_WITH_OFFICIAL_NUMBERING'
 });
 
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',mount);
@@ -40372,6 +40382,14 @@ body.project-home-open-v130 #phduCheckBarV2{
   }
   .phdu-finalize-v4:hover{filter:brightness(.96)}
   .phdu-finalize-v4:disabled{background:#98a5b3;cursor:not-allowed;box-shadow:none;filter:none}
+  .phdu-update-v5{
+    width:100%;margin-top:8px;padding:11px 12px;border-radius:10px;
+    background:#fff;color:#0b5a7d;font-weight:900;cursor:pointer;
+    border:2px solid #0b5a7d;box-shadow:0 4px 12px rgba(11,90,125,.10)
+  }
+  .phdu-update-v5:hover{background:#edf8fc}
+  .phdu-update-v5:disabled{border-color:#b7c0c8;color:#8d98a3;background:#f3f5f7;cursor:not-allowed;box-shadow:none}
+  .phdu-update-note-v5{margin-top:6px;font-size:10px;line-height:1.35;color:#667085;text-align:center}
   .phdu-finalized-v4{
     margin-top:8px;padding:9px 10px;border-radius:9px;border:1px solid #b9dec9;
     background:#eefaf3;color:#195c37;font-size:12px;font-weight:800;display:none
@@ -40442,6 +40460,7 @@ function resultRow(data){
 }
 function finalizeBox(){return document.getElementById('phduFinalizedV4');}
 function finalizeBtn(){return document.getElementById('phduFinalizeV4');}
+function updateBtn(){return document.getElementById('phduUpdateV5');}
 
 function updateFinalizeUi(){
   const btn=finalizeBtn();
@@ -40455,6 +40474,11 @@ function updateFinalizeUi(){
       btn.disabled=busy;
       btn.textContent=busy?'FINALIZANDO…':'FINALIZAR INFORME Y ASIGNAR NÚMERO';
     }
+  }
+  const ubtn=updateBtn();
+  if(ubtn){
+    ubtn.disabled=busy || !n;
+    ubtn.textContent=busy&&n?'ACTUALIZANDO…':'ACTUALIZAR Y MANTENER NÚMERO REGISTRADO';
   }
   if(box){
     if(n){
@@ -40479,11 +40503,96 @@ function mountFinalizeButton(){
   btn.textContent='FINALIZAR INFORME Y ASIGNAR NÚMERO';
   btn.addEventListener('click',finalize);
   checkButton.insertAdjacentElement('afterend',btn);
+
+  const update=document.createElement('button');
+  update.type='button';
+  update.id='phduUpdateV5';
+  update.className='phdu-update-v5';
+  update.textContent='ACTUALIZAR Y MANTENER NÚMERO REGISTRADO';
+  update.addEventListener('click',updateRegisteredInforme);
+  btn.insertAdjacentElement('afterend',update);
+
+  const note=document.createElement('div');
+  note.className='phdu-update-note-v5';
+  note.textContent='Disponible únicamente para un Informe ya numerado. Actualiza sus datos sin solicitar ni consumir un nuevo número oficial.';
+  update.insertAdjacentElement('afterend',note);
+
   const box=document.createElement('div');
   box.id='phduFinalizedV4';
   box.className='phdu-finalized-v4';
-  btn.insertAdjacentElement('afterend',box);
+  note.insertAdjacentElement('afterend',box);
   updateFinalizeUi();
+}
+
+async function updateRegisteredInforme(){
+  if(busy) return;
+  const n=officialNumber();
+  if(!n){
+    setStatus('Primero debe existir un número oficial asignado al Informe.','error');
+    return;
+  }
+  const api=window.AllpaSupabaseCheckV1;
+  if(!api){alert('No se encuentra el módulo PHDU de Supabase.');return;}
+  const profile=typeof api.getProfile==='function'?api.getProfile():null;
+  if(!profile){
+    setStatus('Primero inicie sesión con un usuario PHDU.','error');
+    api.open?.();
+    return;
+  }
+
+  let payload,validation;
+  try{
+    payload=api.buildPayload();
+    validation=api.validatePayload(payload);
+  }catch(err){
+    setStatus('No se pudo preparar la actualización: '+String(err?.message||err),'error');
+    return;
+  }
+  if(validation.bad.length){
+    api.check?.();
+    setStatus('No se puede actualizar: existen '+validation.bad.length+' error(es) que deben corregirse primero.','error');
+    return;
+  }
+
+  const official=String(state?.phduNumeroFormateado||pad3(n));
+  const warns=validation.warn.length?('\n\nAdvertencias detectadas: '+validation.warn.length+'. Revise la comprobación antes de continuar.') : '';
+  const ok=window.confirm(
+    'ACTUALIZAR INFORME Y MANTENER NÚMERO REGISTRADO\n\n'+
+    'Número que se conservará: '+official+'\n'+
+    'eGOB actual: '+payload.egob+'\n'+
+    'Fecha del informe: '+payload.fecha_informe+'\n\n'+
+    'Esta acción actualizará en Supabase los datos del Informe ya registrado. NO solicitará un número nuevo y NO consumirá la siguiente numeración.'+warns+'\n\n¿Desea continuar?'
+  );
+  if(!ok) return;
+
+  busy=true;updateFinalizeUi();
+  setStatus('Actualizando el Informe '+official+' sin modificar su numeración…','info');
+  try{
+    payload=api.buildPayload();
+    const data=await api.updateInformeRpc(payload);
+    const row=resultRow(data);
+    if(!row || !row.numero) throw new Error('Supabase no devolvió los datos del Informe actualizado.');
+
+    state.phduNumeroInforme=Number(row.numero);
+    state.phduNumeroFormateado=String(row.numero_formateado||official);
+    state.phduInformeFinalizado=true;
+    state.phduInformeActualizadoEn=String(row.actualizado_en||new Date().toISOString());
+    ensureAsuntoNumberFromOfficial();
+
+    try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
+    try{window.refreshAsuntoPreviewV119Y?.();}catch(_e){}
+    updateFinalizeUi();
+
+    setStatus('Informe '+state.phduNumeroFormateado+' actualizado correctamente. Se mantuvo el mismo número y no se consumió una nueva numeración.','ok');
+    try{
+      if(typeof window.msg==='function') window.msg('Informe '+state.phduNumeroFormateado+' actualizado sin cambiar su número.',true);
+      else if(typeof msg==='function') msg('Informe '+state.phduNumeroFormateado+' actualizado sin cambiar su número.',true);
+    }catch(_e){}
+  }catch(err){
+    setStatus('No se pudo actualizar el Informe: '+String(err?.message||err),'error');
+  }finally{
+    busy=false;updateFinalizeUi();
+  }
 }
 
 async function finalize(){
@@ -40560,7 +40669,7 @@ async function finalize(){
   }
 }
 
-window.AllpaPhduFinalizeV4=Object.freeze({finalize,refresh:updateFinalizeUi});
+window.AllpaPhduFinalizeV4=Object.freeze({finalize,updateRegisteredInforme,refresh:updateFinalizeUi});
 
 function refreshAll(){
   const manual=document.getElementById('asuntoAprobatorioV119Y');
