@@ -41485,5 +41485,235 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
 })();
 </script>
 
+
+
+<script id="patch-v119s-conversion-pareada-v774">
+/* ==========================================================
+   V7.7.4 — Conversión pareada de tipo de proyecto
+   - Conserva siempre el proyecto origen como registro independiente.
+   - Crea como máximo una contraparte por eGOB y tipo de proyecto.
+   - Si la contraparte ya existe, la abre en vez de crear duplicados.
+   - Corrige registros origen alterados por conversiones antiguas cuando
+     la propia copia conserva convertedFromProjectV119R.
+   ========================================================== */
+(function(){
+'use strict';
+const OM='obra_mayor_definitivo';
+const AP='anteproyecto_edificacion';
+const oldCurrent=typeof window.convertCurrentProjectV119R==='function'?window.convertCurrentProjectV119R:null;
+const oldSaved=typeof window.convertSavedRecordV119R==='function'?window.convertSavedRecordV119R:null;
+
+function clone(v){try{return structuredClone(v)}catch(_e){return JSON.parse(JSON.stringify(v==null?{}:v))}}
+function validProject(v){return v===AP||v===OM?v:OM}
+function opposite(v){return validProject(v)===AP?OM:AP}
+function projectLabel(v){return validProject(v)===AP?'Anteproyecto':'Definitivo'}
+function projectLong(v){return validProject(v)===AP?'ANTEPROYECTO DE EDIFICACIÓN':'OBRA MAYOR DEFINITIVO'}
+function baseEgob(value){
+  const r=value&&typeof value==='object'?value:null;
+  let s=r?String(r.egobBaseV119R||r.egobBaseV164||r.egobBaseV119||r.egobBaseV116||r.egob||''):String(value||'');
+  try{if(typeof obsBaseEgobV119==='function')s=obsBaseEgobV119(s)}catch(_e){}
+  return String(s||'')
+    .replace(/\s+-\s+(ANTEPROYECTO|DEFINITIVO|OBRA\s+MAYOR\s+DEFINITIVO)(?:\s*\(\d+\))?\s*$/i,'')
+    .replace(/\s+-\s+(?:1ER|2DO)\s+INFORME\s+(?:DE|CON)\s+OBSERVACIONES\s*$/i,'')
+    .trim();
+}
+function recordProject(r){
+  if(r?.projectType===AP||r?.projectType===OM)return r.projectType;
+  const key=String(r?.egob||'').toUpperCase();
+  if(/-\s*ANTEPROYECTO(?:\s*\(\d+\))?\s*$/.test(key))return AP;
+  if(/-\s*(?:DEFINITIVO|OBRA\s+MAYOR\s+DEFINITIVO)(?:\s*\(\d+\))?\s*$/.test(key))return OM;
+  try{if(typeof inferSavedProjectV134==='function')return validProject(inferSavedProjectV134(r))}catch(_e){}
+  return OM;
+}
+function currentSavedKey(){
+  return String(state?._savedKeyV119R||state?._savedKeyV164||state?._savedKeyV119||state?.egob||'').trim();
+}
+function setBaseInfo(record,base){
+  try{if(typeof setInfoEgobBaseV119==='function'){setInfoEgobBaseV119(record,base);return}}catch(_e){}
+  try{
+    const f=(DATA.infoFields||[]).find(x=>/TR[ÁA]MITE\s+E-?GOB/i.test(String(x?.label||'')));
+    if(f){record.info=record.info||{};record.info[f.key]=base}
+  }catch(_e){}
+}
+async function saveSourceSnapshot(record,key,project){
+  const base=baseEgob(record);
+  if(!base||!key||typeof dbPut!=='function')return null;
+  const copy=clone(record);
+  copy.egob=key;
+  copy.projectType=validProject(project);
+  copy.egobBaseV119R=base;
+  copy.egobBaseV164=base;
+  copy.updatedAt=new Date().toISOString();
+  if(!copy.createdAt)copy.createdAt=copy.updatedAt;
+  setBaseInfo(copy,base);
+  await dbPut(copy);
+  return copy;
+}
+async function findCounterpart(base,target,excludeKey=''){
+  if(typeof dbAll!=='function')return null;
+  const all=await dbAll();
+  const matches=(all||[]).filter(r=>{
+    const key=String(r?.egob||'').trim();
+    return key!==excludeKey && baseEgob(r)===base && recordProject(r)===target;
+  });
+  if(!matches.length)return null;
+  matches.sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));
+  return matches[0];
+}
+async function openRecord(record){
+  const key=String(record?.egob||'').trim();
+  if(!key)return;
+  if(typeof cargarFormulario==='function')await cargarFormulario(key);
+  try{if(typeof hideProjectEntryV123==='function')hideProjectEntryV123()}catch(_e){}
+  try{if(typeof setSearchInputSelectedV119O==='function')setSearchInputSelectedV119O(record)}catch(_e){}
+}
+
+async function convertCurrent(){
+  try{
+    if(typeof collectTop==='function')collectTop();
+    const base=baseEgob(state);
+    if(!base){if(typeof msg==='function')msg('Debe colocar el Nro. eGOB antes de intercambiar el tipo de proyecto.');return}
+    const sourceProject=recordProject(state);
+    const target=opposite(sourceProject);
+    let sourceKey=currentSavedKey()||base;
+
+    /* Si el formulario actual no es una copia convertida, el eGOB base es su llave natural. */
+    if(!state?._savedKeyV119R&&!state?._savedKeyV164&&!state?._savedKeyV119)sourceKey=base;
+
+    /* Guardar primero el origen tal como está, antes de crear/abrir la contraparte. */
+    const source=clone(state);
+    source.projectType=sourceProject;
+    await saveSourceSnapshot(source,sourceKey,sourceProject);
+
+    const existing=await findCounterpart(base,target,sourceKey);
+    if(existing){
+      const ok=confirm(`Ya existe una copia del eGOB ${base} como ${projectLong(target)}.\n\nSe conservará el proyecto actual y se abrirá la copia existente. ¿Continuar?`);
+      if(!ok)return;
+      await openRecord(existing);
+      if(typeof refreshSavedSearchV131==='function')await refreshSavedSearchV131();
+      if(typeof msg==='function')msg(`Se abrió la copia existente de ${projectLong(target)}. El proyecto ${projectLong(sourceProject)} se mantiene guardado.`,true);
+      return existing;
+    }
+
+    if(!oldCurrent)throw new Error('No está disponible el conversor de proyectos.');
+    return await oldCurrent();
+  }catch(error){
+    console.error('V7.7.4 intercambio pareado:',error);
+    if(typeof msg==='function')msg('No se pudo intercambiar el tipo de proyecto: '+String(error?.message||error));
+  }
+}
+
+async function convertSaved(key,event){
+  event?.preventDefault?.();event?.stopPropagation?.();
+  try{
+    if(typeof dbGet!=='function')throw new Error('No está disponible el almacenamiento local.');
+    const record=await dbGet(key);
+    if(!record)throw new Error('No se encontró el registro seleccionado.');
+    const base=baseEgob(record),sourceProject=recordProject(record),target=opposite(sourceProject);
+    await saveSourceSnapshot(record,key,sourceProject);
+    const existing=await findCounterpart(base,target,key);
+    if(existing){
+      const ok=confirm(`Ya existe ${projectLong(target)} para el eGOB ${base}.\n\nSe abrirá ese proyecto y se conservará el registro origen. ¿Continuar?`);
+      if(!ok)return;
+      await openRecord(existing);
+      if(typeof refreshSavedSearchV131==='function')await refreshSavedSearchV131();
+      return existing;
+    }
+    if(!oldSaved)throw new Error('No está disponible el conversor de proyectos.');
+    return await oldSaved(key,event);
+  }catch(error){
+    console.error('V7.7.4 intercambio desde lista:',error);
+    if(typeof msg==='function')msg('No se pudo intercambiar el tipo de proyecto: '+String(error?.message||error));
+  }
+}
+
+async function repairOldPairs(){
+  if(typeof dbAll!=='function'||typeof dbPut!=='function'||typeof dbGet!=='function')return;
+  try{
+    const all=await dbAll();
+    let changed=0;
+    for(const converted of all||[]){
+      const from=converted?.convertedFromProjectV119R;
+      if(from!==AP&&from!==OM)continue;
+      const base=baseEgob(converted);
+      if(!base)continue;
+      const original=await dbGet(base);
+      if(!original)continue;
+      /* Metadata de conversión es evidencia de cuál era el proyecto origen. */
+      if(original.projectType!==from){
+        original.projectType=from;
+        original.egobBaseV119R=base;
+        original.egobBaseV164=base;
+        original.updatedAt=original.updatedAt||new Date().toISOString();
+        setBaseInfo(original,base);
+        await dbPut(original);
+        changed++;
+      }
+    }
+    if(changed){
+      if(typeof refreshSavedSearchV131==='function')await refreshSavedSearchV131();
+      console.info('V7.7.4: proyectos origen reparados:',changed);
+    }
+  }catch(error){console.warn('V7.7.4 reparación de pares:',error)}
+}
+
+function cleanTitle(record){
+  const base=baseEgob(record)||String(record?.egob||'').trim();
+  const tipo=String(record?.tipoInforme||'').trim()||'Formulario';
+  return `${base} - ${tipo} - ${projectLabel(recordProject(record))}`;
+}
+
+function renderSearch(query=''){
+  const list=document.getElementById('savedReportsResultsV131');
+  if(!list)return;
+  const norm=typeof normalizeSearchV131==='function'?normalizeSearchV131:(v=>String(v||'').toUpperCase());
+  const q=norm(query);
+  let matches=(typeof savedReportsCacheV131!=='undefined'?savedReportsCacheV131:[]).filter(item=>{
+    const text=[baseEgob(item),cleanTitle(item),typeof savedOwnerV131==='function'?savedOwnerV131(item):'',typeof savedProjectV131==='function'?savedProjectV131(item):''].join(' ');
+    return !q||norm(text).includes(q);
+  }).slice(0,12);
+  if(!matches.length){list.innerHTML='<div class="saved-search-empty-v131">No se encontraron informes guardados.</div>';list.classList.add('open');return}
+  const selected=(()=>{try{return typeof selectedSavedKeyV119O==='function'?String(selectedSavedKeyV119O()||''):''}catch(_e){return ''}})();
+  list.innerHTML=matches.map(item=>{
+    const key=String(item?.egob||'').trim(),encoded=encodeURIComponent(key);
+    const owner=typeof savedOwnerV131==='function'?(savedOwnerV131(item)||'Propietario no registrado'):'Propietario no registrado';
+    const project=typeof savedProjectV131==='function'?(savedProjectV131(item)||'Proyecto sin nombre'):'Proyecto sin nombre';
+    const selectedClass=key===selected?' selected-v119p selected-v119o':'';
+    return `<div class="saved-search-row-v119p saved-search-row-v119r">
+      <button type="button" class="saved-search-result-v119p${selectedClass}" data-select-saved-search-v119o="${esc(encoded)}" data-select-saved-search-v119p="${esc(encoded)}">
+        <strong>${esc(cleanTitle(item))}</strong><span>${esc(owner)} · ${esc(project)}</span>
+      </button>
+      <button type="button" class="secondary saved-search-convert-v119r" data-convert-saved-search-v119r="${esc(encoded)}" title="Abrir o crear copia en el otro tipo de proyecto" aria-label="Abrir o crear copia en el otro tipo de proyecto">⇄</button>
+      <button type="button" class="danger saved-search-delete-v119p" data-delete-saved-search-v119p="${esc(encoded)}" title="Eliminar informe guardado" aria-label="Eliminar informe guardado">🗑</button>
+    </div>`;
+  }).join('');
+  list.classList.add('open');
+}
+
+window.convertCurrentProjectV119R=convertCurrent;
+window.convertSavedRecordV119R=convertSaved;
+window.renderSavedSearchResultsV131=renderSearch;
+try{convertCurrentProjectV119R=window.convertCurrentProjectV119R}catch(_e){}
+try{convertSavedRecordV119R=window.convertSavedRecordV119R}catch(_e){}
+try{renderSavedSearchResultsV131=window.renderSavedSearchResultsV131}catch(_e){}
+
+function rebindHeader(){
+  const b=document.getElementById('headerConvertProjectV119R');
+  if(!b)return;
+  const cloneBtn=b.cloneNode(true);
+  cloneBtn.title='Abrir o crear copia en el otro tipo de proyecto';
+  cloneBtn.setAttribute('aria-label',cloneBtn.title);
+  b.replaceWith(cloneBtn);
+  cloneBtn.addEventListener('click',convertCurrent);
+}
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{rebindHeader();repairOldPairs()},600));
+else setTimeout(()=>{rebindHeader();repairOldPairs()},300);
+window.addEventListener('load',()=>{
+  setTimeout(()=>{rebindHeader();repairOldPairs()},1200);
+  setTimeout(rebindHeader,2400);
+});
+})();
+</script>
 </body>
 </html>
