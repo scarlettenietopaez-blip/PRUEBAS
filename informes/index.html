@@ -41165,13 +41165,16 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
     }
     const n=officialV72();
     box.className='v72-result ok';
-    box.innerHTML=n
+    const okMessage=n
       ? '<strong>✓ Informe validado correctamente.</strong><br>El número oficial registrado es <strong>'+escV72((typeof state!=='undefined'&&state?.phduNumeroFormateado)||String(n))+'</strong>. Puede actualizarlo sin consumir una nueva numeración.'
       : '<strong>✓ Informe validado correctamente.</strong><br>Puede finalizarlo y solicitar el número oficial disponible; ALLPA priorizará cualquier número liberado de la misma serie y año.';
+    const warnMessage=warn.length
+      ? '<div style="margin-top:10px;padding:9px 10px;border:1px solid #f0c36b;background:#fff8e6;border-radius:10px;color:#6f4d00"><strong>⚠ Advertencia'+(warn.length===1?'':'s')+' ('+warn.length+')</strong><ul class="v72-errors" style="margin-top:6px">'+warn.map(function(x){return '<li>'+escV72(x)+'</li>';}).join('')+'</ul></div>'
+      : '';
+    box.innerHTML=okMessage+warnMessage;
     const bits=[];
     if(payload?.egob) bits.push('eGOB '+String(payload.egob));
     if(profile?.nombre_completo) bits.push(String(profile.nombre_completo));
-    if(warn.length) bits.push(warn.length+' advertencia'+(warn.length===1?'':'s'));
     meta.textContent=bits.join(' · ');
     setButtonsV72(true);
     return true;
@@ -41287,6 +41290,198 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
   else revealProjectGeneratorV73();
   /* Salvaguarda: nunca dejar la interfaz invisible si un parche histórico falla. */
   setTimeout(function(){document.documentElement.classList.remove('allpa-project-preboot');},1600);
+})();
+</script>
+
+
+
+<script id="allpa-fix-anteproyecto-morfologico-y-tipo-v772">
+/* ==========================================================
+   V7.7.2 — Corrección puntual Anteproyecto
+   1) Restituye AP_REQ_014 = Complementario 5 · Estudio Morfológico
+      tanto para proyectos nuevos como para respaldos antiguos.
+   2) Limpia banderas históricas de 1ra/2da observación cuando el
+      registro realmente es Informe Técnico Aprobatorio.
+   3) Prioriza tipoInforme sobre banderas antiguas al titular guardados.
+   ========================================================== */
+(function(){
+  'use strict';
+
+  const MORF_ANTE_V772={
+    id:'AP_REQ_014',
+    grupo:'Requisitos Complementarios:',
+    texto:'5. Estudio Morfológico',
+    opciones:['Cumple','No Cumple','No Aplica'],
+    normaDefault:'Ordenanza 016-2023, requisitos para la aprobación de anteproyectos de edificación',
+    correccionDefault:'Subsanar o completar el requisito documental indicado para continuar con el proceso de revisión.',
+    seccion:'DOCUMENTAL',
+    orden:14
+  };
+
+  function cloneV772(v){
+    try{return structuredClone(v)}catch(_e){return JSON.parse(JSON.stringify(v))}
+  }
+  function normV772(v){
+    return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+  }
+  function isAnteV772(){
+    const p=String((typeof state!=='undefined'&&state?.projectType)||localStorage.getItem('GADMR_PROJECT_TYPE_V123')||'').trim();
+    return p==='anteproyecto_edificacion';
+  }
+  function hasMorphReqV772(arr){
+    return Array.isArray(arr)&&arr.some(r=>String(r?.id||'').trim().toUpperCase()==='AP_REQ_014' || (normV772(r?.texto).includes('ESTUDIO')&&normV772(r?.texto).includes('MORFOLOGICO')));
+  }
+  function ensureMorphInArrayV772(arr){
+    if(!Array.isArray(arr)) return arr;
+    if(!hasMorphReqV772(arr)) arr.push(cloneV772(MORF_ANTE_V772));
+    return arr;
+  }
+  function ensureAnteMorphV772(){
+    try{
+      if(typeof REQUISITOS_ANTEPROYECTO_V128!=='undefined') ensureMorphInArrayV772(REQUISITOS_ANTEPROYECTO_V128);
+    }catch(_e){}
+    try{
+      if(typeof REQUISITOS_ANTEPROYECTO_FALLBACK_V128!=='undefined') ensureMorphInArrayV772(REQUISITOS_ANTEPROYECTO_FALLBACK_V128);
+    }catch(_e){}
+    try{
+      if(isAnteV772() && typeof DATA!=='undefined' && Array.isArray(DATA.requisitos)) ensureMorphInArrayV772(DATA.requisitos);
+    }catch(_e){}
+  }
+
+  function cleanObservationFlagsV772(obj){
+    if(!obj || typeof obj!=='object') return obj;
+    const tipo=String(obj.tipoInforme||'').trim();
+    if(tipo==='Informe Técnico Aprobatorio' || tipo==='Informe de Desistimiento'){
+      obj.segundaObservacionV116=false;
+      obj.primeraObservacionV119=false;
+      obj.fechaSubsanacionCincoDias=false;
+      if(/2do\s+Informe\s+(de|con)\s+Observaciones/i.test(String(obj._savedKeyV119||''))) obj._savedKeyV119='';
+      const base=String(obj.egob||obj.egobBaseV119||obj.egobBaseV116||'')
+        .replace(/\s+-\s+2do\s+Informe\s+(de|con)\s+Observaciones\s*$/i,'')
+        .replace(/\s+-\s+Informe\s+con\s+Observaciones\s*$/i,'')
+        .trim();
+      if(base){
+        obj.egob=base;
+        obj.egobBaseV116=base;
+        obj.egobBaseV119=base;
+        if(obj.info && typeof obj.info==='object') obj.info.INFO_001=base;
+      }
+    }
+    return obj;
+  }
+  window.cleanObservationFlagsV772=cleanObservationFlagsV772;
+
+  /* El CSV externo de Anteproyecto puede no contener todavía AP_REQ_014.
+     Se refuerza inmediatamente después de cargarlo. */
+  if(typeof loadRequisitosAnteproyectoV128==='function'){
+    const baseLoadReqV772=loadRequisitosAnteproyectoV128;
+    loadRequisitosAnteproyectoV128=async function(){
+      const out=await baseLoadReqV772.apply(this,arguments);
+      ensureAnteMorphV772();
+      return typeof REQUISITOS_ANTEPROYECTO_V128!=='undefined'?REQUISITOS_ANTEPROYECTO_V128:out;
+    };
+  }
+
+  /* Cada vez que se aplica el proyecto, garantiza el Complementario 5. */
+  if(typeof applyProjectRequirementsV128==='function'){
+    const baseApplyReqV772=applyProjectRequirementsV128;
+    applyProjectRequirementsV128=function(projectId,rerender=true){
+      const id=projectId || (typeof state!=='undefined'?state?.projectType:'');
+      if(id==='anteproyecto_edificacion') ensureAnteMorphV772();
+      const out=baseApplyReqV772.apply(this,arguments);
+      if(id==='anteproyecto_edificacion'){
+        ensureAnteMorphV772();
+        if(rerender && typeof renderRequisitosForm==='function') renderRequisitosForm(false);
+      }
+      return out;
+    };
+  }
+
+  /* El renderer propio de Anteproyecto también se refuerza. */
+  if(typeof renderRequisitosForm==='function'){
+    const baseRenderReqV772=renderRequisitosForm;
+    renderRequisitosForm=function(){
+      ensureAnteMorphV772();
+      return baseRenderReqV772.apply(this,arguments);
+    };
+  }
+
+  /* Corrige el título de guardados contradictorios: el tipo explícito manda. */
+  if(typeof savedTitleV119==='function'){
+    savedTitleV119=function(x){
+      const raw=String(x?.egob||'').trim();
+      const base=typeof obsBaseEgobV119==='function'?obsBaseEgobV119(raw):raw;
+      const tipo=String(x?.tipoInforme||'').trim();
+      if(tipo==='Informe Técnico Aprobatorio') return `eGOB ${base} - Informe Técnico Aprobatorio`;
+      if(tipo==='Informe de Desistimiento') return `eGOB ${base} - Informe de Desistimiento`;
+      if(/2do\s+Informe\s+(de|con)\s+Observaciones/i.test(raw) || x?.segundaObservacionV116) return `eGOB ${base} - 2do Informe con Observaciones`;
+      if(/Informe\s+con\s+Observaciones/i.test(raw) || tipo==='Informe con Observaciones') return `eGOB ${base} - Informe con Observaciones`;
+      return tipo?`eGOB ${base} - ${tipo}`:`eGOB ${base}`;
+    };
+  }
+
+  /* Normaliza al cambiar manualmente de Observaciones a Aprobatorio. */
+  document.addEventListener('change',function(ev){
+    if(ev.target?.id!=='tipoInforme') return;
+    if(typeof collectTop==='function') collectTop();
+    cleanObservationFlagsV772(state);
+    ensureAnteMorphV772();
+    setTimeout(()=>{
+      try{if(typeof renderRequisitosForm==='function')renderRequisitosForm(false)}catch(_e){}
+      try{if(typeof refreshSavedSearchV131==='function')refreshSavedSearchV131()}catch(_e){}
+    },0);
+  });
+
+  /* Al cargar un respaldo/registro ya importado, repara el estado en memoria. */
+  window.AllpaPersistenceHooksV22C=window.AllpaPersistenceHooksV22C||{};
+  const priorPostV772=window.AllpaPersistenceHooksV22C.convertedLoadPost;
+  window.AllpaPersistenceHooksV22C.convertedLoadPost=function(key,record){
+    if(typeof priorPostV772==='function') priorPostV772.apply(this,arguments);
+    cleanObservationFlagsV772(state);
+    ensureAnteMorphV772();
+    try{if(typeof applyProjectRequirementsV128==='function')applyProjectRequirementsV128(state.projectType,false)}catch(_e){}
+    ensureAnteMorphV772();
+    try{if(typeof applyStateToUI==='function')applyStateToUI()}catch(_e){}
+    try{if(typeof renderRequisitosForm==='function')renderRequisitosForm(false)}catch(_e){}
+    try{if(typeof renderReport==='function')renderReport()}catch(_e){}
+  };
+
+  /* Repara también registros ya existentes en IndexedDB al arrancar.
+     No cambia contenido técnico: solo banderas incompatibles con Aprobatorio. */
+  async function repairSavedV772(){
+    ensureAnteMorphV772();
+    if(typeof dbAll!=='function' || typeof dbPut!=='function') return;
+    try{
+      const all=await dbAll();
+      let changed=0;
+      for(const item of all||[]){
+        const before=JSON.stringify({t:item?.tipoInforme,s:item?.segundaObservacionV116,p:item?.primeraObservacionV119,k:item?._savedKeyV119,f:item?.fechaSubsanacionCincoDias,e:item?.egob});
+        cleanObservationFlagsV772(item);
+        const after=JSON.stringify({t:item?.tipoInforme,s:item?.segundaObservacionV116,p:item?.primeraObservacionV119,k:item?._savedKeyV119,f:item?.fechaSubsanacionCincoDias,e:item?.egob});
+        if(before!==after){await dbPut(item);changed++;}
+      }
+      if(changed){
+        try{if(typeof renderSavedList==='function')await renderSavedList()}catch(_e){}
+        try{if(typeof refreshSavedSearchV131==='function')await refreshSavedSearchV131()}catch(_e){}
+      }
+    }catch(err){console.warn('V7.7.2 reparación de guardados:',err);}
+  }
+
+  /* Refuerzo visual cuando Complementarios está activado. */
+  function refreshMorphV772(){
+    if(!isAnteV772()) return;
+    ensureAnteMorphV772();
+    try{
+      const saved=state?.requisitos?.AP_REQ_014;
+      if(saved && String(saved.estado||'').trim() && !state.mostrarComplementarios) state.mostrarComplementarios=true;
+    }catch(_e){}
+    try{if(typeof renderRequisitosForm==='function')renderRequisitosForm(false)}catch(_e){}
+  }
+
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{ensureAnteMorphV772();repairSavedV772();refreshMorphV772();},1300);
+    setTimeout(refreshMorphV772,2400);
+  });
 })();
 </script>
 
