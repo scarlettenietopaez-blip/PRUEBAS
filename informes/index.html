@@ -16,6 +16,11 @@
 <link rel="apple-touch-icon"
       href="./assets/logo-allpa-20264.png?v=1" />
 <title>ALLPA - Informes Técnicos PHDU</title>
+<style id="allpa-v73-preboot-css">
+html.allpa-project-preboot body{background:#f4f8f7!important}
+html.allpa-project-preboot body > *{visibility:hidden!important}
+</style>
+<script id="allpa-v73-preboot-start">document.documentElement.classList.add('allpa-project-preboot');</script>
   <style>
     :root {
       --azul:#17324d; --azul2:#24445f; --rojo:#a71930; --gris:#f3f5f8; --linea:#d8dee8;
@@ -40856,7 +40861,7 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
 <script id="allpa-v71-navigation-numbering-js">
 (function(){
   'use strict';
-  const PORTAL_URL_V71='../index.html';
+  const PORTAL_URL_V71=new URL('index.html', document.baseURI).href;
 
   function normV71(v){
     return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
@@ -41030,6 +41035,258 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
     setTimeout(refreshV71,1700);
     setTimeout(refreshV71,2800);
   });
+})();
+</script>
+
+
+
+<!-- ==========================================================
+     ALLPA · V7.2 · CONTROL DE NUMERACIÓN COMPACTO
+     Base: V7.1. Solo sustituye la interfaz extensa del control Nro.
+     ========================================================== -->
+<style id="allpa-v72-numbering-compact-css">
+/* El modal histórico queda disponible para la lógica interna, pero no se muestra. */
+#phduOverlayV1{display:none!important}
+
+#phduCompactNumberV72{
+  position:fixed;inset:0;z-index:250000;display:none;align-items:center;justify-content:center;
+  padding:18px;background:rgba(7,26,43,.48);backdrop-filter:blur(2px)
+}
+#phduCompactNumberV72.open{display:flex}
+#phduCompactNumberV72 .v72-card{
+  width:min(470px,calc(100vw - 30px));background:#fff;border:1px solid #cbd7e2;border-radius:16px;
+  box-shadow:0 22px 60px rgba(7,32,54,.28);overflow:hidden;color:#17324d
+}
+#phduCompactNumberV72 .v72-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;
+  background:#163a5a;color:#fff
+}
+#phduCompactNumberV72 .v72-head strong{font-size:13px;letter-spacing:.15px}
+#phduCompactNumberV72 .v72-close{
+  width:30px;height:30px;border:0;border-radius:9px;background:#fff;color:#17324d;font-weight:1000;
+  display:grid;place-items:center;padding:0;cursor:pointer
+}
+#phduCompactNumberV72 .v72-body{padding:15px}
+#phduCompactNumberV72 .v72-result{
+  border-radius:11px;padding:11px 12px;font-size:11px;line-height:1.45;border:1px solid #cfd9e3;background:#f7f9fb
+}
+#phduCompactNumberV72 .v72-result.ok{background:#ecf9f1;border-color:#acd9bd;color:#185c39}
+#phduCompactNumberV72 .v72-result.error{background:#fff1f0;border-color:#efb7b2;color:#8a251f}
+#phduCompactNumberV72 .v72-result.warn{background:#fff8e8;border-color:#ead08a;color:#705000}
+#phduCompactNumberV72 .v72-result strong{font-size:12px}
+#phduCompactNumberV72 .v72-errors{margin:7px 0 0;padding-left:18px}
+#phduCompactNumberV72 .v72-errors li{margin:3px 0}
+#phduCompactNumberV72 .v72-meta{margin-top:8px;font-size:10px;color:#667085;line-height:1.4}
+#phduCompactNumberV72 .v72-actions{display:grid;gap:8px;margin-top:13px}
+#phduCompactNumberV72 .v72-actions button{
+  width:100%;min-height:42px;border-radius:10px;padding:9px 12px;font-size:10px;font-weight:1000;cursor:pointer
+}
+#phduCompactNumberV72 .v72-finalize{background:#0b5a7d;color:#fff;border:1px solid #0b5a7d}
+#phduCompactNumberV72 .v72-update{background:#fff;color:#0b5a7d;border:2px solid #0b5a7d}
+#phduCompactNumberV72 .v72-actions button:disabled{opacity:.42;cursor:not-allowed;filter:none}
+#phduCompactNumberV72 .v72-foot{margin-top:8px;text-align:center;font-size:9px;color:#7a8794}
+</style>
+<script id="allpa-v72-numbering-compact-js">
+(function(){
+  'use strict';
+
+  function normV72(v){
+    return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();
+  }
+  function escV72(v){
+    return String(v??'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+  }
+  function officialV72(){
+    const n=Number(typeof state!=='undefined' ? state?.phduNumeroInforme : 0);
+    return Number.isInteger(n)&&n>0?n:0;
+  }
+  function approvedV72(){
+    try{ if(typeof collectTop==='function') collectTop(); }catch(_e){}
+    const raw=String((typeof state!=='undefined'&&state?.tipoInforme) || document.getElementById('tipoInforme')?.value || '');
+    const n=normV72(raw);
+    return n==='INFORME TECNICO APROBATORIO' || n.includes('TECNICO APROBATORIO');
+  }
+  function modalV72(){
+    let root=document.getElementById('phduCompactNumberV72');
+    if(root) return root;
+    root=document.createElement('div');
+    root.id='phduCompactNumberV72';
+    root.setAttribute('aria-hidden','true');
+    root.innerHTML=`<div class="v72-card" role="dialog" aria-modal="true" aria-labelledby="phduCompactTitleV72">
+      <div class="v72-head"><strong id="phduCompactTitleV72">Control de numeración</strong><button type="button" class="v72-close" aria-label="Cerrar">×</button></div>
+      <div class="v72-body">
+        <div id="phduCompactResultV72" class="v72-result">Validando…</div>
+        <div id="phduCompactMetaV72" class="v72-meta"></div>
+        <div class="v72-actions">
+          <button id="phduCompactFinalizeV72" type="button" class="v72-finalize">FINALIZAR INFORME Y ASIGNAR NÚMERO</button>
+          <button id="phduCompactUpdateV72" type="button" class="v72-update">ACTUALIZAR Y MANTENER NÚMERO REGISTRADO</button>
+        </div>
+        <div class="v72-foot">La validación se ejecuta automáticamente al pulsar Nro.</div>
+      </div>
+    </div>`;
+    document.body.appendChild(root);
+    root.querySelector('.v72-close')?.addEventListener('click',closeV72);
+    root.addEventListener('click',function(ev){if(ev.target===root) closeV72();});
+    document.addEventListener('keydown',function(ev){if(ev.key==='Escape'&&root.classList.contains('open'))closeV72();});
+    document.getElementById('phduCompactFinalizeV72')?.addEventListener('click',function(){runActionV72('finalize');});
+    document.getElementById('phduCompactUpdateV72')?.addEventListener('click',function(){runActionV72('update');});
+    return root;
+  }
+  function closeV72(){
+    const root=document.getElementById('phduCompactNumberV72');
+    if(root){root.classList.remove('open');root.setAttribute('aria-hidden','true');}
+  }
+  function showV72(){
+    const root=modalV72();
+    root.classList.add('open');root.setAttribute('aria-hidden','false');
+  }
+  function setButtonsV72(valid){
+    const fin=document.getElementById('phduCompactFinalizeV72');
+    const upd=document.getElementById('phduCompactUpdateV72');
+    const n=officialV72();
+    if(fin){
+      fin.disabled=!valid || !!n;
+      fin.textContent=n ? ('INFORME '+String((typeof state!=='undefined'&&state?.phduNumeroFormateado)||n)+' YA ASIGNADO') : 'FINALIZAR INFORME Y ASIGNAR NÚMERO';
+    }
+    if(upd) upd.disabled=!valid;
+  }
+  function renderValidationV72(validation,payload,profile){
+    const box=document.getElementById('phduCompactResultV72');
+    const meta=document.getElementById('phduCompactMetaV72');
+    if(!box||!meta) return false;
+    const bad=Array.isArray(validation?.bad)?validation.bad:[];
+    const warn=Array.isArray(validation?.warn)?validation.warn:[];
+    if(bad.length){
+      box.className='v72-result error';
+      box.innerHTML='<strong>✕ No se puede continuar.</strong><ul class="v72-errors">'+bad.map(function(x){return '<li>'+escV72(x)+'</li>';}).join('')+'</ul>';
+      meta.textContent='Corrija los datos indicados, cierre esta ventana y vuelva a pulsar Nro.';
+      setButtonsV72(false);
+      return false;
+    }
+    const n=officialV72();
+    box.className='v72-result ok';
+    box.innerHTML=n
+      ? '<strong>✓ Informe validado correctamente.</strong><br>El número oficial registrado es <strong>'+escV72((typeof state!=='undefined'&&state?.phduNumeroFormateado)||String(n))+'</strong>. Puede actualizarlo sin consumir una nueva numeración.'
+      : '<strong>✓ Informe validado correctamente.</strong><br>Puede finalizarlo y solicitar el siguiente número oficial disponible.';
+    const bits=[];
+    if(payload?.egob) bits.push('eGOB '+String(payload.egob));
+    if(profile?.nombre_completo) bits.push(String(profile.nombre_completo));
+    if(warn.length) bits.push(warn.length+' advertencia'+(warn.length===1?'':'s'));
+    meta.textContent=bits.join(' · ');
+    setButtonsV72(true);
+    return true;
+  }
+  async function validateV72(){
+    const box=document.getElementById('phduCompactResultV72');
+    const meta=document.getElementById('phduCompactMetaV72');
+    if(box){box.className='v72-result';box.innerHTML='<strong>Validando Informe…</strong>';}
+    if(meta)meta.textContent='';
+    setButtonsV72(false);
+
+    if(!approvedV72()){
+      if(box){box.className='v72-result error';box.innerHTML='<strong>✕ El control Nro. está disponible únicamente para un Informe Técnico Aprobatorio.</strong>';}
+      return false;
+    }
+    const api=window.AllpaSupabaseCheckV1;
+    if(!api){
+      if(box){box.className='v72-result error';box.innerHTML='<strong>✕ El módulo PHDU de Supabase todavía no está disponible.</strong>';}
+      return false;
+    }
+    try{
+      if(typeof api.restoreSession==='function') await api.restoreSession();
+      const profile=typeof api.getProfile==='function'?api.getProfile():null;
+      if(!profile){
+        if(box){box.className='v72-result error';box.innerHTML='<strong>✕ No existe una sesión PHDU activa.</strong><br>Regrese al Portal ALLPA e inicie sesión nuevamente.';}
+        return false;
+      }
+      const role=normV72(profile.rol);
+      if(!profile.activo || !['TECNICO','ADMIN'].includes(role)){
+        if(box){box.className='v72-result error';box.innerHTML='<strong>✕ El perfil '+escV72(profile.rol||'—')+' no está autorizado para numerar Informes.</strong>';}
+        return false;
+      }
+      const payload=api.buildPayload();
+      const validation=api.validatePayload(payload);
+      return renderValidationV72(validation,payload,profile);
+    }catch(err){
+      if(box){box.className='v72-result error';box.innerHTML='<strong>✕ No se pudo validar el Informe.</strong><br>'+escV72(err?.message||err);}
+      setButtonsV72(false);
+      return false;
+    }
+  }
+  async function openCompactV72(){
+    showV72();
+    await validateV72();
+  }
+  async function runActionV72(kind){
+    const valid=await validateV72();
+    if(!valid) return;
+    const actions=window.AllpaPhduFinalizeV4;
+    if(!actions){
+      const box=document.getElementById('phduCompactResultV72');
+      if(box){box.className='v72-result error';box.innerHTML='<strong>✕ No se encontró el módulo de finalización.</strong>';}
+      return;
+    }
+    closeV72();
+    if(kind==='update') await actions.updateRegisteredInforme();
+    else await actions.finalize();
+  }
+
+  function replaceNroHandlerV72(){
+    const old=document.getElementById('headerNumberControlV71');
+    if(!old) return;
+    if(old.dataset.v72Compact==='1'){
+      old.disabled=!approvedV72();
+      return;
+    }
+    const btn=old.cloneNode(true);
+    btn.dataset.v72Compact='1';
+    btn.disabled=!approvedV72();
+    btn.title='Validar y controlar numeración oficial';
+    btn.setAttribute('aria-label','Validar y controlar numeración oficial');
+    btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();openCompactV72();});
+    old.replaceWith(btn);
+  }
+
+  function refreshV72(){
+    modalV72();
+    replaceNroHandlerV72();
+  }
+  document.addEventListener('change',function(ev){if(ev.target?.id==='tipoInforme')setTimeout(refreshV72,0);});
+  document.addEventListener('click',function(){setTimeout(refreshV72,60);},true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(refreshV72,400);});
+  else setTimeout(refreshV72,150);
+  window.addEventListener('load',function(){setTimeout(refreshV72,900);setTimeout(refreshV72,1900);setTimeout(refreshV72,3000);});
+  window.AllpaNumberCompactV72=Object.freeze({open:openCompactV72,close:closeV72,validate:validateV72});
+})();
+</script>
+
+
+<!-- ==========================================================
+     ALLPA · V7.3 · ARRANQUE LIMPIO DEL GENERADOR DE INFORMES
+     Evita el destello del formulario antes del selector de proyectos.
+     ========================================================== -->
+<script id="allpa-v73-project-first-paint">
+(function(){
+  'use strict';
+  let done=false;
+  function revealProjectGeneratorV73(){
+    if(done) return;
+    try{
+      if(typeof ensureProjectEntryV123==='function') ensureProjectEntryV123();
+      if(typeof patchProjectEntryImageV126==='function') patchProjectEntryImageV126();
+      if(typeof patchProjectEntryTextV124==='function') patchProjectEntryTextV124();
+      if(typeof showProjectEntryV123==='function') showProjectEntryV123();
+      done=true;
+    }catch(err){
+      console.warn('ALLPA V7.3: no se pudo preparar inmediatamente el selector de proyectos.',err);
+    }finally{
+      document.documentElement.classList.remove('allpa-project-preboot');
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',revealProjectGeneratorV73,{once:true});
+  else revealProjectGeneratorV73();
+  /* Salvaguarda: nunca dejar la interfaz invisible si un parche histórico falla. */
+  setTimeout(function(){document.documentElement.classList.remove('allpa-project-preboot');},1600);
 })();
 </script>
 
