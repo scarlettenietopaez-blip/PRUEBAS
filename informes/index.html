@@ -41715,5 +41715,170 @@ window.addEventListener('load',()=>{
 });
 })();
 </script>
+
+<!-- ==========================================================
+     ALLPA V7.7.6 - Persistencia robusta de datos aprobatorios críticos
+     2026-09-07
+     - Sincroniza Consideraciones Estructurales ANTES de cada guardado.
+     - Sincroniza Resolución/Anteproyecto cuando esa sección está visible.
+     - Restaura los controles desde state después de cada rerender.
+     - No modifica el contenido técnico ni la lógica de numeración.
+     ========================================================== -->
+<script id="allpa-v776-persistencia-aprobatorio-critico">
+(function(){
+'use strict';
+const VERSION='7.7.6-persistencia-aprobatorio-critico';
+
+function ensure(){
+  if(!window.state) return null;
+  if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
+  if(!state.aprobatorio.estructural || typeof state.aprobatorio.estructural!=='object') state.aprobatorio.estructural={};
+  if(!state.aprobatorio.anteproyecto || typeof state.aprobatorio.anteproyecto!=='object')
+    state.aprobatorio.anteproyecto={activo:false,manualToggle:false,documento:'',egob:'',tecnico:'',criterio:'',calculista:'',senescyt:''};
+  return state.aprobatorio;
+}
+function value(id){
+  const el=document.getElementById(id);
+  return el ? String(el.value ?? '').trim() : null;
+}
+function setIfPresent(target,key,id){
+  const v=value(id);
+  if(v!==null) target[key]=v;
+}
+function syncEstructural(){
+  const a=ensure(); if(!a) return null;
+  const e=a.estructural;
+  setIfPresent(e,'documento','estDocumento');
+  setIfPresent(e,'egob','estEgob');
+  setIfPresent(e,'tecnico','estTecnico');
+  setIfPresent(e,'fecha','estFechaDocumento');
+  setIfPresent(e,'criterio','estCriterio');
+  setIfPresent(e,'calculista','estCalculista');
+  setIfPresent(e,'senescyt','estSenescyt');
+  setIfPresent(e,'municipal','estMunicipal');
+  return e;
+}
+function syncAnteproyecto(){
+  const a=ensure(); if(!a) return null;
+  const ant=a.anteproyecto;
+  const sw=document.getElementById('toggleAnteproyecto');
+  if(sw){ ant.activo=!!sw.checked; if(!sw.disabled) ant.manualToggle=true; }
+  setIfPresent(ant,'documento','antDocumento');
+  setIfPresent(ant,'egob','antEgob');
+  setIfPresent(ant,'tecnico','antTecnico');
+  setIfPresent(ant,'criterio','antCriterio');
+  setIfPresent(ant,'calculista','antCalculista');
+  setIfPresent(ant,'senescyt','antSenescyt');
+  return ant;
+}
+function syncCritical(){
+  syncEstructural();
+  syncAnteproyecto();
+  return state?.aprobatorio||null;
+}
+function setControl(id,v){
+  const el=document.getElementById(id);
+  if(!el || document.activeElement===el) return;
+  const val=String(v ?? '');
+  if(el.value!==val) el.value=val;
+}
+function restoreCritical(){
+  const a=ensure(); if(!a) return;
+  /* La fecha es un control montado tardíamente; pedir su montaje primero. */
+  try{ if(typeof window.AllpaFuenteResolucionesOMV1?.mount==='function') window.AllpaFuenteResolucionesOMV1.mount(); }catch(_e){}
+  const e=a.estructural||{};
+  setControl('estDocumento',e.documento);
+  setControl('estEgob',e.egob);
+  setControl('estTecnico',e.tecnico);
+  setControl('estFechaDocumento',e.fecha);
+  setControl('estCriterio',e.criterio);
+  setControl('estCalculista',e.calculista);
+  setControl('estSenescyt',e.senescyt);
+  setControl('estMunicipal',e.municipal);
+
+  const ant=a.anteproyecto||{};
+  const sw=document.getElementById('toggleAnteproyecto');
+  if(sw && document.activeElement!==sw) sw.checked=!!ant.activo;
+  setControl('antDocumento',ant.documento);
+  setControl('antEgob',ant.egob);
+  setControl('antTecnico',ant.tecnico);
+  setControl('antCriterio',ant.criterio);
+  setControl('antCalculista',ant.calculista);
+  setControl('antSenescyt',ant.senescyt);
+}
+
+/* Punto único y seguro antes de persistir: PersistenceV22C.save siempre llama collectTop(). */
+const baseCollect=typeof window.collectTop==='function' ? window.collectTop : (typeof collectTop==='function'?collectTop:null);
+if(baseCollect && !baseCollect.__allpaV776){
+  const wrappedCollect=function(){
+    /* Captura los valores visibles antes de que cualquier rerender pueda reemplazarlos. */
+    syncCritical();
+    const out=baseCollect.apply(this,arguments);
+    syncCritical();
+    return out;
+  };
+  wrappedCollect.__allpaV776=true;
+  window.collectTop=wrappedCollect;
+  try{collectTop=wrappedCollect}catch(_e){}
+}
+
+/* Delegación permanente: sigue funcionando aunque las tablas se reconstruyan con innerHTML. */
+function delegated(ev){
+  const id=ev.target?.id||'';
+  if(/^est(?:Documento|Egob|Tecnico|FechaDocumento|Criterio|Calculista|Senescyt|Municipal)$/.test(id)){
+    syncEstructural();
+  }else if(/^ant(?:Documento|Egob|Tecnico|Criterio|Calculista|Senescyt)$/.test(id) || id==='toggleAnteproyecto'){
+    syncAnteproyecto();
+  }else return;
+}
+document.addEventListener('input',delegated,true);
+document.addEventListener('change',delegated,true);
+
+/* Restauración robusta después de cada reconstrucción del Aprobatorio. */
+const baseRender=typeof window.renderAprobatorioForm==='function' ? window.renderAprobatorioForm : (typeof renderAprobatorioForm==='function'?renderAprobatorioForm:null);
+if(baseRender && !baseRender.__allpaV776){
+  const wrappedRender=function(){
+    /* Si el usuario estaba editando y otro módulo fuerza un render, no perder lo visible. */
+    syncCritical();
+    const out=baseRender.apply(this,arguments);
+    setTimeout(restoreCritical,0);
+    setTimeout(restoreCritical,80);
+    return out;
+  };
+  wrappedRender.__allpaV776=true;
+  window.renderAprobatorioForm=wrappedRender;
+  try{renderAprobatorioForm=wrappedRender}catch(_e){}
+}
+
+/* Guardado explícito como segunda barrera, por si un flujo futuro omite collectTop(). */
+function installSaveGuard(){
+  const current=window.guardarFormulario;
+  if(typeof current!=='function' || current.__allpaV776) return;
+  const guarded=async function(){
+    syncCritical();
+    const result=await current.apply(this,arguments);
+    return result;
+  };
+  guarded.__allpaV776=true;
+  guarded.__baseV776=current;
+  window.guardarFormulario=guarded;
+  try{guardarFormulario=guarded}catch(_e){}
+}
+installSaveGuard();
+window.addEventListener('load',()=>{
+  /* AllpaPublicRoutesV26 reafirma rutas a 3.2/4.2 s; reinstalamos la barrera después. */
+  setTimeout(()=>{installSaveGuard();restoreCritical()},4500);
+  setTimeout(()=>{installSaveGuard();restoreCritical()},5200);
+});
+
+window.AllpaPersistenciaAprobatorioV776=Object.freeze({
+  version:VERSION,
+  sync:syncCritical,
+  restore:restoreCritical,
+  syncEstructural,
+  syncAnteproyecto
+});
+})();
+</script>
 </body>
 </html>
