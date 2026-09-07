@@ -40078,7 +40078,7 @@ function mount(){
           <button type="button" onclick="window.AllpaSupabaseCheckV1.close()">Cerrar ×</button>
         </div>
         <div class="phdu-check-body-v1">
-          <div class="phdu-check-note-v1"><strong>Flujo controlado:</strong> primero compruebe el payload. Cuando todo esté correcto, <strong>Finalizar Informe y asignar número</strong> llamará a <code>phdu_finalizar_informe</code>. Esa acción registra el Informe y consume el siguiente número oficial de la serie correspondiente. QGIS continúa pendiente para una fase posterior.</div>
+          <div class="phdu-check-note-v1"><strong>Flujo controlado:</strong> primero compruebe el payload. Cuando todo esté correcto, <strong>Finalizar Informe y asignar número</strong> llamará a <code>phdu_finalizar_informe_controlado</code>. Esa acción registra el Informe y asigna el número oficial disponible de la serie correspondiente; si existe un número liberado, ALLPA lo reutiliza primero. QGIS continúa pendiente para una fase posterior.</div>
           <div data-phdu-status-v1 class="phdu-check-status-v1 info" style="margin-top:12px">Pendiente de iniciar sesión.</div>
           <div class="phdu-check-grid-v1">
             <div class="phdu-check-panel-v1">
@@ -40243,7 +40243,7 @@ window.AllpaSupabaseCheckV1=Object.freeze({
     const role=String(currentProfile.rol||'').toUpperCase();
     if(!currentProfile.activo) throw new Error('El perfil PHDU está inactivo.');
     if(!['TECNICO','ADMIN'].includes(role)) throw new Error('El rol '+(currentProfile.rol||'—')+' no puede finalizar Informes Técnicos.');
-    const {data,error}=await client.rpc('phdu_finalizar_informe',{p_payload:payload});
+    const {data,error}=await client.rpc('phdu_finalizar_informe_controlado',{p_payload:payload});
     if(error) throw error;
     return data;
   },
@@ -40710,7 +40710,7 @@ async function finalize(){
     'Trámite: '+tipo+'\n'+
     'eGOB: '+payload.egob+'\n'+
     'Fecha del informe: '+payload.fecha_informe+'\n\n'+
-    'Supabase asignará el siguiente número oficial disponible. Esta acción registra el Informe y el número no debe reutilizarse.'+warns+'\n\n¿Desea continuar?'
+    'Supabase asignará el número oficial disponible. Si existe un número previamente liberado de esta misma serie y año, ALLPA lo reutilizará primero; de lo contrario continuará con el siguiente secuencial.'+warns+'\n\n¿Desea continuar?'
   );
   if(!ok) return;
 
@@ -41167,7 +41167,7 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
     box.className='v72-result ok';
     box.innerHTML=n
       ? '<strong>✓ Informe validado correctamente.</strong><br>El número oficial registrado es <strong>'+escV72((typeof state!=='undefined'&&state?.phduNumeroFormateado)||String(n))+'</strong>. Puede actualizarlo sin consumir una nueva numeración.'
-      : '<strong>✓ Informe validado correctamente.</strong><br>Puede finalizarlo y solicitar el siguiente número oficial disponible.';
+      : '<strong>✓ Informe validado correctamente.</strong><br>Puede finalizarlo y solicitar el número oficial disponible; ALLPA priorizará cualquier número liberado de la misma serie y año.';
     const bits=[];
     if(payload?.egob) bits.push('eGOB '+String(payload.egob));
     if(profile?.nombre_completo) bits.push(String(profile.nombre_completo));
