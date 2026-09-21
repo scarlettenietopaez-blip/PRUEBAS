@@ -42011,5 +42011,77 @@ body.allpa-generator-home-v779 #projectEntryV123{display:grid!important;visibili
 })();
 </script>
 
+
+<script id="allpa-v780-conclusion-obra-mayor">
+(function(){
+'use strict';
+function cadastralV780(v){
+  const d=String(v||'').replace(/\D/g,'');
+  if(d.length!==27) return String(v||'').trim();
+  return [d.slice(0,2),d.slice(2,4),d.slice(4,6),d.slice(6,9),d.slice(9,12),d.slice(12,15),d.slice(15,18),d.slice(18,21),d.slice(21,24),d.slice(24,27)].join(' ');
+}
+function ownersV780(){
+  try{ if(typeof ensurePropietarios==='function') ensurePropietarios(); }catch(_e){}
+  const arr=Array.isArray(state?.propietarios)?state.propietarios:[];
+  return arr.map(p=>{
+    const n=String(p?.nombre||'').trim(),ci=String(p?.ci||'').trim();
+    if(!n)return '';
+    return n+(ci?', con número de cédula '+ci:'');
+  }).filter(Boolean).join('; ');
+}
+function treatmentV780(){
+  const n=(Array.isArray(state?.propietarios)?state.propietarios:[]).filter(p=>String(p?.nombre||'').trim()).length;
+  return n>1?'los señores':'el/la señor(a)';
+}
+function smallIntWordsV780(n){
+  const a=['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte'];
+  return a[n]||String(n);
+}
+function floorTextV780(){
+  const raw=String(typeof infoValue==='function'?infoValue('ALTURA EDIFICACIÓN'):'').trim();
+  const n=parseInt(raw,10);
+  return Number.isFinite(n)?`${smallIntWordsV780(n)} (${n}) pisos`:raw;
+}
+function conclusionIntroV780(){
+  const row=(typeof DATA!=='undefined'&&Array.isArray(DATA.plantillaAprobatorio))?DATA.plantillaAprobatorio.find(r=>String(r.ID_Bloque||'').trim()==='CON_001'):null;
+  const fallback='En concordancia a lo dispuesto en la Ordenanza No. 016-2023 DE ACTUALIZACIÓN DEL CÓDIGO URBANO, Publicada En El Registro Oficial Edición Especial Nº 885 del martes 23 de mayo de 2023, y una vez validada la matriz del formato de Revisión de OBRA MAYOR - PROYECTO DEFINITIVO, del trámite eGOB Nro. {{EGOB_PRINCIPAL}}, se concluye: Emitir el presente informe de OBRA MAYOR, uso {{USO_PROYECTO}}, altura de edificación {{ALTURA_EDIFICACION_TEXTO}}, propiedad de {{TRATAMIENTO_PROPIETARIO}} {{PROPIETARIOS_CON_CEDULAS}}, predio ubicado en la parroquia {{PARROQUIA}}, sector {{BARRIO_SECTOR}}, {{DIRECCION}}, código PIT {{CODIGO_PIT}}, clave catastral {{CLAVE_CATASTRAL_FORMATEADA}}, proyectista {{PROYECTISTA}}, con registro Senescyt {{PROYECTISTA_SENESCYT}}, registro municipal {{PROYECTISTA_REGISTRO_MUNICIPAL}}. Conforme al siguiente detalle:';
+  let tpl=String(row?.Texto_Base||fallback);
+  const vals={
+    EGOB_PRINCIPAL:String(state?.egob||'').trim(),
+    USO_PROYECTO:String(typeof infoValue==='function'?infoValue('USO PRINCIPAL'):'').trim(),
+    ALTURA_EDIFICACION_TEXTO:floorTextV780(),
+    TRATAMIENTO_PROPIETARIO:treatmentV780(),
+    PROPIETARIOS_CON_CEDULAS:ownersV780(),
+    PARROQUIA:String(typeof infoValue==='function'?infoValue('PARROQUIA'):'').trim(),
+    BARRIO_SECTOR:String(typeof infoValue==='function'?infoValue('BARRIO/SECTOR'):'').trim(),
+    DIRECCION:String(typeof infoValue==='function'?infoValue('DIRECCIÓN'):'').trim(),
+    CODIGO_PIT:String(typeof infoValue==='function'?infoValue('CÓDIGO PIT'):'').trim(),
+    CLAVE_CATASTRAL_FORMATEADA:cadastralV780(typeof infoValue==='function'?infoValue('CLAVE CATASTRAL'):''),
+    PROYECTISTA:String(typeof infoValue==='function'?infoValue('PROYECTISTA'):'').trim(),
+    PROYECTISTA_SENESCYT:String(typeof infoValue==='function'?infoValue('REGISTRO SENESCYT'):'').trim(),
+    PROYECTISTA_REGISTRO_MUNICIPAL:String(typeof infoValue==='function'?infoValue('REGISTRO MUNICIPAL'):'').trim()
+  };
+  let html=esc(tpl);
+  for(const [k,v] of Object.entries(vals)){
+    const token=esc('{{'+k+'}}');
+    const value=['TRATAMIENTO_PROPIETARIO','DIRECCION'].includes(k)?esc(v):`<strong>${esc(v)}</strong>`;
+    html=html.split(token).join(value);
+  }
+  return html;
+}
+const baseRenderV780=window.renderInformeAprobatorio||renderInformeAprobatorio;
+window.renderInformeAprobatorio=renderInformeAprobatorio=function(){
+  const html=baseRenderV780.apply(this,arguments);
+  try{
+    if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123())return html;
+    if(state?.tipoInforme!=='Informe Técnico Aprobatorio')return html;
+    const marker=/(<h2>\d+\. Conclusión técnica<\/h2>)<p>[\s\S]*?<\/p>(?=<table|<div|<p|$)/i;
+    return String(html).replace(marker,`$1<p>${conclusionIntroV780()}</p>`);
+  }catch(err){console.warn('ALLPA V7.8.0 conclusión Obra Mayor:',err);return html;}
+};
+window.allpaConclusionObraMayorV780=conclusionIntroV780;
+})();
+</script>
+
 </body>
 </html>
