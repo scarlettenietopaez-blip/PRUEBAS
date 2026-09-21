@@ -39105,6 +39105,19 @@ function renderAprV13Clean(){
   if(String(state?.projectType||'')!=='anteproyecto_edificacion'){
     s=String(s).replace(/Resoluci[oó]n de Anteproyecto/gi,'Aprobación de Anteproyecto');
   }
+
+  /* ALLPA V7.8.1 — Mantener la conclusión canónica incluso cuando V13
+     se reinstala de forma diferida (6.2 s / 7.0 s). */
+  try{
+    if(String(state?.tipoInforme||'')==='Informe Técnico Aprobatorio' &&
+       typeof window.allpaConclusionObraMayorV780==='function'){
+      const marker=/(<h2>\d+\. Conclusión técnica<\/h2>)<p>[\s\S]*?<\/p>(?=<table|<div|<p|$)/i;
+      s=String(s).replace(marker,`$1<p>${window.allpaConclusionObraMayorV780()}</p>`);
+    }
+  }catch(err){
+    console.warn('ALLPA V7.8.1 conclusión canónica:',err);
+  }
+
   return replaceConclusionV13Clean(s);
 }
 function renderV13Clean(){
@@ -42077,7 +42090,7 @@ window.renderInformeAprobatorio=renderInformeAprobatorio=function(){
     if(state?.tipoInforme!=='Informe Técnico Aprobatorio')return html;
     const marker=/(<h2>\d+\. Conclusión técnica<\/h2>)<p>[\s\S]*?<\/p>(?=<table|<div|<p|$)/i;
     return String(html).replace(marker,`$1<p>${conclusionIntroV780()}</p>`);
-  }catch(err){console.warn('ALLPA V7.8.0 conclusión Obra Mayor:',err);return html;}
+  }catch(err){console.warn('ALLPA V7.8.1 conclusión Obra Mayor:',err);return html;}
 };
 window.allpaConclusionObraMayorV780=conclusionIntroV780;
 })();
