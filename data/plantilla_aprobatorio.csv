@@ -47,26 +47,7 @@ EERSA | {{OFICIO}}
 EERSA |  {{EVIDENCIA}}
 CNT | {{EVIDENCIA}}
 BOMBEROS | {{EVIDENCIA}}";Variable;SI;Llenar manualmente por el usuario
-CON_001;8;CONCLUSIONES;CONCLUSIÓN TÉCNICA;"En concordancia a lo dispuesto en la Ordenanza No. 016-2023 de Actualización del Código Urbano, Artículo
-92 Componentes del Proyecto Técnico de Edificación de Obras Mayores, se concluye emitir el presente
-INFORME TÉCNICO FAVORABLE, de conformidad al siguiente detalle:
-TABLA
-DESCRIPCION | CANTIDAD | UNIDAD
-Área del predio (IPRUS) | {{M2}} | |m2
-Área útil planta baja | {{M2}} | |m2
-Área útil total | {{M2}} | |m2
-{{Agregar filas dependiendo de la edificación:
-Área bruta planta baja | {NIVELES} | {M2} | m2
-Área burta 1era planta alta | {NIVELES} | {M2} | m2
-...
-Área bruta Planta Terraza| {NIVELES} | {M2} | m2}}
-Área Bruta total de construcción {{M2}} | |m2
-Número de pisos | {{Nro.}} | U
-Unidades Habitacionales  | {{Nro.}} | U
-Unidades Comerciales  | {{Nro.}} | U
-COS PB  | {{Nro.}} | %
-COS Total | {{Nro.}} | %";Variable;SI;Llenar manualmente por el usuario
+CON_001;8;CONCLUSIONES;CONCLUSIÓN TÉCNICA;En concordancia a lo dispuesto en la Ordenanza No. 016-2023 DE ACTUALIZACIÓN DEL CÓDIGO URBANO, Publicada En El Registro Oficial Edición Especial Nº 885 del martes 23 de mayo de 2023, y una vez validada la matriz del formato de Revisión de OBRA MAYOR - PROYECTO DEFINITIVO, del trámite eGOB Nro. {{EGOB_PRINCIPAL}}, se concluye: Emitir el presente informe de OBRA MAYOR, uso {{USO_PROYECTO}}, altura de edificación {{ALTURA_EDIFICACION_TEXTO}}, propiedad de {{TRATAMIENTO_PROPIETARIO}} {{PROPIETARIOS_CON_CEDULAS}}, predio ubicado en la parroquia {{PARROQUIA}}, sector {{BARRIO_SECTOR}}, {{DIRECCION}}, código PIT {{CODIGO_PIT}}, clave catastral {{CLAVE_CATASTRAL_FORMATEADA}}, proyectista {{PROYECTISTA}}, con registro Senescyt {{PROYECTISTA_SENESCYT}}, registro municipal {{PROYECTISTA_REGISTRO_MUNICIPAL}}. Conforme al siguiente detalle:;Variable;SI;Texto dinámico de Conclusión Técnica para Obra Mayor. V7.8.0 resuelve las variables desde el formulario.
 CON_002;9;CONCLUSIONES;CONCLUSIÓN TÉCNICA;El PROYECTO DEFINITIVO, tiene un área a construir de {{Área Bruta}}, valor a tomar en cuenta para efecto del cálculo para el pago de la tasa administrativa. Nota. - La información y datos que están en el proyecto son de exclusiva responsabilidad del proyectista y propietario, en el caso de existir datos erróneos, ocultos, la aprobación quedará automáticamente insubsistente.;Variable;si;{{Área Bruta}} se toma de la información anterior
 ANX_001;10;Carpetas Físicas;ANEXO;{{Texto Usuario}};Variable;si;Generar una fila por cada carpeta, que el usuario pueda añadir
 ANX_002;11;Digital;ADJUNTOS;{{Texto Usuario}};Variable;si;Generar una fila por cada documento, que el usuario pueda añadir
-ASU_001;12;ASUNTO EGOB;ASUNTO INFORME TÉCNICO APROBATORIO;{{Tipo de Informe}} DE {{Tipo de Proyecto}} NRO. {{Número de Informe}} EGOB NRO. {{Número de Trámite}};Variable;No;Texto para el botón COPIAR ASUNTO. No se imprime ni forma parte del informe.
