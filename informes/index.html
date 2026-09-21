@@ -33393,13 +33393,32 @@ textarea.evidencia-text,
         }
       }
 
-      /* Fallback robusto: insertar después de propietarios si la forma exacta
-         cambió en un renderer posterior. */
-      if(!replaced && !html.includes(arr[1]?.nombre||'__NO_SECOND__')){
-        const tbodyPos=html.indexOf('<tbody>');
-        if(tbodyPos>=0){
-          html=html.slice(0,tbodyPos+7)+multi+html.slice(tbodyPos+7);
+      /* Fallback V7.8.4: nunca insertar el apoderado al inicio del tbody.
+         1) Busca y sustituye cualquier fila legado de APODERADO aunque el renderer
+            haya cambiado clases, centrado o espacios.
+         2) Si no existe fila legado, inserta las filas justo antes de PROYECTO
+            DEFINITIVO, manteniéndolas después de todos los propietarios. */
+      if(!replaced){
+        const legacyApodRow=/<tr\b[^>]*>[\s\S]*?<td\b[^>]*>\s*APODERADO\s*<\/td>[\s\S]*?<td\b[^>]*>\s*CI\/RUC APODERADO\s*<\/td>[\s\S]*?<\/tr>/i;
+        if(legacyApodRow.test(html)){
+          html=html.replace(legacyApodRow,multi);
+          replaced=true;
         }
+      }
+
+      if(!replaced){
+        const proyectoRow=/(<tr\b[^>]*>[\s\S]*?<td\b[^>]*>\s*PROYECTO DEFINITIVO\s*<\/td>[\s\S]*?<\/tr>)/i;
+        if(proyectoRow.test(html)){
+          html=html.replace(proyectoRow,`${multi}$1`);
+          replaced=true;
+        }
+      }
+
+      /* Último resguardo: si una plantilla futura elimina PROYECTO DEFINITIVO,
+         agregar al final de la tabla, nunca al comienzo. */
+      if(!replaced){
+        const endBody=html.lastIndexOf('</tbody>');
+        if(endBody>=0) html=html.slice(0,endBody)+multi+html.slice(endBody);
       }
 
       return html;
@@ -38719,20 +38738,52 @@ function propObjPublicV12(id){
  if(!state.requisitosPropuesta[id])state.requisitosPropuesta[id]={estado:'',observacion:'',imagenes:[]};
  return state.requisitosPropuesta[id];
 }
-function formatPropRowV12(o){
- if(o?.source!=='prop_req')return o;
- const obj=propObjPublicV12(o.id),art=String(o.articulo||o.norma||'').trim(),req=String(o.texto||'').trim();
- const joined=[art,req].filter(Boolean).join(art&&req&&!/[.;:]$/.test(art)?'. ':' ');
- const clarification=String(obj.observacion||'').trim()||'No Cumple';
- return {...o,articulo:joined,norma:joined,observacion:clarification,correccion:clarification,texto:''};
+/* ALLPA V7.8.3 — Tabla de Criterio Técnico
+   Los requisitos DOCUMENTALES siguen la misma lógica visual de los requisitos
+   de PROPUESTA ARQUITECTÓNICA:
+   - Artículo / Norma = norma aplicable + texto del requisito.
+   - Aclaración = observación escrita para el usuario; si está vacía, "No Cumple".
+   Aplica tanto a Obra Mayor como a Anteproyecto porque DATA.requisitos contiene
+   el catálogo documental correspondiente al tipo de proyecto activo. */
+function docReqDefV783(id){
+ const rows=(typeof DATA!=='undefined'&&Array.isArray(DATA.requisitos))?DATA.requisitos:[];
+ return rows.find(r=>String(r?.id||'')===String(id||''))||null;
 }
+function stripDocReqNumberV783(text){
+ const raw=String(text||'').trim();
+ try{
+   if(typeof stripReqNumber==='function') return String(stripReqNumber(raw)||'').trim();
+ }catch(_e){}
+ return raw.replace(/^\s*\d+(?:\.\d+)*\.?\s*/, '').trim();
+}
+function formatCriterionRowV783(o){
+ if(o?.source==='prop_req'){
+   const obj=propObjPublicV12(o.id),art=String(o.articulo||o.norma||'').trim(),req=String(o.texto||'').trim();
+   const joined=[art,req].filter(Boolean).join(art&&req&&!/[.;:]$/.test(art)?'. ':' ');
+   const clarification=String(obj.observacion||'').trim()||'No Cumple';
+   return {...o,articulo:joined,norma:joined,observacion:clarification,correccion:clarification,texto:''};
+ }
+ if(o?.source==='req'){
+   const def=docReqDefV783(o.id);
+   const art=String(def?.normaDefault||o.articulo||o.norma||'').trim();
+   const req=stripDocReqNumberV783(def?.texto||'');
+   const joined=[art,req].filter(Boolean).join(art&&req&&!/[.;:]$/.test(art)?'. ':' ');
+   const userObs=String(state?.requisitos?.[o.id]?.observacion||'').trim();
+   const clarification=userObs||'No Cumple';
+   return {...o,articulo:joined,norma:joined,observacion:clarification,correccion:clarification,texto:''};
+ }
+ return o;
+}
+/* Alias conservado para las rutas históricas que todavía llaman al nombre V12. */
+function formatPropRowV12(o){return formatCriterionRowV783(o)}
 function selectedObsTableV12(){
- const rows=(typeof combinedObsRows==='function'?combinedObsRows():[]).map(formatPropRowV12);
+ const rows=(typeof combinedObsRows==='function'?combinedObsRows():[]).map(formatCriterionRowV783);
  if(!rows.length)return '<p>No se registran observaciones técnicas.</p>';
  return `<table class="criterio-simple-v55"><thead><tr><th>Nro.</th><th>Artículo / Norma</th><th>Aclaración</th></tr></thead><tbody>${rows.map((raw,i)=>{
-   const o=formatPropRowV12(raw);
-   const art=o.source==='prop_req'?escV12(o.articulo||o.norma||''):(typeof articleCellForObsV68==='function'?articleCellForObsV68(o):escV12(o.articulo||o.norma||''));
-   const clar=o.source==='prop_req'?escV12(o.observacion||'No Cumple'):(typeof obsSpecificV55==='function'?escV12(obsSpecificV55(o)):escV12(o.observacion||''));
+   const o=formatCriterionRowV783(raw);
+   const isReq=o.source==='prop_req'||o.source==='req';
+   const art=isReq?escV12(o.articulo||o.norma||''):(typeof articleCellForObsV68==='function'?articleCellForObsV68(o):escV12(o.articulo||o.norma||''));
+   const clar=isReq?escV12(o.observacion||'No Cumple'):(typeof obsSpecificV55==='function'?escV12(obsSpecificV55(o)):escV12(o.observacion||''));
    return `<tr><td>${i+1}</td><td>${art}</td><td>${clar}</td></tr>`;
  }).join('')}</tbody></table>`;
 }
