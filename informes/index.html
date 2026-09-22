@@ -29115,13 +29115,21 @@ renderObsSeleccionadas = function(){
 
   /* 11. Asunto para Desistimiento */
   function projectLabelDesV13(){return typeof isAnteproyectoV123==='function'&&isAnteproyectoV123()?'ANTEPROYECTO DE EDIFICACIÓN':'OBRA MAYOR - PROYECTO DEFINITIVO';}
-  function subjectDesV13(placeholder=false){const egob=String(state?.egob||document.getElementById('egob')?.value||'').trim()||(placeholder?'…':'');return `INFORME TÉCNICO DE DESISTIMIENTO DE ${projectLabelDesV13()} EGOB NRO. ${egob}`.toUpperCase();}
+  function subjectDesV13(placeholder=false){
+    const egob=String(state?.egob||document.getElementById('egob')?.value||'').trim()||(placeholder?'…':'');
+    const n=Number(state?.phduDesistimientoNumero||0);
+    const nro=(Number.isInteger(n)&&n>0)?` NRO. ${String(n).padStart(3,'0')}`:(placeholder?' NRO. …':'');
+    return `INFORME TÉCNICO DE DESISTIMIENTO DE ${projectLabelDesV13()}${nro} EGOB NRO. ${egob}`.toUpperCase();
+  }
   async function copyTextV13(text){
     try{if(navigator.clipboard&&window.isSecureContext)await navigator.clipboard.writeText(text);else throw new Error();}
     catch(_e){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(_e2){}ta.remove();}
   }
   window.copyDesistimientoSubjectV13=async function(){
-    const egob=String(state?.egob||'').trim();if(!egob){if(typeof msg==='function')msg('Complete el Nro. eGOB antes de copiar el asunto.');document.getElementById('egob')?.focus();return;}
+    const egob=String(state?.egob||'').trim();
+    if(!egob){if(typeof msg==='function')msg('Complete el Nro. eGOB antes de copiar el asunto.');document.getElementById('egob')?.focus();return;}
+    const n=Number(state?.phduDesistimientoNumero||0);
+    if(!Number.isInteger(n)||n<=0){if(typeof msg==='function')msg('Finalice el Informe de Desistimiento y asigne su número oficial antes de copiar el asunto.');return;}
     await copyTextV13(subjectDesV13(false));if(typeof msg==='function')msg('Asunto de desistimiento copiado.',true);
   };
   window.renderDesistimientoSubjectV13=function(){
@@ -39829,13 +39837,17 @@ function projectType(){
   try{if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()) return 'ANTEPROYECTO';}catch(_e){}
   return 'OBRA_MAYOR';
 }
+function isDesistimientoPhduV790(){
+  return state?.tipoInforme==='Informe de Desistimiento';
+}
 function ensureInformeId(){
   if(typeof state==='undefined') return '';
-  let id=String(state.phduInformeId||'').trim();
+  const key=isDesistimientoPhduV790()?'phduDesistimientoId':'phduInformeId';
+  let id=String(state[key]||'').trim();
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
     if(window.crypto && typeof window.crypto.randomUUID==='function') id=window.crypto.randomUUID();
     else id='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16);});
-    state.phduInformeId=id;
+    state[key]=id;
   }
   return id;
 }
@@ -39885,7 +39897,72 @@ function professionalEmail(){
   for(const [k,v] of Object.entries(row)){if(/correo|email|e-mail|mail/i.test(k) && String(v||'').trim()) return String(v).trim();}
   return '';
 }
+
+function buildDesistimientoPayloadV790(){
+  try{if(typeof window.collectTop==='function') window.collectTop(); else if(typeof collectTop==='function') collectTop();}catch(_e){}
+  try{if(typeof window.ensurePropietarios==='function') window.ensurePropietarios(); else if(typeof ensurePropietarios==='function') ensurePropietarios();}catch(_e){}
+  try{if(typeof window.ensureDesistimientoV69==='function') window.ensureDesistimientoV69(); else if(typeof ensureDesistimientoV69==='function') ensureDesistimientoV69();}catch(_e){}
+
+  const owners=(Array.isArray(state?.propietarios)?state.propietarios:[])
+    .map(p=>({nombre:String(p?.nombre||'').trim(),ci:String(p?.ci||'').trim()}))
+    .filter(p=>p.nombre||p.ci);
+
+  const snapshotResult=sanitizeSnapshotForSupabase(state);
+  const snapshot=snapshotResult.value;
+  const apoderado=state?.apoderado?.activo
+    ? [String(state.apoderado.nombre||'').trim(),String(state.apoderado.ci||'').trim()].filter(Boolean).join(' · ')
+    : '';
+  const motivo=String(state?.desistimiento?.motivo||'').trim();
+  const extra=String(state?.desistimiento?.conclusiones||'').trim();
+
+  let conclusion='';
+  try{
+    if(/petici[oó]n/i.test(motivo)){
+      conclusion=String(typeof desRowV69==='function'?(desRowV69('DES_CON_003')?.Texto_Base||''):'').trim();
+      if(!conclusion) conclusion='En base al Artículo 211 del COA, por Petición del Administrado se procede con el Desistimiento del Trámite.';
+    }else{
+      const base=String(typeof desRowV69==='function'?(desRowV69('DES_CON_001')?.Texto_Base||''):'').trim()
+        || 'Por las conclusiones antes expuestas se emite criterio técnico NO FAVORABLE,';
+      conclusion=[base,extra].filter(Boolean).join(' ').trim();
+    }
+  }catch(_e){ conclusion=extra; }
+
+  return {
+    payload:{
+      id_informe:ensureInformeId(),
+      tipo_informe:'DESISTIMIENTO',
+      tipo_tramite:projectType(),
+      anio:parseInt(String(state?.fechaRevision||'').slice(0,4),10) || new Date().getFullYear(),
+      egob:digits(state?.egob||info('TRÁMITE EGOB')),
+      fecha_informe:String(state?.fechaRevision||'').trim(),
+      fecha_ingreso_tramite:String(state?.fechaIngresoTramite||'').trim(),
+      propietarios:owners,
+      propietarios_texto:owners.map(p=>p.nombre).filter(Boolean).join(' / '),
+      documentos_propietarios:owners.map(p=>p.ci).filter(Boolean).join(' / '),
+      apoderado,
+      proyectista:info('PROYECTISTA'),
+      proyectista_senescyt:info('REGISTRO SENESCYT'),
+      proyectista_registro_municipal:info('REGISTRO MUNICIPAL'),
+      correo_notificacion_sugerido:professionalEmail(),
+      nombre_proyecto:info('NOMBRE DEL PROYECTO'),
+      uso_proyecto:info('USO PRINCIPAL'),
+      tipo_obra:info('PROYECTO DEFINITIVO') || (projectType()==='ANTEPROYECTO'?'ANTEPROYECTO DE EDIFICACIÓN':'OBRA MAYOR - PROYECTO DEFINITIVO'),
+      altura_edificacion:info('ALTURA EDIFICACIÓN'),
+      parroquia:info('PARROQUIA'),
+      direccion:info('DIRECCIÓN'),
+      codigo_pit:info('CÓDIGO PIT'),
+      clave_catastral:digits(info('CLAVE CATASTRAL')),
+      barrio_sector:info('BARRIO/SECTOR'),
+      motivo_desistimiento:motivo,
+      conclusiones_desistimiento:conclusion,
+      datos_informe:snapshot
+    },
+    rows:[],grav:{},est:{},integerRaw:{},snapshotStats:snapshotResult.stats
+  };
+}
+
 function buildPayload(){
+  if(isDesistimientoPhduV790()) return buildDesistimientoPayloadV790();
   try{if(typeof window.collectTop==='function') window.collectTop(); else if(typeof collectTop==='function') collectTop();}catch(_e){}
   try{if(typeof window.ensureFuenteState==='function') window.ensureFuenteState();}catch(_e){}
   try{if(typeof window.ensureAprobatorioData==='function') window.ensureAprobatorioData(); else if(typeof ensureAprobatorioData==='function') ensureAprobatorioData();}catch(_e){}
@@ -39977,6 +40054,42 @@ function buildPayload(){
 }
 function validate(payload){
   const bad=[],warn=[],good=[];
+  const isDes=isDesistimientoPhduV790();
+
+  if(isDes){
+    if(state?.tipoInforme!=='Informe de Desistimiento') bad.push('El tipo seleccionado no es “Informe de Desistimiento”.');
+    else good.push('Tipo de informe: Informe de Desistimiento.');
+
+    if(!/^\d{1,20}$/.test(payload.egob||'')) bad.push('El eGOB principal está vacío o no es numérico.');
+    else good.push('eGOB válido: '+payload.egob+'.');
+
+    if(!payload.fecha_informe) bad.push('Falta la fecha de emisión del Informe de Desistimiento.');
+    else good.push('Fecha de emisión disponible.');
+
+    if(!payload.fecha_ingreso_tramite) warn.push('Falta la Fecha de ingreso del trámite; será necesaria para la Resolución de Desistimiento.');
+    else good.push('Fecha de ingreso del trámite disponible.');
+
+    if(!payload.propietarios.length) bad.push('No hay propietarios registrados.');
+    else good.push('Propietarios listos: '+payload.propietarios.length+'.');
+
+    if(!payload.motivo_desistimiento) bad.push('Seleccione el motivo del desistimiento.');
+    else good.push('Motivo: '+payload.motivo_desistimiento+'.');
+
+    if(payload.clave_catastral && !/^\d{27}$/.test(payload.clave_catastral)) bad.push('La clave catastral no tiene 27 dígitos.');
+    else if(payload.clave_catastral) good.push('Clave catastral de 27 dígitos.');
+
+    if(!payload.proyectista) warn.push('No se encontró Proyectista.');
+    if(!payload.correo_notificacion_sugerido) warn.push('No se encontró correo sugerido del profesional; podrá completarse en la Resolución.');
+    if(!String(payload.conclusiones_desistimiento||'').trim()) warn.push('La conclusión del Informe de Desistimiento está vacía.');
+
+    if(!currentProfile) bad.push('No hay sesión Supabase comprobada.');
+    else if(!currentProfile.activo) bad.push('El perfil PHDU está inactivo.');
+    else if(!['TECNICO','ADMIN'].includes(String(currentProfile.rol||'').toUpperCase())) bad.push('El rol '+String(currentProfile.rol||'—')+' no puede finalizar Informes Técnicos.');
+    else good.push('Perfil autorizado para Informes: '+currentProfile.rol+'.');
+
+    return {bad,warn,good};
+  }
+
   if(state?.tipoInforme!=='Informe Técnico Aprobatorio') bad.push('El tipo seleccionado no es “Informe Técnico Aprobatorio”.');
   else good.push('Tipo de informe: Informe Técnico Aprobatorio.');
 
@@ -40048,14 +40161,15 @@ function renderProfile(){
   const logout=document.getElementById('phduLogoutV1'); if(logout) logout.disabled=!currentUser;
 }
 function rowsHtml(p){
-  const items=[
+  const base=[
     ['ID interno estable',p.id_informe],
-    ['Serie',p.tipo_tramite],
+    ['Serie',isDesistimientoPhduV790()?'DESISTIMIENTO':p.tipo_tramite],
+    ['Tipo de trámite',p.tipo_tramite],
     ['Año',p.anio],
     ['eGOB',p.egob],
     ['Fecha del informe',p.fecha_informe],
     ['Fecha ingreso trámite',p.fecha_ingreso_tramite],
-    ['Propietarios',p.propietarios.map(x=>[x.nombre,x.ci].filter(Boolean).join(' · ')).join(' / ')],
+    ['Propietarios',(p.propietarios||[]).map(x=>[x.nombre,x.ci].filter(Boolean).join(' · ')).join(' / ')],
     ['Apoderado',p.apoderado],
     ['Proyectista',p.proyectista],
     ['SENESCYT proyectista',p.proyectista_senescyt],
@@ -40069,28 +40183,25 @@ function rowsHtml(p){
     ['Dirección',p.direccion],
     ['Código PIT',p.codigo_pit],
     ['Clave catastral',p.clave_catastral],
-    ['Barrio / sector',p.barrio_sector],
-    ['Área predio',p.area_predio],
-    ['Área construcción',p.area_construccion],
-    ['Área ampliación/modificación',p.area_ampliacion_modificacion],
-    ['Pisos',p.pisos],
-    ['Unidades habitacionales',p.unidades_habitacionales],
-    ['Unidades comerciales',p.unidades_comerciales],
-    ['COS PB',p.cos_pb],
-    ['COS Total',p.cos_total],
-    ['Gravamen · Ficha',p.gravamen_ficha_registral],
-    ['Gravamen · Certificado',p.gravamen_certificado],
-    ['Gravamen · Fecha',p.gravamen_fecha],
-    ['Gravamen · Área total',p.gravamen_area_total],
-    ['Estructural · Documento',p.estructural_documento],
-    ['Estructural · eGOB',p.estructural_egob],
-    ['Estructural · Fecha',p.estructural_fecha],
-    ['Estructural · Técnico',p.estructural_tecnico],
-    ['Estructural · Criterio',p.estructural_criterio],
-    ['Estructural · Calculista',p.estructural_calculista],
-    ['Estructural · SENESCYT',p.estructural_senescyt],
-    ['Filas Conclusión Técnica',Array.isArray(p.conclusion_tecnica)?p.conclusion_tecnica.length:0]
+    ['Barrio / sector',p.barrio_sector]
   ];
+  const items=isDesistimientoPhduV790()
+    ? base.concat([
+        ['Motivo de desistimiento',p.motivo_desistimiento],
+        ['Conclusión de desistimiento',p.conclusiones_desistimiento]
+      ])
+    : base.concat([
+        ['Área predio',p.area_predio],['Área construcción',p.area_construccion],
+        ['Área ampliación/modificación',p.area_ampliacion_modificacion],['Pisos',p.pisos],
+        ['Unidades habitacionales',p.unidades_habitacionales],['Unidades comerciales',p.unidades_comerciales],
+        ['COS PB',p.cos_pb],['COS Total',p.cos_total],['Gravamen · Ficha',p.gravamen_ficha_registral],
+        ['Gravamen · Certificado',p.gravamen_certificado],['Gravamen · Fecha',p.gravamen_fecha],
+        ['Gravamen · Área total',p.gravamen_area_total],['Estructural · Documento',p.estructural_documento],
+        ['Estructural · eGOB',p.estructural_egob],['Estructural · Fecha',p.estructural_fecha],
+        ['Estructural · Técnico',p.estructural_tecnico],['Estructural · Criterio',p.estructural_criterio],
+        ['Estructural · Calculista',p.estructural_calculista],['Estructural · SENESCYT',p.estructural_senescyt],
+        ['Filas Conclusión Técnica',Array.isArray(p.conclusion_tecnica)?p.conclusion_tecnica.length:0]
+      ]);
   return items.map(([k,v])=>'<tr><th>'+e(k)+'</th><td>'+(String(v??'').trim()?e(v):'<span style="color:#98a2b3">—</span>')+'</td></tr>').join('');
 }
 function validationHtml(v){
@@ -40223,7 +40334,7 @@ function mount(){
           <button type="button" onclick="window.AllpaSupabaseCheckV1.close()">Cerrar ×</button>
         </div>
         <div class="phdu-check-body-v1">
-          <div class="phdu-check-note-v1"><strong>Flujo controlado:</strong> primero compruebe el payload. Cuando todo esté correcto, <strong>Finalizar Informe y asignar número</strong> llamará a <code>phdu_finalizar_informe_controlado</code>. Esa acción registra el Informe y asigna el número oficial disponible de la serie correspondiente; si existe un número liberado, ALLPA lo reutiliza primero. QGIS continúa pendiente para una fase posterior.</div>
+          <div class="phdu-check-note-v1"><strong>Flujo controlado:</strong> primero compruebe el payload. Cuando todo esté correcto, <strong>Finalizar Informe y asignar número</strong> utilizará la función de numeración correspondiente al tipo de Informe. Los Aprobatorios conservan sus series actuales y los Informes de Desistimiento utilizan una serie anual independiente que inicia en 001.</div>
           <div data-phdu-status-v1 class="phdu-check-status-v1 info" style="margin-top:12px">Pendiente de iniciar sesión.</div>
           <div class="phdu-check-grid-v1">
             <div class="phdu-check-panel-v1">
@@ -40257,7 +40368,7 @@ function mount(){
                   <div class="phdu-check-actions-v1"><button type="button" class="secondary" onclick="window.AllpaSupabaseCheckV1.copyJson()">Copiar JSON completo</button></div>
                 </div>
               </div>
-              <div id="phduPayloadEmptyV1" class="phdu-check-empty-v1">Inicie sesión y pulse <strong>Comprobar datos para Supabase</strong>. Aquí aparecerá el mapeo del Informe Técnico Aprobatorio actual.</div>
+              <div id="phduPayloadEmptyV1" class="phdu-check-empty-v1">Inicie sesión y pulse <strong>Comprobar datos para Supabase</strong>. Aquí aparecerá el mapeo del Informe actual.</div>
             </div>
           </div>
         </div>
@@ -40303,69 +40414,77 @@ async function recoverRegisteredInforme(payload){
   if(!['TECNICO','ADMIN'].includes(role)) throw new Error('El rol '+(currentProfile.rol||'—')+' no puede actualizar Informes Técnicos.');
 
   payload=payload&&typeof payload==='object'?payload:{};
-  const validUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const selectCols='id,numero,numero_formateado,anio,tipo_tramite,egob,estado,tecnico_id,actualizado_en,creado_en';
+  const isDes=isDesistimientoPhduV790();
   let row=null;
 
-  const idCandidate=String(state?.phduInformeId||payload.id_informe||'').trim();
-  if(validUuid.test(idCandidate)){
-    const exact=await client.from('phdu_informes_aprobatorios')
-      .select(selectCols)
-      .eq('id',idCandidate)
-      .eq('estado','NUMERADO')
-      .maybeSingle();
-    if(exact.error) throw exact.error;
-    if(exact.data) row=exact.data;
-  }
+  if(isDes){
+    const idCandidate=String(state?.phduDesistimientoId||payload.id_informe||'').trim();
+    const validUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const args={
+      p_id:validUuid.test(idCandidate)?idCandidate:null,
+      p_egob:digits(payload.egob||state?.egob||'')||null,
+      p_tipo:String(payload.tipo_tramite||projectType()||'').trim().toUpperCase()||null
+    };
+    const {data,error}=await client.rpc('phdu_buscar_informe_desistimiento_numerado',args);
+    if(error) throw error;
+    const rows=Array.isArray(data)?data:(data?[data]:[]);
+    if(rows.length>1 && !args.p_id) throw new Error('Se encontraron varios Informes de Desistimiento numerados para este eGOB. ALLPA no seleccionará uno automáticamente.');
+    row=rows[0]||null;
+    if(!row) return null;
 
-  if(!row){
-    const egob=digits(payload.egob||state?.egob||'');
-    const tipo=String(payload.tipo_tramite||projectType()||'').trim().toUpperCase();
-    if(!egob) throw new Error('No se puede buscar el Informe registrado porque falta el eGOB.');
-    if(!tipo) throw new Error('No se puede buscar el Informe registrado porque falta el tipo de trámite.');
-
-    const found=await client.from('phdu_informes_aprobatorios')
-      .select(selectCols)
-      .eq('egob',egob)
-      .eq('tipo_tramite',tipo)
-      .eq('estado','NUMERADO')
-      .order('creado_en',{ascending:false})
-      .limit(3);
-    if(found.error) throw found.error;
-    const rows=Array.isArray(found.data)?found.data:[];
-    if(rows.length===1){
-      row=rows[0];
-    }else if(rows.length>1){
-      const hist=String(state?.aprobatorio?.asunto?.numero||'').replace(/\D/g,'');
-      if(hist){
-        const matched=rows.filter(r=>String(r.numero||'')===String(Number(hist)));
-        if(matched.length===1) row=matched[0];
-      }
-      if(!row){
-        throw new Error('Se encontraron varios Informes numerados para el eGOB '+egob+'. Para evitar actualizar el documento equivocado, ALLPA no seleccionará uno automáticamente.');
+    state.phduDesistimientoId=String(row.id);
+    state.phduDesistimientoNumero=Number(row.numero);
+    state.phduDesistimientoNumeroFormateado=String(row.numero_formateado||row.numero||'');
+    state.phduDesistimientoFinalizado=true;
+    state.phduDesistimientoRecuperadoDesdeSupabase=true;
+    state.phduDesistimientoActualizadoEn=String(row.actualizado_en||'');
+  }else{
+    const validUuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const selectCols='id,numero,numero_formateado,anio,tipo_tramite,egob,estado,tecnico_id,actualizado_en,creado_en';
+    const idCandidate=String(state?.phduInformeId||payload.id_informe||'').trim();
+    if(validUuid.test(idCandidate)){
+      const exact=await client.from('phdu_informes_aprobatorios')
+        .select(selectCols).eq('id',idCandidate).eq('estado','NUMERADO').maybeSingle();
+      if(exact.error) throw exact.error;
+      if(exact.data) row=exact.data;
+    }
+    if(!row){
+      const egob=digits(payload.egob||state?.egob||'');
+      const tipo=String(payload.tipo_tramite||projectType()||'').trim().toUpperCase();
+      if(!egob) throw new Error('No se puede buscar el Informe registrado porque falta el eGOB.');
+      if(!tipo) throw new Error('No se puede buscar el Informe registrado porque falta el tipo de trámite.');
+      const found=await client.from('phdu_informes_aprobatorios')
+        .select(selectCols).eq('egob',egob).eq('tipo_tramite',tipo).eq('estado','NUMERADO')
+        .order('creado_en',{ascending:false}).limit(3);
+      if(found.error) throw found.error;
+      const rows=Array.isArray(found.data)?found.data:[];
+      if(rows.length===1) row=rows[0];
+      else if(rows.length>1){
+        const hist=String(state?.aprobatorio?.asunto?.numero||'').replace(/\D/g,'');
+        if(hist){
+          const matched=rows.filter(r=>String(r.numero||'')===String(Number(hist)));
+          if(matched.length===1) row=matched[0];
+        }
+        if(!row) throw new Error('Se encontraron varios Informes numerados para el eGOB '+egob+'. Para evitar actualizar el documento equivocado, ALLPA no seleccionará uno automáticamente.');
       }
     }
+    if(!row) return null;
+    state.phduInformeId=String(row.id);
+    state.phduNumeroInforme=Number(row.numero);
+    state.phduNumeroFormateado=String(row.numero_formateado||row.numero||'');
+    state.phduInformeFinalizado=true;
+    state.phduInformeRecuperadoDesdeSupabase=true;
+    state.phduInformeActualizadoEn=String(row.actualizado_en||'');
+    if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
+    if(!state.aprobatorio.asunto || typeof state.aprobatorio.asunto!=='object') state.aprobatorio.asunto={numero:''};
+    state.aprobatorio.asunto.numero=String(row.numero||'').padStart(3,'0');
   }
-
-  if(!row) return null;
-
-  state.phduInformeId=String(row.id);
-  state.phduNumeroInforme=Number(row.numero);
-  state.phduNumeroFormateado=String(row.numero_formateado||row.numero||'');
-  state.phduInformeFinalizado=true;
-  state.phduInformeRecuperadoDesdeSupabase=true;
-  state.phduInformeActualizadoEn=String(row.actualizado_en||'');
-  if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
-  if(!state.aprobatorio.asunto || typeof state.aprobatorio.asunto!=='object') state.aprobatorio.asunto={numero:''};
-  state.aprobatorio.asunto.numero=String(row.numero||'').padStart(3,'0');
 
   try{
     state.updatedAt=new Date().toISOString();
     if(typeof dbPut==='function') await dbPut(clone(state));
     if(typeof renderSavedList==='function') await renderSavedList();
-  }catch(err){
-    console.warn('ALLPA PHDU: no se pudo persistir localmente la numeración recuperada.',err);
-  }
+  }catch(err){console.warn('ALLPA PHDU: no se pudo persistir localmente la numeración recuperada.',err);}
   return row;
 }
 
@@ -40388,7 +40507,8 @@ window.AllpaSupabaseCheckV1=Object.freeze({
     const role=String(currentProfile.rol||'').toUpperCase();
     if(!currentProfile.activo) throw new Error('El perfil PHDU está inactivo.');
     if(!['TECNICO','ADMIN'].includes(role)) throw new Error('El rol '+(currentProfile.rol||'—')+' no puede finalizar Informes Técnicos.');
-    const {data,error}=await client.rpc('phdu_finalizar_informe_controlado',{p_payload:payload});
+    const fn=isDesistimientoPhduV790()?'phdu_finalizar_informe_desistimiento_controlado':'phdu_finalizar_informe_controlado';
+    const {data,error}=await client.rpc(fn,{p_payload:payload});
     if(error) throw error;
     return data;
   },
@@ -40399,7 +40519,8 @@ window.AllpaSupabaseCheckV1=Object.freeze({
     const role=String(currentProfile.rol||'').toUpperCase();
     if(!currentProfile.activo) throw new Error('El perfil PHDU está inactivo.');
     if(!['TECNICO','ADMIN'].includes(role)) throw new Error('El rol '+(currentProfile.rol||'—')+' no puede actualizar Informes Técnicos.');
-    const {data,error}=await client.rpc('phdu_actualizar_informe_numerado',{p_payload:payload});
+    const fn=isDesistimientoPhduV790()?'phdu_actualizar_informe_desistimiento_numerado':'phdu_actualizar_informe_numerado';
+    const {data,error}=await client.rpc(fn,{p_payload:payload});
     if(error) throw error;
     return data;
   },
@@ -40606,16 +40727,27 @@ function pad3(v){
   const s=String(v==null?'':v).trim();
   return /^\d+$/.test(s)?s.padStart(3,'0'):s;
 }
+function isDesV790(){
+  return state?.tipoInforme==='Informe de Desistimiento';
+}
 function officialNumber(){
-  const n=Number(state?.phduNumeroInforme||0);
+  const n=Number(isDesV790()?state?.phduDesistimientoNumero:state?.phduNumeroInforme||0);
   return Number.isInteger(n)&&n>0?n:0;
 }
+function officialFormatted(){
+  const n=officialNumber();
+  if(!n) return '';
+  if(isDesV790()) return String(state?.phduDesistimientoNumeroFormateado||pad3(n));
+  return String(state?.phduNumeroFormateado||pad3(n));
+}
 function historicalAsuntoNumber(){
+  if(isDesV790()) return '';
   return String(state?.aprobatorio?.asunto?.numero||'').trim();
 }
 function ensureAsuntoNumberFromOfficial(){
   const n=officialNumber();
   if(!n) return '';
+  if(isDesV790()) return pad3(n);
   if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
   if(!state.aprobatorio.asunto || typeof state.aprobatorio.asunto!=='object') state.aprobatorio.asunto={numero:''};
   state.aprobatorio.asunto.numero=pad3(n);
@@ -40623,6 +40755,10 @@ function ensureAsuntoNumberFromOfficial(){
 }
 function syncAsunto(){
   ensureAsuntoNumberFromOfficial();
+  if(isDesV790()){
+    try{window.renderDesistimientoSubjectVistaV13?.();}catch(_e){}
+    return;
+  }
   const available=!!(officialNumber() || historicalAsuntoNumber());
   const box=document.getElementById('asuntoVistaV119Z');
   if(box) box.classList.toggle('phdu-asunto-pending-v4',!available);
@@ -40667,7 +40803,7 @@ function updateFinalizeUi(){
   if(btn){
     if(n){
       btn.disabled=true;
-      btn.textContent='INFORME '+String(state?.phduNumeroFormateado||pad3(n))+' YA ASIGNADO';
+      btn.textContent='INFORME '+officialFormatted()+' YA ASIGNADO';
     }else{
       btn.disabled=busy;
       btn.textContent=busy?'FINALIZANDO…':'FINALIZAR INFORME Y ASIGNAR NÚMERO';
@@ -40683,7 +40819,7 @@ function updateFinalizeUi(){
   if(box){
     if(n){
       box.classList.add('visible');
-      box.innerHTML='Número oficial asignado: <span class="phdu-number-v4">'+String(state?.phduNumeroFormateado||pad3(n))+'</span>. El ASUNTO de Vista del Informe ya utiliza automáticamente el Nro. <strong>'+pad3(n)+'</strong>.';
+      box.innerHTML='Número oficial asignado: <span class="phdu-number-v4">'+officialFormatted()+'</span>. El ASUNTO de Vista del Informe ya utiliza automáticamente el Nro. <strong>'+pad3(n)+'</strong>.';
     }else{
       box.classList.remove('visible');
       box.textContent='';
@@ -40750,7 +40886,7 @@ async function updateRegisteredInforme(){
       ensureAsuntoNumberFromOfficial();
       try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
       updateFinalizeUi();
-      setStatus('Se recuperó de Supabase el Informe '+String(state?.phduNumeroFormateado||pad3(n))+'. Puede continuar con la actualización manteniendo ese número.','ok');
+      setStatus('Se recuperó de Supabase el Informe '+officialFormatted()+'. Puede continuar con la actualización manteniendo ese número.','ok');
     }catch(err){
       setStatus('No se pudo identificar el Informe numerado: '+String(err?.message||err),'error');
       return;
@@ -40777,7 +40913,7 @@ async function updateRegisteredInforme(){
     return;
   }
 
-  const official=String(state?.phduNumeroFormateado||pad3(n));
+  const official=officialFormatted();
   const warns=validation.warn.length?('\n\nAdvertencias detectadas: '+validation.warn.length+'. Revise la comprobación antes de continuar.') : '';
   const ok=window.confirm(
     'ACTUALIZAR INFORME Y MANTENER NÚMERO REGISTRADO\n\n'+
@@ -40796,10 +40932,17 @@ async function updateRegisteredInforme(){
     const row=resultRow(data);
     if(!row || !row.numero) throw new Error('Supabase no devolvió los datos del Informe actualizado.');
 
-    state.phduNumeroInforme=Number(row.numero);
-    state.phduNumeroFormateado=String(row.numero_formateado||official);
-    state.phduInformeFinalizado=true;
-    state.phduInformeActualizadoEn=String(row.actualizado_en||new Date().toISOString());
+    if(isDesV790()){
+      state.phduDesistimientoNumero=Number(row.numero);
+      state.phduDesistimientoNumeroFormateado=String(row.numero_formateado||official);
+      state.phduDesistimientoFinalizado=true;
+      state.phduDesistimientoActualizadoEn=String(row.actualizado_en||new Date().toISOString());
+    }else{
+      state.phduNumeroInforme=Number(row.numero);
+      state.phduNumeroFormateado=String(row.numero_formateado||official);
+      state.phduInformeFinalizado=true;
+      state.phduInformeActualizadoEn=String(row.actualizado_en||new Date().toISOString());
+    }
     ensureAsuntoNumberFromOfficial();
     try{
       state.updatedAt=new Date().toISOString();
@@ -40808,13 +40951,14 @@ async function updateRegisteredInforme(){
     }catch(err){console.warn('ALLPA PHDU: no se pudo guardar localmente la actualización.',err);}
 
     try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
+    try{window.renderDesistimientoSubjectVistaV13?.();}catch(_e){}
     try{window.refreshAsuntoPreviewV119Y?.();}catch(_e){}
     updateFinalizeUi();
 
-    setStatus('Informe '+state.phduNumeroFormateado+' actualizado correctamente. Se mantuvo el mismo número y no se consumió una nueva numeración.','ok');
+    setStatus('Informe '+officialFormatted()+' actualizado correctamente. Se mantuvo el mismo número y no se consumió una nueva numeración.','ok');
     try{
-      if(typeof window.msg==='function') window.msg('Informe '+state.phduNumeroFormateado+' actualizado sin cambiar su número.',true);
-      else if(typeof msg==='function') msg('Informe '+state.phduNumeroFormateado+' actualizado sin cambiar su número.',true);
+      if(typeof window.msg==='function') window.msg('Informe '+officialFormatted()+' actualizado sin cambiar su número.',true);
+      else if(typeof msg==='function') msg('Informe '+officialFormatted()+' actualizado sin cambiar su número.',true);
     }catch(_e){}
   }catch(err){
     setStatus('No se pudo actualizar el Informe: '+String(err?.message||err),'error');
@@ -40850,12 +40994,16 @@ async function finalize(){
 
   const tipo=payload.tipo_tramite==='ANTEPROYECTO'?'Anteproyecto':'Obra Mayor';
   const warns=validation.warn.length?('\n\nAdvertencias detectadas: '+validation.warn.length+'. Revise la comprobación antes de continuar.'):'';
+  const serieTexto=isDesV790()
+    ? 'Supabase asignará el siguiente número de la serie anual independiente de INFORMES DE DESISTIMIENTO. La serie inicia en 001 cada año.'
+    : 'Supabase asignará el número oficial disponible de la serie correspondiente. Si existe un número previamente liberado de esta misma serie y año, ALLPA lo reutilizará primero; de lo contrario continuará con el siguiente secuencial.';
   const ok=window.confirm(
     'FINALIZAR INFORME Y ASIGNAR NÚMERO OFICIAL\n\n'+
+    'Tipo: '+(isDesV790()?'Informe de Desistimiento':'Informe Técnico Aprobatorio')+'\n'+
     'Trámite: '+tipo+'\n'+
     'eGOB: '+payload.egob+'\n'+
     'Fecha del informe: '+payload.fecha_informe+'\n\n'+
-    'Supabase asignará el número oficial disponible. Si existe un número previamente liberado de esta misma serie y año, ALLPA lo reutilizará primero; de lo contrario continuará con el siguiente secuencial.'+warns+'\n\n¿Desea continuar?'
+    serieTexto+warns+'\n\n¿Desea continuar?'
   );
   if(!ok) return;
 
@@ -40868,11 +41016,20 @@ async function finalize(){
     const row=resultRow(data);
     if(!row || !row.numero) throw new Error('Supabase no devolvió el número del Informe.');
 
-    state.phduNumeroInforme=Number(row.numero);
-    state.phduNumeroFormateado=String(row.numero_formateado||pad3(row.numero));
-    state.phduInformeFinalizado=true;
-    state.phduInformeFinalizadoEn=new Date().toISOString();
-    state.phduInformeYaExistia=!!row.ya_existia;
+    if(isDesV790()){
+      state.phduDesistimientoId=String(row.informe_id||state.phduDesistimientoId||payload.id_informe||'');
+      state.phduDesistimientoNumero=Number(row.numero);
+      state.phduDesistimientoNumeroFormateado=String(row.numero_formateado||pad3(row.numero));
+      state.phduDesistimientoFinalizado=true;
+      state.phduDesistimientoFinalizadoEn=new Date().toISOString();
+      state.phduDesistimientoYaExistia=!!row.ya_existia;
+    }else{
+      state.phduNumeroInforme=Number(row.numero);
+      state.phduNumeroFormateado=String(row.numero_formateado||pad3(row.numero));
+      state.phduInformeFinalizado=true;
+      state.phduInformeFinalizadoEn=new Date().toISOString();
+      state.phduInformeYaExistia=!!row.ya_existia;
+    }
     ensureAsuntoNumberFromOfficial();
     /* V5.1: persistimos UUID + número oficial en el formulario local para que
        al volver a abrirlo el botón Actualizar reconozca inmediatamente el Informe. */
@@ -40883,15 +41040,16 @@ async function finalize(){
     }catch(err){console.warn('ALLPA PHDU: no se pudo guardar localmente la numeración finalizada.',err);}
 
     try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
+    try{window.renderDesistimientoSubjectVistaV13?.();}catch(_e){}
     try{window.refreshAsuntoPreviewV119Y?.();}catch(_e){}
     updateFinalizeUi();
 
     const prefix=row.ya_existia?'El Informe ya estaba numerado. Se recuperó':'Informe finalizado correctamente. Se asignó';
-    setStatus(prefix+' '+state.phduNumeroFormateado+'. El ASUNTO ya fue generado con el Nro. '+pad3(row.numero)+'.','ok');
+    setStatus(prefix+' '+officialFormatted()+'. El ASUNTO ya fue generado con el Nro. '+pad3(row.numero)+'.','ok');
 
     try{
-      if(typeof window.msg==='function') window.msg('Informe '+state.phduNumeroFormateado+' asignado correctamente.',true);
-      else if(typeof msg==='function') msg('Informe '+state.phduNumeroFormateado+' asignado correctamente.',true);
+      if(typeof window.msg==='function') window.msg('Informe '+officialFormatted()+' asignado correctamente.',true);
+      else if(typeof msg==='function') msg('Informe '+officialFormatted()+' asignado correctamente.',true);
     }catch(_e){}
 
     /* Mostrar Vista del Informe para que el técnico vea/copíe el asunto ya numerado. */
@@ -41241,15 +41399,24 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
   function escV72(v){
     return String(v??'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
   }
+  function isDesV72(){
+    const raw=String((typeof state!=='undefined'&&state?.tipoInforme) || document.getElementById('tipoInforme')?.value || '');
+    return normV72(raw).includes('DESISTIMIENTO');
+  }
   function officialV72(){
-    const n=Number(typeof state!=='undefined' ? state?.phduNumeroInforme : 0);
+    const n=Number(typeof state!=='undefined' ? (isDesV72()?state?.phduDesistimientoNumero:state?.phduNumeroInforme) : 0);
     return Number.isInteger(n)&&n>0?n:0;
+  }
+  function officialFormattedV72(){
+    const n=officialV72();
+    if(!n)return '';
+    return String(isDesV72()?state?.phduDesistimientoNumeroFormateado:state?.phduNumeroFormateado||n);
   }
   function approvedV72(){
     try{ if(typeof collectTop==='function') collectTop(); }catch(_e){}
     const raw=String((typeof state!=='undefined'&&state?.tipoInforme) || document.getElementById('tipoInforme')?.value || '');
     const n=normV72(raw);
-    return n==='INFORME TECNICO APROBATORIO' || n.includes('TECNICO APROBATORIO');
+    return n==='INFORME TECNICO APROBATORIO' || n.includes('TECNICO APROBATORIO') || n.includes('DESISTIMIENTO');
   }
   function modalV72(){
     let root=document.getElementById('phduCompactNumberV72');
@@ -41291,7 +41458,7 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
     const n=officialV72();
     if(fin){
       fin.disabled=!valid || !!n;
-      fin.textContent=n ? ('INFORME '+String((typeof state!=='undefined'&&state?.phduNumeroFormateado)||n)+' YA ASIGNADO') : 'FINALIZAR INFORME Y ASIGNAR NÚMERO';
+      fin.textContent=n ? ('INFORME '+officialFormattedV72()+' YA ASIGNADO') : 'FINALIZAR INFORME Y ASIGNAR NÚMERO';
     }
     if(upd) upd.disabled=!valid;
   }
@@ -41311,8 +41478,10 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
     const n=officialV72();
     box.className='v72-result ok';
     const okMessage=n
-      ? '<strong>✓ Informe validado correctamente.</strong><br>El número oficial registrado es <strong>'+escV72((typeof state!=='undefined'&&state?.phduNumeroFormateado)||String(n))+'</strong>. Puede actualizarlo sin consumir una nueva numeración.'
-      : '<strong>✓ Informe validado correctamente.</strong><br>Puede finalizarlo y solicitar el número oficial disponible; ALLPA priorizará cualquier número liberado de la misma serie y año.';
+      ? '<strong>✓ Informe validado correctamente.</strong><br>El número oficial registrado es <strong>'+escV72(officialFormattedV72())+'</strong>. Puede actualizarlo sin consumir una nueva numeración.'
+      : (isDesV72()
+          ? '<strong>✓ Informe de Desistimiento validado correctamente.</strong><br>Puede finalizarlo y solicitar el siguiente número de la serie anual independiente de Desistimiento.'
+          : '<strong>✓ Informe validado correctamente.</strong><br>Puede finalizarlo y solicitar el número oficial disponible; ALLPA priorizará cualquier número liberado de la misma serie y año.');
     const warnMessage=warn.length
       ? '<div style="margin-top:10px;padding:9px 10px;border:1px solid #f0c36b;background:#fff8e6;border-radius:10px;color:#6f4d00"><strong>⚠ Advertencia'+(warn.length===1?'':'s')+' ('+warn.length+')</strong><ul class="v72-errors" style="margin-top:6px">'+warn.map(function(x){return '<li>'+escV72(x)+'</li>';}).join('')+'</ul></div>'
       : '';
@@ -41332,7 +41501,7 @@ html body header.no-print #headerReportActionsV131 #headerNumberControlV71:disab
     setButtonsV72(false);
 
     if(!approvedV72()){
-      if(box){box.className='v72-result error';box.innerHTML='<strong>✕ El control Nro. está disponible únicamente para un Informe Técnico Aprobatorio.</strong>';}
+      if(box){box.className='v72-result error';box.innerHTML='<strong>✕ El control Nro. está disponible para Informe Técnico Aprobatorio e Informe de Desistimiento.</strong>';}
       return false;
     }
     const api=window.AllpaSupabaseCheckV1;
