@@ -108,6 +108,9 @@ button{cursor:pointer}
       <button class="rv6-project" type="button" onclick="document.getElementById('rv6ProjectGate').classList.add('hidden');window.AllpaAnteproyectoNotificacion?.open();">
         <span class="rv6-n">2</span><span class="rv6-title">ANTEPROYECTO</span><span class="rv6-arrow">→</span>
       </button>
+      <button class="rv6-project" type="button" onclick="document.getElementById('rv6ProjectGate').classList.add('hidden');window.AllpaDesistimientoResolucion?.open();">
+        <span class="rv6-n">3</span><span class="rv6-title">DESISTIMIENTO</span><span class="rv6-arrow">→</span>
+      </button>
     </div>
   </div></div>
 </div>
@@ -552,6 +555,218 @@ async function openModule(){mount();$('apnOverlay').classList.add('open');await 
 function closeModule(){$('apnOverlay')?.classList.remove('open');document.getElementById('rv6ProjectGate')?.classList.remove('hidden')}
 window.addEventListener('resize',()=>requestAnimationFrame(fitPreviewToViewport));
 window.AllpaAnteproyectoNotificacion=Object.freeze({open:openModule,close:closeModule,refresh:loadReports,select,save:()=>save(false),finalize,copy:copyText,copySubject,print:printDoc,closeError:closeErrors});
+})();
+</script>
+
+
+<style id="allpa-resolucion-desistimiento-v1-style">
+.drv-overlay{position:fixed;inset:0;z-index:151200;background:#eef3f7;display:none;overflow:auto;font-family:Arial,Helvetica,sans-serif;color:#17324d}
+.drv-overlay.open{display:block}.drv-shell{min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+.drv-head{position:sticky;top:0;z-index:7;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;background:linear-gradient(135deg,#49243b,#0b2b4c);color:#fff;box-shadow:0 4px 16px rgba(20,35,55,.18)}
+.drv-head-left{display:flex;align-items:center;gap:11px}.drv-home{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:#ffffff14;border:1px solid #ffffff40;color:#fff;padding:0;cursor:pointer}.drv-home svg{width:19px;height:19px}
+.drv-head h1{margin:0;font-size:16px}.drv-sub{font-size:10px;color:#dce7ef;margin-top:2px}.drv-refresh{min-height:34px;padding:6px 10px;border-radius:9px;background:#ffffff14;border:1px solid #ffffff40;color:#fff;font-size:10px;font-weight:800;cursor:pointer}
+.drv-body{display:grid;grid-template-columns:355px minmax(0,1fr);gap:14px;padding:14px}.drv-side{display:grid;gap:12px;align-content:start;position:sticky;top:76px;max-height:calc(100vh - 90px);overflow:auto}
+.drv-card{background:#fff;border:1px solid #d7e0e8;border-radius:14px;box-shadow:0 5px 16px rgba(14,46,77,.06);overflow:hidden}.drv-pad{padding:14px}.drv-card h2,.drv-card h3{margin:0 0 10px;color:#183a59}.drv-card h2{font-size:14px}.drv-card h3{font-size:12px}
+.drv-tools{display:grid;grid-template-columns:1fr 120px;gap:7px;margin-bottom:10px}.drv-tools input,.drv-tools select,.drv-field input,.drv-field select,.drv-field textarea{width:100%;box-sizing:border-box;border:1px solid #bdc9d4;border-radius:9px;padding:8px 9px;font:inherit;background:#fff;color:#172b3e}.drv-field textarea{min-height:115px;resize:vertical}
+.drv-list{display:grid;gap:7px}.drv-item{width:100%;text-align:left;border:1px solid #d7e0e8;border-radius:10px;background:#fff;padding:9px;cursor:pointer}.drv-item:hover,.drv-item.active{border-color:#0b6b95;background:#f0f8fc}.drv-top{display:flex;justify-content:space-between;gap:7px;align-items:center}.drv-num{font-weight:900;font-size:11px}.drv-meta,.drv-mini{font-size:9.5px;color:#697a89;line-height:1.35;margin-top:3px}
+.drv-badge{padding:3px 6px;border-radius:999px;font-size:8px;font-weight:900;white-space:nowrap}.drv-badge.none{background:#eef2f6;color:#526477}.drv-badge.draft{background:#fff5ce;color:#775700}.drv-badge.final{background:#e6f6eb;color:#24603b}
+.drv-status{margin-top:9px;border-radius:9px;padding:8px 9px;background:#edf4f8;color:#35566f;font-size:9.5px}.drv-status.ok{background:#eaf7ef;color:#215c38}.drv-status.error{background:#fff0ef;color:#8c2822}.drv-status.warn{background:#fff6df;color:#785800}
+.drv-main{display:grid;gap:14px;align-content:start;min-width:0}.drv-empty{min-height:320px;display:grid;place-items:center;text-align:center;color:#718090;background:#fff;border:1px dashed #becbd5;border-radius:14px}
+.drv-workgrid{display:grid;grid-template-columns:minmax(330px,430px) minmax(0,1fr);gap:14px;align-items:start}.drv-form{display:grid;gap:12px}.drv-section{border:1px solid #dbe3ea;border-radius:12px;padding:12px;background:#fff}.drv-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}.drv-section-title h3{margin:0;font-size:12px}
+.drv-field{display:grid;gap:4px;margin-bottom:9px}.drv-field:last-child{margin-bottom:0}.drv-field label{font-size:9px;font-weight:900;text-transform:uppercase;color:#53697a;letter-spacing:.25px}.drv-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.drv-note{font-size:9px;line-height:1.4;color:#6b7784;background:#f7f9fb;border-radius:8px;padding:8px}.drv-note strong{color:#4d2b42}
+.drv-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.drv-actions button,.drv-preview-toolbar button{border:0;border-radius:9px;padding:9px 10px;font-size:9px;font-weight:900;cursor:pointer}.drv-soft{background:#eef2f6;color:#35536d}.drv-green{background:#177245;color:#fff}.drv-red{background:#9f2f35;color:#fff}.drv-primary{background:#0b5a7d;color:#fff}.drv-actions button:disabled{opacity:.45;cursor:not-allowed}
+.drv-final{padding:9px 10px;border-radius:9px;background:#e9f7ef;color:#1f633b;font-size:10px;font-weight:800}
+.drv-preview-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid #d7e0e8;background:#f8fafc}.drv-preview-toolbar .left{font-size:10px;font-weight:900}.drv-preview-toolbar .right{display:flex;gap:7px}
+.drv-preview-wrap{padding:16px;overflow:auto;background:#e7edf2;max-height:calc(100vh - 112px)}.drv-paper{display:grid;gap:18px;justify-items:center}
+.drv-page{position:relative;width:210mm;min-height:297mm;background:#fff url('../assets/fondo_institucional.png') center top/210mm 297mm no-repeat;box-shadow:0 4px 18px rgba(17,39,60,.18);padding:28mm 16mm 25mm;box-sizing:border-box;font-family:Arial,sans-serif;color:#111;font-size:10.5pt;line-height:1.35}
+.drv-page-content{position:relative;z-index:1}.drv-block{margin:0 0 8px;text-align:justify}.drv-block.enc{text-align:center}.drv-block.resolve{text-align:center;font-weight:800;margin:12px 0}.drv-block.closing{text-align:left}.drv-block p{margin:0}
+.drv-missing{background:#fff0a8;padding:1px 3px}.drv-signatures{width:100%;border-collapse:collapse;margin-top:16px;table-layout:fixed;text-align:center}.drv-signatures th,.drv-signatures td{border:1px solid #222}.drv-signatures th{padding:3px;font-family:Georgia,serif;font-size:9pt}.drv-signatures td{height:34mm;padding:14mm 7px 3mm;vertical-align:bottom;font-family:Georgia,serif;font-size:9pt;line-height:1.15}
+.drv-modal{position:fixed;inset:0;z-index:151500;background:#10233899;display:none;place-items:center;padding:20px}.drv-modal.open{display:grid}.drv-modal-box{max-width:620px;width:100%;background:#fff;border-radius:14px;box-shadow:0 18px 45px #0004;overflow:hidden}.drv-modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;background:#7c2735;color:#fff}.drv-modal-head h3{margin:0;font-size:13px}.drv-modal-close{border:0;background:#fff;color:#7c2735;border-radius:8px;width:30px;height:30px;font-weight:1000;cursor:pointer}.drv-modal-list{padding:12px 30px 18px;margin:0;font-size:10px;line-height:1.5}
+@media(max-width:1180px){.drv-workgrid{grid-template-columns:1fr}.drv-preview-wrap{max-height:none}.drv-side{position:static;max-height:none}}@media(max-width:800px){.drv-body{grid-template-columns:1fr}.drv-side{position:static}.drv-two,.drv-actions,.drv-tools{grid-template-columns:1fr}.drv-page{width:100%;min-height:auto;padding:24px}}
+@media print{.drv-head,.drv-side,.drv-form,.drv-preview-toolbar{display:none!important}.drv-body,.drv-workgrid{display:block!important;padding:0!important}.drv-preview-wrap{padding:0!important;background:#fff!important;overflow:visible!important;max-height:none!important}.drv-page{box-shadow:none!important;page-break-after:always;break-after:page}.drv-page:last-child{page-break-after:auto}}
+</style>
+
+<script id="allpa-resolucion-desistimiento-v1-script">
+(function(){
+'use strict';
+const VERSION='1.0.1-resolucion-desistimiento-numero-manual';
+const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
+const KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
+const TEMPLATE_URL='../data/plantillas/resolucion_desistimiento.csv';
+let sb=null,user=null,profile=null,reports=[],selected=null,resolution=null,rows=[],meta={version:'',hash:''},ready=false,busy=false;
+
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toUpperCase();}
+function clone(v){try{return structuredClone(v)}catch(_e){try{return JSON.parse(JSON.stringify(v))}catch(_e2){return null}}}
+function today(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function longDate(v){if(!v)return '';const p=String(v).slice(0,10).split('-').map(Number);if(p.length!==3||!p[0]||!p[1]||!p[2])return String(v);const m=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];return `${String(p[2]).padStart(2,'0')} de ${m[p[1]-1]||''} de ${p[0]}`}
+function fmtClave(v){const d=String(v||'').replace(/\D/g,'');if(d.length!==27)return String(v||'');const g=[2,2,2,3,3,3,3,3,3,3],out=[];let i=0;g.forEach(n=>{out.push(d.slice(i,i+n));i+=n});return out.join(' ')}
+function heightText(v){const raw=String(v||'').trim();const n=parseInt(raw,10);if(!Number.isInteger(n)||n<1)return raw;const words={1:'un (1) piso',2:'dos (2) pisos',3:'tres (3) pisos',4:'cuatro (4) pisos',5:'cinco (5) pisos',6:'seis (6) pisos',7:'siete (7) pisos',8:'ocho (8) pisos',9:'nueve (9) pisos',10:'diez (10) pisos'};return words[n]||`${n} pisos`}
+function parseCsv(text){const data=[];let row=[],field='',q=false;for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'){if(text[i+1]==='"'){field+='"';i++}else q=false}else field+=c;continue}if(c==='"'){q=true;continue}if(c===';'){row.push(field);field='';continue}if(c==='\n'){row.push(field.replace(/\r$/,''));data.push(row);row=[];field='';continue}field+=c}if(field!==''||row.length){row.push(field.replace(/\r$/,''));data.push(row)}if(!data.length)return[];const h=data.shift().map(x=>String(x||'').replace(/^\ufeff/,'').trim());return data.filter(r=>r.some(x=>String(x||'').trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,String(r[i]??'')])));}
+async function sha256(text){if(!crypto?.subtle)return '';const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function loadTemplate(){const u=new URL(TEMPLATE_URL,location.href).href;const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('No se pudo cargar la plantilla de Resolución de Desistimiento ('+r.status+').');const t=await r.text();rows=parseCsv(t);if(!rows.length)throw new Error('La plantilla de Resolución de Desistimiento está vacía.');meta.version=String(rows.find(x=>x.ID_Bloque==='CFG_007')?.Texto_Base||'resolucion_desistimiento_v1');meta.hash=await sha256(t);}
+function cfg(id){return String(rows.find(r=>r.ID_Bloque===id)?.Texto_Base||'').trim()}
+function role(){return norm(profile?.rol)}function canRead(){return !!profile?.activo&&['ABOGADA','ADMIN','DIRECCION'].includes(role())}function canWrite(){return !!profile?.activo&&['ABOGADA','ADMIN'].includes(role())}
+function status(msg,type=''){const e=$('drvStatus');if(e){e.textContent=msg;e.className='drv-status '+type}}
+async function rpc(name,args={}){if(!sb)throw new Error('Supabase no está disponible.');const {data,error}=await sb.rpc(name,args);if(error)throw error;return data}
+function motive(){return norm(selected?.motivo_desistimiento).includes('PETICION')?'PETICION':'OBSERVACIONES'}
+function objectText(){return selected?.tipo_tramite==='ANTEPROYECTO'?'la aprobación de anteproyecto de edificación':'la aprobación de obra mayor - proyecto definitivo'}
+function typeForm(){return selected?.tipo_tramite==='ANTEPROYECTO'?'Anteproyecto de Edificación':'Obra Mayor'}
+function formNumber(){const raw=String($('drvNumero')?.value||resolution?.numero||'').trim();const m=raw.match(/^(\d{1,9})(?:\s*[-–—].*)?$/);if(!m)return null;const n=parseInt(m[1],10);return Number.isInteger(n)&&n>0?n:null}
+function formattedResolution(){if(resolution?.numero_formateado)return String(resolution.numero_formateado);const n=formNumber(),date=$('drvFecha')?.value||resolution?.fecha_resolucion||today(),y=parseInt(String(date).slice(0,4),10)||new Date().getFullYear();return n?`${String(n).padStart(3,'0')}-${y}-GADMR-GPHDU-DES`:'PENDIENTE-AAAA-GADMR-GPHDU-DES'}
+function vars(){
+  const props=String(selected?.propietarios_texto||'').trim();
+  const docs=String(selected?.documentos_propietarios||'').trim();
+  const extract=String($('drvExtracto')?.value||resolution?.extracto_informe_desistimiento||selected?.conclusiones_desistimiento||'').trim();
+  return {
+    NUMERO_RESOLUCION:formattedResolution(),
+    DIRECTOR_NOMBRE:cfg('CFG_001'),DIRECTOR_CARGO:cfg('CFG_002'),ACCION_PERSONAL_DIRECTOR:cfg('CFG_003'),FECHA_ACCION_PERSONAL_DIRECTOR:cfg('CFG_004'),MEMORANDO_CRITERIO_JURIDICO:cfg('CFG_005'),
+    TIPO_FORMULARIO:typeForm(),FECHA_INGRESO_LARGA:longDate(selected?.fecha_ingreso_tramite),
+    PROPIETARIOS_TEXTO:props,PROPIETARIOS_MAYUS:props.toUpperCase(),DOCUMENTOS_PROPIETARIOS:docs,
+    PROYECTISTA:String(selected?.proyectista||'').trim(),EGOB:String(selected?.egob||'').trim(),
+    OBJETO_PROCEDIMIENTO:objectText(),OBJETO_PROCEDIMIENTO_MAYUS:objectText().toUpperCase(),
+    NOMBRE_PROYECTO:String(selected?.nombre_proyecto||'').trim(),USO_PROYECTO:String(selected?.uso_proyecto||'').trim(),
+    ALTURA_EDIFICACION_TEXTO:heightText(selected?.altura_edificacion),PARROQUIA:String(selected?.parroquia||'').trim(),
+    BARRIO_SECTOR:String(selected?.barrio_sector||'').trim()||'sin especificar',DIRECCION:String(selected?.direccion||'').trim()||'dirección no especificada',
+    CLAVE_CATASTRAL:fmtClave(selected?.clave_catastral),CODIGO_PIT:String(selected?.codigo_pit||'').trim()||'sin especificar',
+    FECHA_NOTIFICACION_OBSERVACIONES_LARGA:longDate($('drvFechaObs')?.value||resolution?.fecha_notificacion_observaciones),
+    TECNICO_NOMBRE:String(selected?.tecnico_nombre||'').trim(),TECNICO_CARGO:String(selected?.tecnico_cargo||'').trim()||'Técnico de Gestión de Planificación, Hábitat y Desarrollo Urbanístico',
+    CORREO_NOTIFICACION:String($('drvCorreo')?.value||resolution?.correo_notificacion||selected?.correo_notificacion_sugerido||'').trim(),
+    CORREO_PERTENECE_A:String($('drvCorreoPertenece')?.value||resolution?.correo_notificacion_pertenece_a||'perteneciente al profesional a cargo del trámite').trim(),
+    MEMORANDO_DESISTIMIENTO:String($('drvMemo')?.value||resolution?.numero_memorando_desistimiento||'').trim(),
+    FECHA_MEMORANDO_DESISTIMIENTO_LARGA:longDate($('drvMemoFecha')?.value||resolution?.fecha_memorando_desistimiento),
+    EXTRACTO_INFORME_DESISTIMIENTO:extract,FECHA_RESOLUCION_LARGA:longDate($('drvFecha')?.value||resolution?.fecha_resolucion||today()),
+    ABOGADA_FIRMA_NOMBRE:String(profile?.firma_nombre||profile?.nombre_completo||'').trim(),
+    ABOGADA_FIRMA_CARGO:String(profile?.firma_cargo||profile?.cargo||'').trim()
+  }
+}
+const OPTIONAL=new Set(['BARRIO_SECTOR','DIRECCION','CODIGO_PIT','TECNICO_CARGO']);
+function apply(text,v,missing){return String(text||'').replace(/\{\{([^}]+)\}\}/g,(_,k)=>{const key=String(k||'').trim();const val=v[key];if((val==null||String(val).trim()==='')&&!OPTIONAL.has(key))missing.add(key);return (val==null||String(val).trim()==='')?`[FALTA: ${key}]`:String(val)})}
+function rich(text){let h=esc(text).replace(/\n/g,'<br>');const rules=[[/\[BI\]([\s\S]*?)\[\/BI\]/g,'<strong><em>$1</em></strong>'],[/\[IU\]([\s\S]*?)\[\/IU\]/g,'<em><u>$1</u></em>'],[/\[B\]([\s\S]*?)\[\/B\]/g,'<strong>$1</strong>'],[/\[I\]([\s\S]*?)\[\/I\]/g,'<em>$1</em>'],[/\[U\]([\s\S]*?)\[\/U\]/g,'<u>$1</u>']];rules.forEach(([r,s])=>h=h.replace(r,s));return h.replace(/\[FALTA: ([^\]]+)\]/g,'<span class="drv-missing">FALTA: $1</span>')}
+function printableRows(){const m=motive();return rows.filter(r=>norm(r.Mostrar)!=='NO'&&r.Tipo_Bloque!=='CONFIG'&&(!r.Aplica_Motivo||norm(r.Aplica_Motivo)==='TODOS'||norm(r.Aplica_Motivo)===m)).sort((a,b)=>Number(a.Orden)-Number(b.Orden))}
+function buildBlocks(){
+  const v=vars(),missing=new Set(),out=[];
+  for(const r of printableRows()){
+    if(String(r.ID_Bloque||'').startsWith('FIR_'))continue;
+    const txt=apply(r.Texto_Base,v,missing);
+    let cls='drv-block';
+    if(String(r.Seccion)==='ENCABEZADO')cls+=' enc';
+    if(String(r.Seccion)==='RESUELVE')cls+=' resolve';
+    if(String(r.Seccion)==='CIERRE')cls+=' closing';
+    const page=parseInt(String(r.Pagina_Referencia||'1').match(/\d+/)?.[0]||'1',10);
+    out.push({id:r.ID_Bloque,page,text:txt,html:`<div class="${cls}"><p>${rich(txt)}</p></div>`});
+  }
+  return {out,missing:[...missing],vars:v};
+}
+function signatures(v){
+  const a=apply(rows.find(r=>r.ID_Bloque==='FIR_001')?.Texto_Base||'',v,new Set()).split('|');
+  const d=apply(rows.find(r=>r.ID_Bloque==='FIR_002')?.Texto_Base||'',v,new Set()).split('|');
+  return `<table class="drv-signatures"><thead><tr><th>${rich(a[0]||'ELABORADO POR:')}</th><th>${rich(d[0]||'APROBADO POR:')}</th></tr></thead><tbody><tr><td>${a.slice(1).map(rich).join('<br>')}</td><td>${d.slice(1).map(rich).join('<br>')}</td></tr></tbody></table>`
+}
+function renderPreview(){
+  if(!selected){const p=$('drvPreview');if(p)p.innerHTML='';return {out:[],missing:[]}}
+  const built=buildBlocks(),by={};built.out.forEach(b=>(by[b.page]||(by[b.page]=[])).push(b));
+  const pages=[];for(let n=1;n<=7;n++){let inner=(by[n]||[]).map(b=>b.html).join('');if(n===7)inner+=signatures(built.vars);pages.push(`<section class="drv-page"><div class="drv-page-content">${inner}</div></section>`)}
+  const p=$('drvPreview');if(p)p.innerHTML=pages.join('');
+  return built
+}
+function formPayload(){
+  return {
+    informe_id:String(selected?.informe_id||selected?.id||''),
+    fecha_resolucion:String($('drvFecha')?.value||''),
+    numero_resolucion:String(formNumber()||''),
+    numero_memorando_desistimiento:String($('drvMemo')?.value||'').trim(),
+    fecha_memorando_desistimiento:String($('drvMemoFecha')?.value||''),
+    fecha_notificacion_observaciones:String($('drvFechaObs')?.value||''),
+    correo_notificacion:String($('drvCorreo')?.value||'').trim().toLowerCase(),
+    correo_notificacion_pertenece_a:String($('drvCorreoPertenece')?.value||'').trim(),
+    extracto_informe_desistimiento:String($('drvExtracto')?.value||'').trim(),
+    datos_resolucion:{motivo:motive(),version_interfaz:VERSION}
+  }
+}
+function errors(){
+  const p=formPayload(),e=[];
+  if(!p.fecha_resolucion)e.push('Falta la fecha de la Resolución.');
+  if(!p.numero_resolucion)e.push('Ingrese el número institucional de la Resolución asignado para este trámite (solo la parte numérica, por ejemplo 242).');
+  if(!p.numero_memorando_desistimiento)e.push('Falta el Memorando del Informe Técnico de Desistimiento.');
+  if(!p.fecha_memorando_desistimiento)e.push('Falta la fecha del Memorando.');
+  if(motive()==='OBSERVACIONES'&&!p.fecha_notificacion_observaciones)e.push('Falta la fecha de notificación de observaciones.');
+  if(!p.correo_notificacion||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.correo_notificacion))e.push('El correo de notificación no es válido.');
+  if(!p.correo_notificacion_pertenece_a)e.push('Indique a quién pertenece el correo de notificación.');
+  if(!p.extracto_informe_desistimiento)e.push('Falta el extracto o síntesis del Informe Técnico de Desistimiento.');
+  const b=renderPreview();b.missing.forEach(x=>e.push('La plantilla requiere el dato '+x+'.'));
+  return [...new Set(e)]
+}
+function showErrors(list,title='No se puede continuar'){const m=$('drvModal');if(!m)return;$('drvModalTitle').textContent=title;$('drvModalList').innerHTML=list.map(x=>'<li>'+esc(x)+'</li>').join('');m.classList.add('open')}
+function closeErrors(){$('drvModal')?.classList.remove('open')}
+function filtered(){const q=norm($('drvSearch')?.value),f=$('drvFilter')?.value||'TODOS';return reports.filter(r=>(!q||norm([r.egob,r.propietario,r.nombre_proyecto,r.numero_formateado].join(' ')).includes(q))&&(f==='TODOS'||String(r.estado_resolucion||'SIN_RESOLUCION')===f))}
+function renderList(){const e=$('drvList');if(!e)return;const arr=filtered();if(!arr.length){e.innerHTML='<div class="drv-mini" style="padding:8px">No hay Informes de Desistimiento que coincidan con el filtro.</div>';return}e.innerHTML=arr.map(r=>{const st=String(r.estado_resolucion||'SIN_RESOLUCION'),cls=st==='FINALIZADA'?'final':st==='BORRADOR'?'draft':'none',lab=st==='FINALIZADA'?(r.numero_resolucion||'FINALIZADA'):st==='BORRADOR'?'BORRADOR':'SIN RESOLUCIÓN';return `<button class="drv-item ${selected?.informe_id===r.informe_id?'active':''}" onclick="window.AllpaDesistimientoResolucion.select('${esc(r.informe_id)}')"><div class="drv-top"><span class="drv-num">Desistimiento ${esc(r.numero_formateado||r.numero||'—')}</span><span class="drv-badge ${cls}">${esc(lab)}</span></div><div class="drv-meta">eGOB ${esc(r.egob||'—')} · ${esc(r.tipo_tramite==='ANTEPROYECTO'?'Anteproyecto':'Obra Mayor')}</div><div class="drv-meta">${esc(r.propietario||'')} · ${esc(r.nombre_proyecto||'')}</div></button>`}).join('')}
+async function session(){const {data,error}=await sb.auth.getSession();if(error)throw error;if(!data?.session?.user)throw new Error('No existe una sesión PHDU activa. Regrese al Portal ALLPA e inicie sesión.');user=data.session.user;const {data:p,error:pe}=await sb.from('phdu_profiles').select('id,correo,nombre_completo,rol,activo,cargo,firma_nombre,firma_cargo').eq('id',user.id).single();if(pe)throw pe;profile=p;if(!canRead())throw new Error('El rol '+(p?.rol||'—')+' no tiene acceso al módulo de Resoluciones de Desistimiento.')}
+async function loadReports(){if(!canRead())return;status('Consultando Informes de Desistimiento numerados…');try{const d=await rpc('phdu_listar_informes_desistimiento_para_resolucion');reports=Array.isArray(d)?d:[];renderList();status('Informes de Desistimiento disponibles: '+reports.length+'.','ok')}catch(e){status('No se pudo consultar Informes: '+String(e?.message||e),'error')}}
+async function select(id){status('Cargando Informe de Desistimiento…');try{selected=await rpc('phdu_obtener_informe_desistimiento_para_resolucion',{p_informe_id:id});resolution=selected?.resolucion||null;renderList();renderWorkspace();status('Informe de Desistimiento '+(selected?.numero_informe_formateado||'')+' cargado.','ok')}catch(e){status('No se pudo cargar el Informe: '+String(e?.message||e),'error')}}
+function setValue(id,val,disabled=false){const e=$(id);if(e){e.value=val??'';e.disabled=disabled}}
+function fill(){
+  const ro=!canWrite(),final=resolution?.estado==='FINALIZADA';
+  setValue('drvFecha',resolution?.fecha_resolucion||today(),ro);
+  setValue('drvNumero',resolution?.numero||'',ro||final);
+  setValue('drvMemo',resolution?.numero_memorando_desistimiento||'',ro);
+  setValue('drvMemoFecha',resolution?.fecha_memorando_desistimiento||'',ro);
+  setValue('drvFechaObs',resolution?.fecha_notificacion_observaciones||'',ro);
+  setValue('drvCorreo',resolution?.correo_notificacion||selected?.correo_notificacion_sugerido||'',ro);
+  setValue('drvCorreoPertenece',resolution?.correo_notificacion_pertenece_a||'perteneciente al profesional a cargo del trámite',ro);
+  setValue('drvExtracto',resolution?.extracto_informe_desistimiento||selected?.conclusiones_desistimiento||'',ro);
+  const obs=$('drvObsWrap');if(obs)obs.style.display=motive()==='OBSERVACIONES'?'':'none';
+  document.querySelectorAll('#drvForm input,#drvForm textarea').forEach(e=>e.addEventListener('input',renderPreview));
+}
+function renderWorkspace(){
+  const host=$('drvWorkspace');if(!host)return;
+  if(!selected){host.innerHTML='<div class="drv-empty"><div><strong>Seleccione un Informe de Desistimiento</strong><br>Los informes numerados aparecerán en el panel izquierdo.</div></div>';return}
+  const final=resolution?.estado==='FINALIZADA';
+  host.innerHTML=`<div class="drv-workgrid"><div class="drv-form">
+    <div class="drv-card"><div class="drv-pad"><div class="drv-section-title"><h3>Informe Técnico vinculado</h3><span class="drv-badge ${motive()==='PETICION'?'draft':'none'}">${esc(motive()==='PETICION'?'PETICIÓN DEL ADMINISTRADO':'OBSERVACIONES NO SUBSANADAS')}</span></div>
+      <div class="drv-mini"><strong>Informe:</strong> ${esc(selected.numero_informe_formateado||selected.numero||'—')} · <strong>eGOB:</strong> ${esc(selected.egob||'—')}</div>
+      <div class="drv-mini"><strong>Proyecto:</strong> ${esc(selected.nombre_proyecto||'—')}</div><div class="drv-mini"><strong>Propietario(s):</strong> ${esc(selected.propietarios_texto||'—')}</div>
+    </div></div>
+    <form id="drvForm" class="drv-card"><div class="drv-pad">
+      <div class="drv-section"><div class="drv-section-title"><h3>Datos de la Resolución</h3><span class="drv-mini">${final?'FINALIZADA':'Borrador editable'}</span></div>
+        <div class="drv-two"><div class="drv-field"><label>Fecha de Resolución *</label><input id="drvFecha" type="date"></div><div class="drv-field"><label>N.º de Resolución asignado *</label><input id="drvNumero" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="Ej. 242"></div></div>
+        <div class="drv-note"><strong>Número manual:</strong> la abogada debe ingresar el número institucional que haya sido asignado a esta Resolución, por ejemplo <b>242</b>. ALLPA <b>no calcula ni reserva un consecutivo</b>; únicamente completa el formato <b>242-AAAA-GADMR-GPHDU-DES</b> usando el año de la fecha de Resolución.</div>
+      </div>
+      <div class="drv-section"><div class="drv-section-title"><h3>Informe Técnico de Desistimiento</h3></div>
+        <div class="drv-two"><div class="drv-field"><label>N.º Memorando *</label><input id="drvMemo" placeholder="GADMR-DG-PHDU-2026-...-M"></div><div class="drv-field"><label>Fecha Memorando *</label><input id="drvMemoFecha" type="date"></div></div>
+        <div id="drvObsWrap" class="drv-field"><label>Fecha de notificación de observaciones *</label><input id="drvFechaObs" type="date"></div>
+        <div class="drv-field"><label>Extracto / síntesis del Informe *</label><textarea id="drvExtracto"></textarea><div class="drv-mini">Se precarga desde la conclusión del Informe de Desistimiento y puede completarse para reflejar la cronología técnica del expediente.</div></div>
+      </div>
+      <div class="drv-section"><div class="drv-section-title"><h3>Notificación</h3></div><div class="drv-field"><label>Correo *</label><input id="drvCorreo" type="email"></div><div class="drv-field"><label>El correo pertenece a *</label><input id="drvCorreoPertenece"></div></div>
+      <div class="drv-section"><div class="drv-actions"><button type="button" class="drv-soft" onclick="window.AllpaDesistimientoResolucion.preview()">Actualizar vista</button><button type="button" class="drv-green" onclick="window.AllpaDesistimientoResolucion.save()" ${final?'disabled':''}>Guardar borrador</button><button type="button" class="drv-red" onclick="window.AllpaDesistimientoResolucion.finalize()" ${final?'disabled':''}>Finalizar Resolución</button><button type="button" class="drv-primary" onclick="window.AllpaDesistimientoResolucion.update()" ${final?'':'disabled'}>Actualizar y mantener número</button></div>${final?`<div class="drv-final" style="margin-top:9px">Resolución ${esc(resolution.numero_formateado||'')} FINALIZADA.</div>`:''}</div>
+    </div></form></div>
+    <div class="drv-card"><div class="drv-preview-toolbar"><div class="left">Vista previa · ${esc(meta.version)}</div><div class="right"><button class="drv-soft" onclick="window.AllpaDesistimientoResolucion.copy()">Copiar texto</button><button class="drv-primary" onclick="window.AllpaDesistimientoResolucion.print()">Imprimir</button></div></div><div class="drv-preview-wrap"><article id="drvPreview" class="drv-paper"></article></div></div>
+  </div>`;
+  fill();renderPreview()
+}
+async function save(silent=false){
+  if(!selected)return null;if(!canWrite())throw new Error('El perfil actual no puede modificar Resoluciones.');
+  try{if(!silent)status('Guardando borrador…');const d=await rpc('phdu_guardar_borrador_resolucion_desistimiento',{p_payload:formPayload()});resolution=d;selected.resolucion=d;if(!silent)status('Borrador guardado correctamente.','ok');await loadReports();renderWorkspace();return d}catch(e){if(!silent){showErrors([String(e?.message||e)],'No se pudo guardar');status('No se pudo guardar el borrador.','error')}throw e}
+}
+async function finalize(){
+  if(busy||!selected)return;const er=errors();if(er.length){showErrors(er);return}
+  if(!confirm('FINALIZAR RESOLUCIÓN ADMINISTRATIVA DE DESISTIMIENTO\\n\\nInforme: '+selected.numero_informe_formateado+'\\neGOB: '+selected.egob+'\\nResolución: '+formattedResolution()+'\\n\\nSe registrará como FINALIZADA. ¿Desea continuar?'))return;
+  busy=true;try{await save(true);const b=renderPreview();const d=await rpc('phdu_finalizar_resolucion_desistimiento',{p_payload:{resolucion_id:resolution.id,bloques_renderizados:b.out,plantilla_version:meta.version,plantilla_hash:meta.hash}});resolution=d;selected.resolucion=d;status('Resolución '+d.numero_formateado+' finalizada correctamente.','ok');await loadReports();renderWorkspace()}catch(e){showErrors([String(e?.message||e)],'No se pudo finalizar');status('No se pudo finalizar la Resolución.','error')}finally{busy=false}
+}
+async function updateFinal(){
+  if(busy||!selected||resolution?.estado!=='FINALIZADA')return;const er=errors();if(er.length){showErrors(er);return}
+  if(!confirm('ACTUALIZAR RESOLUCIÓN '+String(resolution.numero_formateado||'')+'\\n\\nSe conservará el mismo número oficial. ¿Desea continuar?'))return;
+  busy=true;try{const p=formPayload(),b=renderPreview();p.resolucion_id=resolution.id;p.bloques_renderizados=b.out;p.plantilla_version=meta.version;p.plantilla_hash=meta.hash;const d=await rpc('phdu_actualizar_resolucion_desistimiento_numerada',{p_payload:p});resolution=d;selected.resolucion=d;status('Resolución '+d.numero_formateado+' actualizada sin cambiar su número.','ok');await loadReports();renderWorkspace()}catch(e){showErrors([String(e?.message||e)],'No se pudo actualizar');status('No se pudo actualizar la Resolución.','error')}finally{busy=false}
+}
+async function copyText(){renderPreview();try{await navigator.clipboard.writeText($('drvPreview')?.innerText||'');status('Texto de la Resolución copiado.','ok')}catch(e){status('No se pudo copiar el texto.','error')}}
+function printDoc(){renderPreview();const body=$('drvPreview')?.innerHTML||'';const w=open('','_blank','width=950,height=900');if(!w){status('El navegador bloqueó la ventana de impresión.','error');return}const bg=new URL('../assets/fondo_institucional.png',location.href).href;w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Resolución de Desistimiento</title><style>@page{size:A4;margin:0}*{box-sizing:border-box}html,body{margin:0}.drv-page{position:relative;width:210mm;min-height:297mm;page-break-after:always;break-after:page;background:#fff url('${bg}') center top/210mm 297mm no-repeat;padding:28mm 16mm 25mm;font-family:Arial,sans-serif;color:#111;font-size:10.5pt;line-height:1.35}.drv-page:last-child{page-break-after:auto}.drv-block{margin:0 0 8px;text-align:justify}.drv-block.enc{text-align:center}.drv-block.resolve{text-align:center;font-weight:800;margin:12px 0}.drv-block.closing{text-align:left}.drv-block p{margin:0}.drv-signatures{width:100%;border-collapse:collapse;margin-top:16px;table-layout:fixed;text-align:center}.drv-signatures th,.drv-signatures td{border:1px solid #222}.drv-signatures th{padding:3px;font-family:Georgia,serif;font-size:9pt}.drv-signatures td{height:34mm;padding:14mm 7px 3mm;vertical-align:bottom;font-family:Georgia,serif;font-size:9pt;line-height:1.15}.drv-missing{background:#fff0a8}</style></head><body>${body}</body></html>`);w.document.close();setTimeout(()=>{w.focus();w.print()},500)}
+function mount(){if($('drvOverlay'))return;const ov=document.createElement('div');ov.id='drvOverlay';ov.className='drv-overlay';ov.innerHTML=`<div class="drv-shell"><header class="drv-head"><div class="drv-head-left"><button class="drv-home" onclick="window.AllpaDesistimientoResolucion.close()" title="Volver"><svg viewBox="0 0 24 24" fill="none"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button><div><h1>ALLPA · RESOLUCIÓN DE DESISTIMIENTO</h1><div class="drv-sub">Informes de Desistimiento numerados · Obra Mayor y Anteproyecto</div></div></div><button class="drv-refresh" onclick="window.AllpaDesistimientoResolucion.refresh()">Actualizar lista</button></header><div class="drv-body"><aside class="drv-side"><div class="drv-card"><div class="drv-pad"><h2>Informes de Desistimiento</h2><div class="drv-tools"><input id="drvSearch" placeholder="Buscar eGOB, propietario…"><select id="drvFilter"><option value="TODOS">Todos</option><option value="SIN_RESOLUCION">Sin Resolución</option><option value="BORRADOR">Borradores</option><option value="FINALIZADA">Finalizadas</option></select></div><div id="drvList" class="drv-list"></div><div id="drvStatus" class="drv-status">Validando sesión…</div></div></div></aside><main id="drvWorkspace" class="drv-main"></main></div></div><div id="drvModal" class="drv-modal"><div class="drv-modal-box"><div class="drv-modal-head"><h3 id="drvModalTitle">No se puede continuar</h3><button class="drv-modal-close" onclick="window.AllpaDesistimientoResolucion.closeError()">×</button></div><ul id="drvModalList" class="drv-modal-list"></ul></div></div>`;document.body.appendChild(ov);$('drvSearch').addEventListener('input',renderList);$('drvFilter').addEventListener('change',renderList);$('drvModal').addEventListener('click',e=>{if(e.target===$('drvModal'))closeErrors()})}
+async function ensure(){mount();if(ready)return true;try{if(!window.supabase?.createClient)throw new Error('No se pudo cargar Supabase.');sb=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:false,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});await session();await loadTemplate();ready=true;await loadReports();renderWorkspace();return true}catch(e){showErrors([String(e?.message||e)],'Módulo no disponible');status(String(e?.message||e),'error');return false}}
+async function openModule(){mount();$('drvOverlay').classList.add('open');await ensure()}
+function closeModule(){$('drvOverlay')?.classList.remove('open');document.getElementById('rv6ProjectGate')?.classList.remove('hidden')}
+window.AllpaDesistimientoResolucion=Object.freeze({version:VERSION,open:openModule,close:closeModule,refresh:loadReports,select,preview:renderPreview,save:()=>save(false),finalize,update:updateFinal,copy:copyText,print:printDoc,closeError:closeErrors});
 })();
 </script>
 
