@@ -14739,7 +14739,7 @@ renderRequisitosForm = function(rebuild=true){
     const req9=rows.find(reqIsNineSeparatedV112);
     const normalRows=rows.filter(r=>!reqIsNineSeparatedV112(r));
 
-    html+=`<div class="section-title">${esc(grupo)}</div>`;
+    html+=`<div class="section-title">${esc(typeof displayRequirementGroupTitle==='function'?displayRequirementGroupTitle(grupo):grupo)}</div>`;
     html+=renderReqTableNormalV112(normalRows, showNA, forceNA);
     html+=renderReq9SeparadoV112(req9, showNA, forceNA);
   });
@@ -37342,7 +37342,7 @@ function renderObraMayor(rebuild=true){
       ? isReqMasDe2V55(grupo)
       : (typeof normTextV145==='function'&&(normTextV145(grupo).includes('MAS DE 2')||normTextV145(grupo).includes('400')));
     const showNA=forceNA||rows.some(r=>(r.opciones||[]).includes('No Aplica'));
-    html+=`<div class="section-title">${esc(grupo)}</div>`;
+    html+=`<div class="section-title">${esc(typeof displayRequirementGroupTitle==='function'?displayRequirementGroupTitle(grupo):grupo)}</div>`;
 
     let normal=[];
     const flush=()=>{
@@ -37406,7 +37406,7 @@ function renderAnteproyecto(rebuild=true){
     if(typeof isGrupoMas2AnteV149==='function'&&isGrupoMas2AnteV149(grupo)){
       const req=rows.find(r=>typeof isFactibilidadAnteReqV149==='function'&&isFactibilidadAnteReqV149(r))||rows[0];
       if(req){
-        html+=`<div class="section-title">${esc(grupo)}</div>`;
+        html+=`<div class="section-title">${esc(typeof displayRequirementGroupTitle==='function'?displayRequirementGroupTitle(grupo):grupo)}</div>`;
         html+=renderFactibilidadAnteReqV149(req,true);
       }
       return;
@@ -37414,7 +37414,7 @@ function renderAnteproyecto(rebuild=true){
 
     const forceNA=typeof isReqMasDe2V55==='function'?isReqMasDe2V55(grupo):false;
     const showNA=forceNA||rows.some(r=>(r.opciones||[]).includes('No Aplica'));
-    html+=`<div class="section-title">${esc(grupo)}</div>`;
+    html+=`<div class="section-title">${esc(typeof displayRequirementGroupTitle==='function'?displayRequirementGroupTitle(grupo):grupo)}</div>`;
     if(typeof renderReqTableNormalV112==='function')html+=renderReqTableNormalV112(rows,showNA,forceNA);
   });
 
@@ -42375,6 +42375,167 @@ body.allpa-generator-home-v779 #projectEntryV123{display:grid!important;visibili
     window.renderInformeAprobatorio=wrapped;
     try{renderInformeAprobatorio=wrapped}catch(_e){}
   }
+})();
+</script>
+
+
+<script id="allpa-v794-reglas-requisitos-obra-mayor">
+(function(){
+'use strict';
+const VERSION='7.9.5-reglas-obra-mayor-titulo-conservado';
+const CONDITIONAL_IDS=new Set(['REQ_033','REQ_034','REQ_035','REQ_036']);
+const CONDITIONAL_GROUP='Requisitos condicionados por altura o área';
+const CONDITIONAL_GROUP_DISPLAY='Requisitos más de 2 pisos o 400 m²';
+function displayRequirementGroupTitle(grupo){
+  return String(grupo||'')===CONDITIONAL_GROUP?CONDITIONAL_GROUP_DISPLAY:String(grupo||'');
+}
+window.displayRequirementGroupTitle=displayRequirementGroupTitle;
+
+function n(v){
+  if(typeof numVal==='function') return numVal(v);
+  const x=Number(String(v??'').replace(',','.').replace(/[^0-9.\-]/g,''));
+  return Number.isFinite(x)?x:0;
+}
+function metrics(){
+  return {
+    pisos:n(typeof infoValue==='function'?infoValue('ALTURA EDIFICACIÓN'):0),
+    area:n(typeof infoValue==='function'?infoValue('Área Bruta'):0)
+  };
+}
+function reqApplies(id){
+  const {pisos,area}=metrics();
+  switch(String(id||'')){
+    case 'REQ_033': return pisos>3 || area>400;
+    case 'REQ_034': return pisos>3 || area>400;
+    case 'REQ_035': return area>400;
+    case 'REQ_036': return pisos>2 || area>400;
+    default:return true;
+  }
+}
+function studyApplies(entity){
+  const {pisos,area}=metrics();
+  const e=String(entity||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  if(e.includes('RIOBAMBA')||e.includes('EMAPAR')) return pisos>3 && area>500;
+  if(e.includes('EERSA')) return area>400;
+  if(e.includes('BOMBER')) return area>400;
+  return false;
+}
+function canonicalEntity(v){
+  const e=String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  if(e.includes('RIOBAMBA')||e.includes('EMAPAR')) return 'RIOBAMBA-EP';
+  if(e.includes('EERSA')) return 'EERSA';
+  if(e.includes('BOMBER')) return 'BOMBEROS';
+  return String(v||'').trim();
+}
+function normalizeRequirementGroups(){
+  if(!window.DATA||!Array.isArray(DATA.requisitos))return;
+  DATA.requisitos.forEach(r=>{
+    if(CONDITIONAL_IDS.has(String(r?.id||''))) r.grupo=CONDITIONAL_GROUP;
+  });
+}
+
+const baseShould=typeof window.shouldShowReq==='function'?window.shouldShowReq:(typeof shouldShowReq==='function'?shouldShowReq:null);
+window.shouldShowReq=function(req){
+  const id=String(req?.id||'');
+  if(CONDITIONAL_IDS.has(id)) return reqApplies(id);
+  return baseShould?baseShould(req):true;
+};
+try{shouldShowReq=window.shouldShowReq}catch(_e){}
+
+const baseMas2=typeof window.isReqMasDe2V55==='function'?window.isReqMasDe2V55:(typeof isReqMasDe2V55==='function'?isReqMasDe2V55:null);
+window.isReqMasDe2V55=function(grupo){
+  const g=String(grupo||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+  if(g.includes('REQUISITOS CONDICIONADOS POR ALTURA O AREA')) return false;
+  return baseMas2?baseMas2(grupo):false;
+};
+try{isReqMasDe2V55=window.isReqMasDe2V55}catch(_e){}
+
+function ensureStudyState(){
+  if(typeof ensureAprobatorioData==='function')ensureAprobatorioData();
+  if(!state.aprobatorio)state.aprobatorio={};
+  const old=Array.isArray(state.aprobatorio.estudios)?state.aprobatorio.estudios:[];
+  const names=['RIOBAMBA-EP','EERSA','BOMBEROS'];
+  const rows=names.map(name=>{
+    const found=old.find(r=>canonicalEntity(r?.estudio||r?.empresa||r?.entidad)===name);
+    return found?{...found,estudio:name}:{estudio:name,documento:'',fecha:'',evidencia:''};
+  });
+  state.aprobatorio.estudios=rows;
+  return rows;
+}
+function applicableStudyRows(){
+  return ensureStudyState().map((row,index)=>({row,index})).filter(x=>studyApplies(x.row.estudio));
+}
+window.updateEstudioCondicionalV794=function(index,field,elOrValue){
+  const rows=ensureStudyState(); if(!rows[index])return;
+  let value=(elOrValue&&typeof elOrValue==='object'&&'value' in elOrValue)?elOrValue.value:String(elOrValue??'');
+  if(field!=='fecha'&&field!=='evidencia') value=String(value).toUpperCase();
+  if(elOrValue&&typeof elOrValue==='object'&&field!=='fecha'&&field!=='evidencia')elOrValue.value=value;
+  rows[index][field]=value;
+  if(typeof scheduleReportUpdate==='function')scheduleReportUpdate();
+  else{try{renderReport()}catch(_e){} try{renderPreview()}catch(_e){}}
+};
+
+window.ensureEstudiosOMV145=function(){return ensureStudyState();};
+try{ensureEstudiosOMV145=window.ensureEstudiosOMV145}catch(_e){}
+
+function studiesEditor(){
+  const items=applicableStudyRows();
+  const {pisos,area}=metrics();
+  if(!items.length)return `<div class="note-box">No se requieren Estudios Complementarios para ${pisos||0} pisos y ${area||0} m² de Área Bruta.</div>`;
+  return `<div class="req-estudios-wrapper-v111"><div class="mini">Estudios Complementarios aplicables automáticamente según altura y Área Bruta.</div>
+    <table class="service-edit-v13"><thead><tr><th style="width:22%">ENTIDAD</th><th>DOCUMENTO / TRÁMITE</th><th style="width:18%">FECHA</th></tr></thead><tbody>${items.map(({row,index})=>`<tr><td><input value="${typeof esc==='function'?esc(row.estudio):row.estudio}" readonly></td><td><input value="${typeof esc==='function'?esc(row.documento||''):row.documento||''}" oninput="updateEstudioCondicionalV794(${index},'documento',this)"></td><td><input type="date" value="${typeof esc==='function'?esc(row.fecha||''):row.fecha||''}" oninput="updateEstudioCondicionalV794(${index},'fecha',this)"></td></tr><tr class="service-evidence-row-v13"><td colspan="3"><label>Evidencia / detalle</label><textarea oninput="updateEstudioCondicionalV794(${index},'evidencia',this)">${typeof esc==='function'?esc(row.evidencia||''):row.evidencia||''}</textarea></td></tr>`).join('')}</tbody></table></div>`;
+}
+window.renderEstudiosOMV145=studiesEditor;
+try{renderEstudiosOMV145=window.renderEstudiosOMV145}catch(_e){}
+
+const baseRenderEstudiosTabla=typeof window.renderEstudiosTabla==='function'?window.renderEstudiosTabla:(typeof renderEstudiosTabla==='function'?renderEstudiosTabla:null);
+window.renderEstudiosTabla=function(){
+  const box=document.getElementById('estudiosTabla');
+  if(!box)return baseRenderEstudiosTabla?baseRenderEstudiosTabla.apply(this,arguments):undefined;
+  const ante=typeof isAnteproyectoV123==='function'&&isAnteproyectoV123();
+  if(ante)return baseRenderEstudiosTabla?baseRenderEstudiosTabla.apply(this,arguments):undefined;
+  box.innerHTML=studiesEditor();
+};
+try{renderEstudiosTabla=window.renderEstudiosTabla}catch(_e){}
+
+function studiesForReport(){return applicableStudyRows().map(x=>x.row);}
+window.combinedStudiesReportV145=function(){
+  const facts=typeof ensureFactibilidadesOMV145==='function'?ensureFactibilidadesOMV145():[];
+  const studies=studiesForReport();
+  if(typeof window.combinedServiceReportV13==='function')return window.combinedServiceReportV13(facts,studies,true);
+  if(typeof combinedServiceReportV13==='function')return combinedServiceReportV13(facts,studies,true);
+  return '<p>No se registran estudios complementarios ni factibilidades.</p>';
+};
+try{combinedStudiesReportV145=window.combinedStudiesReportV145}catch(_e){}
+
+const baseEstudiosReport=typeof window.estudiosReport==='function'?window.estudiosReport:(typeof estudiosReport==='function'?estudiosReport:null);
+window.estudiosReport=function(){
+  const ante=typeof isAnteproyectoV123==='function'&&isAnteproyectoV123();
+  if(ante)return baseEstudiosReport?baseEstudiosReport.apply(this,arguments):'';
+  return window.combinedStudiesReportV145();
+};
+try{estudiosReport=window.estudiosReport}catch(_e){}
+
+function patchRequirementNote(){
+  normalizeRequirementGroups();
+  const {pisos,area}=metrics();
+  document.querySelectorAll('#requisitosForm .note-box').forEach(el=>{
+    if(/Condici[oó]n autom[aá]tica/i.test(el.textContent||'')){
+      el.innerHTML=`<strong>Condiciones automáticas:</strong> REQ_033 y REQ_034: más de 3 pisos <strong>o</strong> más de 400 m²; REQ_035: más de 400 m²; REQ_036: más de 2 pisos <strong>o</strong> más de 400 m².<br>Proyecto actual: <strong>${pisos||0} pisos / ${area||0} m²</strong>.`;
+    }
+  });
+}
+
+const baseRenderReq=window.renderRequisitosForm;
+if(typeof baseRenderReq==='function'&&!baseRenderReq.__v794){
+  const wrapped=function(){normalizeRequirementGroups();const out=baseRenderReq.apply(this,arguments);setTimeout(patchRequirementNote,0);return out;};
+  wrapped.__v794=true;
+  window.renderRequisitosForm=wrapped;
+  try{renderRequisitosForm=wrapped}catch(_e){}
+}
+
+window.AllpaReglasObraMayorV794=Object.freeze({VERSION,metrics,reqApplies,studyApplies,normalizeRequirementGroups,applicableStudyRows});
+window.addEventListener('load',()=>{normalizeRequirementGroups();setTimeout(()=>{normalizeRequirementGroups();patchRequirementNote();},700)});
 })();
 </script>
 
