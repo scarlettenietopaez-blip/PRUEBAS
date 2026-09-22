@@ -29117,7 +29117,8 @@ renderObsSeleccionadas = function(){
   function projectLabelDesV13(){return typeof isAnteproyectoV123==='function'&&isAnteproyectoV123()?'ANTEPROYECTO DE EDIFICACIÓN':'OBRA MAYOR - PROYECTO DEFINITIVO';}
   function subjectDesV13(placeholder=false){
     const egob=String(state?.egob||document.getElementById('egob')?.value||'').trim()||(placeholder?'…':'');
-    const n=Number(state?.phduDesistimientoNumero||0);
+    const rawN=state?.phduDesistimientoNumero||String(state?.phduDesistimientoNumeroFormateado||'').match(/\d+/)?.[0]||0;
+    const n=Number(rawN);
     const nro=(Number.isInteger(n)&&n>0)?` NRO. ${String(n).padStart(3,'0')}`:(placeholder?' NRO. …':'');
     return `INFORME TÉCNICO DE DESISTIMIENTO DE ${projectLabelDesV13()}${nro} EGOB NRO. ${egob}`.toUpperCase();
   }
@@ -39885,16 +39886,44 @@ function reqGravamen(){
     area:String(d.areaTotalCertificado||'').trim()
   };
 }
+function validMunicipalEmailV792(value){
+  const raw=String(value||'').replace(/[\u200B-\u200D\u2060\uFEFF]/g,'').trim();
+  if(!raw) return '';
+  const n=norm(raw).replace(/[.]/g,'');
+  if(['S/N','SN','N/A','NA','NO REGISTRA','NO REGISTRADO','SIN CORREO','NINGUNO','-'].includes(n)) return '';
+  const m=raw.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return m?m[0].trim():'';
+}
 function professionalEmail(){
+  /* V7.9.2: para Desistimiento el correo sugerido se toma de la ficha del
+     Registro Municipal del profesional. Se prioriza el número de Registro
+     Municipal y solo como respaldo se usa el nombre del proyectista. */
   const proyectista=info('PROYECTISTA');
-  if(!proyectista) return '';
+  const registroMunicipal=digits(info('REGISTRO MUNICIPAL'));
   const rows=Array.isArray(window.__PROF_RAW_V13__)?window.__PROF_RAW_V13__:[];
-  const row=rows.find(r=>norm(r.Nombre||r.Profesional||r.Proyectista||'')===norm(proyectista))
-        || rows.find(r=>norm(r.Nombre||r.Profesional||r.Proyectista||'').includes(norm(proyectista)) || norm(proyectista).includes(norm(r.Nombre||r.Profesional||r.Proyectista||'')));
+  let row=null;
+  if(registroMunicipal){
+    row=rows.find(r=>digits(r['Registro Municipal']||r['RegistroMunicipal']||r['Reg. Municipal']||r['REGISTRO MUNICIPAL']||'')===registroMunicipal)||null;
+  }
+  if(!row && proyectista){
+    row=rows.find(r=>norm(r.Nombre||r.Profesional||r.Proyectista||'')===norm(proyectista))
+      || rows.find(r=>{
+        const a=norm(r.Nombre||r.Profesional||r.Proyectista||''),b=norm(proyectista);
+        return !!a&&!!b&&(a.includes(b)||b.includes(a));
+      })||null;
+  }
   if(!row) return '';
-  const candidates=['Correo electrónico','Correo Electronico','Correo','Email','E-mail','Mail','Correo institucional','Correo Institucional'];
-  for(const k of candidates){if(String(row[k]||'').trim()) return String(row[k]).trim();}
-  for(const [k,v] of Object.entries(row)){if(/correo|email|e-mail|mail/i.test(k) && String(v||'').trim()) return String(v).trim();}
+  const candidates=['CORREO ELECTRONICO','Correo electrónico','Correo Electronico','Correo','EMAIL','Email','E-mail','Mail','Correo institucional','Correo Institucional'];
+  for(const k of candidates){
+    const mail=validMunicipalEmailV792(row[k]);
+    if(mail) return mail;
+  }
+  for(const [k,v] of Object.entries(row)){
+    if(/correo|email|e-mail|mail/i.test(k)){
+      const mail=validMunicipalEmailV792(v);
+      if(mail) return mail;
+    }
+  }
   return '';
 }
 
@@ -40079,7 +40108,7 @@ function validate(payload){
     else if(payload.clave_catastral) good.push('Clave catastral de 27 dígitos.');
 
     if(!payload.proyectista) warn.push('No se encontró Proyectista.');
-    if(!payload.correo_notificacion_sugerido) warn.push('No se encontró correo sugerido del profesional; podrá completarse en la Resolución.');
+    if(!payload.correo_notificacion_sugerido) warn.push('No se encontró un correo electrónico válido en los datos del Registro Municipal del profesional; deberá completarse manualmente en el módulo de la Resolución.');
     if(!String(payload.conclusiones_desistimiento||'').trim()) warn.push('La conclusión del Informe de Desistimiento está vacía.');
 
     if(!currentProfile) bad.push('No hay sesión Supabase comprobada.');
@@ -40731,7 +40760,10 @@ function isDesV790(){
   return state?.tipoInforme==='Informe de Desistimiento';
 }
 function officialNumber(){
-  const n=Number(isDesV790()?state?.phduDesistimientoNumero:state?.phduNumeroInforme||0);
+  let raw;
+  if(isDesV790()) raw=state?.phduDesistimientoNumero||String(state?.phduDesistimientoNumeroFormateado||'').match(/\d+/)?.[0]||0;
+  else raw=state?.phduNumeroInforme||String(state?.phduNumeroFormateado||'').match(/\d+/)?.[0]||0;
+  const n=Number(raw);
   return Number.isInteger(n)&&n>0?n:0;
 }
 function officialFormatted(){
@@ -40995,7 +41027,7 @@ async function finalize(){
   const tipo=payload.tipo_tramite==='ANTEPROYECTO'?'Anteproyecto':'Obra Mayor';
   const warns=validation.warn.length?('\n\nAdvertencias detectadas: '+validation.warn.length+'. Revise la comprobación antes de continuar.'):'';
   const serieTexto=isDesV790()
-    ? 'Supabase asignará el siguiente número de la serie anual independiente de INFORMES DE DESISTIMIENTO. La serie inicia en 001 cada año.'
+    ? 'Al pulsar Aceptar, Supabase solicitará el siguiente número de la serie anual independiente de INFORMES DE DESISTIMIENTO. La serie inicia en 001 cada año. El ASUNTO mantendrá “NRO. …” hasta que Supabase confirme la asignación.'
     : 'Supabase asignará el número oficial disponible de la serie correspondiente. Si existe un número previamente liberado de esta misma serie y año, ALLPA lo reutilizará primero; de lo contrario continuará con el siguiente secuencial.';
   const ok=window.confirm(
     'FINALIZAR INFORME Y ASIGNAR NÚMERO OFICIAL\n\n'+
@@ -41013,8 +41045,13 @@ async function finalize(){
     /* Se reconstruye inmediatamente antes del RPC para enviar el estado más reciente. */
     payload=api.buildPayload();
     const data=await api.finalizeInformeRpc(payload);
-    const row=resultRow(data);
-    if(!row || !row.numero) throw new Error('Supabase no devolvió el número del Informe.');
+    let row=resultRow(data);
+    /* V7.9.2: si el RPC terminó pero la respuesta no llegó con el número,
+       intentamos recuperarlo por UUID/eGOB antes de declarar un fallo. */
+    if((!row || !row.numero) && isDesV790() && typeof api.recoverRegisteredInforme==='function'){
+      try{ row=await api.recoverRegisteredInforme(payload) || row; }catch(_recoverErr){ console.warn('ALLPA V7.9.2 recuperación de numeración:',_recoverErr); }
+    }
+    if(!row || !row.numero) throw new Error('Supabase no devolvió el número del Informe. Verifique que el SQL 45 de Desistimiento esté ejecutado en Supabase.');
 
     if(isDesV790()){
       state.phduDesistimientoId=String(row.informe_id||state.phduDesistimientoId||payload.id_informe||'');
@@ -41056,7 +41093,13 @@ async function finalize(){
     try{if(typeof window.showTab==='function') window.showTab('tab-vista'); else if(typeof showTab==='function') showTab('tab-vista');}catch(_e){}
     setTimeout(function(){try{window.renderAsuntoVistaV119Z?.();updateFinalizeUi();}catch(_e){}},80);
   }catch(err){
-    setStatus('No se pudo finalizar el Informe: '+String(err?.message||err),'error');
+    const detail=String(err?.message||err);
+    const missingRpc=/phdu_finalizar_informe_desistimiento_controlado|PGRST202|schema cache|could not find the function/i.test(detail);
+    const help=missingRpc?' Verifique o vuelva a ejecutar el SQL 45_DESISTIMIENTO_NUMERACION_Y_RESOLUCION.sql en Supabase.':'';
+    setStatus('No se pudo finalizar el Informe: '+detail+help,'error');
+    if(isDesV790()){
+      try{window.alert('NO SE ASIGNÓ NINGÚN NÚMERO AL INFORME DE DESISTIMIENTO.\n\n'+detail+help);}catch(_e){}
+    }
   }finally{
     busy=false;updateFinalizeUi();
   }
