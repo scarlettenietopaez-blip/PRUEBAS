@@ -689,6 +689,21 @@ html.allpa-project-preboot body::before{
   align-items:center;
   margin-top:8px;
 }
+.clave-antigua-v49 .inline-check{
+  gap:6px!important;
+  font-size:11px!important;
+  line-height:1.05!important;
+  white-space:nowrap;
+  flex-wrap:nowrap;
+}
+.clave-antigua-v49 .inline-check input{
+  width:14px;
+  height:14px;
+  min-width:14px;
+  min-height:14px;
+  margin:0;
+  accent-color:#0b5a7d;
+}
 @media(max-width:1050px){
   .catastral-line-v49{grid-template-columns:repeat(4,1fr)}
   .catastral-info-v49{grid-template-columns:1fr}
@@ -7543,7 +7558,7 @@ catastralPanelHtmlV36 = function(f,val){
       <div><label>PRED</label><input id="catPred" value="${esc(c.pred||'')}" maxlength="12" ${oldActive?'disabled':''}></div>
       <button type="button" class="secondary catastral-search" onclick="buscarClaveCatastralV36()" ${oldActive?'disabled':''}>🔍</button>
     </div>
-    <div class="clave-antigua-v49"><label class="inline-check"><input type="checkbox" id="toggleClaveAntiguaV37" ${oldActive?'checked':''}> Usar clave catastral antigua</label></div>
+    <div class="clave-antigua-v49"><label class="inline-check"><input type="checkbox" id="toggleClaveAntiguaV37" ${oldActive?'checked':''}> Ingresar Clave Catastral Manualmente</label></div>
     ${oldActive?`<div class="field clave-antigua-input-v38"><label>Clave catastral antigua</label><input id="claveAntiguaTextV37" value="${esc(c.claveAntigua||'')}" placeholder="Ingrese la clave antigua en texto libre"></div>`:''}
     <div class="catastral-info-v49">
       <div><label>Parroquia</label><input id="catParroquiaAutoV46" value="${esc(parroquiaAuto||'')}" readonly></div>
