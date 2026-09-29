@@ -42875,5 +42875,144 @@ window.AllpaFixesV7911=Object.freeze({VERSION,autosave:autosaveV7911,optimizeCli
 })();
 </script>
 
+
+
+<!-- ==========================================================
+     ALLPA · V7.9.12
+     Navegación determinista al primer clic en la portada.
+     - Evita la carrera entre V26/V7.7.9/V7.9.11 al reinstalar selectProjectV123.
+     - La portada abandona el estado HOME antes de cualquier operación asíncrona.
+     - Intercepta directamente las tarjetas de proyecto en fase capture.
+     ========================================================== -->
+<script id="allpa-v7912-navigation-first-click">
+(function(){
+'use strict';
+const VERSION='7.9.12-navigation-first-click';
+let navigating=false;
+
+function validProjectV7912(projectId){
+  return projectId==='anteproyecto_edificacion'
+    ? 'anteproyecto_edificacion'
+    : 'obra_mayor_definitivo';
+}
+
+function projectFromButtonV7912(btn){
+  const code=String(btn?.getAttribute?.('onclick')||'');
+  const m=code.match(/selectProjectV123\(\s*['\"]([^'\"]+)['\"]\s*\)/i);
+  if(m?.[1]) return validProjectV7912(m[1]);
+  const txt=String(btn?.textContent||'').toUpperCase();
+  return txt.includes('ANTEPROYECTO')?'anteproyecto_edificacion':'obra_mayor_definitivo';
+}
+
+function projectLabelV7912(projectId){
+  return projectId==='anteproyecto_edificacion'
+    ? 'Anteproyecto de Edificación'
+    : 'Obra Mayor Definitivo';
+}
+
+function leaveHomeImmediatelyV7912(){
+  try{window.AllpaStartupV779?.leaveHome?.()}catch(_e){}
+  try{document.body?.classList.remove('allpa-generator-home-v779')}catch(_e){}
+  const entry=document.getElementById('projectEntryV123');
+  if(entry) entry.classList.add('hidden');
+}
+
+function restoreHomeV7912(){
+  try{
+    if(window.AllpaStartupV779?.home) window.AllpaStartupV779.home();
+    else{
+      document.body?.classList.add('allpa-generator-home-v779');
+      const entry=document.getElementById('projectEntryV123');
+      if(entry) entry.classList.remove('hidden');
+    }
+  }catch(_e){}
+}
+
+function setProjectButtonsBusyV7912(on){
+  document.querySelectorAll('#projectEntryV123 .project-option-v123').forEach(btn=>{
+    btn.toggleAttribute('disabled',!!on);
+    btn.setAttribute('aria-busy',on?'true':'false');
+  });
+}
+
+async function selectProjectFirstClickV7912(projectId){
+  if(navigating) return false;
+  navigating=true;
+  const id=validProjectV7912(projectId);
+  const label=projectLabelV7912(id);
+
+  /* Clave del arreglo: salir de HOME ANTES del await del autoguardado.
+     Así ningún CSS/observer de arranque puede volver a mostrar la portada. */
+  leaveHomeImmediatelyV7912();
+  setProjectButtonsBusyV7912(true);
+  try{window.AllpaCleanTransitionV778?.show?.('Preparando '+label+'…')}catch(_e){}
+
+  try{
+    /* Conserva la regla V7.9.11 de guardar antes de abandonar un informe,
+       pero no condiciona el cambio de proyecto a que exista un borrador completo. */
+    try{await window.AllpaFixesV7911?.autosave?.(true)}catch(err){console.warn('ALLPA V7.9.12 autoguardado previo:',err)}
+
+    /* Ruta estable: se llama directamente al módulo consolidado V24D.
+       No dependemos del alias global selectProjectV123, que módulos históricos
+       reinstalan a los 3.2/4.2/5.6/6.5 segundos. */
+    let route=window.ProjectNavigationV24D?.selectProject;
+    if(typeof route!=='function') route=window.RequirementsNavigationV24C?.selectProject;
+    if(typeof route!=='function') throw new Error('No se encontró la ruta de navegación de proyectos.');
+
+    const result=route(id);
+    if(result && typeof result.then==='function') await result;
+
+    leaveHomeImmediatelyV7912();
+    return true;
+  }catch(err){
+    console.error('ALLPA V7.9.12 navegación:',err);
+    restoreHomeV7912();
+    try{
+      if(typeof window.msg==='function') window.msg('No se pudo abrir '+label+'. Intente nuevamente.');
+    }catch(_e){}
+    return false;
+  }finally{
+    setTimeout(()=>{
+      try{window.AllpaCleanTransitionV778?.hide?.()}catch(_e){}
+      setProjectButtonsBusyV7912(false);
+      navigating=false;
+    },260);
+  }
+}
+
+/* Captura el clic antes del onclick HTML. Esta ruta no puede ser reemplazada
+   por los setTimeout históricos que reasignan window.selectProjectV123. */
+document.addEventListener('click',function(ev){
+  const btn=ev.target?.closest?.('#projectEntryV123 .project-option-v123');
+  if(!btn) return;
+  ev.preventDefault();
+  ev.stopImmediatePropagation();
+  selectProjectFirstClickV7912(projectFromButtonV7912(btn));
+},true);
+
+function installAliasV7912(){
+  window.selectProjectV123=selectProjectFirstClickV7912;
+  try{selectProjectV123=window.selectProjectV123}catch(_e){}
+}
+
+installAliasV7912();
+/* V26 y V7.9.11 todavía hacen reinstalaciones diferidas. Reafirmamos el alias
+   después de cada ventana; el listener capture ya funciona desde el inicio. */
+window.addEventListener('load',()=>{
+  setTimeout(installAliasV7912,4300);
+  setTimeout(installAliasV7912,5700);
+  setTimeout(installAliasV7912,6600);
+  setTimeout(installAliasV7912,7600);
+});
+
+window.AllpaNavigationFixV7912=Object.freeze({
+  VERSION,
+  selectProject:selectProjectFirstClickV7912,
+  leaveHome:leaveHomeImmediatelyV7912,
+  install:installAliasV7912
+});
+})();
+</script>
+
 </body>
 </html>
