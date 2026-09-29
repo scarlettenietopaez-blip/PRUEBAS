@@ -14,7 +14,7 @@
 .top{height:72px;background:linear-gradient(90deg,#072e52,#42192d);display:flex;align-items:center;justify-content:flex-end;padding:0 32px;color:#fff;font-weight:900;font-size:18px;letter-spacing:.4px}
 .portal{min-height:calc(100vh - 72px);display:grid;grid-template-columns:1fr 1fr}.hero{position:relative;background:#e7353f url('assets/portada_inicio_riobamba.png') center/cover no-repeat;min-height:calc(100vh - 72px)}.hero-label{position:absolute;left:54px;bottom:28px;max-width:440px;color:#062f55;font-size:10px;line-height:1.35;font-weight:1000;letter-spacing:.7px;text-transform:uppercase}.panel{display:flex;align-items:center;justify-content:center;padding:46px 54px;border-left:4px solid #075681}.box{width:min(650px,100%)}
 h1{font-size:34px;margin:0 0 8px}.lead{margin:0 0 26px;color:var(--muted);line-height:1.5}.login{background:#fff;border:1px solid var(--line);border-left:5px solid #bf1d34;border-radius:18px;padding:22px;box-shadow:0 10px 28px rgba(18,64,94,.08)}
-.field{display:grid;gap:6px;margin-top:13px}.field label{font-size:10px;font-weight:900;text-transform:uppercase}.field input{width:100%;min-height:46px;border:1px solid #b9cbd9;border-radius:11px;padding:10px 12px;font-size:14px}.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}button,.module{border:0;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer}.primary{background:var(--blue2);color:#fff}.soft{background:#edf4f7;color:var(--blue)}.status{margin-top:14px;padding:10px 12px;border-radius:10px;background:#f3f6f8;color:#52677a;font-size:12px;line-height:1.4}.status.ok{background:#eaf8f0;color:#17623d}.status.error{background:#fff0f0;color:#8d241f}.profile{margin-top:18px;font-size:12px;line-height:1.55}.modules{display:grid;gap:14px;margin-top:22px}.module{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #11648f;text-decoration:none;color:var(--ink);padding:18px 20px;box-shadow:0 7px 18px rgba(12,63,94,.07)}.module .n{width:46px;height:46px;border-radius:14px;background:#075b87;color:#fff;display:grid;place-items:center;font-size:18px}.module .txt{flex:1}.module .txt strong{display:block;font-size:17px}.module .txt span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.module .arr{font-size:24px}.hidden{display:none!important}
+.field{display:grid;gap:6px;margin-top:13px}.field label{font-size:10px;font-weight:900;text-transform:uppercase}.field input{width:100%;min-height:46px;border:1px solid #b9cbd9;border-radius:11px;padding:10px 12px;font-size:14px}.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}button,.module{border:0;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer}.primary{background:var(--blue2);color:#fff}.soft{background:#edf4f7;color:var(--blue)}.status{margin-top:14px;padding:10px 12px;border-radius:10px;background:#f3f6f8;color:#52677a;font-size:12px;line-height:1.4}.status.ok{background:#eaf8f0;color:#17623d}.status.error{background:#fff0f0;color:#8d241f}.profile{margin-top:18px;font-size:12px;line-height:1.55}.modules{display:grid;gap:14px;margin-top:22px}.module{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #11648f;text-decoration:none;color:var(--ink);padding:18px 20px;box-shadow:0 7px 18px rgba(12,63,94,.07)}.module .n{width:46px;height:46px;border-radius:14px;background:#075b87;color:#fff;display:grid;place-items:center;font-size:18px}.module .txt{flex:1}.module .txt strong{display:block;font-size:17px}.module .txt span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.module .arr{font-size:24px}.hidden{display:none!important}.recovery-note{margin-top:10px;color:var(--muted);font-size:11px;line-height:1.45}.recovery-title{margin-bottom:6px}
 @media(max-width:850px){.portal{grid-template-columns:1fr}.hero{display:none}.panel{padding:28px 20px;border-left:0}.top{height:58px}.portal{min-height:calc(100vh - 58px)}h1{font-size:28px}}
 </style>
 </head>
@@ -22,21 +22,114 @@ h1{font-size:34px;margin:0 0 8px}.lead{margin:0 0 26px;color:var(--muted);line-h
 <div class="top">ALLPA</div>
 <div class="portal"><section class="hero" aria-label="Identidad institucional"><div class="hero-label">DIRECCIÓN GENERAL DE GESTIÓN DE PLANIFICACIÓN,<br>HÁBITAT Y DESARROLLO URBANÍSTICO</div></section><section class="panel"><div class="box">
   <div id="loginView"><h1>Inicio de sesión</h1><p class="lead">Ingrese con su cuenta PHDU. ALLPA habilitará únicamente los módulos correspondientes a su rol.</p>
-    <div class="login"><div class="field"><label>Correo</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label>Contraseña</label><input id="password" type="password" autocomplete="current-password"></div><div class="actions"><button class="primary" onclick="login()">INGRESAR A ALLPA</button></div><div id="status" class="status">Esperando credenciales PHDU.</div></div>
+    <div class="login"><div class="field"><label>Correo</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label>Contraseña</label><input id="password" type="password" autocomplete="current-password"></div><div class="actions"><button class="primary" onclick="login()">INGRESAR A ALLPA</button><button class="soft" onclick="requestPasswordReset()">RECUPERAR CONTRASEÑA</button></div><div class="recovery-note">Para recuperar el acceso, ingrese primero su correo y pulse “Recuperar contraseña”. Recibirá un enlace para definir una nueva contraseña.</div><div id="status" class="status">Esperando credenciales PHDU.</div></div>
+  </div>
+  <div id="recoveryView" class="hidden"><h1 class="recovery-title">Restablecer contraseña</h1><p class="lead">Ingrese y confirme su nueva contraseña para la cuenta PHDU.</p>
+    <div class="login"><div class="field"><label>Nueva contraseña</label><input id="newPassword" type="password" autocomplete="new-password"></div><div class="field"><label>Confirmar nueva contraseña</label><input id="confirmPassword" type="password" autocomplete="new-password"></div><div class="actions"><button class="primary" onclick="saveNewPassword()">GUARDAR NUEVA CONTRASEÑA</button></div><div id="recoveryStatus" class="status">El enlace de recuperación fue validado. Defina una nueva contraseña.</div></div>
   </div>
   <div id="roleView" class="hidden"><h1 id="welcome">ALLPA</h1><p id="roleText" class="lead"></p><div id="profile" class="profile"></div><div id="modules" class="modules"></div><div class="actions"><button class="soft" onclick="logout()">CERRAR SESIÓN</button></div></div>
 </div></section></div>
 <script>
 const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
 const SUPABASE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});
+
+// Guardamos las pistas de la URL ANTES de que supabase-js procese/limpie el hash.
+const INITIAL_HASH_PARAMS=new URLSearchParams((location.hash||'').replace(/^#/,''));
+const INITIAL_QUERY_PARAMS=new URLSearchParams(location.search||'');
+const INITIAL_RECOVERY_HINT=(INITIAL_HASH_PARAMS.get('type')==='recovery'||INITIAL_QUERY_PARAMS.get('type')==='recovery');
+const INITIAL_AUTH_ERROR=INITIAL_HASH_PARAMS.get('error_description')||INITIAL_QUERY_PARAMS.get('error_description')||'';
+
+// detectSessionInUrl debe estar activo para que Supabase convierta el enlace de
+// recuperación del correo en una sesión temporal válida dentro de ALLPA.
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'allpa-phdu-auth-v1'}});
 let currentProfile=null;
+let recoveryMode=false;
+
 function s(msg,type=''){const e=document.getElementById('status');e.textContent=msg;e.className='status '+type}
+function rs(msg,type=''){const e=document.getElementById('recoveryStatus');e.textContent=msg;e.className='status '+type}
+function cleanPortalUrl(){const u=new URL(location.href);u.search='';u.hash='';return u.href}
+function setView(name){
+  document.getElementById('loginView').classList.toggle('hidden',name!=='login');
+  document.getElementById('recoveryView').classList.toggle('hidden',name!=='recovery');
+  document.getElementById('roleView').classList.toggle('hidden',name!=='role');
+}
+function showRecoveryView(){recoveryMode=true;setView('recovery');setTimeout(()=>document.getElementById('newPassword')?.focus(),50)}
+
 async function profileFor(user){const {data,error}=await sb.from('phdu_profiles').select('id,correo,nombre_completo,rol,activo,cargo,firma_nombre,firma_cargo').eq('id',user.id).single();if(error)throw error;if(!data?.activo)throw new Error('El perfil PHDU está inactivo.');return data}
 function moduleLink(href,n,title,sub){return `<a class="module" href="${href}"><span class="n">${n}</span><span class="txt"><strong>${title}</strong><span>${sub}</span></span><span class="arr">→</span></a>`}
-function showRole(p){currentProfile=p;document.getElementById('loginView').classList.add('hidden');document.getElementById('roleView').classList.remove('hidden');document.getElementById('welcome').textContent='Bienvenido/a, '+(p.firma_nombre||p.nombre_completo||'');document.getElementById('profile').innerHTML='<strong>Rol:</strong> '+p.rol+(p.cargo?'<br><strong>Cargo:</strong> '+p.cargo:'');const r=String(p.rol||'').toUpperCase();let html='',txt='';if(r==='TECNICO'){txt='Su perfil tiene habilitado el Generador de Informes Técnicos.';html=moduleLink('informes/index.html','1','INFORMES TÉCNICOS','Obra Mayor Definitivo y Anteproyecto de Edificación.');}else if(r==='ABOGADO'){txt='Su perfil tiene habilitado el módulo de Resoluciones.';html=moduleLink('resoluciones/index.html','1','RESOLUCIONES','Seleccione el tipo de resolución. Por ahora: Obra Mayor.');}else if(r==='ADMIN'){txt='Su perfil de Administrador tiene acceso a todos los módulos.';html=moduleLink('informes/index.html','1','INFORMES TÉCNICOS','Generador técnico y numeración oficial.')+moduleLink('resoluciones/index.html','2','RESOLUCIONES','Generación jurídica, notificaciones y numeración oficial.')+moduleLink('control/index.html','3','CONTROL','Consulta, respaldo CSV y administración de números registrados.');}else{txt='Este rol todavía no tiene una interfaz asignada en el Portal ALLPA.';}document.getElementById('roleText').textContent=txt;document.getElementById('modules').innerHTML=html}
+function showRole(p){currentProfile=p;recoveryMode=false;setView('role');document.getElementById('welcome').textContent='Bienvenido/a, '+(p.firma_nombre||p.nombre_completo||'');document.getElementById('profile').innerHTML='<strong>Rol:</strong> '+p.rol+(p.cargo?'<br><strong>Cargo:</strong> '+p.cargo:'');const r=String(p.rol||'').toUpperCase();let html='',txt='';if(r==='TECNICO'){txt='Su perfil tiene habilitado el Generador de Informes Técnicos.';html=moduleLink('informes/index.html','1','INFORMES TÉCNICOS','Obra Mayor Definitivo y Anteproyecto de Edificación.');}else if(r==='ABOGADO'){txt='Su perfil tiene habilitado el módulo de Resoluciones.';html=moduleLink('resoluciones/index.html','1','RESOLUCIONES','Seleccione el tipo de resolución. Por ahora: Obra Mayor.');}else if(r==='ADMIN'){txt='Su perfil de Administrador tiene acceso a todos los módulos.';html=moduleLink('informes/index.html','1','INFORMES TÉCNICOS','Generador técnico y numeración oficial.')+moduleLink('resoluciones/index.html','2','RESOLUCIONES','Generación jurídica, notificaciones y numeración oficial.')+moduleLink('control/index.html','3','CONTROL','Consulta, respaldo CSV y administración de números registrados.');}else{txt='Este rol todavía no tiene una interfaz asignada en el Portal ALLPA.';}document.getElementById('roleText').textContent=txt;document.getElementById('modules').innerHTML=html}
+
 async function login(){const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;if(!email||!password){s('Ingrese correo y contraseña.','error');return}s('Validando cuenta PHDU…');try{const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;const p=await profileFor(data.user);showRole(p);if(String(p.rol).toUpperCase()==='TECNICO') location.href='informes/index.html';else if(String(p.rol).toUpperCase()==='ABOGADO') location.href='resoluciones/index.html';}catch(e){s('No se pudo iniciar sesión: '+(e.message||e),'error')}}
-async function logout(){await sb.auth.signOut();currentProfile=null;document.getElementById('roleView').classList.add('hidden');document.getElementById('loginView').classList.remove('hidden');document.getElementById('password').value='';s('Sesión cerrada.');}
-(async()=>{try{const {data}=await sb.auth.getSession();if(data?.session?.user){const p=await profileFor(data.session.user);showRole(p)}}catch(e){console.warn('ALLPA Portal V6:',e)}})();
+
+async function requestPasswordReset(){
+  const email=document.getElementById('email').value.trim();
+  if(!email){s('Ingrese primero el correo de la cuenta que desea recuperar.','error');document.getElementById('email').focus();return}
+  s('Solicitando enlace de recuperación…');
+  try{
+    const redirectTo=cleanPortalUrl();
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error)throw error;
+    s('Correo de recuperación enviado. Revise la bandeja de entrada y correo no deseado. Use el enlace más reciente recibido.','ok');
+  }catch(e){s('No se pudo enviar el correo de recuperación: '+(e.message||e),'error')}
+}
+
+async function saveNewPassword(){
+  const p1=document.getElementById('newPassword').value;
+  const p2=document.getElementById('confirmPassword').value;
+  if(!p1||!p2){rs('Ingrese y confirme la nueva contraseña.','error');return}
+  if(p1!==p2){rs('Las contraseñas no coinciden.','error');return}
+  rs('Actualizando contraseña…');
+  try{
+    const {data:sessionData}=await sb.auth.getSession();
+    if(!sessionData?.session){throw new Error('El enlace de recuperación no tiene una sesión válida o ya expiró. Solicite un nuevo correo de recuperación.')}
+    const {error}=await sb.auth.updateUser({password:p1});
+    if(error)throw error;
+    rs('Contraseña actualizada correctamente. Cerrando la sesión de recuperación…','ok');
+    await new Promise(r=>setTimeout(r,700));
+    await sb.auth.signOut();
+    recoveryMode=false;
+    history.replaceState({},document.title,cleanPortalUrl());
+    document.getElementById('newPassword').value='';
+    document.getElementById('confirmPassword').value='';
+    document.getElementById('password').value='';
+    setView('login');
+    s('Contraseña actualizada correctamente. Inicie sesión con su nueva contraseña.','ok');
+  }catch(e){rs('No se pudo actualizar la contraseña: '+(e.message||e),'error')}
+}
+
+async function logout(){await sb.auth.signOut();currentProfile=null;recoveryMode=false;setView('login');document.getElementById('password').value='';s('Sesión cerrada.');}
+
+// Supabase emite PASSWORD_RECOVERY al procesar un enlace de recuperación válido.
+sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    showRecoveryView();
+    rs('Enlace validado. Ingrese y confirme su nueva contraseña.','ok');
+  }
+});
+
+(async()=>{
+  try{
+    if(INITIAL_AUTH_ERROR){
+      setView('login');
+      s('El enlace de recuperación es inválido o expiró: '+decodeURIComponent(INITIAL_AUTH_ERROR.replace(/\+/g,' ')),'error');
+      return;
+    }
+    if(INITIAL_RECOVERY_HINT){
+      showRecoveryView();
+      rs('Validando enlace de recuperación…');
+    }
+    // Dejamos un instante para que supabase-js procese tokens/código del enlace.
+    await new Promise(r=>setTimeout(r,450));
+    const {data}=await sb.auth.getSession();
+    if(recoveryMode||INITIAL_RECOVERY_HINT){
+      if(data?.session)rs('Enlace validado. Ingrese y confirme su nueva contraseña.','ok');
+      return;
+    }
+    if(data?.session?.user){const p=await profileFor(data.session.user);showRole(p)}
+  }catch(e){
+    console.warn('ALLPA Portal recuperación:',e);
+    if(recoveryMode||INITIAL_RECOVERY_HINT){showRecoveryView();rs('No se pudo validar el enlace: '+(e.message||e),'error')}
+  }
+})();
 </script>
 </body></html>
