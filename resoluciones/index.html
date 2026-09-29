@@ -1014,5 +1014,56 @@ html,body{height:100%!important;overflow:hidden!important;overflow-x:hidden!impo
 .apn-subject-head h3{font-size:10px!important}.apn-subject-head .apn-btn{min-height:31px!important;padding:5px 9px!important;font-size:9px!important}
 @media(max-width:900px){.apn-leftcol{height:auto!important;max-height:55vh!important;overflow-y:auto!important}.apn-work>.apn-preview-card{height:65vh!important}}
 </style>
+
+
+<style id="allpa-resoluciones-v806-scroll-desistimiento">
+/* V8.0.6 · Corrección de scroll del panel Información Complementaria / Desistimiento. */
+.drv-form{
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  padding-right:0!important;
+}
+.drv-form>#drvForm{
+  display:block!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  overflow-y:scroll!important;
+  overflow-x:hidden!important;
+  scrollbar-gutter:stable!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch;
+  box-sizing:border-box!important;
+}
+#drvForm>.drv-panel-title{
+  position:sticky!important;
+  top:0!important;
+  z-index:8!important;
+}
+#drvForm>.drv-pad{
+  padding-bottom:28px!important;
+}
+#drvForm::-webkit-scrollbar{width:10px}
+#drvForm::-webkit-scrollbar-track{background:#eef3f7;border-radius:10px}
+#drvForm::-webkit-scrollbar-thumb{background:#9eafbd;border:2px solid #eef3f7;border-radius:10px}
+#drvForm::-webkit-scrollbar-thumb:hover{background:#7f94a5}
+@media(max-width:900px){
+  .drv-form{height:auto!important;max-height:55vh!important;overflow:hidden!important}
+  .drv-form>#drvForm{height:auto!important;max-height:55vh!important;overflow-y:scroll!important}
+}
+</style>
+<script id="allpa-resoluciones-v806-scroll-desistimiento-js">
+(function(){
+  document.addEventListener('wheel',function(ev){
+    const form=ev.target&&ev.target.closest?ev.target.closest('#drvForm'):null;
+    if(!form||form.scrollHeight<=form.clientHeight+1)return;
+    const before=form.scrollTop;
+    form.scrollTop+=ev.deltaY;
+    if(form.scrollTop!==before)ev.preventDefault();
+  },{passive:false});
+})();
+</script>
+
 </body>
 </html>
