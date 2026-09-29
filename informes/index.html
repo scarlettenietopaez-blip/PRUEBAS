@@ -37089,20 +37089,65 @@ async function saveBase(showMessage=true){
   return true;
 }
 
+function baseEgobForReportV795(value){
+  let out=String(value||'').trim();
+  try{
+    if(typeof obsBaseEgobV119==='function') out=obsBaseEgobV119(out);
+  }catch(_e){}
+  return String(out||'')
+    .replace(/\s+-\s+2do\s+Informe\s+(de|con)\s+Observaciones\s*$/i,'')
+    .replace(/\s+-\s+Informe\s+con\s+Observaciones\s*$/i,'')
+    .trim();
+}
+
+function normalizeReportIdentityBeforeSaveV795(tipo){
+  const t=String(tipo||'').trim();
+  if(t!=='Informe Técnico Aprobatorio' && t!=='Informe de Desistimiento') return;
+
+  const visibleEgob=document.getElementById('egob')?.value || state.egob || state.egobBaseV119 || state.egobBaseV116 || '';
+  const base=baseEgobForReportV795(visibleEgob);
+
+  state.tipoInforme=t;
+  if(base){
+    state.egob=base;
+    state.egobBaseV116=base;
+    state.egobBaseV119=base;
+    try{if(typeof setInfoEgobBaseV119==='function') setInfoEgobBaseV119(state,base)}catch(_e){}
+    const egobInput=document.getElementById('egob');
+    if(egobInput && egobInput.value!==base) egobInput.value=base;
+  }
+
+  /* Un Aprobatorio/Desistimiento nunca puede heredar identidad de 1ra/2da Observación. */
+  state.segundaObservacionV116=false;
+  state.primeraObservacionV119=false;
+  state.fechaSubsanacionCincoDias=false;
+  state._savedKeyV119='';
+
+  /* Si alguna conversión antigua arrastró una llave decorada de Observaciones, se descarta.
+     Las llaves válidas de conversión de proyecto (ANTEPROYECTO/DEFINITIVO) se conservan. */
+  ['_savedKeyV119R','_savedKeyV164'].forEach(k=>{
+    if(/Informe\s+(con\s+Observaciones|de\s+Observaciones)|2do\s+Informe/i.test(String(state[k]||''))) state[k]='';
+  });
+
+  const cb=document.getElementById('calc5DiasSubsanacionV55');
+  if(cb) cb.checked=false;
+}
+
 async function save(showMessage=true){
   if(!state.projectType){
     state.projectType=localStorage.getItem('GADMR_PROJECT_TYPE_V123') || 'obra_mayor_definitivo';
   }
 
+  /* La interfaz visible manda. Se sincroniza ANTES de cualquier ruta especial de guardado. */
+  if(typeof collectTop==='function') collectTop();
+  const initialTipo=String(document.getElementById('tipoInforme')?.value || state.tipoInforme || '').trim();
+  state.tipoInforme=initialTipo;
+  normalizeReportIdentityBeforeSaveV795(initialTipo);
+
   if(typeof H.convertedSave==='function'){
     const special=await H.convertedSave(showMessage);
     if(special?.handled) return !!special.result;
   }
-
-  if(typeof collectTop==='function') collectTop();
-
-  const initialTipo=document.getElementById('tipoInforme')?.value || state.tipoInforme || '';
-  state.tipoInforme=initialTipo;
 
   if(initialTipo==='Informe con Observaciones'){
     if(typeof validateTop==='function' && !validateTop()) return false;
@@ -37119,7 +37164,8 @@ async function save(showMessage=true){
 
   const ok=await saveBase(showMessage);
 
-  if(ok && state.tipoInforme==='Informe con Observaciones' && state.fechaSubsanacionCincoDias){
+  /* La Segunda Observación solo puede generarse cuando el tipo seleccionado es Observaciones. */
+  if(ok && initialTipo==='Informe con Observaciones' && state.fechaSubsanacionCincoDias){
     if(typeof guardarSegundoInformeObservacionesV116==='function'){
       await guardarSegundoInformeObservacionesV116(false);
     }
@@ -42553,6 +42599,56 @@ window.AllpaReglasObraMayorV794=Object.freeze({VERSION,metrics,reqApplies,studyA
 window.addEventListener('load',()=>{normalizeRequirementGroups();setTimeout(()=>{normalizeRequirementGroups();patchRequirementNote();},700)});
 })();
 </script>
+\n<script id="allpa-fix-identidad-informes-v795">
+(function(){
+'use strict';
+const VERSION='7.9.5-report-identity-guard';
+function base(v){
+  let x=String(v||'').trim();
+  try{if(typeof obsBaseEgobV119==='function')x=obsBaseEgobV119(x)}catch(_e){}
+  return x.replace(/\s+-\s+2do\s+Informe\s+(de|con)\s+Observaciones\s*$/i,'')
+          .replace(/\s+-\s+Informe\s+con\s+Observaciones\s*$/i,'').trim();
+}
+function title(record){
+  const raw=String(record?.egob||'').trim();
+  const b=base(raw);
+  const tipo=String(record?.tipoInforme||'').trim();
+  if(tipo==='Informe Técnico Aprobatorio') return `eGOB ${b} - Informe Técnico Aprobatorio`;
+  if(tipo==='Informe de Desistimiento') return `eGOB ${b} - Informe de Desistimiento`;
+  if(/2do\s+Informe\s+(de|con)\s+Observaciones/i.test(raw) || record?.segundaObservacionV116) return `eGOB ${b} - 2do Informe con Observaciones`;
+  if(tipo==='Informe con Observaciones' || /Informe\s+con\s+Observaciones/i.test(raw)) return `eGOB ${b} - Informe con Observaciones`;
+  return tipo?`eGOB ${b} - ${tipo}`:`eGOB ${b}`;
+}
+/* El tipo explícito tiene prioridad absoluta en todas las listas. */
+window.savedTitleV119=title;
+try{savedTitleV119=title}catch(_e){}
 
+async function audit(){
+  if(typeof dbAll!=='function' || typeof dbPut!=='function') return;
+  try{
+    const all=await dbAll();
+    let changed=0;
+    for(const item of all||[]){
+      const tipo=String(item?.tipoInforme||'').trim();
+      if(tipo!=='Informe Técnico Aprobatorio' && tipo!=='Informe de Desistimiento') continue;
+      const before=JSON.stringify([item.segundaObservacionV116,item.primeraObservacionV119,item.fechaSubsanacionCincoDias,item._savedKeyV119]);
+      item.segundaObservacionV116=false;
+      item.primeraObservacionV119=false;
+      item.fechaSubsanacionCincoDias=false;
+      item._savedKeyV119='';
+      const after=JSON.stringify([item.segundaObservacionV116,item.primeraObservacionV119,item.fechaSubsanacionCincoDias,item._savedKeyV119]);
+      if(before!==after){await dbPut(item);changed++;}
+    }
+    if(changed){
+      try{if(typeof renderSavedList==='function')await renderSavedList()}catch(_e){}
+      try{if(typeof refreshSavedSearchV131==='function')await refreshSavedSearchV131()}catch(_e){}
+      console.info(`ALLPA ${VERSION}: reparados ${changed} registro(s) con banderas de Observaciones incompatibles.`);
+    }
+  }catch(err){console.warn('ALLPA V7.9.5 auditoría de identidad:',err);}
+}
+window.AllpaReportIdentityGuardV795=Object.freeze({VERSION,title,audit});
+window.addEventListener('load',()=>{setTimeout(audit,1600);setTimeout(audit,5400)});
+})();
+</script>\n
 </body>
 </html>
