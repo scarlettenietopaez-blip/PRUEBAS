@@ -3880,7 +3880,9 @@ header.no-print{padding-left:82px!important}
       <div class="card">
         <h2>1. Identificación del informe</h2>
         <div class="field"><label>Nro. eGOB Principal *</label><input id="egob" inputmode="numeric" placeholder="Ej.: 1157249" /></div>
-        <div class="field"><label>Técnico revisor *</label><input id="tecnico" list="listaTecnicos" placeholder="Buscar o escribir nombre" /><datalist id="listaTecnicos"></datalist><div class="tools-note mini"></div></div>
+        <!-- V7.9.14: el técnico revisor se obtiene automáticamente del perfil PHDU autenticado. -->
+        <input id="tecnico" type="hidden" />
+        <datalist id="listaTecnicos" hidden></datalist>
         <div class="field" id="fechaIngresoTramiteWrap"><label>Fecha de ingreso del trámite</label><input type="date" id="fechaIngresoTramite" /></div>
         <div class="field"><label>Tipo de informe *</label><select id="tipoInforme"><option value="">Seleccione...</option><option>Informe con Observaciones</option><option>Informe Técnico Aprobatorio</option></select></div>
         <div class="row" id="dateRow">
@@ -9792,12 +9794,15 @@ function reportTypeNameV70(){
 
 /* Validación superior corregida: Desistimiento no requiere fecha máxima de subsanación */
 function validateTop(){
+  try{window.AllpaTecnicoSesionV7914?.sync?.();}catch(_e){}
   collectTop();
   if(!state.egob){msg('No se puede continuar: debe colocar el Nro. eGOB principal.'); return false;}
-  const match=tecnicoCoincidente(state.tecnico);
-  if(!match){msg('No se puede continuar: el técnico debe coincidir con una opción de la hoja Técnicos.'); return false;}
-  state.tecnico=match;
-  const tec=document.getElementById('tecnico'); if(tec) tec.value=match;
+  const perfil=window.AllpaSupabaseCheckV1?.getProfile?.() || null;
+  const rol=String(perfil?.rol||'').trim().toUpperCase();
+  if(!perfil || perfil.activo!==true || !['TECNICO','ADMIN'].includes(rol) || !String(state.tecnico||'').trim()){
+    msg('No se puede continuar: no se pudo identificar al técnico revisor desde la sesión PHDU. Regrese al Portal ALLPA e inicie sesión nuevamente.');
+    return false;
+  }
   if(!state.tipoInforme){msg('No se puede continuar: debe seleccionar el tipo de informe.'); return false;}
   if(!state.fechaRevision){msg(state.tipoInforme==='Informe Técnico Aprobatorio'||state.tipoInforme==='Informe de Desistimiento'?'No se puede continuar: debe colocar la fecha de emisión.':'No se puede continuar: debe colocar la fecha de revisión.'); return false;}
   if(state.tipoInforme!=='Informe Técnico Aprobatorio' && state.tipoInforme!=='Informe de Desistimiento' && !state.fechaSubsanacion){
@@ -9812,8 +9817,12 @@ function validationErrorsV70(context='generar el PDF'){
   collectTop();
 
   if(!state.egob) errors.push('Falta el Nro. eGOB principal.');
-  const match=tecnicoCoincidente(state.tecnico);
-  if(!match) errors.push('El técnico revisor no coincide con la lista de la hoja Técnicos.');
+  try{window.AllpaTecnicoSesionV7914?.sync?.();}catch(_e){}
+  const perfil=window.AllpaSupabaseCheckV1?.getProfile?.() || null;
+  const rol=String(perfil?.rol||'').trim().toUpperCase();
+  if(!perfil || perfil.activo!==true || !['TECNICO','ADMIN'].includes(rol) || !String(state.tecnico||'').trim()){
+    errors.push('No se pudo identificar al técnico revisor desde la sesión PHDU.');
+  }
   if(!state.tipoInforme) errors.push('Falta seleccionar el tipo de informe.');
   if(!state.fechaRevision) errors.push((state.tipoInforme==='Informe Técnico Aprobatorio'||state.tipoInforme==='Informe de Desistimiento')?'Falta la fecha de emisión.':'Falta la fecha de revisión.');
   if(state.tipoInforme!=='Informe Técnico Aprobatorio' && state.tipoInforme!=='Informe de Desistimiento' && !state.fechaSubsanacion) errors.push('Falta la fecha máxima de subsanación.');
@@ -37663,9 +37672,13 @@ function validate(context='generar el PDF'){
 
   if(!state.egob)errors.push('Falta el campo: Nro. eGOB principal.');
   try{
-    const match=typeof tecnicoCoincidente==='function'?tecnicoCoincidente(state.tecnico):state.tecnico;
-    if(!match)errors.push('Técnico revisor: debe coincidir con la lista de la hoja Técnicos.');
-  }catch(_e){}
+    window.AllpaTecnicoSesionV7914?.sync?.();
+    const perfil=window.AllpaSupabaseCheckV1?.getProfile?.() || null;
+    const rol=String(perfil?.rol||'').trim().toUpperCase();
+    if(!perfil || perfil.activo!==true || !['TECNICO','ADMIN'].includes(rol) || !String(state.tecnico||'').trim()){
+      errors.push('Técnico revisor: no se pudo identificar desde la sesión PHDU activa.');
+    }
+  }catch(_e){errors.push('Técnico revisor: no se pudo identificar desde la sesión PHDU activa.');}
 
   if(!state.tipoInforme)errors.push('Falta el campo: Tipo de informe.');
   if(!state.fechaRevision){
@@ -43087,6 +43100,100 @@ window.AllpaNavigationFixV7913=Object.freeze({
   isProjectOpen:()=>screen==='PROJECT',
   screen:()=>screen
 });
+})();
+</script>
+
+
+<script id="allpa-tecnico-sesion-v7914">
+/* ==========================================================
+   ALLPA V7.9.14 · TÉCNICO REVISOR DESDE SESIÓN PHDU
+   - Elimina la selección manual en Identificación del Informe.
+   - Usa firma_nombre/nombre_completo del perfil autenticado.
+   - Usa firma_cargo/cargo para la firma del documento.
+   - Conserva el técnico histórico cuando se abre un informe ya guardado.
+   ========================================================== */
+(function(){
+'use strict';
+const VERSION='7.9.14';
+
+function clean(v){return String(v==null?'':v).replace(/\s+/g,' ').trim();}
+function norm(v){return clean(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();}
+function profile(){
+  try{return window.AllpaSupabaseCheckV1?.getProfile?.() || null;}catch(_e){return null;}
+}
+function profileTech(){
+  const p=profile();
+  if(!p || p.activo!==true) return null;
+  const rol=norm(p.rol);
+  if(!['TECNICO','ADMIN'].includes(rol)) return null;
+  const nombre=clean(p.firma_nombre)||clean(p.nombre_completo);
+  if(!nombre) return null;
+  return {
+    nombre,
+    cargo:clean(p.firma_cargo)||clean(p.cargo)||'TÉCNICO REVISOR',
+    rol,
+    id:clean(p.id),
+    correo:clean(p.correo)
+  };
+}
+function sync(options){
+  options=options||{};
+  if(typeof state==='undefined' || !state) return false;
+  const t=profileTech();
+  if(!t) return false;
+
+  /* Un informe histórico conserva el técnico que ya tenía guardado.
+     Un informe nuevo, cuyo técnico está vacío, toma automáticamente la sesión. */
+  if(options.force===true || !clean(state.tecnico)) state.tecnico=t.nombre;
+  state.tecnicoPerfilId=t.id;
+  state.tecnicoPerfilCorreo=t.correo;
+  if(norm(state.tecnico)===norm(t.nombre)) state.tecnicoFirmaCargo=t.cargo;
+
+  const input=document.getElementById('tecnico');
+  if(input) input.value=clean(state.tecnico);
+  return true;
+}
+
+/* collectTop histórico sigue esperando #tecnico. Se conserva como input oculto,
+   pero antes de leerlo se sincroniza desde la sesión. */
+const collectBase=typeof collectTop==='function'?collectTop:null;
+if(collectBase){
+  collectTop=function(){
+    sync();
+    const out=collectBase.apply(this,arguments);
+    sync();
+    return out;
+  };
+  window.collectTop=collectTop;
+}
+
+/* La firma usa el cargo configurado en phdu_profiles cuando el técnico del
+   informe corresponde al usuario autenticado. Para históricos de otro técnico,
+   se conserva el catálogo anterior como respaldo. */
+const tecnicoInfoBase=typeof tecnicoInfo==='function'?tecnicoInfo:null;
+if(tecnicoInfoBase){
+  tecnicoInfo=function(nombre){
+    const t=profileTech();
+    const actual=clean(nombre)||clean(state?.tecnico);
+    if(t && norm(actual)===norm(t.nombre)) return {nombre:t.nombre,cargo:t.cargo};
+    return tecnicoInfoBase.apply(this,arguments);
+  };
+  window.tecnicoInfo=tecnicoInfo;
+}
+
+function syncSoon(){
+  [80,220,500,900,1600,3000].forEach(ms=>setTimeout(()=>{
+    if(sync()){
+      try{if(typeof renderReport==='function')renderReport();}catch(_e){}
+      try{if(typeof renderPreview==='function')renderPreview();}catch(_e){}
+    }
+  },ms));
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',syncSoon,{once:true});
+else syncSoon();
+window.addEventListener('load',syncSoon,{once:true});
+
+window.AllpaTecnicoSesionV7914=Object.freeze({VERSION,profile:profileTech,sync});
 })();
 </script>
 
