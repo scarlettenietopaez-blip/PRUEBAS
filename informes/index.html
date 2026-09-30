@@ -43367,7 +43367,7 @@ window.AllpaNumeracionV7916=Object.freeze({VERSION,refresh:refreshNumberedUi,off
 
 
 <!-- ==========================================================
-     ALLPA V7.9.19 · SOLICITUD DE REVISIÓN ESTRUCTURAL
+     ALLPA V7.9.20 · SOLICITUD DE REVISIÓN ESTRUCTURAL
      2026-09-30
      - Solo para OBRA MAYOR DEFINITIVO.
      - Se incorpora después de "Informe con Observaciones".
@@ -43377,7 +43377,7 @@ window.AllpaNumeracionV7916=Object.freeze({VERSION,refresh:refreshNumberedUi,off
      - En Vista no se genera previsualización de informe; solo los tres bloques de copiado.
      - El cuerpo conserva negritas mediante copiado HTML enriquecido.
      - La solicitud entra a la bandeja estructural únicamente al pulsar
-       "REGISTRAR SOLICITUD EN ALLPA".
+       "REGISTRAR Y ENVIAR A REVISIÓN ESTRUCTURAL".
      ========================================================== -->
 <style id="allpa-solicitud-estructural-v7918-style">
 #solicitudEstructuralCopyV7918{display:none;margin:0 0 14px;border:1px solid #c9d9e7;border-radius:14px;background:#f8fbfe;padding:14px;box-shadow:0 5px 16px rgba(23,58,90,.06)}
@@ -43414,12 +43414,19 @@ window.AllpaNumeracionV7916=Object.freeze({VERSION,refresh:refreshNumberedUi,off
 .report-solicitud-estructural-v7918 .se-memo-body{font:11pt/1.15 Arial,sans-serif;text-align:justify;margin:20px 0}
 .report-solicitud-estructural-v7918 .se-memo-anexo{font:9pt/1.15 Arial,sans-serif;margin-top:24px}
 @media(max-width:700px){#solicitudEstructuralCopyV7918 .se-head{flex-direction:column}.report-solicitud-estructural-v7918 .se-memo-row{grid-template-columns:1fr;gap:3px}}
+/* V7.9.20: en Solicitud Estructural, Vista muestra exclusivamente ASUNTO, CUERPO y ANEXOS. */
+body.allpa-structural-request-active #tab-vista > *{display:none!important}
+body.allpa-structural-request-active #tab-vista > #solicitudEstructuralCopyV7918{display:block!important}
+body.allpa-structural-request-active #tab-vista #solicitudEstructuralCopyV7918 .se-grid{display:grid!important}
+body.allpa-structural-request-active #tab-vista #solicitudEstructuralCopyV7918 .se-field,
+body.allpa-structural-request-active #tab-vista #solicitudEstructuralCopyV7918 .se-register,
+body.allpa-structural-request-active #tab-vista #solicitudEstructuralCopyV7918 .se-status{display:block}
 @media print{#solicitudEstructuralCopyV7918{display:none!important}}
 </style>
 <script id="allpa-solicitud-estructural-v7918-script">
 (function(){
 'use strict';
-const VERSION='7.9.19';
+const VERSION='7.9.20';
 const TYPE='Solicitud de Revisión Estructural';
 const PROJECT='obra_mayor_definitivo';
 const SB_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
@@ -43589,14 +43596,15 @@ function syncTypeOption(){
 }
 function ensurePanel(){
   let box=document.getElementById('solicitudEstructuralCopyV7918');
+  if(box && box.dataset?.allpaVersion!==VERSION){box.remove();box=null;}
   if(box)return box;
   const tab=document.getElementById('tab-vista');const wrap=tab?.querySelector('.report-wrap');if(!tab||!wrap)return null;
-  box=document.createElement('section');box.id='solicitudEstructuralCopyV7918';box.className='no-print';
+  box=document.createElement('section');box.id='solicitudEstructuralCopyV7918';box.className='no-print';box.dataset.allpaVersion=VERSION;
   box.innerHTML=`<div class="se-head"><div><h3>Solicitud de Revisión Estructural · Memorando e-DOC</h3><p>Copie cada campo por separado. El cuerpo conserva las negritas del formato institucional.</p></div><span class="se-badge">SIN NUMERACIÓN</span></div><div class="se-grid">
     <div class="se-field"><div class="se-field-head"><strong>Asunto</strong><button type="button" class="se-copy" id="copiarAsuntoEstructuralV7918">COPIAR ASUNTO</button></div><input id="solicitudEstructuralAsuntoV7918" readonly></div>
     <div class="se-field"><div class="se-field-head"><strong>Cuerpo de la solicitud</strong><button type="button" class="se-copy" id="copiarCuerpoEstructuralV7918">COPIAR CUERPO</button></div><div id="solicitudEstructuralCuerpoV7918"></div></div>
     <div class="se-field"><div class="se-field-head"><strong>Anexos</strong><button type="button" class="se-copy" id="copiarAnexosEstructuralV7918">COPIAR ANEXOS</button></div><div id="solicitudEstructuralAnexosEditorV7919"></div></div>
-    <button type="button" id="registrarSolicitudEstructuralV7918" class="se-register">REGISTRAR SOLICITUD EN ALLPA</button>
+    <button type="button" id="registrarSolicitudEstructuralV7918" class="se-register">REGISTRAR Y ENVIAR A REVISIÓN ESTRUCTURAL</button>
     <div id="estadoSolicitudEstructuralV7918" class="se-status">La solicitud aparecerá en la bandeja de Revisiones Estructurales únicamente después de registrarla.</div>
   </div>`;
   tab.insertBefore(box,wrap);
@@ -43620,7 +43628,7 @@ function updatePanel(){
   const ae=document.getElementById('solicitudEstructuralAnexosEditorV7919');
   if(ae){
     const rows=ensureSharedAnexos();
-    ae.innerHTML=`<p class="anexos-help-v163" style="margin:0 0 10px">Los anexos registrados aquí se conservarán para el posterior Informe Técnico Aprobatorio de Obra Mayor.</p><table class="anexos-table-v163">
+    ae.innerHTML=`<p class="anexos-help-v163" style="margin:0 0 10px">Los anexos registrados aquí se guardan en el expediente y se reutilizarán automáticamente en el posterior Informe Técnico Aprobatorio de Obra Mayor.</p><table class="anexos-table-v163">
       <colgroup><col style="width:9%"><col style="width:18%"><col style="width:14%"><col style="width:18%"><col style="width:16%"><col style="width:13%"><col style="width:12%"></colgroup>
       <thead><tr><th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th><th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th></tr></thead>
       <tbody>${rows.map((row,i)=>`<tr>
@@ -43640,7 +43648,7 @@ function updatePanel(){
     <div class="anexos-actions-v163"><button type="button" class="secondary" onclick="addSolicitudAnexoV7919()">+ Agregar fila</button></div>`;
   }
   const btn=document.getElementById('registrarSolicitudEstructuralV7918');
-  if(btn){btn.disabled=registering||!!x.formalizada;btn.textContent=x.formalizada?'SOLICITUD REGISTRADA · '+(x.estadoRevision||'PENDIENTE'):(registering?'REGISTRANDO…':'REGISTRAR SOLICITUD EN ALLPA');}
+  if(btn){btn.disabled=registering||!!x.formalizada;btn.textContent=x.formalizada?'SOLICITUD REGISTRADA · '+(x.estadoRevision||'PENDIENTE'):(registering?'REGISTRANDO Y ENVIANDO…':'REGISTRAR Y ENVIAR A REVISIÓN ESTRUCTURAL');}
   if(x.formalizada)setStatus('Solicitud registrada en Revisiones Estructurales. Estado: '+(x.estadoRevision||'PENDIENTE')+'.','ok');
 }
 async function richCopy(html,plain){
@@ -43783,6 +43791,7 @@ function selectProjectV7918(projectId){
 }
 function syncUi(){
   syncTypeOption();ensureState();const active=isRequest();
+  document.body.classList.toggle('allpa-structural-request-active',active);
   const date=document.getElementById('dateRow');if(date)date.classList.toggle('hidden',active);
   const generic=document.getElementById('copyPanelAprobatorio');if(generic&&active)generic.classList.add('hidden');
   const nr=document.getElementById('headerNumberControlV71');if(nr){nr.style.display=active?'none':'';if(active)nr.disabled=true;}
@@ -43792,6 +43801,13 @@ function syncUi(){
   if(reportWrap){
     if(active)reportWrap.style.setProperty('display','none','important');
     else reportWrap.style.removeProperty('display');
+  }
+  if(active){
+    const report=document.getElementById('report');
+    if(report){report.innerHTML='';report.className='report';}
+    document.querySelectorAll('#tab-vista .report-solicitud-estructural-v7918, #tab-vista .se-memo-preview').forEach(el=>{
+      if(!el.closest('#solicitudEstructuralCopyV7918'))el.remove();
+    });
   }
   const legacyAnexos=document.getElementById('anexosVistaV163');
   if(legacyAnexos&&active)legacyAnexos.classList.remove('visible');
@@ -43817,6 +43833,13 @@ window.addEventListener('load',()=>{[150,650,1300,2100,3400,5600].forEach(ms=>se
 
 window.AllpaSolicitudEstructuralV7918=Object.freeze({VERSION,TYPE,render:renderRequest,copy:copyPart,register:registerRequest,payload:structuralPayload,subject,bodyHtml,bodyPlain,anexos,sync:syncUi});
 })();
+</script>
+
+<script id="allpa-v7-9-20-meta">
+window.AllpaV7920=Object.freeze({
+  version:'7.9.20',
+  change:'Solicitud estructural: sin vista previa de informe; anexos Folder/Carpeta/Fojas reutilizables; botón Registrar y Enviar a Revisión Estructural'
+});
 </script>
 
 </body>
