@@ -43367,12 +43367,14 @@ window.AllpaNumeracionV7916=Object.freeze({VERSION,refresh:refreshNumberedUi,off
 
 
 <!-- ==========================================================
-     ALLPA V7.9.18 · SOLICITUD DE REVISIÓN ESTRUCTURAL
+     ALLPA V7.9.19 · SOLICITUD DE REVISIÓN ESTRUCTURAL
      2026-09-30
      - Solo para OBRA MAYOR DEFINITIVO.
      - Se incorpora después de "Informe con Observaciones".
      - No tiene numeración.
      - Genera por separado ASUNTO, CUERPO y ANEXOS para e-DOC.
+     - ANEXOS usa la misma matriz del Informe Técnico Aprobatorio y comparte sus datos.
+     - En Vista no se genera previsualización de informe; solo los tres bloques de copiado.
      - El cuerpo conserva negritas mediante copiado HTML enriquecido.
      - La solicitud entra a la bandeja estructural únicamente al pulsar
        "REGISTRAR SOLICITUD EN ALLPA".
@@ -43393,6 +43395,9 @@ window.AllpaNumeracionV7916=Object.freeze({VERSION,refresh:refreshNumberedUi,off
 #solicitudEstructuralAsuntoV7918,#solicitudEstructuralAnexosV7918{width:100%;box-sizing:border-box;border:1px solid #cbd5df;border-radius:8px;padding:9px 10px;background:#fff;color:#243753;font:11px Arial,sans-serif}
 #solicitudEstructuralAsuntoV7918{background:#f8fafc}
 #solicitudEstructuralAnexosV7918{min-height:76px;resize:vertical}
+#solicitudEstructuralAnexosEditorV7919{overflow-x:auto}
+#solicitudEstructuralAnexosEditorV7919 .anexos-table-v163{margin:0}
+#solicitudEstructuralAnexosEditorV7919 .anexos-actions-v163{margin-top:10px}
 #solicitudEstructuralCuerpoV7918{border:1px solid #cbd5df;border-radius:8px;padding:12px;background:#fff;color:#111;font:11pt/1.15 Arial,sans-serif;text-align:justify;min-height:130px}
 #solicitudEstructuralCopyV7918 .se-register{width:100%;margin-top:2px;border:0;border-radius:10px;background:#0b5a7d;color:#fff;padding:11px 12px;font-size:10px;font-weight:1000;cursor:pointer}
 #solicitudEstructuralCopyV7918 .se-register:disabled{background:#8fa0af;cursor:not-allowed}
@@ -43414,7 +43419,7 @@ window.AllpaNumeracionV7916=Object.freeze({VERSION,refresh:refreshNumberedUi,off
 <script id="allpa-solicitud-estructural-v7918-script">
 (function(){
 'use strict';
-const VERSION='7.9.18';
+const VERSION='7.9.19';
 const TYPE='Solicitud de Revisión Estructural';
 const PROJECT='obra_mayor_definitivo';
 const SB_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
@@ -43433,13 +43438,97 @@ function ensureState(){
   if(typeof state==='undefined'||!state)return null;
   if(!state.solicitudEstructural||typeof state.solicitudEstructural!=='object')state.solicitudEstructural={};
   const x=state.solicitudEstructural;
-  if(typeof x.anexos!=='string')x.anexos='';
   if(typeof x.idLocal!=='string')x.idLocal='';
   if(typeof x.solicitudId!=='string')x.solicitudId='';
   if(typeof x.estadoRevision!=='string')x.estadoRevision='';
   if(typeof x.formalizada!=='boolean')x.formalizada=false;
+  ensureSharedAnexos();
   return x;
 }
+function ensureSharedAnexos(){
+  if(typeof state==='undefined'||!state)return [];
+  if(!state.aprobatorio||typeof state.aprobatorio!=='object')state.aprobatorio={};
+  if(!Array.isArray(state.aprobatorio.anexos))state.aprobatorio.anexos=[];
+  if(!state.aprobatorio.anexos.length){
+    state.aprobatorio.anexos.push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});
+  }
+  state.aprobatorio.anexos=state.aprobatorio.anexos.map(row=>{
+    const raw=String(row?.tipo||'folder').toLowerCase().trim();
+    const tipo=raw==='carpeta'?'carpeta':(['fojas','expediente'].includes(raw)?'fojas':'folder');
+    return {
+      tipo,
+      fojas:row?.fojas==null?'':String(row.fojas),
+      incluyePlanos:!!row?.incluyePlanos,
+      planos:row?.planos==null?'':String(row.planos),
+      incluyeCds:!!row?.incluyeCds,
+      cds:row?.cds==null?'':String(row.cds)
+    };
+  });
+  return state.aprobatorio.anexos;
+}
+function annexTypeNumber(rows,index,type){
+  let n=0;
+  for(let i=0;i<=index;i++)if(String(rows[i]?.tipo||'folder').toLowerCase()===type)n++;
+  return n;
+}
+function annexLine(row,index,placeholder=false){
+  const rows=ensureSharedAnexos();
+  const tipo=['folder','carpeta','fojas'].includes(String(row?.tipo||'folder').toLowerCase())?String(row.tipo).toLowerCase():'folder';
+  const fojas=String(row.fojas||'').trim()||(placeholder?'…':'');
+  const planos=String(row.planos||'').trim()||(placeholder?'…':'');
+  const cds=String(row.cds||'').trim()||(placeholder?'…':'');
+  let line='';
+  if(tipo==='carpeta')line=`Carpeta ${annexTypeNumber(rows,index,'carpeta')}: ${fojas} fojas`;
+  else if(tipo==='folder')line=`Folder ${annexTypeNumber(rows,index,'folder')}: ${fojas} fojas`;
+  else line=`${fojas} fojas`;
+  if(row.incluyePlanos){
+    const n=Number(planos);
+    line+=` incluido ${planos} ${n===1?'plano':'planos'}`;
+  }
+  line+=' en su foliado';
+  if(row.incluyeCds){
+    const n=Number(cds);
+    line+=` + ${cds} ${n===1?'CD':'CDs'}`;
+  }
+  return line;
+}
+function annexText(placeholder=false){
+  return ensureSharedAnexos().map((row,i)=>annexLine(row,i,placeholder)).join('\n\n');
+}
+function annexHtml(){
+  return ensureSharedAnexos().map((row,i)=>`<p style="margin:0 0 8px 0;font-family:Arial,sans-serif;font-size:11pt;color:#000;">${h(annexLine(row,i,false))}</p>`).join('');
+}
+function validateAnnexRows(){
+  const rows=ensureSharedAnexos();
+  for(let i=0;i<rows.length;i++){
+    const ref=rows[i].tipo==='carpeta'?`Carpeta ${annexTypeNumber(rows,i,'carpeta')}`:(rows[i].tipo==='folder'?`Folder ${annexTypeNumber(rows,i,'folder')}`:`fila de fojas ${i+1}`);
+    if(!String(rows[i].fojas||'').trim())return `Complete el número de fojas de ${ref}.`;
+    if(rows[i].incluyePlanos&&!String(rows[i].planos||'').trim())return `Complete el número de planos de ${ref}.`;
+    if(rows[i].incluyeCds&&!String(rows[i].cds||'').trim())return `Complete el número de CDs de ${ref}.`;
+  }
+  return '';
+}
+function scheduleDraft(){
+  try{window.AllpaAutosaveV7911?.schedule?.();}catch(_e){}
+}
+window.updateSolicitudAnexoV7919=function(index,field,value){
+  const rows=ensureSharedAnexos();if(!rows[index])return;
+  if(field==='incluyePlanos'||field==='incluyeCds')rows[index][field]=!!value;
+  else rows[index][field]=String(value??'');
+  if(field==='incluyePlanos'&&!value)rows[index].planos='';
+  if(field==='incluyeCds'&&!value)rows[index].cds='';
+  scheduleDraft();
+  if(field==='tipo'||field==='incluyePlanos'||field==='incluyeCds')updatePanel();
+};
+window.addSolicitudAnexoV7919=function(){
+  ensureSharedAnexos().push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});
+  scheduleDraft();updatePanel();
+};
+window.removeSolicitudAnexoV7919=function(index){
+  const rows=ensureSharedAnexos();
+  if(rows.length<=1){if(typeof msg==='function')msg('Debe conservar al menos una fila de anexos.');return;}
+  rows.splice(index,1);scheduleDraft();updatePanel();
+};
 function uuid(){
   if(window.crypto?.randomUUID)return window.crypto.randomUUID();
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16);});
@@ -43477,18 +43566,13 @@ function bodyHtml(){
 function bodyPlain(){
   const d=document.createElement('div');d.innerHTML=bodyHtml();return clean(d.textContent||'');
 }
-function anexos(){return clean(ensureState()?.anexos||'');}
-function memoPreview(){
-  const ax=anexos();
-  return `<div class="se-memo-preview"><h2>SOLICITUD DE REVISIÓN ESTRUCTURAL</h2><div class="se-memo-row"><div class="label">ASUNTO:</div><div class="value">${h(subject())}</div></div><div class="se-memo-body">${bodyHtml()}</div><div class="se-memo-anexo"><strong>Anexo:</strong> ${ax?h(ax):'<span style="color:#8a94a0">Complete el campo Anexos antes de formalizar la solicitud.</span>'}</div></div>`;
-}
+function anexos(){return annexText(false);}
 function renderRequest(){
   const el=document.getElementById('report');
-  const html=memoPreview();
-  if(el){el.className='report report-solicitud-estructural-v7918';el.innerHTML=html;}
+  if(el){el.className='report report-solicitud-estructural-v7918';el.innerHTML='';}
   document.body.classList.remove('printing-observaciones','printing-aprobatorio');
   updatePanel();
-  return html;
+  return '';
 }
 
 function syncTypeOption(){
@@ -43511,7 +43595,7 @@ function ensurePanel(){
   box.innerHTML=`<div class="se-head"><div><h3>Solicitud de Revisión Estructural · Memorando e-DOC</h3><p>Copie cada campo por separado. El cuerpo conserva las negritas del formato institucional.</p></div><span class="se-badge">SIN NUMERACIÓN</span></div><div class="se-grid">
     <div class="se-field"><div class="se-field-head"><strong>Asunto</strong><button type="button" class="se-copy" id="copiarAsuntoEstructuralV7918">COPIAR ASUNTO</button></div><input id="solicitudEstructuralAsuntoV7918" readonly></div>
     <div class="se-field"><div class="se-field-head"><strong>Cuerpo de la solicitud</strong><button type="button" class="se-copy" id="copiarCuerpoEstructuralV7918">COPIAR CUERPO</button></div><div id="solicitudEstructuralCuerpoV7918"></div></div>
-    <div class="se-field"><div class="se-field-head"><strong>Anexos</strong><button type="button" class="se-copy" id="copiarAnexosEstructuralV7918">COPIAR ANEXOS</button></div><textarea id="solicitudEstructuralAnexosV7918" placeholder="Ej.: CARPETA 1 CON 43 FOJAS INCLUIDO 5 PLANOS MÁS 3 CD"></textarea></div>
+    <div class="se-field"><div class="se-field-head"><strong>Anexos</strong><button type="button" class="se-copy" id="copiarAnexosEstructuralV7918">COPIAR ANEXOS</button></div><div id="solicitudEstructuralAnexosEditorV7919"></div></div>
     <button type="button" id="registrarSolicitudEstructuralV7918" class="se-register">REGISTRAR SOLICITUD EN ALLPA</button>
     <div id="estadoSolicitudEstructuralV7918" class="se-status">La solicitud aparecerá en la bandeja de Revisiones Estructurales únicamente después de registrarla.</div>
   </div>`;
@@ -43520,11 +43604,6 @@ function ensurePanel(){
   box.querySelector('#copiarCuerpoEstructuralV7918')?.addEventListener('click',()=>copyPart('cuerpo'));
   box.querySelector('#copiarAnexosEstructuralV7918')?.addEventListener('click',()=>copyPart('anexos'));
   box.querySelector('#registrarSolicitudEstructuralV7918')?.addEventListener('click',registerRequest);
-  box.querySelector('#solicitudEstructuralAnexosV7918')?.addEventListener('input',ev=>{
-    ensureState().anexos=String(ev.target.value||'');
-    try{window.AllpaAutosaveV7911?.schedule?.();}catch(_e){}
-    renderRequest();
-  });
   return box;
 }
 function setStatus(text,kind=''){
@@ -43538,7 +43617,28 @@ function updatePanel(){
   const x=ensureState();
   const s=document.getElementById('solicitudEstructuralAsuntoV7918');if(s)s.value=subject();
   const b=document.getElementById('solicitudEstructuralCuerpoV7918');if(b)b.innerHTML=bodyHtml();
-  const a=document.getElementById('solicitudEstructuralAnexosV7918');if(a&&document.activeElement!==a)a.value=x.anexos||'';
+  const ae=document.getElementById('solicitudEstructuralAnexosEditorV7919');
+  if(ae){
+    const rows=ensureSharedAnexos();
+    ae.innerHTML=`<p class="anexos-help-v163" style="margin:0 0 10px">Los anexos registrados aquí se conservarán para el posterior Informe Técnico Aprobatorio de Obra Mayor.</p><table class="anexos-table-v163">
+      <colgroup><col style="width:9%"><col style="width:18%"><col style="width:14%"><col style="width:18%"><col style="width:16%"><col style="width:13%"><col style="width:12%"></colgroup>
+      <thead><tr><th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th><th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th></tr></thead>
+      <tbody>${rows.map((row,i)=>`<tr>
+        <td>${row.tipo==='carpeta'?`Carpeta ${annexTypeNumber(rows,i,'carpeta')}`:(row.tipo==='folder'?`Folder ${annexTypeNumber(rows,i,'folder')}`:'—')}</td>
+        <td><select onchange="updateSolicitudAnexoV7919(${i},'tipo',this.value)">
+          <option value="folder" ${row.tipo==='folder'?'selected':''}>folder</option>
+          <option value="carpeta" ${row.tipo==='carpeta'?'selected':''}>carpeta</option>
+          <option value="fojas" ${row.tipo==='fojas'?'selected':''}>fojas</option>
+        </select></td>
+        <td><input type="number" min="0" step="1" inputmode="numeric" value="${h(row.fojas)}" placeholder="Fojas" oninput="updateSolicitudAnexoV7919(${i},'fojas',this.value)"></td>
+        <td><div class="anexos-planos-line-v1"><label class="anexos-check-v163"><input type="checkbox" ${row.incluyePlanos?'checked':''} onchange="updateSolicitudAnexoV7919(${i},'incluyePlanos',this.checked)"> incluido</label><input class="anexos-planos-count-v1" type="number" min="0" step="1" inputmode="numeric" value="${h(row.planos)}" placeholder="N.º" ${row.incluyePlanos?'':'disabled'} oninput="updateSolicitudAnexoV7919(${i},'planos',this.value)"><span>planos</span></div></td>
+        <td><label class="anexos-check-v163"><input type="checkbox" ${row.incluyeCds?'checked':''} onchange="updateSolicitudAnexoV7919(${i},'incluyeCds',this.checked)"> + CDs</label></td>
+        <td><input type="number" min="0" step="1" inputmode="numeric" value="${h(row.cds)}" placeholder="CDs" ${row.incluyeCds?'':'disabled'} oninput="updateSolicitudAnexoV7919(${i},'cds',this.value)"></td>
+        <td style="text-align:center"><button type="button" class="danger mini-btn" onclick="removeSolicitudAnexoV7919(${i})" ${rows.length<=1?'disabled':''}>Quitar</button></td>
+      </tr>`).join('')}</tbody>
+    </table>
+    <div class="anexos-actions-v163"><button type="button" class="secondary" onclick="addSolicitudAnexoV7919()">+ Agregar fila</button></div>`;
+  }
   const btn=document.getElementById('registrarSolicitudEstructuralV7918');
   if(btn){btn.disabled=registering||!!x.formalizada;btn.textContent=x.formalizada?'SOLICITUD REGISTRADA · '+(x.estadoRevision||'PENDIENTE'):(registering?'REGISTRANDO…':'REGISTRAR SOLICITUD EN ALLPA');}
   if(x.formalizada)setStatus('Solicitud registrada en Revisiones Estructurales. Estado: '+(x.estadoRevision||'PENDIENTE')+'.','ok');
@@ -43555,16 +43655,21 @@ async function copyPart(part){
   try{
     if(part==='cuerpo')await richCopy(bodyHtml(),bodyPlain());
     else if(part==='asunto')await richCopy(`<span style="font-family:Arial,sans-serif;font-size:11pt">${h(subject())}</span>`,subject());
-    else{const ax=anexos();if(!ax)throw new Error('Complete primero el campo Anexos.');await richCopy(`<span style="font-family:Arial,sans-serif;font-size:9pt">${h(ax)}</span>`,ax);}
+    else{
+      const err=validateAnnexRows();if(err)throw new Error(err);
+      const ax=anexos();if(!ax)throw new Error('Complete primero los Anexos.');
+      await richCopy(`<div style="font-family:Arial,sans-serif;font-size:11pt;color:#000">${annexHtml()}</div>`,ax);
+    }
     if(typeof msg==='function')msg(part==='asunto'?'Asunto copiado.':part==='cuerpo'?'Cuerpo de la solicitud copiado con formato.':'Anexos copiados.',true);
   }catch(err){if(typeof msg==='function')msg('No se pudo copiar: '+String(err?.message||err));else alert(String(err?.message||err));}
 }
 function requestErrors(){
   const p=window.AllpaSupabaseCheckV1?.getProfile?.()||null;const role=norm(p?.rol);
-  const req=[['Nro. eGOB',egob()],['Propietario(s)',ownerNames()],['CI/RUC',ownerIds()],['Proyectista',info('PROYECTISTA')],['Registro SENESCYT',info('REGISTRO SENESCYT')],['Registro Municipal',info('REGISTRO MUNICIPAL')],['Nombre del proyecto',info('NOMBRE DEL PROYECTO')],['Uso principal',info('USO PRINCIPAL')],['Altura/Pisos',info('ALTURA EDIFICACIÓN')],['Parroquia',info('PARROQUIA')],['Dirección',info('DIRECCIÓN')],['Código PIT',info('CÓDIGO PIT')],['Clave catastral',info('CLAVE CATASTRAL')],['Área Bruta',info('Área Bruta')],['Barrio/Sector',info('BARRIO/SECTOR')],['Anexos',anexos()]];
+  const req=[['Nro. eGOB',egob()],['Propietario(s)',ownerNames()],['CI/RUC',ownerIds()],['Proyectista',info('PROYECTISTA')],['Registro SENESCYT',info('REGISTRO SENESCYT')],['Registro Municipal',info('REGISTRO MUNICIPAL')],['Nombre del proyecto',info('NOMBRE DEL PROYECTO')],['Uso principal',info('USO PRINCIPAL')],['Altura/Pisos',info('ALTURA EDIFICACIÓN')],['Parroquia',info('PARROQUIA')],['Dirección',info('DIRECCIÓN')],['Código PIT',info('CÓDIGO PIT')],['Clave catastral',info('CLAVE CATASTRAL')],['Área Bruta',info('Área Bruta')],['Barrio/Sector',info('BARRIO/SECTOR')]];
   const errors=[];
   if(!isOM())errors.push('La Solicitud de Revisión Estructural solo corresponde a Obra Mayor Definitivo.');
   req.forEach(([lab,val])=>{if(!clean(val))errors.push('Falta '+lab+'.');});
+  const annexError=validateAnnexRows();if(annexError)errors.push(annexError);
   if(egob()&&!/^\d{1,20}$/.test(egob()))errors.push('El eGOB debe contener únicamente números.');
   const clave=digits(info('CLAVE CATASTRAL'));if(clave&&clave.length!==27)errors.push('La clave catastral debe contener 27 dígitos.');
   if(!p||p.activo!==true||!['TECNICO','ADMIN'].includes(role))errors.push('No existe una sesión PHDU activa con rol TECNICO o ADMIN.');
@@ -43603,6 +43708,7 @@ function structuralPayload(){
     cuerpo_html:bodyHtml(),
     cuerpo_texto:bodyPlain(),
     anexos:anexos(),
+    anexos_detalle:ensureSharedAnexos().map(r=>({...r})),
     fecha_solicitud:new Date().toISOString()
   };
 }
@@ -43682,6 +43788,13 @@ function syncUi(){
   const nr=document.getElementById('headerNumberControlV71');if(nr){nr.style.display=active?'none':'';if(active)nr.disabled=true;}
   const check=document.getElementById('phduCheckBarV2');if(check)check.style.display=active?'none':'';
   const box=ensurePanel();if(box)box.classList.toggle('visible',active);
+  const reportWrap=document.querySelector('#tab-vista .report-wrap');
+  if(reportWrap){
+    if(active)reportWrap.style.setProperty('display','none','important');
+    else reportWrap.style.removeProperty('display');
+  }
+  const legacyAnexos=document.getElementById('anexosVistaV163');
+  if(legacyAnexos&&active)legacyAnexos.classList.remove('visible');
   if(active)updatePanel();
 }
 function install(){
