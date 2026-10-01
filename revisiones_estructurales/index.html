@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALLPA · Revisiones Estructurales</title>
+<link rel="icon" type="image/png" href="../assets/logo-allpa-20264.png?v=1">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--blue:#06375d;--blue2:#075681;--red:#b91d35;--ink:#17344d;--muted:#63778a;--line:#cad9e4;--bg:#f2f7fa;--green:#7db9ad;--amber:#f8e7ae;--ok:#dff3e9;--danger:#f9dddd}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+header{height:68px;background:linear-gradient(90deg,#072e52,#42192d);display:flex;align-items:center;justify-content:space-between;padding:0 24px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.brand{display:flex;align-items:center;gap:12px}.brand strong{font-size:19px;letter-spacing:.5px}.brand span{font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:.7px}.header-actions{display:flex;gap:8px}.btn{border:0;border-radius:10px;padding:11px 15px;font-weight:900;cursor:pointer;font-size:11px}.btn-light{background:#fff;color:var(--blue)}.btn-blue{background:#075b87;color:#fff}.btn-soft{background:#edf4f7;color:var(--blue)}
+main{max-width:1500px;margin:0 auto;padding:22px}
+.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:15px}.hero h1{margin:0;color:#082f53;font-size:23px}.hero p{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+.search-card{background:#fff;border:1px solid var(--line);border-left:5px solid var(--red);border-radius:15px;padding:16px 17px;box-shadow:0 8px 22px rgba(20,62,91,.06)}
+.search-card h2{font-size:13px;margin:0 0 11px;color:#062f55}.search-grid{display:grid;grid-template-columns:minmax(280px,1fr) auto;gap:10px;align-items:end}.field label{display:block;font-size:9px;font-weight:900;text-transform:uppercase;margin-bottom:6px}.field input{width:100%;height:44px;border:1px solid #b9cbd9;border-radius:11px;padding:0 13px;font-size:13px;outline:none}.field input:focus{border-color:#0a6796;box-shadow:0 0 0 2px rgba(10,103,150,.10)}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.filter{border:1px solid #b9cbd9;background:#fff;color:#31526c;border-radius:999px;padding:7px 11px;font-size:9px;font-weight:900;cursor:pointer}.filter.active{background:#0b5e89;color:#fff;border-color:#0b5e89}
+.table-card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px rgba(20,62,91,.05)}.table-title{padding:13px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.table-title strong{font-size:12px}.count{font-size:10px;color:var(--muted)}.table-scroll{overflow:auto;max-height:calc(100vh - 310px)}table{width:100%;min-width:1050px;border-collapse:collapse;font-size:10px}th{position:sticky;top:0;z-index:2;background:#e8f1f6;color:#16354e;text-align:left;padding:10px 9px;border-bottom:1px solid #cbd8e2;font-size:9px;text-transform:uppercase;white-space:nowrap}td{padding:10px 9px;border-bottom:1px solid #e2e9ee;vertical-align:middle}tbody tr:hover td{background:#f8fbfd}.project{min-width:230px;font-weight:700}.owner{min-width:220px}.address{min-width:180px}.status-pill{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:6px 9px;font-weight:900;font-size:8px;white-space:nowrap}.PENDIENTE{background:var(--amber);color:#694d00}.EN_REVISION{background:#deedf7;color:#0c527a}.OBSERVADO{background:#ffe6cf;color:#8c4300}.APROBADO{background:var(--ok);color:#14623e}.DESISTIMIENTO{background:var(--danger);color:#8d241f}.open-btn{background:#075b87;color:#fff;border:0;border-radius:8px;padding:8px 11px;font-size:9px;font-weight:900;cursor:pointer}.empty{padding:38px;text-align:center;color:var(--muted);font-size:12px}.error{padding:14px;background:#fff0f0;color:#8d241f;border:1px solid #f2c7c7;border-radius:10px;margin-top:12px;font-size:11px}.hidden{display:none!important}
+@media(max-width:760px){header{padding:0 13px}.brand span{display:none}main{padding:13px}.hero{display:block}.hero .header-actions{margin-top:11px}.search-grid{grid-template-columns:1fr}.table-scroll{max-height:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><strong>ALLPA</strong><span>Revisiones Estructurales · Obra Mayor</span></div>
+  <div class="header-actions"><button class="btn btn-light" id="portalBtn">PORTAL</button><button class="btn btn-soft" id="logoutBtn">CERRAR SESIÓN</button></div>
+</header>
+<main>
+  <section class="hero">
+    <div><h1>Revisiones Estructurales</h1><p id="profileText">Validando usuario PHDU…</p></div>
+  </section>
+
+  <section class="search-card">
+    <h2>BUSCAR REVISIÓN ESTRUCTURAL</h2>
+    <div class="search-grid">
+      <div class="field"><label>eGOB, propietario o nombre del proyecto</label><input id="searchInput" type="search" placeholder="Escriba el Nro. eGOB, propietario o proyecto…" autocomplete="off"></div>
+      <button class="btn btn-blue" id="refreshBtn">ACTUALIZAR</button>
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter active" data-status="TODOS">TODOS</button>
+      <button class="filter" data-status="PENDIENTE">PENDIENTES</button>
+      <button class="filter" data-status="EN_REVISION">EN REVISIÓN</button>
+      <button class="filter" data-status="OBSERVADO">OBSERVADOS</button>
+      <button class="filter" data-status="APROBADO">APROBADOS</button>
+      <button class="filter" data-status="DESISTIMIENTO">DESISTIMIENTOS</button>
+    </div>
+  </section>
+
+  <div id="errorBox" class="error hidden"></div>
+
+  <section class="table-card" style="margin-top:14px">
+    <div class="table-title"><strong>SOLICITUDES REGISTRADAS</strong><span class="count" id="countText">0 registros</span></div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Estado</th><th>eGOB</th><th>Solicitante / Propietario(s)</th><th>Proyecto / Detalle</th><th>Ubicación</th><th>Clave Catastral</th><th>Área</th><th>Acción</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div id="empty" class="empty">No existen solicitudes de revisión estructural registradas.</div>
+    </div>
+  </section>
+</main>
+<script>
+const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
+const SUPABASE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});
+let profile=null, records=[], activeStatus='TODOS';
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function n(v){const x=Number(v);return Number.isFinite(x)?new Intl.NumberFormat('es-EC',{maximumFractionDigits:2}).format(x):'—'}
+function showError(msg=''){const el=$('errorBox');if(!msg){el.classList.add('hidden');el.textContent='';return}el.textContent=msg;el.classList.remove('hidden')}
+function statusLabel(v){return ({PENDIENTE:'PENDIENTE',EN_REVISION:'EN REVISIÓN',OBSERVADO:'OBSERVADO',APROBADO:'APROBADO',DESISTIMIENTO:'DESISTIMIENTO'})[v]||v||'—'}
+async function authGuard(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){location.replace('../index.html');return false}const {data,error}=await sb.from('phdu_profiles').select('id,correo,nombre_completo,rol,activo,cargo,firma_nombre,firma_cargo').eq('id',session.user.id).single();if(error)throw error;if(!data?.activo)throw new Error('El perfil PHDU está inactivo.');const role=String(data.rol||'').toUpperCase();if(!['INGENIERO_CIVIL','ADMIN'].includes(role)){location.replace('../index.html');return false}profile=data;$('profileText').textContent=(data.firma_nombre||data.nombre_completo||data.correo||'Usuario PHDU')+' · '+role.replace('_',' ');return true}
+async function loadRecords(){showError('');$('refreshBtn').disabled=true;$('refreshBtn').textContent='ACTUALIZANDO…';try{const {data,error}=await sb.from('phdu_solicitudes_revision_estructural').select('id,egob,estado_revision,propietarios_texto,nombre_proyecto,uso_proyecto,parroquia,direccion,clave_catastral,area_construccion,pisos,creado_en').order('creado_en',{ascending:false});if(error)throw error;records=Array.isArray(data)?data:[];render()}catch(e){showError('No se pudo cargar la bandeja estructural: '+(e.message||e));records=[];render()}finally{$('refreshBtn').disabled=false;$('refreshBtn').textContent='ACTUALIZAR'}}
+function render(){const q=$('searchInput').value.trim().toLowerCase();const filtered=records.filter(r=>{if(activeStatus!=='TODOS'&&r.estado_revision!==activeStatus)return false;if(!q)return true;return [r.egob,r.propietarios_texto,r.nombre_proyecto,r.uso_proyecto,r.parroquia,r.direccion,r.clave_catastral].some(v=>String(v||'').toLowerCase().includes(q))});$('countText').textContent=filtered.length+' '+(filtered.length===1?'registro':'registros');$('empty').classList.toggle('hidden',filtered.length>0);$('rows').innerHTML=filtered.map(r=>`<tr><td><span class="status-pill ${esc(r.estado_revision)}">${esc(statusLabel(r.estado_revision))}</span></td><td><strong>${esc(r.egob)}</strong></td><td class="owner">${esc(r.propietarios_texto||'—')}</td><td class="project">${esc(r.nombre_proyecto||r.uso_proyecto||'—')}</td><td class="address">${esc([r.parroquia,r.direccion].filter(Boolean).join(' · ')||'—')}</td><td>${esc(r.clave_catastral||'—')}</td><td>${r.area_construccion==null?'—':n(r.area_construccion)+' m²'}</td><td><button class="open-btn" onclick="openRequest('${esc(r.id)}')">ABRIR</button></td></tr>`).join('')}
+function openRequest(id){location.href='informe.html?solicitud='+encodeURIComponent(id)}
+$('searchInput').addEventListener('input',render);$('refreshBtn').addEventListener('click',loadRecords);$('filters').addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(!b)return;activeStatus=b.dataset.status;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));render()});$('portalBtn').addEventListener('click',()=>location.href='../index.html');$('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.replace('../index.html')});
+(async()=>{try{if(await authGuard())await loadRecords()}catch(e){showError(e.message||String(e))}})();
+</script>
+</body>
+</html>
