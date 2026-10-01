@@ -43689,6 +43689,7 @@ function structuralPayload(){
   const est=state?.aprobatorio?.estructural||{};
   return {
     id_solicitud_local:x.idLocal,
+    arquitecto_cargo:clean((window.AllpaSupabaseCheckV1?.getProfile?.()||{}).firma_cargo||(window.AllpaSupabaseCheckV1?.getProfile?.()||{}).cargo||''),
     egob:egob(),
     propietarios:os,
     propietarios_texto:os.map(o=>o.nombre).filter(Boolean).join(' / '),
@@ -43840,6 +43841,49 @@ window.AllpaV7920=Object.freeze({
   version:'7.9.20',
   change:'Solicitud estructural: sin vista previa de informe; anexos Folder/Carpeta/Fojas reutilizables; botón Registrar y Enviar a Revisión Estructural'
 });
+</script>
+
+
+<script id="allpa-v7-9-21-sync-estructural-aprobado">
+(function(){
+'use strict';
+const SB_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
+const SB_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
+let client=null,lastKey='',busy=false;
+function c(v){return String(v??'').trim()}
+function digits(v){return String(v??'').replace(/\D/g,'')}
+function sb(){if(client)return client;if(!window.supabase?.createClient)return null;client=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});return client}
+function egob(){return digits(document.getElementById('egob')?.value||window.state?.egob||'')}
+function ensure(){if(!window.state)return null;if(!state.aprobatorio)state.aprobatorio={};if(!state.aprobatorio.estructural)state.aprobatorio.estructural={};if(!Array.isArray(state.aprobatorio.anexos))state.aprobatorio.anexos=[];return state.aprobatorio}
+async function sync(force=false){
+  if(busy||!window.state||state.tipoInforme!=='Informe Técnico Aprobatorio')return;
+  const e=egob();if(!/^\d{1,20}$/.test(e))return;const key=e+'|'+state.tipoInforme;if(!force&&key===lastKey)return;busy=true;
+  try{
+    const cl=sb();if(!cl)return;const {data,error}=await cl.rpc('phdu_datos_revision_estructural_para_arquitectura',{p_egob:e});
+    if(error){console.warn('ALLPA V7.9.21 sync estructural:',error.message);return}
+    if(!data||String(data.estado_revision||'')!=='APROBADO')return;
+    const a=ensure();if(!a)return;const est=a.estructural;
+    if(c(data.ingeniero_nombre))est.tecnico=c(data.ingeniero_nombre);
+    if(c(data.fecha_aprobatorio))est.fecha=c(data.fecha_aprobatorio);
+    est.criterio='FAVORABLE';
+    if(c(data.calculista))est.calculista=c(data.calculista);
+    if(c(data.calculista_senescyt))est.senescyt=c(data.calculista_senescyt);
+    est.egob=e;
+    if(!c(est.documento))est.documento='INFORME TÉCNICO APROBATORIO ESTRUCTURAL';
+    if(Array.isArray(data.anexos)&&data.anexos.length)a.anexos=data.anexos.map(r=>({tipo:r?.tipo||'folder',fojas:c(r?.fojas),incluyePlanos:!!r?.incluyePlanos,planos:c(r?.planos),incluyeCds:!!r?.incluyeCds,cds:c(r?.cds)}));
+    lastKey=key;
+    try{if(typeof renderAprobatorioForm==='function')renderAprobatorioForm();}catch(_e){}
+    try{if(typeof renderReport==='function')renderReport();}catch(_e){}
+    try{window.AllpaAutosaveV7911?.schedule?.();}catch(_e){}
+    try{if(typeof msg==='function')msg('Datos del Informe Aprobatorio Estructural cargados en el Informe Aprobatorio de Obra Mayor.',true);}catch(_e){}
+  }finally{busy=false}
+}
+document.addEventListener('change',e=>{if(e.target?.id==='tipoInforme')setTimeout(()=>sync(true),180)});
+document.addEventListener('blur',e=>{if(e.target?.id==='egob')setTimeout(()=>sync(true),100)},true);
+window.addEventListener('allpa:state-applied',()=>setTimeout(()=>sync(true),250));
+window.AllpaStructuralApprovalSyncV7921={sync};
+setTimeout(()=>sync(false),1600);setTimeout(()=>sync(false),3500);
+})();
 </script>
 
 </body>
