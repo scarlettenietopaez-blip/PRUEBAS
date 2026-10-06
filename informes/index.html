@@ -43687,6 +43687,8 @@ function structuralPayload(){
   const x=ensureState();if(!x.idLocal)x.idLocal=uuid();
   const os=owners(), alt=info('ALTURA EDIFICACIÓN');const n=Number(String(alt).replace(',','.'));
   const est=state?.aprobatorio?.estructural||{};
+  const apods=(Array.isArray(state?.apoderados)?state.apoderados:[]).map(a=>({nombre:clean(a?.nombre),ci:clean(a?.ci)})).filter(a=>a.nombre||a.ci);
+  if(!apods.length&&state?.apoderado?.activo&&(clean(state.apoderado.nombre)||clean(state.apoderado.ci)))apods.push({nombre:clean(state.apoderado.nombre),ci:clean(state.apoderado.ci)});
   return {
     id_solicitud_local:x.idLocal,
     arquitecto_cargo:clean((window.AllpaSupabaseCheckV1?.getProfile?.()||{}).firma_cargo||(window.AllpaSupabaseCheckV1?.getProfile?.()||{}).cargo||''),
@@ -43694,8 +43696,14 @@ function structuralPayload(){
     propietarios:os,
     propietarios_texto:os.map(o=>o.nombre).filter(Boolean).join(' / '),
     documentos_propietarios:os.map(o=>o.ci).filter(Boolean).join(' / '),
+    apoderados:apods,
+    apoderados_texto:apods.map(o=>o.nombre).filter(Boolean).join(' / '),
+    documentos_apoderados:apods.map(o=>o.ci).filter(Boolean).join(' / '),
+    apoderado_nombre:apods[0]?.nombre||'',
+    apoderado_documento:apods[0]?.ci||'',
     proyectista:info('PROYECTISTA'),
     proyectista_senescyt:info('REGISTRO SENESCYT'),
+    proyectista_registro_municipal:info('REGISTRO MUNICIPAL'),
     nombre_proyecto:info('NOMBRE DEL PROYECTO'),
     uso_proyecto:info('USO PRINCIPAL'),
     tipo_obra:info('PROYECTO DEFINITIVO'),
@@ -43860,7 +43868,7 @@ async function sync(force=false){
   const e=egob();if(!/^\d{1,20}$/.test(e))return;const key=e+'|'+state.tipoInforme;if(!force&&key===lastKey)return;busy=true;
   try{
     const cl=sb();if(!cl)return;const {data,error}=await cl.rpc('phdu_datos_revision_estructural_para_arquitectura',{p_egob:e});
-    if(error){console.warn('ALLPA V7.9.21 sync estructural:',error.message);return}
+    if(error){console.warn('ALLPA V7.9.26 sync estructural:',error.message);return}
     if(!data||String(data.estado_revision||'')!=='APROBADO')return;
     const a=ensure();if(!a)return;const est=a.estructural;
     if(c(data.ingeniero_nombre))est.tecnico=c(data.ingeniero_nombre);
