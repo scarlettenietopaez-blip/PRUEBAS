@@ -43894,5 +43894,87 @@ setTimeout(()=>sync(false),1600);setTimeout(()=>sync(false),3500);
 })();
 </script>
 
+
+<script id="allpa-v7-9-27-compatibilidad-solicitud-estructural-antiguos">
+(function(){
+'use strict';
+const VERSION='7.9.27';
+const OM='obra_mayor_definitivo';
+const AP='anteproyecto_edificacion';
+
+function normalize(v){
+  return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+}
+function validProject(v){return v===OM||v===AP?v:'';}
+function inferLegacyProject(record){
+  const explicit=validProject(record?.projectType);
+  if(explicit) return explicit;
+
+  const key=String(record?.egob||record?._savedKeyV119||'').toUpperCase();
+  if(/-\s*ANTEPROYECTO(?:\s*\(\d+\))?\s*$/.test(key)) return AP;
+
+  try{
+    if(Object.keys(record?.requisitos||{}).some(k=>String(k).startsWith('AP_REQ_'))) return AP;
+  }catch(_e){}
+
+  const body=normalize(JSON.stringify(record||{}));
+  if(body.includes('ANTEPROYECTO DE EDIFICACION')) return AP;
+
+  /* Compatibilidad: los registros antiguos que no guardaban projectType
+     pertenecen a Obra Mayor salvo evidencia expresa de Anteproyecto. */
+  return OM;
+}
+
+/* Corrige la inferencia usada por el cargador central V22C. */
+window.inferSavedProjectV134=inferLegacyProject;
+try{inferSavedProjectV134=inferLegacyProject}catch(_e){}
+
+function syncStructuralOption(){
+  if(typeof state==='undefined'||!state) return;
+  const inferred=inferLegacyProject(state);
+  if(!validProject(state.projectType)) state.projectType=inferred;
+  if(state.projectType===OM) localStorage.setItem('GADMR_PROJECT_TYPE_V123',OM);
+  try{window.AllpaSolicitudEstructuralV7918?.sync?.();}catch(e){console.warn('ALLPA V7.9.27 sync solicitud estructural:',e);}
+}
+
+function installLoadCompat(){
+  const current=window.cargarFormulario;
+  if(typeof current!=='function'||current.__v7927StructuralCompat) return;
+  const wrapped=async function(){
+    const result=await current.apply(this,arguments);
+    try{
+      if(typeof state!=='undefined'&&state){
+        const project=inferLegacyProject(state);
+        state.projectType=project;
+        localStorage.setItem('GADMR_PROJECT_TYPE_V123',project);
+      }
+      syncStructuralOption();
+      setTimeout(syncStructuralOption,80);
+      setTimeout(syncStructuralOption,260);
+    }catch(e){console.warn('ALLPA V7.9.27 post-carga:',e);}
+    return result;
+  };
+  wrapped.__v7927StructuralCompat=true;
+  wrapped.__base=current;
+  window.cargarFormulario=wrapped;
+  try{cargarFormulario=wrapped}catch(_e){}
+}
+
+/* También cubre cargas efectuadas por búsquedas/listados y restauraciones antiguas. */
+window.addEventListener('allpa:state-applied',()=>setTimeout(syncStructuralOption,0));
+document.addEventListener('click',ev=>{
+  if(ev.target?.closest?.('.saved-select-btn-v119n,[data-select-saved-v119n],[data-open-saved-v131]')){
+    setTimeout(syncStructuralOption,180);
+  }
+});
+
+installLoadCompat();
+[120,500,1100,2200,4200,7000].forEach(ms=>setTimeout(()=>{installLoadCompat();syncStructuralOption();},ms));
+window.addEventListener('load',()=>setTimeout(()=>{installLoadCompat();syncStructuralOption();},350),{once:true});
+
+window.AllpaCompatSolicitudEstructuralV7927=Object.freeze({VERSION,inferLegacyProject,sync:syncStructuralOption});
+})();
+</script>
+
 </body>
 </html>
