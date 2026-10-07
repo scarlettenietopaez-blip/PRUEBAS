@@ -16158,6 +16158,7 @@ window.addEventListener('load',()=>{
 
 <script>
 /* ==========================================================
+   V7.9.41 · navegación jerárquica corregida para GitHub Pages
    V123 SOBRE V122
    Selector de proyecto + Anteproyecto de Edificación.
    ========================================================== */
@@ -16191,7 +16192,10 @@ function navigateBackAllpaV140(){
     }
   }
   // Nivel 2: desde Tipos de Proyectos, regresar al Portal general de ALLPA.
-  window.location.href='../index.html';
+  // IMPORTANTE: este HTML usa <base href="../">. Resolver '../index.html' contra
+  // document.baseURI sube un nivel de más en GitHub Pages. Se resuelve contra la URL
+  // real del documento para conservar el prefijo del repositorio (p. ej. /PRUEBAS/).
+  window.location.href=new URL('../index.html', window.location.href).href;
 }
 
 function projectTypeV123(){
@@ -43099,7 +43103,7 @@ document.addEventListener('click',function(ev){
 /* Volver a la portada sí es una intención explícita. Esto se ejecuta antes
    de los handlers históricos que llaman showProjectEntryV123(). */
 document.addEventListener('click',function(ev){
-  const home=ev.target?.closest?.('#homeProjectBtnV124,.change-project-v123,a.allpa-home-v7');
+  const home=ev.target?.closest?.('#allpaHomeBackV140,#homeProjectBtnV124,.change-project-v123,a.allpa-home-v7');
   if(!home) return;
   if(screen==='PROJECT') screen='HOME';
 },true);
