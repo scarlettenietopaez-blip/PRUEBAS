@@ -3863,9 +3863,9 @@ header.no-print{padding-left:82px!important}
 </style>
 </head>
 <body>
-<a class="allpa-home-v7 no-print" href="../index.html" title="Inicio ALLPA" aria-label="Inicio ALLPA">
+<button type="button" class="allpa-home-v7 no-print" id="allpaHomeBackV140" title="Volver al nivel anterior" aria-label="Volver al nivel anterior" onclick="navigateBackAllpaV140()">
 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-</a>
+</button>
 
 
 <header class="no-print">
@@ -16177,6 +16177,23 @@ const PROJECTS_V123 = {
   }
 };
 
+function projectEntryVisibleV140(){
+  const entry=document.getElementById('projectEntryV123');
+  return !!entry && !entry.classList.contains('hidden');
+}
+
+function navigateBackAllpaV140(){
+  // Nivel 1: si estamos dentro de un proyecto/formulario, regresar al selector de Tipos de Proyectos.
+  if(!projectEntryVisibleV140()) {
+    if(typeof showProjectEntryV123==='function') {
+      showProjectEntryV123();
+      return;
+    }
+  }
+  // Nivel 2: desde Tipos de Proyectos, regresar al Portal general de ALLPA.
+  window.location.href='../index.html';
+}
+
 function projectTypeV123(){
   return state?.projectType || localStorage.getItem('GADMR_PROJECT_TYPE_V123') || '';
 }
@@ -16518,7 +16535,7 @@ function hideProjectEntryV123(){
 }
 
 function goHomeProjectV124(){
-  showProjectEntryV123();
+  navigateBackAllpaV140();
 }
 
 function ensureHomeButtonV124(){
@@ -16528,7 +16545,7 @@ function ensureHomeButtonV124(){
   btn.type='button';
   btn.id='homeProjectBtnV124';
   btn.className='home-project-v124 no-print';
-  btn.title='Volver a la página principal';
+  btn.title='Volver al nivel anterior';
   btn.innerHTML='⌂';
   btn.onclick=goHomeProjectV124;
 
@@ -43976,5 +43993,6 @@ window.AllpaCompatSolicitudEstructuralV7927=Object.freeze({VERSION,inferLegacyPr
 })();
 </script>
 
+<!-- ALLPA Informes V7.9.40: navegación jerárquica de casita -->
 </body>
 </html>
