@@ -3861,6 +3861,19 @@ header.no-print{padding-left:82px!important}
 .allpa-home-v7:hover{background:#ffffff2b!important}.allpa-home-v7 svg{width:21px;height:21px;display:block}
 @media(max-width:760px){.allpa-home-v7{left:10px;top:10px;width:38px;height:38px}header.no-print{padding-left:62px!important}}
 </style>
+
+<style id="allpa-home-unified-v7942">
+/* V7.9.42 · Casita homologada en ALLPA */
+.allpa-home-v7,#homeProjectBtnV124.home-project-v124{
+  width:42px!important;height:42px!important;border-radius:12px!important;
+  display:grid!important;place-items:center!important;padding:0!important;
+  background:#fff!important;color:#0a5c87!important;
+  border:1.5px solid #0a5c87!important;box-shadow:0 4px 12px rgba(7,64,99,.14)!important;
+}
+.allpa-home-v7:hover,#homeProjectBtnV124.home-project-v124:hover{background:#edf7fc!important;color:#073f62!important}
+.allpa-home-v7 svg,#homeProjectBtnV124.home-project-v124 svg{width:22px!important;height:22px!important;display:block!important}
+.allpa-home-v7{left:18px!important;top:15px!important}
+</style>
 </head>
 <body>
 <button type="button" class="allpa-home-v7 no-print" id="allpaHomeBackV140" title="Volver al nivel anterior" aria-label="Volver al nivel anterior" onclick="navigateBackAllpaV140()">
@@ -16550,7 +16563,7 @@ function ensureHomeButtonV124(){
   btn.id='homeProjectBtnV124';
   btn.className='home-project-v124 no-print';
   btn.title='Volver al nivel anterior';
-  btn.innerHTML='⌂';
+  btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
   btn.onclick=goHomeProjectV124;
 
   document.body.appendChild(btn);
@@ -17230,7 +17243,7 @@ function ensureHeaderProjectControlsV129(){
   if(typeof ensureHomeButtonV124==='function') ensureHomeButtonV124();
   const home=document.getElementById('homeProjectBtnV124');
   if(home && home.parentElement!==group){
-    home.innerHTML='⌂';
+    home.innerHTML='<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
     home.setAttribute('aria-label','Volver a la página principal');
     home.title='Volver a la página principal';
     group.appendChild(home);
