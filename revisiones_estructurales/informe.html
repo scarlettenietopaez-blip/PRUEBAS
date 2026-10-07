@@ -251,6 +251,74 @@ button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:point
   body.printing-observaciones .signature-space{height:17mm!important}
 }
 </style>
+
+<style id="struct-paged-preview-v7936">
+/* Vista previa A4 = impresión PDF */
+.struct-report-source-host{position:absolute!important;left:-100000px!important;top:0!important;width:174mm!important;visibility:hidden!important;pointer-events:none!important}
+.struct-paged-preview{display:flex;flex-direction:column;align-items:center;gap:8mm;padding:8mm 0;background:#e6e9ed;border-radius:12px;overflow:auto}
+.struct-a4-page{position:relative;flex:0 0 auto;width:210mm;height:297mm;background:#fff;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.22)}
+.struct-page-bg{position:absolute;inset:0;z-index:0;width:210mm;height:297mm;max-width:none!important;object-fit:fill;display:block!important;pointer-events:none;user-select:none}
+.struct-page-content{position:absolute;z-index:1;top:34mm;left:18mm;right:18mm;bottom:25mm;overflow:hidden}
+.struct-page-flow{height:100%;overflow:hidden;color:#000;font-family:"Times New Roman",Times,serif;font-size:10.5pt;line-height:1.28}
+.struct-page-flow p{margin:0 0 3.2mm;text-align:justify!important;text-justify:inter-word;orphans:3;widows:3}
+.struct-page-flow strong,.struct-page-flow b{font-weight:700!important}
+.struct-page-flow .report-document-title{text-align:center!important;font-weight:700!important;text-transform:uppercase!important;font-size:10.5pt;line-height:1.2;margin:0 0 5mm}
+.struct-page-flow .report-document-title .municipio,.struct-page-flow .report-document-title .tipo{display:block;font-weight:700!important}
+.struct-page-flow .report-document-title .tipo{margin-top:1.5mm}
+.struct-page-flow .report-section-title{display:flex;gap:3mm;align-items:baseline;font-weight:700!important;font-size:11pt;line-height:1.2;margin:4.2mm 0 2.2mm;color:#000}
+.struct-page-flow .report-section-title span{font-weight:700!important}
+.struct-page-flow .report-legal-title{font-weight:700!important;margin:0 0 1.6mm!important;text-align:left!important}
+.struct-page-flow .report-table{width:100%;border-collapse:collapse!important;table-layout:fixed;margin:2mm 0 4mm;color:#000;font-family:"Times New Roman",Times,serif;font-size:9.8pt;line-height:1.2}
+.struct-page-flow .report-table thead{display:table-header-group}
+.struct-page-flow .report-table th,.struct-page-flow .report-table td{border:1px solid #000!important;padding:2.1mm 2.3mm;vertical-align:top;color:#000}
+.struct-page-flow .report-table th{background:#d9d9d9!important;font-weight:700!important;text-align:left!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.struct-page-flow .report-table .nro-col{width:12mm;text-align:center!important}
+.struct-page-flow .report-table .req-col{width:45%}
+.struct-page-flow .report-table .clar-col{width:auto}
+.struct-page-flow .report-img-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3mm;padding:1.5mm 0}
+.struct-page-flow .report-img-gallery img{display:block;width:100%;max-height:48mm;object-fit:contain;border:1px solid #888;background:#fff}
+.struct-page-flow .report-note-box{border:1px solid #000;padding:2.5mm 3mm;margin:1.5mm 0 4mm;background:#fff}
+.struct-page-flow .report-small-note{font-size:9.2pt;line-height:1.2;text-align:justify!important}
+.struct-page-flow .signature{margin-top:5mm}
+.struct-page-flow .signature-space{height:17mm}
+.struct-page-group{break-inside:avoid;page-break-inside:avoid}
+@media(max-width:900px){.struct-paged-preview{align-items:flex-start}.struct-a4-page{transform-origin:top left}}
+
+@media print{
+  @page{size:A4 portrait;margin:0!important}
+  html,body{margin:0!important;padding:0!important;background:#fff!important}
+  body.printing-observaciones .struct-topbar,
+  body.printing-observaciones .struct-sidebar,
+  body.printing-observaciones .tabs,
+  body.printing-observaciones .view-toolbar,
+  body.printing-observaciones .tab-actions,
+  body.printing-observaciones .struct-report-source-host,
+  body.printing-observaciones .no-print{display:none!important}
+  body.printing-observaciones .struct-main,
+  body.printing-observaciones .struct-layout,
+  body.printing-observaciones .struct-workspace,
+  body.printing-observaciones #tab-vista,
+  body.printing-observaciones #vista{display:block!important;width:210mm!important;max-width:210mm!important;margin:0!important;padding:0!important;background:#fff!important;border:0!important;box-shadow:none!important}
+  body.printing-observaciones .tab:not(#tab-vista){display:none!important}
+  body.printing-observaciones .struct-paged-preview{display:block!important;width:210mm!important;margin:0!important;padding:0!important;background:#fff!important;border:0!important;border-radius:0!important;overflow:visible!important}
+  body.printing-observaciones .struct-a4-page{display:block!important;position:relative!important;width:210mm!important;height:297mm!important;margin:0!important;padding:0!important;background:#fff!important;box-shadow:none!important;overflow:hidden!important;break-after:page!important;page-break-after:always!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body.printing-observaciones .struct-a4-page:last-child{break-after:auto!important;page-break-after:auto!important}
+  body.printing-observaciones .struct-page-bg{display:block!important;position:absolute!important;inset:0!important;width:210mm!important;height:297mm!important;object-fit:fill!important;z-index:0!important}
+  body.printing-observaciones .struct-page-content{position:absolute!important;z-index:1!important;top:34mm!important;left:18mm!important;right:18mm!important;bottom:25mm!important;overflow:hidden!important}
+  body.printing-observaciones .struct-page-flow{height:100%!important;overflow:hidden!important;color:#000!important;font-family:"Times New Roman",Times,serif!important;font-size:10.5pt!important;line-height:1.28!important}
+  body.printing-observaciones .struct-page-flow p{text-align:justify!important;text-justify:inter-word!important}
+  body.printing-observaciones .struct-page-flow strong,
+  body.printing-observaciones .struct-page-flow b,
+  body.printing-observaciones .struct-page-flow .report-section-title,
+  body.printing-observaciones .struct-page-flow .report-section-title span,
+  body.printing-observaciones .struct-page-flow .report-document-title,
+  body.printing-observaciones .struct-page-flow .report-document-title span{font-weight:700!important}
+  body.printing-observaciones .struct-page-flow .report-table th,
+  body.printing-observaciones .struct-page-flow .report-table td{border:1px solid #000!important}
+  body.printing-observaciones .struct-page-flow .report-table th{background:#d9d9d9!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
+</style>
+
 </head>
 <body>
 <header class="struct-topbar no-print">
@@ -508,9 +576,61 @@ function desistBody(){const m=state.des.motivo,c=clean(state.des.conclusiones);l
 async function richCopy(html,plain){if(navigator.clipboard?.write&&window.ClipboardItem){await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain||html.replace(/<[^>]+>/g,' ')],{type:'text/plain'})})]);return}const d=document.createElement('div');d.contentEditable='true';d.style.position='fixed';d.style.left='-9999px';d.innerHTML=html;document.body.appendChild(d);const r=document.createRange();r.selectNodeContents(d);const s=getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy');s.removeAllRanges();d.remove()}
 async function copyBlock(kind){try{if(kind==='obs')return await richCopy(reportObservaciones(false),$('printReport')?.innerText||'');if(kind==='aprSub')return await richCopy(`<span style="font-family:Arial;font-size:11pt">${h(aprobatorioSubject())}</span>`,aprobatorioSubject());if(kind==='aprBody')return await richCopy(`<div style="font-family:Arial;font-size:11pt">${aprobatorioBody()}</div>`,'');if(kind==='aprAx')return await richCopy(`<div style="font-family:Arial;font-size:11pt">${annexHtml()}</div>`,'');if(kind==='desSub')return await richCopy(`<span style="font-family:Arial;font-size:11pt">${h(desistSubject())}</span>`,desistSubject());if(kind==='desBody')return await richCopy(`<div style="font-family:Arial;font-size:11pt">${desistBody()}</div>`,'');}catch(e){alert('No se pudo copiar: '+e.message)}setStatus('Contenido copiado.', 'ok')}
 window.copyBlock=copyBlock;
-function printObservaciones(){document.body.classList.add('printing-observaciones');window.print()}
+
+const STRUCT_REPORT_BG='../assets/fondo_institucional.png';
+function newStructA4Page(root){
+  const page=document.createElement('section');page.className='struct-a4-page';
+  const bg=document.createElement('img');bg.className='struct-page-bg';bg.src=STRUCT_REPORT_BG;bg.alt='';bg.setAttribute('aria-hidden','true');
+  const content=document.createElement('div');content.className='struct-page-content';
+  const flow=document.createElement('div');flow.className='struct-page-flow';
+  content.appendChild(flow);page.appendChild(bg);page.appendChild(content);root.appendChild(page);
+  return {page,flow,bg};
+}
+function structPageFits(ctx){return ctx.flow.scrollHeight<=ctx.flow.clientHeight+1}
+function structClone(el){const c=el.cloneNode(true);c.removeAttribute?.('id');c.querySelectorAll?.('[id]').forEach(x=>x.removeAttribute('id'));return c}
+function structRowGroups(table){const rows=[...table.querySelectorAll(':scope > tbody > tr')],groups=[];for(let i=0;i<rows.length;i++){const g=[rows[i]];if(i+1<rows.length&&rows[i+1].querySelector('.report-img-gallery'))g.push(rows[++i]);groups.push(g)}return groups}
+function appendStructTablePaginated(sourceTable,ctx,newPage){
+  const groups=structRowGroups(sourceTable);let table=null,tbody=null;
+  const startTable=()=>{table=sourceTable.cloneNode(false);table.removeAttribute('id');const thead=sourceTable.querySelector(':scope > thead');if(thead)table.appendChild(structClone(thead));tbody=document.createElement('tbody');table.appendChild(tbody);ctx.flow.appendChild(table)};
+  startTable();
+  for(const group of groups){
+    const clones=group.map(structClone);clones.forEach(r=>tbody.appendChild(r));
+    if(!structPageFits(ctx)){
+      clones.forEach(r=>r.remove());
+      if(tbody.children.length===0){clones.forEach(r=>tbody.appendChild(r));continue}
+      ctx=newPage();startTable();clones.forEach(r=>tbody.appendChild(r));
+    }
+  }
+  return ctx;
+}
+function buildPagedPreviewStruct(){
+  const root=$('structPagedPreview'),source=$('structReportSourceHost')?.querySelector('.report-content');if(!root||!source)return;
+  root.innerHTML='';let ctx=newStructA4Page(root);const newPage=()=>{ctx=newStructA4Page(root);return ctx};
+  const children=[...source.children];
+  for(let i=0;i<children.length;i++){
+    const el=children[i];
+    if(el.matches('table.report-table')){ctx=appendStructTablePaginated(el,ctx,newPage);continue}
+    if(el.classList.contains('report-section-title')&&i+1<children.length){
+      const next=children[i+1];
+      if(next.matches('table.report-table')){
+        const heading=structClone(el);ctx.flow.appendChild(heading);
+        const probe=next.cloneNode(false);const th=next.querySelector(':scope > thead');if(th)probe.appendChild(structClone(th));const tb=document.createElement('tbody');const firstGroup=structRowGroups(next)[0]||[];firstGroup.forEach(r=>tb.appendChild(structClone(r)));probe.appendChild(tb);ctx.flow.appendChild(probe);
+        if(!structPageFits(ctx)){heading.remove();probe.remove();ctx=newPage();ctx.flow.appendChild(heading)}else probe.remove();
+        continue;
+      }
+      const group=document.createElement('div');group.className='struct-page-group';group.appendChild(structClone(el));group.appendChild(structClone(next));ctx.flow.appendChild(group);
+      if(!structPageFits(ctx)){group.remove();ctx=newPage();ctx.flow.appendChild(group)}
+      i++;continue;
+    }
+    const clone=structClone(el);ctx.flow.appendChild(clone);
+    if(!structPageFits(ctx)){clone.remove();ctx=newPage();ctx.flow.appendChild(clone)}
+  }
+}
+async function waitStructBackgrounds(){const imgs=[...document.querySelectorAll('#structPagedPreview .struct-page-bg')];await Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{img.addEventListener('load',res,{once:true});img.addEventListener('error',res,{once:true})})))}
+async function printObservaciones(){buildPagedPreviewStruct();await waitStructBackgrounds();document.body.classList.add('printing-observaciones');setTimeout(()=>window.print(),80)}
+
 window.addEventListener('afterprint',()=>document.body.classList.remove('printing-observaciones'));
-function renderVista(){const t=state.tipo;document.body.classList.toggle('printing-observaciones',t==='OBSERVACIONES');const box=$('vista');if(!t){box.innerHTML='<div class="note">Seleccione el tipo de informe para generar la vista.</div>';return}if(t==='OBSERVACIONES'){box.innerHTML=`<div class="view-toolbar no-print"><button type="button" class="view-mini-btn primary" onclick="copyBlock('obs')"><span class="icon">▣</span><span>COPIAR</span></button><button type="button" class="view-mini-btn" onclick="printObservaciones()">PDF</button></div>${reportObservaciones()}`;return}if(t==='APROBATORIO'){box.innerHTML=`<div class="memo-panel"><div class="copy-card"><div class="copy-head"><strong>ASUNTO</strong><button class="btn btn-outline" onclick="copyBlock('aprSub')">COPIAR ASUNTO</button></div><div class="copy-body">${h(aprobatorioSubject())}</div></div><div class="copy-card"><div class="copy-head"><strong>CUERPO</strong><button class="btn btn-outline" onclick="copyBlock('aprBody')">COPIAR CUERPO</button></div><div class="copy-body">${aprobatorioBody()}</div></div><div class="copy-card"><div class="copy-head"><strong>ANEXOS</strong><button class="btn btn-outline" onclick="copyBlock('aprAx')">COPIAR ANEXOS</button></div><div class="copy-body">${annexHtml()}</div></div></div>`;return}box.innerHTML=`<div class="memo-panel"><div class="copy-card"><div class="copy-head"><strong>ASUNTO</strong><button class="btn btn-outline" onclick="copyBlock('desSub')">COPIAR ASUNTO</button></div><div class="copy-body">${h(desistSubject())}</div></div><div class="copy-card"><div class="copy-head"><strong>CUERPO</strong><button class="btn btn-outline" onclick="copyBlock('desBody')">COPIAR CUERPO</button></div><div class="copy-body">${desistBody()}</div></div></div>`}
+function renderVista(){const t=state.tipo;const box=$('vista');if(!t){box.innerHTML='<div class="note">Seleccione el tipo de informe para generar la vista.</div>';return}if(t==='OBSERVACIONES'){box.innerHTML=`<div class="view-toolbar no-print"><button type="button" class="view-mini-btn primary" onclick="copyBlock('obs')"><span class="icon">▣</span><span>COPIAR</span></button><button type="button" class="view-mini-btn" onclick="printObservaciones()"><span>PDF</span></button></div><div id="structPagedPreview" class="struct-paged-preview"></div><div id="structReportSourceHost" class="struct-report-source-host">${reportObservaciones()}</div>`;requestAnimationFrame(()=>buildPagedPreviewStruct());return}if(t==='APROBATORIO'){box.innerHTML=`<div class="memo-panel"><div class="copy-card"><div class="copy-head"><strong>ASUNTO</strong><button class="btn btn-outline" onclick="copyBlock('aprSub')">COPIAR ASUNTO</button></div><div class="copy-body">${h(aprobatorioSubject())}</div></div><div class="copy-card"><div class="copy-head"><strong>CUERPO</strong><button class="btn btn-outline" onclick="copyBlock('aprBody')">COPIAR CUERPO</button></div><div class="copy-body">${aprobatorioBody()}</div></div><div class="copy-card"><div class="copy-head"><strong>ANEXOS</strong><button class="btn btn-outline" onclick="copyBlock('aprAx')">COPIAR ANEXOS</button></div><div class="copy-body">${annexHtml()}</div></div></div>`;return}box.innerHTML=`<div class="memo-panel"><div class="copy-card"><div class="copy-head"><strong>ASUNTO</strong><button class="btn btn-outline" onclick="copyBlock('desSub')">COPIAR ASUNTO</button></div><div class="copy-body">${h(desistSubject())}</div></div><div class="copy-card"><div class="copy-head"><strong>CUERPO</strong><button class="btn btn-outline" onclick="copyBlock('desBody')">COPIAR CUERPO</button></div><div class="copy-body">${desistBody()}</div></div></div>`}
 function validate(){const e=[];if(!state.tipo)e.push('Seleccione el tipo de informe.');if(!clean(state.info.egob))e.push('Falta eGOB.');if(state.tipo==='OBSERVACIONES'){if(!selectedObservations().length)e.push('Registre al menos una observación estructural.');[['Propietario(s)',state.info.propietarios],['CI/RUC',state.info.documentos],['Uso principal',state.info.uso],['Altura/Pisos',state.info.pisos],['Parroquia',state.info.parroquia],['Dirección',state.info.direccion],['Zona de planeamiento / Código PIT',state.info.pit],['Clave catastral',state.info.clave],['Proyectista',state.info.proyectista],['REG. SENESCYT Proyectista',state.info.proyectistaSenescyt],['REG. MUNICIPAL Proyectista',state.info.proyectistaMunicipal],['Fecha máxima de subsanación',state.info.fechaSubsanacion]].forEach(([l,v])=>{if(!clean(v))e.push('Falta '+l+'.')})}if(state.tipo==='APROBATORIO'){[['Memorando de Solicitud',state.info.memorando],['Técnico solicitante',state.info.arquitecto],['Cargo técnico solicitante',state.info.arquitectoCargo],['Propietario(s)',state.info.propietarios],['CI/RUC',state.info.documentos],['Ing. Calculista',state.info.calculista],['REG. SENESCYT Calculista',state.info.calculistaSenescyt]].forEach(([l,v])=>{if(!clean(v))e.push('Falta '+l+'.')});state.anexos.forEach((r,i)=>{if(!clean(r.fojas))e.push(`Falta número de fojas en anexo ${i+1}.`);if(r.incluyePlanos&&!clean(r.planos))e.push(`Falta número de planos en anexo ${i+1}.`);if(r.incluyeCds&&!clean(r.cds))e.push(`Falta número de CDs en anexo ${i+1}.`)})}if(state.tipo==='DESISTIMIENTO'&&!clean(state.des.motivo))e.push('Seleccione el motivo de desistimiento.');return e}
 async function finalizeReport(){const e=validate();if(e.length)return alert('No se puede registrar todavía:\n\n- '+e.join('\n- '));if(!confirm('¿Registrar este Informe Estructural como FINALIZADO?'))return;const rendered=state.tipo==='OBSERVACIONES'?{informe_html:reportObservaciones(false)}:(state.tipo==='APROBATORIO'?{asunto:aprobatorioSubject(),cuerpo_html:aprobatorioBody(),anexos_html:annexHtml()}:{asunto:desistSubject(),cuerpo_html:desistBody()});const payload={solicitud_id:request.id,tipo_informe:state.tipo,estado:'FINALIZADO',fecha_informe:state.fecha,memorando_solicitud:state.info.memorando||'',calculista:state.info.calculista||'',calculista_senescyt:state.info.calculistaSenescyt||'',anexos:state.anexos,datos_informe:state,bloques_renderizados:rendered};setStatus('Registrando informe estructural...');const {data,error}=await sb.rpc('phdu_guardar_informe_estructural',{p_payload:payload});if(error){setStatus(error.message||String(error),'error');return alert(error.message||error)}const row=Array.isArray(data)?data[0]:data;setStatus(`Informe registrado. Estado estructural: ${row?.estado_revision||''}`,'ok');$('estadoTop').value=row?.estado_revision||$('estadoTop').value;localStorage.removeItem('allpa-struct-'+request.id);setTimeout(()=>location.href='index.html',700)}
 window.finalizeReport=finalizeReport;
