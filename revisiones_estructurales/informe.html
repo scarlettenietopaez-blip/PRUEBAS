@@ -325,6 +325,39 @@ button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:point
 }
 </style>
 
+
+<style id="struct-v7939-css">
+/* ANEXOS: mismo lenguaje visual del módulo Arquitectónico */
+.struct-annex-card{margin-top:18px;padding:14px;border:1px solid #b8cbe0;border-radius:14px;background:#f8fbff;overflow-x:auto}
+.struct-annex-title{margin:0 0 6px;padding:9px 11px;border-left:4px solid #c9183a;background:#eef4fa;color:#0b2b4c;font-size:13px;font-weight:900;text-transform:uppercase}
+.struct-annex-help{margin:0 0 11px;color:#667085;font-size:10px;line-height:1.35}
+.struct-annex-table{width:100%;min-width:820px;table-layout:fixed;border-collapse:collapse;background:#fff}
+.struct-annex-table th,.struct-annex-table td{border:1px solid #b8cbe0;padding:7px;vertical-align:middle}
+.struct-annex-table th{background:#e5eef7;color:#0b2b4c;font-size:10px;font-weight:900;text-transform:uppercase;text-align:center}
+.struct-annex-table td:first-child{font-weight:900;color:#0b2b4c;text-align:center}
+.struct-annex-table input[type=number],.struct-annex-table select{width:100%;min-width:0;height:36px;padding:7px 8px;border:1px solid #c8d6e5;border-radius:9px;background:#fff;color:#17324d;font-size:11px}
+.struct-annex-table input[type=checkbox]{width:18px;height:18px;margin:0}
+.struct-annex-check{display:flex;align-items:center;justify-content:center;gap:6px;margin:0;color:#17324d;font-size:10px;font-weight:800;text-transform:none;white-space:nowrap}
+.struct-annex-planos{display:flex;align-items:center;justify-content:center;gap:6px;color:#17324d;font-size:10px;font-weight:800;white-space:nowrap}
+.struct-annex-planos input[type=number]{width:58px;flex:0 0 58px;text-align:center;padding:6px 5px}
+.struct-annex-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:11px}
+.struct-annex-actions button{min-height:34px}
+
+/* Antecedentes del Desistimiento: densidad equivalente al módulo Arquitectónico */
+.struct-page-flow .des-data-table{font-family:Arial,Helvetica,sans-serif!important;font-size:8.35pt!important;line-height:1.03!important;margin:1.5mm 0 3.2mm!important}
+.struct-page-flow .des-data-table col.des-c1{width:22%!important}
+.struct-page-flow .des-data-table col.des-c2{width:40%!important}
+.struct-page-flow .des-data-table col.des-c3{width:18%!important}
+.struct-page-flow .des-data-table col.des-c4{width:20%!important}
+.struct-page-flow .des-data-table td{border:1px solid #000!important;padding:.8mm 1.15mm!important;vertical-align:middle!important;min-height:0!important;height:auto!important}
+.struct-page-flow .des-data-table td.label{background:#dedede!important;font-weight:700!important;text-transform:uppercase!important;width:auto!important;line-height:1.02!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.struct-page-flow .des-data-table td.value{width:auto!important;line-height:1.04!important}
+.struct-page-flow .des-data-table td.center{text-align:center!important}
+.struct-page-flow .des-data-table td.des-section{background:#d7d7d7!important;text-align:center!important;font-weight:700!important;text-transform:uppercase!important;padding:.65mm 1mm!important}
+.struct-page-flow .des-data-table tr{break-inside:avoid;page-break-inside:avoid}
+.struct-page-flow .des-criterion-table{font-family:Arial,Helvetica,sans-serif!important;font-size:8.3pt!important;line-height:1.08!important}
+.struct-page-flow .des-criterion-table th,.struct-page-flow .des-criterion-table td{padding:1.1mm 1.3mm!important}
+</style>
 </head>
 <body>
 <header class="struct-topbar no-print">
@@ -389,7 +422,7 @@ button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:point
         <div class="field" style="margin-top:14px"><label>NOTA (OPCIONAL)</label><textarea id="obsNota" placeholder="Texto adicional que ingresa el Ing. Revisor, si corresponde."></textarea></div>
         <div class="tab-actions"><button type="button" class="secondary" onclick="tabAnteriorStruct()">ATRÁS</button><button type="button" class="success" onclick="guardarYSeguirStruct()">GUARDAR Y SIGUIENTE</button></div>
       </section>
-      <section id="tab-apr" class="tab card no-print"><div class="section-title">INFORME TÉCNICO APROBATORIO ESTRUCTURAL</div><div id="aprFields" class="grid"></div><div class="field" style="margin-top:12px"><label><input id="recColumnas" type="checkbox" style="width:auto;height:auto"> Incluir recomendación: Se sugiere revisar secciones de columnas de acuerdo al cálculo estructural.</label></div><div class="section-title" style="margin-top:18px">ANEXOS</div><div id="annexForm"></div></section>
+      <section id="tab-apr" class="tab card no-print"><div class="section-title">INFORME TÉCNICO APROBATORIO ESTRUCTURAL</div><div id="aprFields" class="grid"></div><div class="field" style="margin-top:12px"><label><input id="recColumnas" type="checkbox" style="width:auto;height:auto"> Incluir recomendación: Se sugiere revisar secciones de columnas de acuerdo al cálculo estructural.</label></div><div id="annexForm"></div></section>
       <section id="tab-des" class="tab card no-print">
         <div class="section-title">INFORME TÉCNICO NO FAVORABLE DE DESISTIMIENTO</div>
         <div class="grid">
@@ -398,7 +431,6 @@ button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:point
           <div class="field span3" id="desConclusionesWrap"><label>Conclusiones complementarias</label><textarea id="desConclusiones" placeholder="Texto complementario, si corresponde"></textarea></div>
         </div>
         <div id="desObsInfo" class="note" style="margin-top:12px"></div>
-        <div class="section-title" style="margin-top:18px">ANEXOS</div>
         <div id="desAnnexForm"></div>
       </section>
       <section id="tab-vista" class="tab card"><div id="vista"></div><div class="tab-actions no-print"><button type="button" class="secondary" onclick="tabAnteriorStruct()">ATRÁS</button><button type="button" class="success" onclick="guardarYSeguirStruct()">GUARDAR Y SIGUIENTE</button></div></section>
@@ -579,7 +611,12 @@ window.removeReqImage=function(key,id,index){const o=reqObj(key,id);o.imagenes.s
 window.clearReqImages=function(key,id){const o=reqObj(key,id);o.imagenes=[];o.imagen='';saveLocal();renderRequirements();renderVista()}
 function annexN(index,type){let n=0;for(let i=0;i<=index;i++)if((state.anexos[i]?.tipo||'folder')===type)n++;return n}
 function annexLine(r,i){const tipo=r.tipo||'folder';const f=clean(r.fojas);let s=tipo==='carpeta'?`Carpeta ${annexN(i,'carpeta')}: ${f} fojas`:tipo==='fojas'?`${f} fojas`:`Folder ${annexN(i,'folder')}: ${f} fojas`;if(r.incluyePlanos)s+=` incluido ${clean(r.planos)} ${Number(r.planos)===1?'plano':'planos'}`;s+=' en su foliado';if(r.incluyeCds)s+=` + ${clean(r.cds)} ${Number(r.cds)===1?'CD':'CDs'}`;return s}
-function renderAnnex(){const rows=state.anexos;const html=`<div class="req-wrap"><table class="annex-table"><thead><tr><th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th><th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${r.tipo==='carpeta'?'Carpeta '+annexN(i,'carpeta'):r.tipo==='fojas'?'Fojas':'Folder '+annexN(i,'folder')}</td><td><select data-ax="${i}" data-f="tipo"><option value="folder" ${r.tipo==='folder'?'selected':''}>folder</option><option value="carpeta" ${r.tipo==='carpeta'?'selected':''}>carpeta</option><option value="fojas" ${r.tipo==='fojas'?'selected':''}>fojas</option></select></td><td><input data-ax="${i}" data-f="fojas" value="${h(r.fojas||'')}" placeholder="Fojas"></td><td><label class="inline-check"><input type="checkbox" data-ax="${i}" data-f="incluyePlanos" ${r.incluyePlanos?'checked':''}> incluido</label><input data-ax="${i}" data-f="planos" value="${h(r.planos||'')}" placeholder="N.º" ${r.incluyePlanos?'':'disabled'}></td><td><label class="inline-check"><input type="checkbox" data-ax="${i}" data-f="incluyeCds" ${r.incluyeCds?'checked':''}> + CDs</label></td><td><input data-ax="${i}" data-f="cds" value="${h(r.cds||'')}" placeholder="CDs" ${r.incluyeCds?'':'disabled'}></td><td><button class="danger-small" onclick="removeAnnex(${i})">QUITAR</button></td></tr>`).join('')}</tbody></table></div><div class="toolbar"><button class="btn btn-blue" onclick="addAnnex()">+ AGREGAR FILA</button></div>`;['annexForm','desAnnexForm'].forEach(id=>{const box=$(id);if(box)box.innerHTML=html});document.querySelectorAll('[data-ax]').forEach(el=>{const ev=(el.type==='checkbox'||el.tagName==='SELECT')?'change':'input';el.addEventListener(ev,()=>{const r=state.anexos[Number(el.dataset.ax)],f=el.dataset.f;r[f]=el.type==='checkbox'?el.checked:el.value;if(f==='incluyePlanos'&&!r[f])r.planos='';if(f==='incluyeCds'&&!r[f])r.cds='';saveLocal();if(el.type==='checkbox'||el.tagName==='SELECT')renderAnnex();renderVista()})})}
+function renderAnnex(){
+ const rows=state.anexos;
+ const html=`<section class="struct-annex-card"><div class="struct-annex-title">ANEXOS</div><p class="struct-annex-help">Esta información se usa para generar el texto de anexos del Informe Técnico Aprobatorio o del Informe de Desistimiento. El resultado y el botón “Copiar anexos” se encuentran en Vista del Informe.</p><table class="struct-annex-table"><colgroup><col style="width:9%"><col style="width:18%"><col style="width:14%"><col style="width:18%"><col style="width:16%"><col style="width:13%"><col style="width:12%"></colgroup><thead><tr><th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th><th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${r.tipo==='carpeta'?'Carpeta '+annexN(i,'carpeta'):r.tipo==='fojas'?'—':'Folder '+annexN(i,'folder')}</td><td><select data-ax="${i}" data-f="tipo"><option value="folder" ${r.tipo==='folder'?'selected':''}>folder</option><option value="carpeta" ${r.tipo==='carpeta'?'selected':''}>carpeta</option><option value="fojas" ${r.tipo==='fojas'?'selected':''}>fojas</option></select></td><td><input type="number" min="0" step="1" inputmode="numeric" data-ax="${i}" data-f="fojas" value="${h(r.fojas||'')}" placeholder="Fojas"></td><td><div class="struct-annex-planos"><label class="struct-annex-check"><input type="checkbox" data-ax="${i}" data-f="incluyePlanos" ${r.incluyePlanos?'checked':''}> incluido</label><input type="number" min="0" step="1" inputmode="numeric" data-ax="${i}" data-f="planos" value="${h(r.planos||'')}" placeholder="N.º" ${r.incluyePlanos?'':'disabled'}><span>planos</span></div></td><td><label class="struct-annex-check"><input type="checkbox" data-ax="${i}" data-f="incluyeCds" ${r.incluyeCds?'checked':''}> + CDs</label></td><td><input type="number" min="0" step="1" inputmode="numeric" data-ax="${i}" data-f="cds" value="${h(r.cds||'')}" placeholder="CDs" ${r.incluyeCds?'':'disabled'}></td><td style="text-align:center"><button type="button" class="danger-small" onclick="removeAnnex(${i})" ${rows.length<=1?'disabled':''}>QUITAR</button></td></tr>`).join('')}</tbody></table><div class="struct-annex-actions"><button type="button" class="btn btn-blue" onclick="addAnnex()">+ AGREGAR FILA</button></div></section>`;
+ ['annexForm','desAnnexForm'].forEach(id=>{const box=$(id);if(box)box.innerHTML=html});
+ document.querySelectorAll('[data-ax]').forEach(el=>{const ev=(el.type==='checkbox'||el.tagName==='SELECT')?'change':'input';el.addEventListener(ev,()=>{const r=state.anexos[Number(el.dataset.ax)],f=el.dataset.f;r[f]=el.type==='checkbox'?el.checked:el.value;if(f==='incluyePlanos'&&!r[f])r.planos='';if(f==='incluyeCds'&&!r[f])r.cds='';saveLocal();if(el.type==='checkbox'||el.tagName==='SELECT')renderAnnex();renderVista()})})
+}
 window.addAnnex=()=>{state.anexos.push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});saveLocal();renderAnnex();renderVista()};window.removeAnnex=i=>{if(state.anexos.length===1)return alert('Debe conservar al menos una fila.');state.anexos.splice(i,1);saveLocal();renderAnnex();renderVista()};
 function renderAprFields(){$('aprFields').innerHTML=infoField('memorando','Memorando de Solicitud Estructural')+infoField('arquitecto','Técnico que registra la solicitud')+infoField('arquitectoCargo','Cargo del técnico solicitante')+infoField('egob','eGOB')+infoField('propietarios','Propietario(s)')+infoField('documentos','CI/RUC')+infoField('calculista','Ing. Calculista')+infoField('calculistaSenescyt','REG. SENESCYT Calculista');$('aprFields').querySelectorAll('[data-info]').forEach(el=>el.addEventListener('input',()=>{state.info[el.dataset.info]=el.value;saveLocal();renderInfo();renderVista()}));$('recColumnas').checked=!!state.recColumnas;$('recColumnas').onchange=()=>{state.recColumnas=$('recColumnas').checked;saveLocal();renderVista()};renderAnnex()}
 function selectedObservations(){ensureStructObservationState();return (state.obsSeleccionadas||[]).map(o=>({requisito:o.requisito||'',observacion:o.observacion||'',imagenes:Array.isArray(o.imagenes)?o.imagenes:[]}));}
