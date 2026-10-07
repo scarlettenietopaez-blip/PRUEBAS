@@ -1,8 +1,8 @@
 ﻿ID;Tipo;Nivel;Grupo;Requisito;Norma;Estructuras;Opciones;Preseleccion;Condicion;Control
 MS01;REQUISITO;;Requisito;Requisito;;;;Preselección;;
 MS02;TITULO;0;PLANOS ESTRUCTURALES;PLANOS ESTRUCTURALES;;;;;;
-M001;REQUISITO;;PLANOS ESTRUCTURALES;Coincide con el plano arquitectónico (ejes, niveles, # y dimensiones de columnas, volados y pozos);;;CUMPLE|NO_CUMPLE;Cumple;;
-M002;REQUISITO;;PLANOS ESTRUCTURALES;Detalle de la junta sísmica entre estructuras adyacentes.;;;CUMPLE|NO_CUMPLE|NO_APLICA;No Aplica;;
+M001;REQUISITO;;PLANOS ESTRUCTURALES;0.1. Coincide con el plano arquitectónico (ejes, niveles, # y dimensiones de columnas, volados y pozos);;;CUMPLE|NO_CUMPLE;Cumple;;
+M002;REQUISITO;;PLANOS ESTRUCTURALES;0.2. Detalle de la junta sísmica entre estructuras adyacentes.;;;CUMPLE|NO_CUMPLE|NO_APLICA;No Aplica;;
 MS03;SUBTITULO;1;1. CIMENTACIÓN;1. CIMENTACIÓN;;;;;;
 M003;REQUISITO;;1. CIMENTACIÓN;1.1. Planta de Cimentación (Disposición de las zapatas considerando los linderos);;;CUMPLE|NO_CUMPLE;Cumple;;
 M004;REQUISITO;;1. CIMENTACIÓN;1.1.1 Incorporación de vigas de conexión al tener excentricidad en las zapatas de lindero.;;;CUMPLE|NO_CUMPLE|NO_APLICA;No Aplica;;
