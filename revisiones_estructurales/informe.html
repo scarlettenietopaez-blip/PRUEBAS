@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ALLPA · Informe Estructural</title>
-<!-- ALLPA Revisiones Estructurales V7.9.34 · paginación institucional + información/propietarios + notificación compacta 2026-10-06 -->
+<!-- ALLPA Revisiones Estructurales V7.9.35 · impresión A4 institucional + paginación/márgenes/tablas 2026-10-07 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--azul:#06375d;--azul2:#075681;--rojo:#b91d35;--ink:#17344d;--muted:#62788b;--line:#c8d8e4;--bg:#f1f6f9;--ok:#0d7a46;--warn:#8a5a00}
@@ -60,18 +60,195 @@ button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:point
 @media print{.struct-topbar,.struct-sidebar,.tabs{display:none!important}.struct-main{padding:0!important}.struct-layout{display:block!important}.card{border:0!important;box-shadow:none!important;padding:0!important}}
 </style>
 
-<style id="struct-print-v7933">
+<style id="struct-print-v7935">
+/* Vista del informe: conserva el aspecto del documento antes de imprimir */
+#tab-vista .report-shell{
+  width:210mm;
+  max-width:100%;
+  min-height:297mm;
+  margin:0 auto;
+  padding:38mm 18mm 27mm;
+  background:#fff url('../assets/fondo_institucional.png') top center/210mm 297mm repeat-y!important;
+  color:#000;
+  font-family:"Times New Roman",Times,serif;
+  font-size:10.5pt;
+  line-height:1.25;
+  box-shadow:0 1px 5px rgba(0,0,0,.18);
+  print-color-adjust:exact;
+  -webkit-print-color-adjust:exact;
+}
+#tab-vista .report-content{color:#000;font-family:"Times New Roman",Times,serif;font-size:10.5pt;line-height:1.25}
+#tab-vista .report-content p{margin:0 0 3.2mm;text-align:justify}
+#tab-vista .report-content strong,#tab-vista .report-content b{font-weight:700!important}
+#tab-vista .report-document-title{font-size:10.5pt;line-height:1.2;margin:0 0 5mm;font-weight:700}
+#tab-vista .report-section-title{display:flex;gap:3mm;align-items:baseline;font-weight:700;font-size:11pt;margin:4.5mm 0 2.2mm;color:#000}
+#tab-vista .report-legal-title{font-weight:700;margin:0 0 1.5mm!important;text-align:left!important}
+#tab-vista .report-table{width:100%;border-collapse:collapse;table-layout:fixed;margin:2mm 0 4mm;color:#000;font-size:9.8pt;line-height:1.2}
+#tab-vista .report-table th,#tab-vista .report-table td{border:1px solid #000;padding:2.2mm 2.4mm;vertical-align:top}
+#tab-vista .report-table th{background:#d9d9d9!important;font-weight:700;text-align:left;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+#tab-vista .report-table .nro-col{width:12mm;text-align:center}
+#tab-vista .report-table .req-col{width:45%}
+#tab-vista .report-table .clar-col{width:auto}
+#tab-vista .report-img-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3mm;padding:1.5mm 0}
+#tab-vista .report-img-gallery img{display:block;width:100%;max-height:50mm;object-fit:contain;border:1px solid #888;background:#fff}
+#tab-vista .report-note-box{border:1px solid #000;padding:2.5mm 3mm;margin:1.5mm 0 4mm;background:#fff}
+#tab-vista .report-small-note{font-size:9.2pt;line-height:1.2;text-align:justify}
+#tab-vista .signature{margin-top:5mm}
+#tab-vista .signature-space{height:17mm}
+
 @media print{
-  @page{size:A4;margin:42mm 20mm 40mm}
-  html,body{background:#fff!important}
-  body.printing-observaciones .report-shell{width:auto!important;max-width:none!important;min-height:0!important;margin:0!important;padding:0!important;background:none!important;overflow:visible!important;box-shadow:none!important;border:0!important}
-  body.printing-observaciones .report-print-bg{display:block!important;position:fixed!important;z-index:-10!important;left:-20mm!important;top:-42mm!important;width:210mm!important;height:297mm!important;object-fit:fill!important;pointer-events:none!important}
-  body.printing-observaciones .report-content{position:relative!important;z-index:1!important;width:auto!important}
-  body.printing-observaciones .report-document-title{break-after:avoid-page;page-break-after:avoid;margin-bottom:6mm!important}
-  body.printing-observaciones .report-section-title{break-after:avoid-page;page-break-after:avoid}
-  body.printing-observaciones .report-table thead{display:table-header-group}
-  body.printing-observaciones .report-table tr{break-inside:avoid-page;page-break-inside:avoid}
-  body.printing-observaciones .report-img-gallery,.signature{break-inside:avoid-page;page-break-inside:avoid}
+  @page{size:A4 portrait;margin:38mm 18mm 27mm}
+  html,body{margin:0!important;padding:0!important;background:#fff!important;color:#000!important}
+  *{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important}
+  body.printing-observaciones .struct-topbar,
+  body.printing-observaciones .struct-sidebar,
+  body.printing-observaciones .tabs,
+  body.printing-observaciones .view-toolbar,
+  body.printing-observaciones .tab-actions,
+  body.printing-observaciones .no-print{display:none!important}
+  body.printing-observaciones .struct-main,
+  body.printing-observaciones .struct-layout,
+  body.printing-observaciones .struct-workspace,
+  body.printing-observaciones #tab-vista,
+  body.printing-observaciones #vista{display:block!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+  body.printing-observaciones .tab:not(#tab-vista){display:none!important}
+
+  /* El fondo institucional se repite en todas las páginas impresas. */
+  body.printing-observaciones .report-print-bg{
+    display:block!important;
+    position:fixed!important;
+    z-index:0!important;
+    left:-18mm!important;
+    top:-38mm!important;
+    width:210mm!important;
+    height:297mm!important;
+    max-width:none!important;
+    object-fit:fill!important;
+    pointer-events:none!important;
+  }
+  body.printing-observaciones .report-shell{
+    position:static!important;
+    width:auto!important;
+    max-width:none!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    background:none!important;
+    border:0!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+    color:#000!important;
+    font-family:"Times New Roman",Times,serif!important;
+    font-size:10.5pt!important;
+    line-height:1.25!important;
+  }
+  body.printing-observaciones .report-content{
+    position:relative!important;
+    z-index:1!important;
+    width:auto!important;
+    color:#000!important;
+    font-family:"Times New Roman",Times,serif!important;
+    font-size:10.5pt!important;
+    line-height:1.25!important;
+  }
+  body.printing-observaciones .report-content p{
+    margin:0 0 3.2mm!important;
+    text-align:justify!important;
+    orphans:3;
+    widows:3;
+  }
+  body.printing-observaciones .report-content strong,
+  body.printing-observaciones .report-content b{font-weight:700!important}
+  body.printing-observaciones .report-document-title{
+    font-size:10.5pt!important;
+    line-height:1.2!important;
+    font-weight:700!important;
+    text-align:center!important;
+    text-transform:uppercase!important;
+    margin:0 0 5mm!important;
+    break-after:avoid-page!important;
+    page-break-after:avoid!important;
+  }
+  body.printing-observaciones .report-section-title{
+    display:flex!important;
+    gap:3mm!important;
+    align-items:baseline!important;
+    color:#000!important;
+    font-size:11pt!important;
+    line-height:1.2!important;
+    font-weight:700!important;
+    margin:4.5mm 0 2.2mm!important;
+    break-after:avoid-page!important;
+    page-break-after:avoid!important;
+  }
+  body.printing-observaciones .report-legal-title{
+    font-weight:700!important;
+    margin:0 0 1.5mm!important;
+    text-align:left!important;
+    break-after:avoid-page!important;
+    page-break-after:avoid!important;
+  }
+  body.printing-observaciones .report-table{
+    width:100%!important;
+    border-collapse:collapse!important;
+    table-layout:fixed!important;
+    margin:2mm 0 4mm!important;
+    color:#000!important;
+    font-family:"Times New Roman",Times,serif!important;
+    font-size:9.8pt!important;
+    line-height:1.2!important;
+  }
+  body.printing-observaciones .report-table thead{display:table-header-group!important}
+  body.printing-observaciones .report-table th,
+  body.printing-observaciones .report-table td{
+    border:1px solid #000!important;
+    padding:2.2mm 2.4mm!important;
+    vertical-align:top!important;
+    color:#000!important;
+  }
+  body.printing-observaciones .report-table th{
+    background:#d9d9d9!important;
+    font-weight:700!important;
+    text-align:left!important;
+  }
+  body.printing-observaciones .report-table .nro-col{width:12mm!important;text-align:center!important}
+  body.printing-observaciones .report-table .req-col{width:45%!important}
+  body.printing-observaciones .report-table .clar-col{width:auto!important}
+  body.printing-observaciones .report-table tr{
+    break-inside:avoid-page!important;
+    page-break-inside:avoid!important;
+  }
+  body.printing-observaciones .report-img-gallery{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:3mm!important;
+    padding:1.5mm 0!important;
+    break-inside:avoid-page!important;
+    page-break-inside:avoid!important;
+  }
+  body.printing-observaciones .report-img-gallery img{
+    display:block!important;
+    width:100%!important;
+    max-height:50mm!important;
+    object-fit:contain!important;
+    border:1px solid #888!important;
+    background:#fff!important;
+  }
+  body.printing-observaciones .report-note-box{
+    border:1px solid #000!important;
+    padding:2.5mm 3mm!important;
+    margin:1.5mm 0 4mm!important;
+    background:#fff!important;
+    break-inside:avoid-page!important;
+    page-break-inside:avoid!important;
+  }
+  body.printing-observaciones .report-small-note{font-size:9.2pt!important;line-height:1.2!important;text-align:justify!important}
+  body.printing-observaciones .signature{
+    margin-top:5mm!important;
+    break-inside:avoid-page!important;
+    page-break-inside:avoid!important;
+  }
+  body.printing-observaciones .signature-space{height:17mm!important}
 }
 </style>
 </head>
