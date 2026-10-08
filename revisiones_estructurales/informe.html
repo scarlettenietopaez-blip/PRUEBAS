@@ -440,7 +440,7 @@ button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:point
       </section>
       <section id="tab-apr" class="tab card no-print"><div class="section-title">INFORME TÉCNICO APROBATORIO ESTRUCTURAL</div><div id="aprFields" class="grid"></div><div class="field" style="margin-top:12px"><label><input id="recColumnas" type="checkbox" style="width:auto;height:auto"> Incluir recomendación: Se sugiere revisar secciones de columnas de acuerdo al cálculo estructural.</label></div><div id="annexForm"></div></section>
       <section id="tab-des" class="tab card no-print">
-        <div class="section-title">INFORME TÉCNICO NO FAVORABLE DE DESISTIMIENTO</div>
+        <div class="section-title">INFORME TÉCNICO DE DESISTIMIENTO</div>
         <div class="grid">
           <div class="field span3"><label>Motivo *</label><select id="desMotivo"><option value="">Seleccione...</option><option value="Observaciones No Subsanadas/Parcialmente Subsanadas">Observaciones No Subsanadas/Parcialmente Subsanadas</option><option value="Petición del Administrado">Petición del Administrado</option></select></div>
           <div class="field span3"><label>Nota (opcional)</label><input id="desNota" placeholder="Texto opcional para incluir antes de conclusiones"></div>
@@ -672,7 +672,7 @@ function reportDesistimiento(){
  const criterio=obs.map((o,i)=>`<tr><td class="nro-col">${i+1}</td><td>${h(o.requisito||o.grupo||'')}</td><td>${h(o.observacion||'')}</td></tr>`).join('');
  const nota=clean(state.des.nota),extra=clean(state.des.conclusiones),motivo=normalizeDesMotivoStruct(state.des.motivo);
  const petition=motivo==='Petición del Administrado';
- const title=petition?'INFORME TÉCNICO DE DESISTIMIENTO':'INFORME TÉCNICO NO FAVORABLE DE DESISTIMIENTO';
+ const title=petition?'INFORME TÉCNICO DE DESISTIMIENTO':'INFORME TÉCNICO DE DESISTIMIENTO';
  let body=`<div class="report-shell" id="printReport"><img class="report-print-bg" src="../assets/fondo_institucional.png" alt="" aria-hidden="true"><div class="report-content"><div class="report-document-title"><span class="municipio">GOBIERNO AUTÓNOMO DESCENTRALIZADO MUNICIPAL RIOBAMBA</span><span class="tipo">${title}</span></div><div class="report-section-title"><span>1.</span><span>ANTECEDENTES</span></div>${desDataTableHtml()}`;
  if(petition){
    body+=`<div class="report-section-title"><span>2.</span><span>BASE LEGAL</span></div>${baseLegalPeticionDesHtml()}${nota?`<p class="des-note"><strong>Nota:</strong> ${h(nota)}</p>`:''}<div class="report-section-title"><span>3.</span><span>CONCLUSIONES</span></div><p>En base al Artículo 211 del COA, por Petición del Administrado se procede con el Desistimiento del Trámite.</p><div class="report-section-title"><span>4.</span><span>RECOMENDACIONES</span></div><p>Se recomienda remitir el presente trámite para la emisión de la Resolución Administrativa correspondiente.</p>`;

@@ -39263,18 +39263,43 @@ function planosStateV13Clean(){
 function conclusionExtraV13Clean(){
   if(!ampModV13Clean())return '';
   const tipo=projectTypeTextV13().trim();
+
+  /* V7.9.17: para AMPLIACIÓN / MODIFICACIÓN el área a construir debe salir
+     de la fila calculada "Área Total de Ampliación/Modificación", no del
+     Área Bruta total del edificio. */
   let area='';
-  try{area=String(infoValue('Área Bruta')||'')}catch(_e){}
+  try{
+    const rows=Array.isArray(state?.aprobatorio?.conclusion)?state.aprobatorio.conclusion:[];
+    const ampRow=rows.find(r=>{
+      const role=String(r?.role||r?._roleV13||r?._ctRoleV9||r?._roleV108||'').trim();
+      const desc=norm13(r?.descripcion||'');
+      return role==='areaAmpliacionTotal' || desc.includes('AREA TOTAL DE AMPLIACION') || desc.includes('AREA TOTAL DE MODIFICACION');
+    });
+    area=String(ampRow?.cantidad||'').trim();
+    if(!area) area=String(infoValue('Área Bruta')||'').trim();
+  }catch(_e){
+    try{area=String(infoValue('Área Bruta')||'').trim()}catch(__e){}
+  }
+  const areaTexto=area?`${area} m2`:'';
   const p=planosStateV13Clean();
 
-  let first=`${esc13(tipo)}, tiene un área a construir de ${esc13(area)}, valor a tomar en cuenta para efecto del cálculo para el pago de la tasa administrativa.`;
+  let first=`${esc13(tipo)}, tiene un área a construir de ${esc13(areaTexto)}, valor a tomar en cuenta para efecto del cálculo para el pago de la tasa administrativa.`;
 
   if(p.licencia){
-    first+=` El Proyecto cuenta con Licencia Urbanística ${esc13(p.resolucion||'')} emitida con fecha ${esc13(fmt13(p.fecha))}`;
-    if(String(p.egob||'').trim())first+=`, relacionada al número eGOB ${esc13(p.egob)}`;
-    first+='.';
+    const res=String(p.resolucion||'').trim();
+    const fecha=String(p.fecha||'').trim();
+    const egob=String(p.egob||'').trim();
+    if(res||fecha||egob){
+      first+=` El Proyecto cuenta con Licencia Urbanística${res?' '+esc13(res):''}${fecha?' emitida con fecha '+esc13(fmt13(fecha)):''}`;
+      if(egob)first+=`, relacionada al número eGOB ${esc13(egob)}`;
+      first+='.';
+    }
   }else{
-    first+=` El Proyecto cuenta con Planos Aprobador por ${esc13(p.entidad||'')} con fecha ${esc13(fmt13(p.fechaAprobacion))}.`;
+    const entidad=String(p.entidad||'').trim();
+    const fechaAprob=String(p.fechaAprobacion||'').trim();
+    if(entidad||fechaAprob){
+      first+=` El Proyecto cuenta con Planos Aprobados${entidad?' por '+esc13(entidad):''}${fechaAprob?' con fecha '+esc13(fmt13(fechaAprob)):''}.`;
+    }
   }
 
   return `<p class="planos-conclusion-v13">${first}</p>
@@ -39285,7 +39310,13 @@ function replaceConclusionV13Clean(html){
   if(!ampModV13Clean())return s;
 
   const block=conclusionExtraV13Clean();
-  const generic=/<p\b[^>]*>[\s\S]*?tiene\s+un\s+[áa]rea\s+a\s+construir\s+de[\s\S]*?aprobaci[oó]n\s+quedar[aá]\s+autom[aá]ticamente\s+insubsistente\.?[\s\S]*?<\/p>/i;
+
+  /* V7.9.17: la expresión anterior podía comenzar en el primer <p> de
+     "Detalle del proyecto" y atravesar varios acápites hasta encontrar el
+     texto de Conclusión, eliminando Requisitos, Base legal, Anteproyecto,
+     Estructural, Estudios y la tabla de Conclusión. Esta versión queda
+     estrictamente confinada a UN SOLO párrafo. */
+  const generic=/<p\b[^>]*>(?:(?!<\/p>)[\s\S])*?tiene\s+un\s+[áa]rea\s+a\s+construir\s+de(?:(?!<\/p>)[\s\S])*?aprobaci[oó]n\s+quedar[aá]\s+autom[aá]ticamente\s+insubsistente\.?(?:(?!<\/p>)[\s\S])*?<\/p>/i;
 
   if(generic.test(s))return s.replace(generic,block);
   return s;

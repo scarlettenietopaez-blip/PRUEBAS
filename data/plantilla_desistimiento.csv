@@ -1,5 +1,5 @@
 ﻿ID_Bloque;Motivo;Titulo;Texto_Base;Mostrar
-DES_TIT_001;Observaciones No Subsanadas/Parcialmente Subsanadas;Título;INFORME TÉCNICO NO FAVORABLE DE DESISTIMIENTO;Sí
+DES_TIT_001;Observaciones No Subsanadas/Parcialmente Subsanadas;Título;INFORME TÉCNICO DE DESISTIMIENTO;Sí
 DES_CON_001;Observaciones No Subsanadas/Parcialmente Subsanadas;Conclusión base;Por las conclusiones antes expuestas se emite criterio técnico NO FAVORABLE,;Sí
 DES_TIT_003;Petición del Administrado;Título;INFORME TÉCNICO DE DESISTIMIENTO;Sí
 DES_BLG_003;Petición del Administrado;Base legal petición administrado;"CÓDIGO ORGÁNICO ADMINISTRATIVO
