@@ -997,8 +997,7 @@ html.allpa-project-preboot body::before{
   padding:10px;
   margin-bottom:12px;
 }
-.apr-note-v56 textarea{
-  min-height:90px;
+.apr-note-v56 textarea{min-height:90px;
 }
 @media(max-width:800px){
   .fav-item-v56{grid-template-columns:1fr}
@@ -1997,8 +1996,7 @@ input,select,textarea{
   border-radius:8px;
   padding:6px 10px;
   font-weight:900;
-  cursor:pointer;
-}
+  cursor:pointer;}
 .validation-body-v96{
   padding:16px 18px 18px;
   color:#0f172a;
@@ -2997,8 +2995,7 @@ td{
    ========================================================== */
 
 #institutionalHeroV120,
-.institutional-form-hero-v120{
-  display:none!important;
+.institutional-form-hero-v120{display:none!important;
 }
 
 /* Layout: panel izquierdo + formulario derecho */
@@ -3997,8 +3994,7 @@ header.no-print{padding-left:82px!important}
       "Componente": "ARQUITECTÓNICOS",
       "Tema": "PLANTAS",
       "Observación corta": "IDENTIFICACIÓN LOCALES",
-      "Texto técnico para informe": "Dentro de cada local se identificará su designación y se colocará cotas de nivel en los sitios que fueran necesarios para la comprensión del proyecto.",
-      "Norma / criterio": ""
+      "Texto técnico para informe": "Dentro de cada local se identificará su designación y se colocará cotas de nivel en los sitios que fueran necesarios para la comprensión del proyecto.","Norma / criterio": ""
     },
     {
       "Código": "CPTOM 8",
@@ -4997,8 +4993,7 @@ function propietariosHtml(){
  ensurePropietarios();
  return `<div class="section-title">Propietarios</div><table class="owners-table"><thead><tr><th style="width:52%">Nombre del propietario *</th><th>CI/RUC *</th><th style="width:80px">Acción</th></tr></thead><tbody>${state.propietarios.map((p,i)=>`<tr><td><input value="${esc(p.nombre||'')}" oninput="updPropietario(${i},'nombre',this)"></td><td><input inputmode="numeric" maxlength="13" value="${esc(p.ci||'')}" oninput="updPropietario(${i},'ci',this)"></td><td><button class="danger mini-btn" onclick="delPropietario(${i})">Quitar</button></td></tr>`).join('')}</tbody></table><div class="buttons small-actions"><button class="secondary" onclick="addPropietario()">Agregar propietario</button></div><div class="error-text" id="err_propietarios"></div>`;
 }
-function renderPropietarios(){ const box=document.getElementById('propietariosBox'); if(box) box.innerHTML=propietariosHtml(); }
-function updPropietario(i,k,elOrValue){ ensurePropietarios(); let v=(elOrValue&&typeof elOrValue==='object')?elOrValue.value:elOrValue; if(k==='ci') v=onlyDigits(v,13); else v=smartInputCase(v); if(elOrValue&&typeof elOrValue==='object') elOrValue.value=v; state.propietarios[i][k]=v; syncPropietariosInfo(); scheduleReportUpdate(); }
+function renderPropietarios(){ const box=document.getElementById('propietariosBox'); if(box) box.innerHTML=propietariosHtml(); }function updPropietario(i,k,elOrValue){ ensurePropietarios(); let v=(elOrValue&&typeof elOrValue==='object')?elOrValue.value:elOrValue; if(k==='ci') v=onlyDigits(v,13); else v=smartInputCase(v); if(elOrValue&&typeof elOrValue==='object') elOrValue.value=v; state.propietarios[i][k]=v; syncPropietariosInfo(); scheduleReportUpdate(); }
 function addPropietario(){ ensurePropietarios(); state.propietarios.push({nombre:'',ci:''}); renderPropietarios(); scheduleReportUpdate(); }
 function delPropietario(i){ ensurePropietarios(); if(state.propietarios.length===1){ state.propietarios=[{nombre:'',ci:''}]; } else state.propietarios.splice(i,1); syncPropietariosInfo(); renderPropietarios(); renderReport(); }
 function validatePropietarios(show=true){ ensurePropietarios(); const valid=(state.propietarios||[]).filter(p=>p.nombre||p.ci); let ok=valid.length>0 && valid.every(p=>p.nombre && /^\d{10}(\d{3})?$/.test(String(p.ci||''))); const el=document.getElementById('err_propietarios'); if(el) el.textContent=(!ok && show)?'Debe ingresar al menos un propietario y su CI/RUC de 10 o 13 dígitos.':''; return ok; }
@@ -5997,8 +5992,7 @@ function normTipoInformeV40(v){
 }
 function isAprobatorioV40(){
   return normTipoInformeV40(state.tipoInforme).includes('APROBATORIO');
-}
-function isObservacionesV40(){
+}function isObservacionesV40(){
   return normTipoInformeV40(state.tipoInforme).includes('OBSERVACIONES');
 }
 
@@ -6997,8 +6991,7 @@ function appendRowV47(block, items, cls='row-v47'){
   return row.children.length>0;
 }
 function takeFieldV47(parts){
-  const el=fieldWrapperByAnyLabelV47(parts);
-  return el || null;
+  const el=fieldWrapperByAnyLabelV47(parts);return el || null;
 }
 function reorderInfoGeneralV47(){
   const box=document.getElementById('infoForm');
@@ -7995,10 +7988,7 @@ function renderObservacionesForm(){
  renderManualImagePreviewV53();
 }
 
-/* renderCatalogoObs histórica retirada en Depuración 06 */
-
-
-/* agregarArticuloOrdenanzaV52 histórica retirada en Depuración 07 */
+/* renderCatalogoObs histórica retirada en Depuración 06 *//* agregarArticuloOrdenanzaV52 histórica retirada en Depuración 07 */
 
 async /* Dep19: agregarObsManual histórico retirado L8378 */
 
@@ -8997,8 +8987,7 @@ function parseUsoValueV63(){
   if(raw.toUpperCase().startsWith('MIXTO')){
     const vals=raw.replace(/^MIXTO\s*:?\s*/i,'').split(',').map(x=>x.trim()).filter(Boolean);
     state.usoPrincipalV63={modo:'MIXTO', seleccionados:vals, otro:''};
-  }else if(raw.toUpperCase().startsWith('OTROS')){
-    const val=raw.replace(/^OTROS\s*:?\s*/i,'').trim();
+  }else if(raw.toUpperCase().startsWith('OTROS')){const val=raw.replace(/^OTROS\s*:?\s*/i,'').trim();
     state.usoPrincipalV63={modo:'OTROS', seleccionados:[], otro:val};
   }else if(raw){
     state.usoPrincipalV63={modo:raw.toUpperCase(), seleccionados:[], otro:''};
@@ -9997,8 +9986,7 @@ function updateCopyPanelV70(){
     btnCopy.onclick=copiarInformeActualV70;
     btnCopy.title=state.tipoInforme==='Informe de Desistimiento'?'Copiar informe de desistimiento para pegar en eGOB':'Copiar informe aprobatorio para pegar en eGOB';
     btnCopy.setAttribute('aria-label', btnCopy.title);
-  }
-}
+  }}
 
 /* Reforzar updateSideActions sin alterar la lógica existente */
 const _updateSideActions_base_V70 = typeof updateSideActions === 'function' ? updateSideActions : null;
@@ -10997,8 +10985,7 @@ function activeConclusionKeysV81(){
       const v = String(r.activo ?? '').trim().toLowerCase();
       return r.activo === true || v === 'true' || v === 'sí' || v === 'si' || v === '1';
     })
-    .map(r=>normDescConclusionV81(r.descripcion))
-    .filter(Boolean));
+    .map(r=>normDescConclusionV81(r.descripcion)).filter(Boolean));
 }
 
 function allConclusionKeysV81(){
@@ -11997,8 +11984,7 @@ function codigoPitOfItemV90(item){
 }
 
 function parroquiaOfItemV90(item){
-  return String(pgetV43(item?.properties||{}, 'parroquia') || '').trim();
-}
+  return String(pgetV43(item?.properties||{}, 'parroquia') || '').trim();}
 
 function findPitByCodigoParroquiaV90(code, parroquia){
   ensureIprusPitV43();
@@ -12997,8 +12983,7 @@ function parseValidationErrorV96(text){
   let detalle=raw;
 
   const m=raw.match(/^([^:]{2,80}):\s*(.+)$/);
-  if(m){
-    campo=m[1].trim();
+  if(m){campo=m[1].trim();
     detalle=m[2].trim();
   }else{
     const m2=raw.match(/^Falta el campo:\s*(.+)\.?$/i);
@@ -13997,8 +13982,7 @@ function reqTable(reqs, mode){
   if(!reqs.length) return '<p>No se registran requisitos para esta sección.</p>';
 
   return `<table class="req-report-v94"><thead><tr>
-    <th>Requisito</th>
-    <th>Resultado / detalle</th>
+    <th>Requisito</th><th>Resultado / detalle</th>
     ${mode === 'obs' ? '<th>Corrección requerida</th>' : ''}
   </tr></thead><tbody>${reqs.map((r)=>{
     const v = state.requisitos[r.id] || {};
@@ -14997,8 +14981,7 @@ function obsImageToolsHtmlV113(o){
         <img src="${esc(src)}" alt="Imagen ${i+1}">
         <button type="button" class="secondary mini-btn" onclick="removeObsImageV113('${esc(o.id)}',${i})">Quitar ${i+1}</button>
       </div>`).join('')}</div>
-      <button type="button" class="secondary mini-btn" onclick="clearObsImagesV113('${esc(o.id)}')">Quitar todas</button>`:''}
-  </div>`;
+      <button type="button" class="secondary mini-btn" onclick="clearObsImagesV113('${esc(o.id)}')">Quitar todas</button>`:''}</div>`;
 }
 
 /* Tabla de observaciones seleccionadas con galería múltiple. */
@@ -15997,9 +15980,7 @@ function savedTitleV119(x){
 
   if(tipo){
     return `eGOB ${raw} - ${tipo}`;
-  }
-
-  return `eGOB ${raw}`;
+  }return `eGOB ${raw}`;
 }
 /* Fase 22B: renderSavedList histórico retirado L16196 */
 
@@ -16188,6 +16169,12 @@ const PROJECTS_V123 = {
     nombre:'Anteproyecto de Edificación',
     corto:'Anteproyecto',
     descripcion:'Informes para observaciones, aprobación y desistimiento de anteproyectos de edificación.'
+  },
+  anteproyecto_subdivision:{
+    id:'anteproyecto_subdivision',
+    nombre:'Anteproyecto de Subdivisión Predial de dos a diez lotes con obras',
+    corto:'Anteproyecto de Subdivisión',
+    descripcion:'Mesa Técnica · Informe Técnico Aprobatorio para subdivisión predial de dos a diez lotes con obras.'
   }
 };
 
@@ -16252,6 +16239,11 @@ function ensureProjectEntryV123(){
           <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_edificacion')">
             <span class="num">2</span>
             <span><span class="title">Anteproyecto de Edificación</span><span class="desc">Nuevo proyecto con textos y secciones adaptadas.</span></span>
+            <span class="arrow">→</span>
+          </button>
+          <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_subdivision')">
+            <span class="num">3</span>
+            <span><span class="title">Anteproyecto de Subdivisión Predial</span><span class="desc">Mesa Técnica · Dos a diez lotes con obras.</span></span>
             <span class="arrow">→</span>
           </button>
         </div>
@@ -16533,6 +16525,11 @@ function ensureProjectEntryV123(){
           <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_edificacion')">
             <span class="num">2</span>
             <span class="title">ANTEPROYECTO DE EDIFICACIÓN</span>
+            <span class="arrow">→</span>
+          </button>
+          <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_subdivision')">
+            <span class="num">3</span>
+            <span class="title">ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS</span>
             <span class="arrow">→</span>
           </button>
         </div>
@@ -16997,8 +16994,7 @@ header.no-print h1{
   margin:0 0 0 auto!important;
   text-align:right!important;
   flex:0 1 auto!important;
-}
-#currentProjectPillV123,
+}#currentProjectPillV123,
 #projectBadgeTabsV123{
   display:none!important;
 }
@@ -17997,8 +17993,7 @@ body.project-home-open-v130 .header-report-actions-v131{
   display:block;
 }
 .saved-search-result-v131{
-  width:100%!important;
-  display:block!important;
+  width:100%!important;display:block!important;
   padding:9px 10px!important;
   margin:0 0 5px!important;
   text-align:left!important;
@@ -18997,8 +18992,7 @@ window.addEventListener('load',()=>{
 @media(max-width:900px){
   #conclusionTabla .editable-conclusion{
     min-width:720px!important;
-  }
-}
+  }}
 </style>
 
 
@@ -19997,9 +19991,7 @@ function savedAnteproyectoScoreV141(record){
   if(Array.isArray(record?.aprobatorio?.conclusion) && record.aprobatorio.conclusion.length) score+=200;
   if(record?.info && Object.keys(record.info).length) score+=50;
   return score;
-}
-
-async function findSavedAnteproyectoByEgobV141(value){
+}async function findSavedAnteproyectoByEgobV141(value){
   const target=egobNumberV141(value);
   if(!target) return null;
   let records=[];
@@ -20997,8 +20989,7 @@ bindAnteproyectoFields=function(){
       state.aprobatorio.anteproyecto.manualToggle=true;
       state.aprobatorio.anteproyecto.activo=!!sw.checked;
       if(!sw.checked){
-        state.aprobatorio.anteproyecto={activo:false,manualToggle:true,documento:'',egob:'',tecnico:'',criterio:'',calculista:'',senescyt:''};
-      }
+        state.aprobatorio.anteproyecto={activo:false,manualToggle:true,documento:'',egob:'',tecnico:'',criterio:'',calculista:'',senescyt:''};}
       renderAprobatorioForm(); renderReport(); renderPreview();
     });
   }
@@ -21997,8 +21988,7 @@ window.addEventListener('load',()=>{
    ========================================================== */
 html body #report.report h2,
 html body .report h2{
-  font-size:11pt!important;
-  line-height:1.15!important;
+  font-size:11pt!important;line-height:1.15!important;
   font-weight:700!important;
   margin:14px 0 7px!important;
   padding:0 0 4px!important;
@@ -22997,8 +22987,7 @@ function sanitizeCopiedBackgroundsV159(root){
     el.style.setProperty('background','transparent','important');
     el.style.setProperty('background-color','transparent','important');
     el.style.setProperty('text-shadow','none','important');
-    el.style.setProperty('box-shadow','none','important');
-    el.removeAttribute('bgcolor');
+    el.style.setProperty('box-shadow','none','important');el.removeAttribute('bgcolor');
   });
   return root;
 }
@@ -23997,8 +23986,7 @@ function setSearchInputSelectedV119O(recordOrKey){
     record=(savedReportsCacheV131||[]).find(r=>savedRecordKeyV119O(r)===key) || null;
   }
 
-  const key=record ? savedRecordKeyV119O(record) : String(recordOrKey||'').trim();
-  const title=record ? savedTitleV119O(record) : key;
+  const key=record ? savedRecordKeyV119O(record) : String(recordOrKey||'').trim();const title=record ? savedTitleV119O(record) : key;
 
   input.value=title;
   input.dataset.selectedSavedKeyV119O=key;
@@ -24997,8 +24985,7 @@ document.addEventListener('click',event=>{
       const base=baseEgobV119R(state);
       if(!base){
         if(typeof msg==='function') msg('Debe colocar el Nro. eGOB antes de convertir el proyecto.');
-        return;
-      }
+        return;}
 
       const source=cloneV119R(state);
       source.egob=state?._savedKeyV119R || state?._savedKeyV164 || state?._savedKeyV119 || state?.egob || base;
@@ -25997,8 +25984,7 @@ aprobatorioInfoTableFromTemplate = function(text){
     const base = _aprobatorioInfoTableFromTemplate_base_V119W
       ? _aprobatorioInfoTableFromTemplate_base_V119W(text)
       : '';
-    return String(base||'');
-  }
+    return String(base||'');}
 
   return `<table class="apr-info-table"><colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"></colgroup><tbody>
     ${aprOne('TRÁMITE E-GOB', state.egob || val('TRÁMITE EGOB'))}
@@ -26997,8 +26983,7 @@ window.addEventListener('load',()=>{
     renderEmailPreviewV119X();
     renderSientoPreviewV119X();
   };
-  window.updateAdditionalEmailV119X=function(index,value){
-    const n=ensureNotificationStateV119X();
+  window.updateAdditionalEmailV119X=function(index,value){const n=ensureNotificationStateV119X();
     while(n.correosAdicionales.length<=index) n.correosAdicionales.push('');
     n.correosAdicionales[index]=String(value||'').trim();
     renderSientoPreviewV119X();
@@ -27997,8 +27982,7 @@ window.addEventListener('load',()=>{
         : await (await fetch(path,{cache:'no-store'})).text();
       return typeof parseCSVV32==='function' ? parseCSVV32(text) : [];
     }catch(err){
-      console.warn('VERSIÓN 3: no se pudo cargar '+path+'. Se usa la base interna.',err);
-      return [];
+      console.warn('VERSIÓN 3: no se pudo cargar '+path+'. Se usa la base interna.',err);return [];
     }
   }
   async function loadRequirementsV2(){
@@ -28997,8 +28981,7 @@ renderObsSeleccionadas = function(){
       buildIprusPitIndexV43();
     }catch(e){ console.warn('No se pudo cargar data/iprus_pit_lookup.geojson:',e); }
 
-    await loadOrdenanzaArticulosV52();
-    await loadUsosPrincipalesV63();
+    await loadOrdenanzaArticulosV52();await loadUsosPrincipalesV63();
     await loadPlantillaDesistimientoV69();
 
     try{ mergeConclusionFromCSVV76(false); }
@@ -29995,10 +29978,7 @@ renderObsSeleccionadas = function(){
   });
 })();
 </script>
-<!-- VERSIÓN 27: Nota de desistimiento corregida antes de Conclusiones y fuera del texto de conclusión. -->
-
-
-<!-- ==========================================================
+<!-- VERSIÓN 27: Nota de desistimiento corregida antes de Conclusiones y fuera del texto de conclusión. --><!-- ==========================================================
      V29 SOBRE INDEX GITHUB CARGADO
      Corrección final de Registro Municipal Estructural.
      Esta versión se inserta al final real del documento para no caer
@@ -30997,8 +30977,7 @@ textarea.evidencia-text,
 }
 
 /* Formulario: respetar exactamente mayúsculas, minúsculas y saltos pegados. */
-.service-edit-v13 .service-evidence-row-v13 textarea,
-textarea.evidencia-text,
+.service-edit-v13 .service-evidence-row-v13 textarea,textarea.evidencia-text,
 .req-factibilidades-table-v134 textarea,
 .study-edit-table textarea,
 .form-report-table textarea.evidencia-text{
@@ -31996,9 +31975,7 @@ textarea.evidencia-text,
       var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
       return map[ch];
     });
-  }
-
-  function dep03ServiceKey(v){
+  }function dep03ServiceKey(v){
     var n=dep03Text(v).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     if(n.indexOf('EMAPAR')>=0 || n.indexOf('RIOBAMBA')>=0) return 'RIOBAMBA-EP';
     if(n.indexOf('EERSA')>=0 || n.indexOf('ELECTRICA')>=0) return 'EERSA';
@@ -32997,8 +32974,7 @@ textarea.evidencia-text,
   function clearPagesV2(){
     document.body.classList.remove('allpa-print-pages-active-v2');
     const root=document.getElementById('allpaPrintPagesV2');
-    if(root) root.innerHTML='';
-  }
+    if(root) root.innerHTML='';}
 
   /* V25B2: el paginador V2 era privado del IIFE. Se expone como servicio
      explícito para que ReportOutputV25B pueda utilizarlo realmente. */
@@ -33997,8 +33973,7 @@ textarea.evidencia-text,
       if(rowRole(raw,index)!=='bruta') return;
 
       const key=semanticKey(raw,index);
-      const list=snapshot?.byKey?.get(key)||[];
-      const pos=used.get(key)||0;
+      const list=snapshot?.byKey?.get(key)||[];const pos=used.get(key)||0;
 
       let type=list[pos];
       if(type) used.set(key,pos+1);
@@ -34997,8 +34972,7 @@ textarea.evidencia-text,
       return '<p>No se registran datos de conclusión técnica.</p>';
     }
 
-    const body=rows.map(row=>{
-      const niveles=(row.levels||[])
+    const body=rows.map(row=>{const niveles=(row.levels||[])
         .filter(v=>String(v??'').trim())
         .map(v=>{
           try{
@@ -35997,8 +35971,7 @@ textarea.evidencia-text,
       if(typeof b==='number') index=b;
       else{
         try{
-          const found=(state?.aprobatorio?.conclusion||[]).indexOf(raw);
-          if(found>=0) index=found;
+          const found=(state?.aprobatorio?.conclusion||[]).indexOf(raw);if(found>=0) index=found;
         }catch(_e){}
       }
     }
@@ -36997,8 +36970,7 @@ function selectedKey(){
 }
 
 function recordKey(x){
-  try{if(typeof savedRecordKeyV119O==='function') return savedRecordKeyV119O(x)}catch(_e){}
-  try{if(typeof savedRecordKeyV119N==='function') return savedRecordKeyV119N(x)}catch(_e){}
+  try{if(typeof savedRecordKeyV119O==='function') return savedRecordKeyV119O(x)}catch(_e){}try{if(typeof savedRecordKeyV119N==='function') return savedRecordKeyV119N(x)}catch(_e){}
   return String(x?.egob||'');
 }
 
@@ -37997,8 +37969,7 @@ function byType(t){
  t=String(t||state?.tipoInforme||'').trim();
  if(t==='Informe Técnico Aprobatorio')return aprobatorio();
  if(t==='Informe con Observaciones')return observaciones();
- if(t==='Informe de Desistimiento')return desistimiento();
- return 'Seleccione el tipo de informe para generar la vista previa.';
+ if(t==='Informe de Desistimiento')return desistimiento();return 'Seleccione el tipo de informe para generar la vista previa.';
 }
 function render(){
  try{if(typeof collectTop==='function')collectTop()}catch(_e){}
@@ -38997,10 +38968,7 @@ setTimeout(()=>{installFinalRoutesV12();bindRMV12();mountPlanosV12();try{renderP
 window.addEventListener('load',()=>{
  setTimeout(()=>{installFinalRoutesV12();bindRMV12();mountPlanosV12();try{renderPitDetailV41()}catch(_e){}},4300);
  setTimeout(()=>{installFinalRoutesV12();bindRMV12();mountPlanosV12();},5200);
-});
-
-
-})();
+});})();
 </script>
 
 
@@ -39997,8 +39965,7 @@ function validMunicipalEmailV792(value){
   if(['S/N','SN','N/A','NA','NO REGISTRA','NO REGISTRADO','SIN CORREO','NINGUNO','-'].includes(n)) return '';
   const m=raw.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
   return m?m[0].trim():'';
-}
-function professionalEmail(){
+}function professionalEmail(){
   /* V7.9.2: para Desistimiento el correo sugerido se toma de la ficha del
      Registro Municipal del profesional. Se prioriza el número de Registro
      Municipal y solo como respaldo se usa el nombre del proyectista. */
@@ -40997,8 +40964,7 @@ function mountFinalizeButton(){
 }
 
 async function updateRegisteredInforme(){
-  if(busy) return;
-  const api=window.AllpaSupabaseCheckV1;
+  if(busy) return;const api=window.AllpaSupabaseCheckV1;
   if(!api){alert('No se encuentra el módulo PHDU de Supabase.');return;}
   const profile=typeof api.getProfile==='function'?api.getProfile():null;
   if(!profile){
@@ -41997,8 +41963,7 @@ function recordProject(r){
   try{if(typeof inferSavedProjectV134==='function')return validProject(inferSavedProjectV134(r))}catch(_e){}
   return OM;
 }
-function currentSavedKey(){
-  return String(state?._savedKeyV119R||state?._savedKeyV164||state?._savedKeyV119||state?.egob||'').trim();
+function currentSavedKey(){return String(state?._savedKeyV119R||state?._savedKeyV164||state?._savedKeyV119||state?.egob||'').trim();
 }
 function setBaseInfo(record,base){
   try{if(typeof setInfoEgobBaseV119==='function'){setInfoEgobBaseV119(record,base);return}}catch(_e){}
@@ -42997,11 +42962,11 @@ let navSeq=0;
 const rawShow=typeof window.showProjectEntryV123==='function'
   ? window.showProjectEntryV123
   : null;
-const rawHide=typeof window.hideProjectEntryV123==='function'
-  ? window.hideProjectEntryV123
+const rawHide=typeof window.hideProjectEntryV123==='function'? window.hideProjectEntryV123
   : null;
 
 function validProjectV7913(projectId){
+  if(projectId==='anteproyecto_subdivision') return 'anteproyecto_subdivision';
   return projectId==='anteproyecto_edificacion'
     ? 'anteproyecto_edificacion'
     : 'obra_mayor_definitivo';
@@ -43011,12 +42976,15 @@ function projectFromButtonV7913(btn){
   const code=String(btn?.getAttribute?.('onclick')||'');
   const m=code.match(/selectProjectV123\(\s*['\"]([^'\"]+)['\"]\s*\)/i);
   if(m?.[1]) return validProjectV7913(m[1]);
-  return String(btn?.textContent||'').toUpperCase().includes('ANTEPROYECTO')
+  const label=String(btn?.textContent||'').toUpperCase();
+  if(label.includes('SUBDIVISIÓN') || label.includes('SUBDIVISION')) return 'anteproyecto_subdivision';
+  return label.includes('ANTEPROYECTO')
     ? 'anteproyecto_edificacion'
     : 'obra_mayor_definitivo';
 }
 
 function projectLabelV7913(id){
+  if(id==='anteproyecto_subdivision') return 'Anteproyecto de Subdivisión Predial';
   return id==='anteproyecto_edificacion'
     ? 'Anteproyecto de Edificación'
     : 'Obra Mayor Definitivo';
@@ -43086,6 +43054,12 @@ function startAutosaveWithoutBlockingV7913(){
 }
 
 function routeProjectV7913(id){
+  if(id==='anteproyecto_subdivision'){
+    localStorage.setItem('GADMR_PROJECT_TYPE_V123',id);
+    if(typeof state!=='undefined') state.projectType=id;
+    window.location.href=new URL('anteproyecto_subdivision/informe_tecnico_aprobatorio.html',window.location.href).href;
+    return true;
+  }
   const route=window.ProjectNavigationV24D?.selectProject
     || window.RequirementsNavigationV24C?.selectProject;
   if(typeof route!=='function') throw new Error('No se encontró la ruta consolidada de proyectos.');
@@ -43960,84 +43934,159 @@ setTimeout(()=>sync(false),1600);setTimeout(()=>sync(false),3500);
 </script>
 
 
-<script id="allpa-v7-9-27-compatibilidad-solicitud-estructural-antiguos">
+<script id="allpa-v7-9-47-compatibilidad-solicitud-estructural-antiguos">
 (function(){
 'use strict';
-const VERSION='7.9.27';
+const VERSION='7.9.47';
 const OM='obra_mayor_definitivo';
 const AP='anteproyecto_edificacion';
+const TYPE='Solicitud de Revisión Estructural';
 
-function normalize(v){
-  return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
-}
+function clean(v){return String(v??'').replace(/\s+/g,' ').trim();}
 function validProject(v){return v===OM||v===AP?v:'';}
+
+/*
+ V7.9.47
+ La clasificación de informes antiguos se resuelve por evidencia del propio
+ registro antes de confiar en projectType. Esto evita que informes de Obra Mayor
+ antiguos se clasifiquen como Anteproyecto únicamente porque dentro de sus
+ requisitos exista el texto "Aprobación del Anteproyecto de Edificación".
+*/
 function inferLegacyProject(record){
-  const explicit=validProject(record?.projectType);
-  if(explicit) return explicit;
+  const r=record||{};
+  const key=String(
+    r._savedKeyV119R||r._savedKeyV164||r._savedKeyV119||r.egob||''
+  ).toUpperCase();
 
-  const key=String(record?.egob||record?._savedKeyV119||'').toUpperCase();
+  /* 1. Llaves históricas explícitas del tipo de proyecto. */
   if(/-\s*ANTEPROYECTO(?:\s*\(\d+\))?\s*$/.test(key)) return AP;
+  if(/-\s*(?:DEFINITIVO|OBRA\s+MAYOR\s+DEFINITIVO)(?:\s*\(\d+\))?\s*$/.test(key)) return OM;
 
+  /* 2. La familia de requisitos es la evidencia más fiable en registros antiguos. */
   try{
-    if(Object.keys(record?.requisitos||{}).some(k=>String(k).startsWith('AP_REQ_'))) return AP;
+    const reqKeys=Object.keys(r.requisitos||{}).map(k=>String(k).trim().toUpperCase());
+    if(reqKeys.some(k=>k.startsWith('AP_REQ_'))) return AP;
+    if(reqKeys.some(k=>k.startsWith('OM_')||k.startsWith('REQ_'))) return OM;
   }catch(_e){}
 
-  const body=normalize(JSON.stringify(record||{}));
-  if(body.includes('ANTEPROYECTO DE EDIFICACION')) return AP;
+  /* 3. Solo si no existe evidencia documental se conserva projectType. */
+  const explicit=validProject(r.projectType);
+  if(explicit) return explicit;
 
-  /* Compatibilidad: los registros antiguos que no guardaban projectType
-     pertenecen a Obra Mayor salvo evidencia expresa de Anteproyecto. */
+  /* 4. Registros previos a la separación de proyectos pertenecían a Obra Mayor. */
   return OM;
 }
 
-/* Corrige la inferencia usada por el cargador central V22C. */
+/* El cargador central V22C utilizará esta inferencia antes de aplicar el estado. */
 window.inferSavedProjectV134=inferLegacyProject;
 try{inferSavedProjectV134=inferLegacyProject}catch(_e){}
 
+function ensureStructuralOptionDirect(project){
+  const sel=document.getElementById('tipoInforme');
+  if(!sel)return;
+  const matches=[...sel.options].filter(o=>clean(o.value||o.textContent)===TYPE);
+
+  /* Evita duplicados creados por sincronizaciones históricas. */
+  matches.slice(1).forEach(o=>o.remove());
+
+  if(project===OM){
+    let op=matches[0]||null;
+    if(!op){
+      op=document.createElement('option');
+      op.value=TYPE;
+      op.textContent=TYPE;
+      const obs=[...sel.options].find(o=>clean(o.value||o.textContent)==='Informe con Observaciones');
+      if(obs)obs.insertAdjacentElement('afterend',op);else sel.appendChild(op);
+    }
+    if(clean(state?.tipoInforme)===TYPE)sel.value=TYPE;
+  }else{
+    matches.forEach(o=>o.remove());
+    if(clean(state?.tipoInforme)===TYPE){
+      state.tipoInforme='';
+      sel.value='';
+    }
+  }
+}
+
+function applyDetectedProject(project){
+  if(typeof state==='undefined'||!state)return;
+  const changed=state.projectType!==project;
+  state.projectType=project;
+  localStorage.setItem('GADMR_PROJECT_TYPE_V123',project);
+
+  /* Si el registro fue clasificado mal durante una carga antigua, repara también
+     los consumidores de proyecto para que selector, badge y requisitos coincidan. */
+  if(changed){
+    try{if(typeof applyProjectRequirementsV128==='function')applyProjectRequirementsV128(project,false)}catch(_e){}
+    try{if(typeof updateProjectBadgeV123==='function')updateProjectBadgeV123()}catch(_e){}
+    try{if(typeof patchLabelsByProjectV123==='function')patchLabelsByProjectV123()}catch(_e){}
+    try{if(typeof renderRequisitosForm==='function')renderRequisitosForm(false)}catch(_e){}
+    try{if(typeof renderAprobatorioForm==='function')renderAprobatorioForm()}catch(_e){}
+  }
+}
+
 function syncStructuralOption(){
-  if(typeof state==='undefined'||!state) return;
-  const inferred=inferLegacyProject(state);
-  if(!validProject(state.projectType)) state.projectType=inferred;
-  if(state.projectType===OM) localStorage.setItem('GADMR_PROJECT_TYPE_V123',OM);
-  try{window.AllpaSolicitudEstructuralV7918?.sync?.();}catch(e){console.warn('ALLPA V7.9.27 sync solicitud estructural:',e);}
+  if(typeof state==='undefined'||!state)return;
+  const project=inferLegacyProject(state);
+
+  /* V7.9.47: la inferencia documental prevalece incluso si projectType ya tenía
+     un valor válido pero incorrecto. */
+  applyDetectedProject(project);
+
+  try{window.AllpaSolicitudEstructuralV7918?.sync?.()}catch(e){
+    console.warn('ALLPA V7.9.47 sync solicitud estructural:',e);
+  }
+
+  /* Refuerzo independiente: la opción debe existir siempre en Obra Mayor. */
+  ensureStructuralOptionDirect(project);
 }
 
 function installLoadCompat(){
   const current=window.cargarFormulario;
-  if(typeof current!=='function'||current.__v7927StructuralCompat) return;
+  if(typeof current!=='function'||current.__v7947StructuralCompat)return;
+
   const wrapped=async function(){
     const result=await current.apply(this,arguments);
     try{
-      if(typeof state!=='undefined'&&state){
-        const project=inferLegacyProject(state);
-        state.projectType=project;
-        localStorage.setItem('GADMR_PROJECT_TYPE_V123',project);
-      }
       syncStructuralOption();
-      setTimeout(syncStructuralOption,80);
-      setTimeout(syncStructuralOption,260);
-    }catch(e){console.warn('ALLPA V7.9.27 post-carga:',e);}
+      [0,80,260,650].forEach(ms=>setTimeout(syncStructuralOption,ms));
+    }catch(e){console.warn('ALLPA V7.9.47 post-carga:',e)}
     return result;
   };
+
+  wrapped.__v7947StructuralCompat=true;
+  /* Mantiene la marca histórica para que V7.9.27 no vuelva a envolver el cargador. */
   wrapped.__v7927StructuralCompat=true;
   wrapped.__base=current;
   window.cargarFormulario=wrapped;
   try{cargarFormulario=wrapped}catch(_e){}
 }
 
-/* También cubre cargas efectuadas por búsquedas/listados y restauraciones antiguas. */
-window.addEventListener('allpa:state-applied',()=>setTimeout(syncStructuralOption,0));
+/* Cubre cargas desde buscador, lista, importaciones y restauraciones antiguas. */
+window.addEventListener('allpa:state-applied',()=>{
+  [0,80,260].forEach(ms=>setTimeout(syncStructuralOption,ms));
+});
+
 document.addEventListener('click',ev=>{
-  if(ev.target?.closest?.('.saved-select-btn-v119n,[data-select-saved-v119n],[data-open-saved-v131]')){
-    setTimeout(syncStructuralOption,180);
+  if(ev.target?.closest?.('.saved-select-btn-v119n,[data-select-saved-v119n],[data-open-saved-v119n],[data-saved-key-v131],[data-open-saved-v131]')){
+    [120,280,650].forEach(ms=>setTimeout(syncStructuralOption,ms));
   }
 });
 
 installLoadCompat();
-[120,500,1100,2200,4200,7000].forEach(ms=>setTimeout(()=>{installLoadCompat();syncStructuralOption();},ms));
-window.addEventListener('load',()=>setTimeout(()=>{installLoadCompat();syncStructuralOption();},350),{once:true});
+[120,500,1100,2200,4200,7000].forEach(ms=>setTimeout(()=>{
+  installLoadCompat();
+  syncStructuralOption();
+},ms));
+window.addEventListener('load',()=>setTimeout(()=>{
+  installLoadCompat();
+  syncStructuralOption();
+},350),{once:true});
 
-window.AllpaCompatSolicitudEstructuralV7927=Object.freeze({VERSION,inferLegacyProject,sync:syncStructuralOption});
+const API=Object.freeze({VERSION,inferLegacyProject,sync:syncStructuralOption});
+window.AllpaCompatSolicitudEstructuralV7947=API;
+/* Alias histórico para cualquier consumidor que todavía consulte V7927. */
+window.AllpaCompatSolicitudEstructuralV7927=API;
 })();
 </script>
 
