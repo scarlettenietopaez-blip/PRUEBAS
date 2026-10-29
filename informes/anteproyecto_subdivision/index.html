@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALLPA · Anteproyecto de Subdivisión Predial</title>
+<style>
+:root{--bg:#f4f6f8;--panel:#fff;--line:#d7dee6;--ink:#1f2937;--muted:#667085;--brand:#0f766e;--soft:#e9f5f3}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+h1{font-size:18px;margin:0}.small{font-size:12px;color:var(--muted)}button{cursor:pointer}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font-weight:700}.btn.primary{background:var(--brand);color:white;border-color:var(--brand)}
+.layout{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 65px)}
+nav{background:#fff;border-right:1px solid var(--line);padding:14px;position:sticky;top:65px;height:calc(100vh - 65px);overflow:auto}
+nav button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:11px 12px;border-radius:8px;font-weight:700;margin:2px 0}
+nav button.active{background:var(--soft);color:var(--brand)}
+main{padding:18px;max-width:1500px;width:100%}.tab{display:none}.tab.active{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}input,select,textarea{width:100%;padding:8px 9px;border:1px solid #cbd5e1;border-radius:7px;font:inherit;background:#fff}textarea{min-height:82px;resize:vertical}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid var(--line);padding:7px}th{background:#f8fafc}.scroll{overflow:auto}
+.preview-grid{display:grid;grid-template-columns:0.8fr 1.2fr;gap:16px}.page{background:#fff;border:1px solid var(--line);min-height:297mm;padding:18mm;font-size:11pt;line-height:1.25;box-shadow:0 2px 8px #0001}.page p{text-align:justify}.meta{text-align:right;font-weight:700}.subject{font-weight:700;text-transform:uppercase}.egob{white-space:pre-wrap;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:14px;min-height:220px}.hint{font-size:11px;color:var(--muted);margin-top:5px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{padding:10px;border:1px solid var(--line);border-radius:8px;background:#f8fafc}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}nav{position:relative;top:auto;height:auto;display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}nav button{min-width:210px}.grid,.grid3,.preview-grid,.kpis{grid-template-columns:1fr}}
+@media print{header,nav,.preview-actions,.egob-card{display:none!important}.layout{display:block}main{padding:0}.tab{display:none!important}#preview{display:block!important}.card{border:0;padding:0}.preview-grid{display:block}.page{border:0;box-shadow:none;width:210mm;margin:auto}}
+</style>
+</head>
+<body>
+<header>
+<div><h1>ALLPA · Mesa Técnica</h1><div class="small">Anteproyecto de Subdivisión Predial de dos a diez lotes con obras · Informe Técnico Aprobatorio</div></div>
+<div class="actions"><button class="btn" onclick="saveDraft()">Guardar borrador</button><button class="btn" onclick="loadDraft()">Recuperar</button><button class="btn primary" onclick="showTab('preview')">Vista del informe</button></div>
+</header>
+<div class="layout">
+<nav id="tabs">
+<button class="active" data-t="general" onclick="showTab('general')">1. Datos generales</button>
+<button data-t="gravamen" onclick="showTab('gravamen')">2. Gravamen e IPRUS</button>
+<button data-t="fact" onclick="showTab('fact')">3. Factibilidades</button>
+<button data-t="tributos" onclick="showTab('tributos')">4. Predial, RUC y patente</button>
+<button data-t="propuesta" onclick="showTab('propuesta')">5. Propuesta del proyecto</button>
+<button data-t="lotes" onclick="showTab('lotes')">6. Loteamiento y áreas</button>
+<button data-t="vias" onclick="showTab('vias')">7. Vías, retiros y área verde</button>
+<button data-t="cierre" onclick="showTab('cierre')">8. Recomendaciones y adjuntos</button>
+<button data-t="preview" onclick="showTab('preview')">9. Vista del informe</button>
+</nav>
+<main>
+
+<section class="tab active" id="general">
+<div class="card"><h2>Datos generales</h2><div class="grid3">
+<div><label>Nro. eGOB principal</label><input data-k="egob"></div>
+<div><label>Numeración ITA</label><input data-k="ita"></div>
+<div><label>Fecha del informe</label><input type="date" data-k="fecha"></div>
+<div><label>Nombre del proyecto</label><input data-k="proyecto"></div>
+<div><label>Dirección</label><input data-k="direccion"></div>
+<div><label>Barrio / sector</label><input data-k="barrio"></div>
+<div><label>Parroquia</label><input data-k="parroquia"></div>
+<div><label>PIT / Zona de planeamiento</label><input data-k="pit"></div>
+<div><label>Clave catastral</label><input data-k="clave"></div>
+</div></div>
+<div class="card"><h2>Propietario y profesionales</h2><div class="grid">
+<div><label>Tratamiento</label><select data-k="tratamiento"><option>el señor</option><option>la señora</option><option>los señores</option><option>las señoras</option></select></div>
+<div><label>Propietario(s)</label><input data-k="propietarios"></div>
+<div><label>C.I./RUC propietario</label><input data-k="ci_prop"></div>
+<div><label>Proyectista</label><input data-k="proyectista"></div>
+<div><label>RUC/C.I. proyectista</label><input data-k="ruc_proy"></div>
+<div><label>Técnico revisor</label><input data-k="tecnico"></div>
+<div class="full"><label>Cargo técnico revisor</label><input data-k="cargo"></div>
+</div></div>
+</section>
+
+<section class="tab" id="gravamen">
+<div class="card"><h2>Certificado de gravamen</h2><div class="grid3">
+<div><label>Fojas</label><input data-k="g_fojas"></div><div><label>Carpeta</label><input data-k="g_carpeta"></div><div><label>Ficha registral</label><input data-k="ficha"></div>
+<div><label>Nro. certificado</label><input data-k="g_cert"></div><div><label>Referencia</label><input data-k="g_ref"></div><div><label>Fecha</label><input type="date" data-k="g_fecha"></div>
+<div><label>Área gravamen (m²)</label><input type="number" step="0.01" data-k="area_grav"></div>
+<div class="full"><label>Texto de dominio / calidad de propietario</label><textarea data-k="g_texto"></textarea></div>
+<div class="full"><label>Linderos y dimensiones</label><textarea data-k="linderos"></textarea></div>
+</div></div>
+<div class="card"><h2>IPRUS</h2><div class="grid3">
+<div><label>Fojas</label><input data-k="i_fojas"></div><div><label>Carpeta</label><input data-k="i_carpeta"></div><div><label>Nro. IPRUS</label><input data-k="iprus"></div>
+<div><label>Técnico IPRUS</label><input data-k="i_tecnico"></div><div><label>Área IPRUS (m²)</label><input type="number" step="0.01" data-k="area_iprus"></div><div><label>Implantación</label><input data-k="implantacion"></div>
+<div><label>Uso principal</label><input data-k="uso"></div><div><label>Lote mínimo (m²)</label><input type="number" step="0.01" data-k="lote_min"></div><div><label>Frente mínimo (m)</label><input type="number" step="0.01" data-k="frente_min"></div>
+<div><label>Nro. pisos</label><input data-k="pisos"></div><div><label>Retiro frontal</label><input type="number" step="0.01" data-k="rf"></div><div><label>Retiro lateral</label><input type="number" step="0.01" data-k="rl"></div>
+<div><label>Retiro posterior</label><input type="number" step="0.01" data-k="rp"></div><div><label>COS PB (%)</label><input type="number" step="0.01" data-k="cos_pb"></div><div><label>COS Total (%)</label><input type="number" step="0.01" data-k="cos_total"></div>
+</div><div class="hint">Estos parámetros quedan listos para conectarse posteriormente con <b>data/iprus_pit_lookup.geojson</b> a partir del PIT.</div></div>
+</section>
+
+<section class="tab" id="fact">
+<div class="card"><h2>RIOBAMBA EP · Agua potable y alcantarillado</h2><div class="grid3">
+<div><label>Fojas</label><input data-k="ep_fojas"></div><div><label>Carpeta</label><input data-k="ep_carpeta"></div><div><label>Tipo documento</label><input data-k="ep_tipo" placeholder="Informe de factibilidad / Parámetros de Diseño"></div>
+<div><label>Nro. oficio</label><input data-k="ep_oficio"></div><div><label>Fecha</label><input type="date" data-k="ep_fecha"></div><div><label>Técnico/a</label><input data-k="ep_tecnico"></div>
+<div class="full"><label>Solicitado por</label><input data-k="ep_solicitante"></div><div class="full"><label>Datos / texto de factibilidad</label><textarea data-k="ep_datos"></textarea></div>
+</div></div>
+<div class="card"><h2>EERSA</h2><div class="grid3">
+<div><label>Fojas</label><input data-k="ee_fojas"></div><div><label>Carpeta</label><input data-k="ee_carpeta"></div><div><label>Nro. EERSA-DIC-</label><input data-k="ee_oficio"></div>
+<div><label>Fecha</label><input type="date" data-k="ee_fecha"></div><div><label>Técnico EERSA</label><input data-k="ee_tecnico"></div><div class="full"><label>Datos / texto EERSA</label><textarea data-k="ee_datos"></textarea></div>
+</div></div>
+<div class="card"><h2>CNT</h2><div class="grid3">
+<div><label>Fojas</label><input data-k="cnt_fojas"></div><div><label>Carpeta</label><input data-k="cnt_carpeta"></div><div><label>Nro. CNTEP-RG3-CH-TEC-</label><input data-k="cnt_oficio"></div>
+<div><label>Fecha</label><input type="date" data-k="cnt_fecha"></div><div><label>Técnico CNT</label><input data-k="cnt_tecnico"></div><div><label>Nro. líneas</label><input type="number" data-k="cnt_lineas"></div>
+<div class="full"><label>Datos / texto CNT</label><textarea data-k="cnt_datos"></textarea></div>
+</div></div>
+</section>
+
+<section class="tab" id="tributos">
+<div class="card"><h2>Impuesto predial</h2><div class="grid3">
+<div><label>Fojas</label><input data-k="p_fojas"></div><div><label>Carpeta</label><input data-k="p_carpeta"></div><div><label>Año</label><input data-k="p_anio"></div>
+<div><label>Nro. emisión</label><input data-k="p_emision"></div><div><label>Dirección predio</label><input data-k="p_direccion"></div><div><label>Área total</label><input type="number" step="0.01" data-k="p_area"></div>
+<div><label>Área construcción</label><input type="number" step="0.01" data-k="p_const"></div>
+</div></div>
+<div class="card"><h2>RUC y patente del proyectista</h2><div class="grid3">
+<div><label>Fojas RUC</label><input data-k="r_fojas"></div><div><label>Carpeta RUC</label><input data-k="r_carpeta"></div><div><label>Fojas patente</label><input data-k="pat_fojas"></div>
+<div><label>Carpeta patente</label><input data-k="pat_carpeta"></div><div><label>Año patente</label><input data-k="pat_anio"></div><div><label>Nro. emisión patente</label><input data-k="pat_emision"></div>
+<div><label>Nombre comercial</label><input data-k="comercial"></div><div><label>Actividad</label><input data-k="actividad"></div><div><label>Base imponible</label><input type="number" step="0.01" data-k="base"></div>
+</div></div>
+</section>
+
+<section class="tab" id="propuesta">
+<div class="card"><h2>Propuesta del proyecto</h2><div class="grid">
+<div class="full"><label>Ejes viales / descripción técnica</label><textarea data-k="datos_tecnicos"></textarea></div>
+<div><label>¿Contempla vías internas?</label><select data-k="vias_int"><option>No</option><option>Sí</option></select></div>
+<div><label>¿Presenta afectación vial?</label><select data-k="afecta"><option>No</option><option>Sí</option></select></div>
+<div><label>Área afectación vial (m²)</label><input type="number" step="0.01" data-k="area_af"></div>
+<div><label>Área afectación vial propuesta (m²)</label><input type="number" step="0.01" data-k="area_af_prop"></div>
+<div><label>Densidad bruta (hab/ha)</label><input type="number" step="0.01" data-k="dens_b"></div>
+<div><label>Densidad neta (hab/ha)</label><input type="number" step="0.01" data-k="dens_n"></div>
+<div class="full"><label>Texto adicional de propuesta de vías</label><textarea data-k="vias_texto"></textarea></div>
+<div class="full"><label>Memoria técnica · área verde y equipamiento</label><textarea data-k="memoria"></textarea></div>
+</div></div>
+</section>
+
+<section class="tab" id="lotes">
+<div class="card"><h2>Loteamiento</h2><div class="grid">
+<div><label>Número de lotes</label><select data-k="n_lotes" id="n_lotes"></select></div>
+<div style="align-self:end"><button class="btn" onclick="renderLots()">Actualizar tabla</button></div>
+</div>
+<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Lote</th><th>Área (m²)</th></tr></thead><tbody id="lots"></tbody><tfoot><tr><th>Total útil</th><th id="sumLots">0.00</th></tr></tfoot></table></div>
+</div>
+<div class="card"><h2>Cálculos</h2><div class="kpis"><div class="kpi"><b>Área IPRUS</b><div id="k1">0.00 m²</div></div><div class="kpi"><b>Área útil de lotes</b><div id="k2">0.00 m²</div></div><div class="kpi"><b>Área útil urbanizable</b><div id="k3">0.00 m²</div></div></div></div>
+</section>
+
+<section class="tab" id="vias">
+<div class="card"><h2>Retiros, vías y área verde</h2><div class="grid">
+<div class="full"><label>Texto adicional de retiros y adosamientos</label><textarea data-k="retiros_extra"></textarea></div>
+<div class="full"><label>Observación adicional de afectación vial</label><textarea data-k="af_extra"></textarea></div>
+<div class="full"><label>Observación adicional de área verde/equipamiento</label><textarea data-k="verde_extra"></textarea></div>
+</div></div>
+</section>
+
+<section class="tab" id="cierre">
+<div class="card"><h2>Recomendaciones y adjuntos</h2><div class="grid">
+<div class="full"><label>Recomendaciones adicionales</label><textarea data-k="recom_extra"></textarea></div>
+<div class="full"><label>Detalle de adjuntos / carpetas</label><textarea data-k="adjuntos" placeholder="Carpeta 1: ...&#10;Carpeta 2: ..."></textarea></div>
+</div></div>
+</section>
+
+<section class="tab" id="preview">
+<div class="card preview-actions"><div class="actions"><button class="btn primary" onclick="renderPreview()">Actualizar vista</button><button class="btn" onclick="copyEgob()">Copiar texto eGOB</button><button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button></div></div>
+<div class="preview-grid">
+<div class="card egob-card"><h2>Texto para eGOB</h2><div class="egob" id="egobText"></div></div>
+<div class="page" id="report"></div>
+</div>
+</section>
+
+</main></div>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const v=k=>($(`[data-k="${k}"]`)?.value||'').trim(), n=k=>parseFloat(v(k)||0)||0;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const nl=s=>esc(s).replace(/\n/g,'<br>'); const fmt=x=>Number(x||0).toFixed(2);
+const dlong=s=>{if(!s)return'';let[a,b,c]=s.split('-');return new Date(+a,+b-1,+c).toLocaleDateString('es-EC',{day:'2-digit',month:'long',year:'numeric'})}
+function showTab(id){$$('.tab').forEach(x=>x.classList.remove('active'));$$('nav button').forEach(x=>x.classList.remove('active'));$('#'+id).classList.add('active');$(`nav button[data-t="${id}"]`)?.classList.add('active');if(id==='preview')renderPreview()}
+function initLots(){for(let i=2;i<=10;i++)$('#n_lotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);renderLots()}
+function renderLots(){let c=parseInt(v('n_lotes')||2),old={};$$('[data-lot]').forEach(x=>old[x.dataset.lot]=x.value);$('#lots').innerHTML='';for(let i=1;i<=c;i++)$('#lots').insertAdjacentHTML('beforeend',`<tr><td>LOTE ${i}</td><td><input type="number" step="0.01" data-lot="${i}" value="${old[i]||''}"></td></tr>`);$$('[data-lot]').forEach(x=>x.oninput=()=>{calc();renderPreview()});calc()}
+function lotData(){return $$('[data-lot]').map((x,i)=>({i:i+1,a:parseFloat(x.value||0)||0}))}
+function calc(){let s=lotData().reduce((a,b)=>a+b.a,0),u=n('area_iprus')-n('area_af')-n('area_af_prop');$('#sumLots').textContent=fmt(s);$('#k1').textContent=fmt(n('area_iprus'))+' m²';$('#k2').textContent=fmt(s)+' m²';$('#k3').textContent=fmt(u)+' m²'}
+function pct(a,b){return b?(a/b*100).toFixed(2)+'%':'0.00%'}
+function lotWords(x){return ({2:'dos (2)',3:'tres (3)',4:'cuatro (4)',5:'cinco (5)',6:'seis (6)',7:'siete (7)',8:'ocho (8)',9:'nueve (9)',10:'diez (10)'})[x]||x}
+function lotTable(){let d=lotData(),r=d.map(x=>`<tr><td>LOTE ${x.i}</td><td>${fmt(x.a)}</td></tr>`).join('');return `<table><tr><th>Nro.</th><th>ÁREA</th></tr>${r}<tr><th>TOTAL ÚTIL</th><th>${fmt(d.reduce((a,b)=>a+b.a,0))}</th></tr></table>`}
+function areaTable(){let ip=n('area_iprus'),g=n('area_grav'),a=n('area_af'),p=n('area_af_prop'),l=lotData().reduce((x,y)=>x+y.a,0),u=ip-a-p;return `<table><tr><th>DESCRIPCIÓN</th><th>ÁREA</th><th>U</th><th>PORCENTAJE</th></tr><tr><td>Área Total del Lote (gravamen)</td><td>${fmt(g)}</td><td>m²</td><td>${pct(g,ip)}</td></tr><tr><td>Área Total del Lote (IPRUS)</td><td>${fmt(ip)}</td><td>m²</td><td>${ip?'100.00%':'0.00%'}</td></tr><tr><td>Área útil de lotes</td><td>${fmt(l)}</td><td>m²</td><td>${pct(l,ip)}</td></tr><tr><td>Área de afectación vial</td><td>${fmt(a)}</td><td>m²</td><td>${pct(a,ip)}</td></tr><tr><td>Área de afectación vial propuesta</td><td>${fmt(p)}</td><td>m²</td><td>${pct(p,ip)}</td></tr><tr><td>Área Útil Urbanizable</td><td>${fmt(u)}</td><td>m²</td><td>${pct(u,ip)}</td></tr><tr><td>COS PB</td><td>${esc(v('cos_pb'))}</td><td>%</td><td>-</td></tr><tr><td>COS Total</td><td>${esc(v('cos_total'))}</td><td>%</td><td>-</td></tr><tr><td>Densidad Bruta</td><td>${esc(v('dens_b'))}</td><td>hab/ha</td><td>-</td></tr><tr><td>Densidad Neta</td><td>${esc(v('dens_n'))}</td><td>hab/ha</td><td>-</td></tr></table>`}
+function renderPreview(){calc();let y=(new Date()).getFullYear(),memo=`GADMR-GPHDU-MTI-${y}-${v('ita')||'___'}-ITA`,t=v('tratamiento'),L=parseInt(v('n_lotes')||2);
+let vias=v('vias_int')==='Sí'?(v('vias_texto')||'Según la propuesta presentada, el proyecto contempla vías planificadas internas dentro del predio.'):'Según la propuesta presentada el proyecto no contempla vías planificadas internas dentro del predio.';
+let afect=`El predio ${v('afecta')==='Sí'?'sí':'no'} presenta afectación vial según IPRUS Nro. ${esc(v('iprus'))}, suscrito por ${esc(v('i_tecnico'))}, Técnico Coordinador del IPRUS${v('afecta')==='Sí'?`, con un área de ${fmt(n('area_af'))} m²`:''}.`;
+$('#report').innerHTML=`<div class="meta">MEMORANDO Nro. ${esc(memo)}<br>Trámite Nro. ${esc(v('egob'))}<br>Riobamba, ${esc(dlong(v('fecha')))}</div>
+<p class="subject">ASUNTO: INFORME TÉCNICO FAVORABLE PARA REVISIÓN Y APROBACIÓN DE ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS, DENOMINADO "${esc(v('proyecto'))}" (eGOB ${esc(v('egob'))})</p>
+<p>De mi consideración:</p>
+<p>En relación con el procedimiento administrativo signado con el trámite Nro. ${esc(v('egob'))} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${esc(v('proyecto'))}" ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(v('pit'))}, parroquia ${esc(v('parroquia'))} de la ciudad de Riobamba, de propiedad de ${esc(t)} ${esc(v('propietarios'))} del predio con clave catastral ${esc(v('clave'))}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el <b>INFORME TÉCNICO FAVORABLE</b> en los siguientes términos:</p>
+<h3>ANTECEDENTES:</h3>
+<p><b>1.</b> En el expediente de fojas ${esc(v('g_fojas'))} carpeta ${esc(v('g_carpeta'))}, consta ficha registral Nro. ${esc(v('ficha'))}, certificado Nro. ${esc(v('g_cert'))}, Ref.: ${esc(v('g_ref'))} el ${esc(dlong(v('g_fecha')))}, del cual se desprende que ${esc(t)} ${esc(v('propietarios'))} ${nl(v('g_texto'))}, con una superficie de ${fmt(n('area_grav'))} metros cuadrados, según certificado de gravamen y cuyos linderos y dimensiones son: ${nl(v('linderos'))}</p>
+<p><b>2.</b> En el expediente de fojas ${esc(v('i_fojas'))} carpeta ${esc(v('i_carpeta'))}, consta el IPRUS Nro. ${esc(v('iprus'))}, suscrito por ${esc(v('i_tecnico'))}, quien certifica una superficie de ${fmt(n('area_iprus'))} m². Zona ${esc(v('pit'))}; Implantación: ${esc(v('implantacion'))}; lote mínimo: ${esc(v('lote_min'))} m²; frente mínimo: ${esc(v('frente_min'))} m; retiros: frontal ${esc(v('rf'))} m, lateral ${esc(v('rl'))} m, posterior ${esc(v('rp'))} m.</p>
+<p><b>3.</b> RIOBAMBA EP: fojas ${esc(v('ep_fojas'))}, carpeta ${esc(v('ep_carpeta'))}, ${esc(v('ep_tipo'))} Nro. ${esc(v('ep_oficio'))}, fecha ${esc(dlong(v('ep_fecha')))}, emitido por ${esc(v('ep_tecnico'))}. ${nl(v('ep_datos'))}</p>
+<p><b>4.</b> EERSA: fojas ${esc(v('ee_fojas'))}, carpeta ${esc(v('ee_carpeta'))}, Oficio Nro. EERSA-DIC-${esc(v('ee_oficio'))}-OF, fecha ${esc(dlong(v('ee_fecha')))}, emitido por ${esc(v('ee_tecnico'))}. ${nl(v('ee_datos'))}</p>
+<p><b>5.</b> CNT: fojas ${esc(v('cnt_fojas'))}, carpeta ${esc(v('cnt_carpeta'))}, Certificado CNTEP-RG3-CH-TEC-${esc(v('cnt_oficio'))}-O, fecha ${esc(dlong(v('cnt_fecha')))}, emitido por ${esc(v('cnt_tecnico'))}; líneas: ${esc(v('cnt_lineas'))}. ${nl(v('cnt_datos'))}</p>
+<p><b>6.</b> Pago predial: fojas ${esc(v('p_fojas'))}, carpeta ${esc(v('p_carpeta'))}, cliente ${esc(v('propietarios'))}, Ruc/Cédula ${esc(v('ci_prop'))}, año ${esc(v('p_anio'))}, emisión ${esc(v('p_emision'))}, dirección ${esc(v('p_direccion'))}, área total ${esc(v('p_area'))}, área construcción ${esc(v('p_const'))}, referencia ${esc(v('clave'))}.</p>
+<p><b>7.</b> RUC de ${esc(v('proyectista'))}: ${esc(v('ruc_proy'))}, fojas ${esc(v('r_fojas'))}, carpeta ${esc(v('r_carpeta'))}.</p>
+<p><b>8.</b> Patente de ${esc(v('proyectista'))}: año ${esc(v('pat_anio'))}, emisión ${esc(v('pat_emision'))}, nombre comercial ${esc(v('comercial'))}, actividad ${esc(v('actividad'))}, base imponible ${esc(v('base'))}.</p>
+<h3>INFORME TÉCNICO</h3><h3>1. UBICACIÓN:</h3><p>Proyecto "${esc(v('proyecto'))}", calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, zona ${esc(v('pit'))}, parroquia ${esc(v('parroquia'))}, propiedad de ${esc(t)} ${esc(v('propietarios'))}.<br><b>Clave catastral:</b> ${esc(v('clave'))}</p>
+<h3>2. LINDEROS GENERALES:</h3><p>${nl(v('linderos'))}<br><b>Área Total:</b> ${fmt(n('area_iprus'))} m²</p>
+<h3>3. PROPUESTA DEL PROYECTO:</h3><p>${nl(v('datos_tecnicos'))}</p>
+<table><tr><th colspan="4">ZONA DE PLANEAMIENTO ${esc(v('pit'))}</th></tr><tr><td>Implantación</td><td>${esc(v('implantacion'))}</td><td>Uso Principal</td><td>${esc(v('uso'))}</td></tr><tr><td>Lote Mínimo</td><td>${esc(v('lote_min'))}</td><td>Nro. Pisos</td><td>${esc(v('pisos'))}</td></tr><tr><td>Frente Mínimo</td><td>${esc(v('frente_min'))}</td><td>Retiro Frontal</td><td>${esc(v('rf'))}</td></tr><tr><td>COS PB %</td><td>${esc(v('cos_pb'))}</td><td>Retiro Lateral</td><td>${esc(v('rl'))}</td></tr><tr><td></td><td></td><td>Retiro Posterior</td><td>${esc(v('rp'))}</td></tr><tr><td></td><td></td><td>COS TOTAL %</td><td>${esc(v('cos_total'))}</td></tr></table>
+<h3>4. DESCRIPCIÓN DE LOTEAMIENTO:</h3><p>El predio en mención se propone subdividir en ${L} lotes, cumpliendo con el lote y frente mínimo de la zona de planeamiento.</p>${lotTable()}
+<h3>5. LINDEROS Y DIMENSIONES:</h3><p>Se propone la urbanización en ${lotWords(L)} lotes, cuyos linderos y dimensiones se encuentran detallados en el formulario FRM – SCO – R - 003 y concuerdan con los planos y memoria descriptiva suscritos por Arq. ${esc(v('proyectista'))}.</p><p><b><i>Nota: Los linderos y dimensiones son de exclusiva responsabilidad del proyectista y/o propietario.</i></b></p>
+<h3>6. PROPUESTA DE RETIROS Y ADOSAMIENTOS:</h3><p>Según la propuesta presentada, se propone una Implantación ${esc(v('implantacion'))} con retiro frontal: ${esc(v('rf'))} m, retiro lateral: ${esc(v('rl'))} m, retiro posterior: ${esc(v('rp'))} m. ${nl(v('retiros_extra'))}</p>
+<h3>7. PROPUESTA DE VÍAS</h3><p>${nl(vias)}</p><h3>8. VÍAS Y AFECTACIÓN VIAL</h3><p>${afect} ${nl(v('af_extra'))}</p>
+<h3>9. ÁREA VERDE Y EQUIPAMIENTO COMUNITARIO:</h3><p>La propuesta del anteproyecto "${esc(v('proyecto'))}", conforme consta en la memoria técnica suscrita por Arq. ${esc(v('proyectista'))}, establece expresamente que: “(…) ${nl(v('memoria'))} (…)”. ${nl(v('verde_extra'))}</p>
+<h3>10. CUADRO DE ÁREAS</h3>${areaTable()}
+<h3>11. INFRAESTRUCTURA BÁSICA</h3><p>El predio dispone de las factibilidades correspondientes para realizar los estudios de dotación de servicios, conforme los documentos de RIOBAMBA EP, EERSA y CNT descritos en antecedentes.</p>
+<h3>12. OBSERVACIONES Y RECOMENDACIONES PARA APROBACIÓN DEL PROYECTO DEFINITIVO</h3><p>- Adjuntar los requisitos establecidos en el Artículo 53 de la Ordenanza 016-2023.<br>- Verificar que el proyecto técnico cumpla los parámetros del Artículo 54 de la Ordenanza 016-2023.</p><p>${nl(v('recom_extra'))}</p>
+<h3>13. CONCLUSIÓN</h3><p>De conformidad con el artículo 39 de la Ordenanza 016-2023, se emite <b>INFORME TÉCNICO FAVORABLE</b> para revisión y aprobación de Subdivisión Predial de dos a diez lotes con obras, denominado "${esc(v('proyecto'))}", ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(v('pit'))}, parroquia ${esc(v('parroquia'))}, de propiedad de ${esc(t)} ${esc(v('propietarios'))}, con clave catastral ${esc(v('clave'))}.</p><p><b><i>El presente informe técnico está emitido con base en los documentos detallados en los antecedentes, siendo la veracidad de los mismos, responsabilidad de quien los suscribe.</i></b></p><p>Atentamente;</p><p><b>${esc(v('tecnico'))}</b><br><b>${esc(v('cargo'))}</b></p><p><u>Adjunto:</u><br>${nl(v('adjuntos'))}</p>`;
+$('#egobText').textContent=`De mi consideración
+
+En relación con el procedimiento administrativo signado con el trámite Nro. ${v('egob')} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${v('proyecto')}" ubicado en la calle ${v('direccion')}, barrio ${v('barrio')}, Zona de planeamiento ${v('pit')}, parroquia ${v('parroquia')} de la ciudad de Riobamba, de propiedad de ${t} ${v('propietarios')} del predio con clave catastral ${v('clave')}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el INFORME TÉCNICO FAVORABLE contenido en MEMORANDO Nro. ${memo}, el cual fue elaborado y corregido en base al cumplimiento de las disposiciones técnicas, normas arquitectónicas y normativa vigente aplicable. En tal virtud, se solicita muy comedidamente se sirva revisar la documentación anexa y de considerarlo procedente, disponer la continuación del trámite conforme a la normativa vigente.
+
+En virtud de lo establecido en el artículo 39 de la Ordenanza 016-2023, solicito de la manera más comedida que, por su intermedio, se remita a la Dirección de Procuraduría Institucional para que se complemente con el informe legal suscrito por su delegado conforme MEMORANDO Nro. GADMR-PROC-2026-0252-M, junto con su respectiva propuesta de resolución administrativa.
+
+Con sentimientos de estima y consideración.`}
+function snap(){let d={};$$('[data-k]').forEach(x=>d[x.dataset.k]=x.value);d.lots=lotData().map(x=>x.a);return d}
+function saveDraft(){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO',JSON.stringify(snap()));alert('Borrador guardado.')}
+function loadDraft(){let x=localStorage.getItem('ALLPA_SUBDIVISION_APROBATORIO');if(!x)return alert('No hay borrador guardado.');let d=JSON.parse(x);$$('[data-k]').forEach(el=>{if(d[el.dataset.k]!=null)el.value=d[el.dataset.k]});renderLots();if(d.lots)$$('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');calc();renderPreview()}
+async function copyEgob(){try{await navigator.clipboard.writeText($('#egobText').textContent);alert('Texto eGOB copiado.')}catch(e){alert('Selecciona y copia el texto manualmente.')}}
+document.addEventListener('input',e=>{if(e.target.matches('[data-k]')){calc();renderPreview()}});document.addEventListener('change',e=>{if(e.target.dataset.k==='n_lotes')renderLots();else if(e.target.matches('[data-k]'))renderPreview()});
+initLots();$('[data-k="fecha"]').value=new Date().toISOString().slice(0,10);renderPreview();
+</script>
+</body></html>
