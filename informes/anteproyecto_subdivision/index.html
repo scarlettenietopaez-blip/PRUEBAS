@@ -1,221 +1,409 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ALLPA · Anteproyecto de Subdivisión Predial</title>
+<base href="../../">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/logo-allpa-20264.png?v=1">
+<link rel="shortcut icon" type="image/png" href="./assets/logo-allpa-20264.png?v=1">
+<link rel="apple-touch-icon" href="./assets/logo-allpa-20264.png?v=1">
+<title>ALLPA - Anteproyecto de Subdivisión Predial</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
-:root{--bg:#f4f6f8;--panel:#fff;--line:#d7dee6;--ink:#1f2937;--muted:#667085;--brand:#0f766e;--soft:#e9f5f3}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink)}
-header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;justify-content:space-between;gap:12px;align-items:center}
-h1{font-size:18px;margin:0}.small{font-size:12px;color:var(--muted)}button{cursor:pointer}
-.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 12px;font-weight:700}.btn.primary{background:var(--brand);color:white;border-color:var(--brand)}
-.layout{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 65px)}
-nav{background:#fff;border-right:1px solid var(--line);padding:14px;position:sticky;top:65px;height:calc(100vh - 65px);overflow:auto}
-nav button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:11px 12px;border-radius:8px;font-weight:700;margin:2px 0}
-nav button.active{background:var(--soft);color:var(--brand)}
-main{padding:18px;max-width:1500px;width:100%}.tab{display:none}.tab.active{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}
-label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}input,select,textarea{width:100%;padding:8px 9px;border:1px solid #cbd5e1;border-radius:7px;font:inherit;background:#fff}textarea{min-height:82px;resize:vertical}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid var(--line);padding:7px}th{background:#f8fafc}.scroll{overflow:auto}
-.preview-grid{display:grid;grid-template-columns:0.8fr 1.2fr;gap:16px}.page{background:#fff;border:1px solid var(--line);min-height:297mm;padding:18mm;font-size:11pt;line-height:1.25;box-shadow:0 2px 8px #0001}.page p{text-align:justify}.meta{text-align:right;font-weight:700}.subject{font-weight:700;text-transform:uppercase}.egob{white-space:pre-wrap;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:14px;min-height:220px}.hint{font-size:11px;color:var(--muted);margin-top:5px}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{padding:10px;border:1px solid var(--line);border-radius:8px;background:#f8fafc}
-@media(max-width:1000px){.layout{grid-template-columns:1fr}nav{position:relative;top:auto;height:auto;display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}nav button{min-width:210px}.grid,.grid3,.preview-grid,.kpis{grid-template-columns:1fr}}
-@media print{header,nav,.preview-actions,.egob-card{display:none!important}.layout{display:block}main{padding:0}.tab{display:none!important}#preview{display:block!important}.card{border:0;padding:0}.preview-grid{display:block}.page{border:0;box-shadow:none;width:210mm;margin:auto}}
+:root{
+ --azul:#17324d;--azul2:#0d4f77;--azul3:#0b4266;--rojo:#b5162b;--gris:#f3f5f8;
+ --linea:#d8dee8;--texto:#243142;--muted:#667085;--verde:#186044;--blanco:#fff;
+ --sombra:0 10px 24px rgba(17,37,61,.10);--radio:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--gris);color:var(--texto)}
+header.no-print{
+ min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;
+ padding:12px 24px;background:linear-gradient(135deg,var(--azul),#0d2238);color:#fff;box-shadow:var(--sombra)
+}
+.header-left{display:flex;align-items:center;gap:12px;min-width:0}
+.home-btn{width:48px;height:48px;min-width:48px;border-radius:14px;background:#fff;color:#0b2b4c;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 8px 20px rgba(0,0,0,.22);cursor:pointer}
+.home-btn svg{width:24px;height:24px}
+.project-pill{display:inline-flex;align-items:center;gap:8px;max-width:min(46vw,580px);min-height:38px;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);font-size:12px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.project-pill:before{content:"●";color:#e83a4d}
+.header-title{text-align:right}.header-title h1{margin:0;font-size:22px;letter-spacing:.2px}.header-title p{margin:4px 0 0;color:#dbe7f2;font-size:12px}
+.actionbar{max-width:1450px;margin:14px auto 0;padding:0 22px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:var(--azul);color:#fff;text-transform:uppercase}
+button.secondary{background:#e8eef5;color:var(--azul)}button.success{background:var(--verde)}button.ghost{background:#fff;color:var(--azul);border:1px solid var(--linea)}
+main{padding:14px 22px 22px;max-width:1450px;margin:auto}
+.grid-main{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra);padding:16px;margin-bottom:16px}
+.card h2{font-size:16px;margin:0 0 12px;color:var(--azul);text-transform:uppercase}
+label{font-size:11px;font-weight:800;color:#344054;display:block;margin-bottom:5px;text-transform:uppercase}
+input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:9px 10px;font:inherit;background:#fff;color:var(--texto)}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(23,50,77,.14);border-color:var(--azul)}
+textarea{min-height:76px;resize:vertical}.field{margin-bottom:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini{font-size:11px;color:var(--muted)}
+.section-title{background:#f8fafc;border-left:4px solid var(--rojo);padding:9px 12px;margin:16px 0 10px;font-weight:900;color:var(--azul);text-transform:uppercase}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;position:sticky;top:0;background:rgba(237,243,247,.97);z-index:5;padding:7px 8px 9px;border-radius:18px}
+.tab-btn{position:relative;background:#0d4f77;color:#fff;border:1px solid #0d4f77;border-bottom:4px solid transparent;opacity:.68;font-weight:900;box-shadow:0 6px 13px rgba(11,43,76,.15)}
+.tab-btn:hover{opacity:.88}.tab-btn.active{background:#0b4266;color:#fff;border-color:#0b4266;border-bottom-color:#d91f3d;opacity:1;box-shadow:0 7px 16px rgba(11,43,76,.22),inset 0 -2px 0 #d91f3d}
+.tab{display:none}.tab.active{display:block}
+.side-nav{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:8px;margin:0 0 8px;padding:7px 8px;border:1px solid #d2deea;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(11,43,76,.07)}
+.side-nav button{width:36px;height:34px;padding:0;border-radius:10px;background:#e8f0f7;color:#0b2b4c;font-size:19px}
+.side-status{text-align:center;min-width:0}.side-title{color:#0b2b4c;font-size:10px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:4px}.dot{width:7px;height:7px;border-radius:50%;background:#b7c7d5}.dot.active{width:19px;border-radius:999px;background:var(--rojo)}
+.side-widget{display:none}.side-widget.active{display:block}
+.side-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 0;padding:10px;background:#f8fafc;border:1px solid var(--linea);border-radius:12px}
+.side-actions-title{grid-column:1/-1;font-size:11px;font-weight:900;color:var(--azul);text-transform:uppercase}.side-actions button{font-size:10.5px;padding:7px 8px}
+.pit-map-actions button{width:100%;background:#0d5a83}.pit-map{height:190px;border-radius:10px;overflow:hidden;border:1px solid #cbd5e1;margin-top:8px}
+.pit-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:7px}.pit-table td{border-bottom:1px solid #d7e0e8;padding:3px 4px}.pit-table td:first-child{font-weight:900;color:#163b5a;text-transform:uppercase;width:43%}
+.legend{display:flex;gap:8px;font-size:9px;margin-top:4px}.swatch{display:inline-block;width:10px;height:10px;border:1px solid #0b5cab;background:#73bdf855}.red-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#d71920;border:2px solid #fff;box-shadow:0 0 0 1px #d71920}
+.catastral-panel{border:1px solid #b8cbe0;border-radius:12px;padding:10px;background:#f8fbff}
+.catastral-line{display:grid;grid-template-columns:46px 46px 72px 80px 70px 70px minmax(150px,1fr) 42px;gap:6px;align-items:end}
+.catastral-line label{font-size:9px;text-align:center;margin-bottom:2px}.catastral-line input,.catastral-line select{padding:8px 5px;text-align:center}
+.catastral-info{display:grid;grid-template-columns:1.2fr .55fr 1.2fr;gap:8px;margin-top:10px}.inline-check{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:10px;font-weight:700;text-transform:none}.inline-check input{width:auto}
+table.form-table{width:100%;border-collapse:collapse;font-size:12px}.form-table th,.form-table td{border:1px solid var(--linea);padding:7px}.form-table th{background:#edf2f7;color:var(--azul)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{padding:10px;border:1px solid var(--linea);border-radius:10px;background:#f8fafc}
+.report-wrap{background:#fff;border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra);padding:24px}.report{font-family:Arial,sans-serif;color:#111;line-height:1.35;font-size:12px}.report h2{font-size:14px;color:#111;border-bottom:1px solid #333;padding-bottom:4px}.report h3{font-size:12.5px;color:#111}.report p{text-align:justify}
+.copy-panel{display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px}.copy-panel button:first-child{background:#087443;font-size:16px}
+.map-modal{position:fixed;inset:0;background:#0008;z-index:1000;display:none;place-items:center;padding:24px}.map-modal.open{display:grid}.map-modal-box{background:#fff;width:min(1000px,95vw);border-radius:16px;padding:12px}.map-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:900;color:var(--azul)}#pitMapModalCanvas{height:70vh;border-radius:12px;overflow:hidden}
+.alert{padding:10px 12px;border-radius:12px;background:#fff7e6;border:1px solid #ffe0a3;color:#664500;margin:10px 0;font-size:12px}.hidden{display:none!important}
+@media(max-width:1000px){.grid-main{grid-template-columns:1fr}.catastral-line{grid-template-columns:repeat(4,1fr)}.catastral-info,.row,.row3,.kpis{grid-template-columns:1fr}.header-title p{display:none}.project-pill{max-width:54vw}}
+@media print{header,.actionbar,aside,.tabs,.no-print{display:none!important}.grid-main{display:block}main{padding:0}.tab{display:none!important}#tab-vista{display:block!important}.report-wrap{border:0;box-shadow:none;padding:0}}
 </style>
 </head>
 <body>
-<header>
-<div><h1>ALLPA · Mesa Técnica</h1><div class="small">Anteproyecto de Subdivisión Predial de dos a diez lotes con obras · Informe Técnico Aprobatorio</div></div>
-<div class="actions"><button class="btn" onclick="window.location.href='../index.html'">← Proyectos</button><button class="btn" onclick="saveDraft()">Guardar borrador</button><button class="btn" onclick="loadDraft()">Recuperar</button><button class="btn primary" onclick="showTab('preview')">Vista del informe</button></div>
+<header class="no-print">
+ <div class="header-left">
+  <button class="home-btn" title="Volver a Informes Técnicos" onclick="location.href='informes/index.html'"><svg viewBox="0 0 24 24" fill="none"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
+  <div class="project-pill">Anteproyecto de Subdivisión Predial de dos a diez lotes con obras</div>
+ </div>
+ <div class="header-title"><h1>ALLPA</h1><p>Mesa Técnica · Informe Técnico Aprobatorio</p></div>
 </header>
-<div class="layout">
-<nav id="tabs">
-<button class="active" data-t="general" onclick="showTab('general')">1. Datos generales</button>
-<button data-t="gravamen" onclick="showTab('gravamen')">2. Gravamen e IPRUS</button>
-<button data-t="fact" onclick="showTab('fact')">3. Factibilidades</button>
-<button data-t="tributos" onclick="showTab('tributos')">4. Predial, RUC y patente</button>
-<button data-t="propuesta" onclick="showTab('propuesta')">5. Propuesta del proyecto</button>
-<button data-t="lotes" onclick="showTab('lotes')">6. Loteamiento y áreas</button>
-<button data-t="vias" onclick="showTab('vias')">7. Vías, retiros y área verde</button>
-<button data-t="cierre" onclick="showTab('cierre')">8. Recomendaciones y adjuntos</button>
-<button data-t="preview" onclick="showTab('preview')">9. Vista del informe</button>
-</nav>
+
+<div class="actionbar no-print">
+ <button class="secondary" onclick="nuevoFormulario()">Nuevo</button>
+ <button class="success" onclick="guardarFormulario()">Guardar</button>
+ <button class="success" onclick="guardarYSeguir()">Guardar y siguiente</button>
+ <button class="ghost" onclick="showTab('tab-vista')">Vista del informe</button>
+</div>
+
 <main>
+<div class="grid-main">
+<aside class="no-print">
+ <div class="side-nav">
+  <button onclick="sidePrev()">‹</button>
+  <div class="side-status"><div class="side-title" id="sideTitle">1. Identificación del informe</div><div class="dots"><i class="dot active"></i><i class="dot"></i></div></div>
+  <button onclick="sideNext()">›</button>
+ </div>
 
-<section class="tab active" id="general">
-<div class="card"><h2>Datos generales</h2><div class="grid3">
-<div><label>Nro. eGOB principal</label><input data-k="egob"></div>
-<div><label>Numeración ITA</label><input data-k="ita"></div>
-<div><label>Fecha del informe</label><input type="date" data-k="fecha"></div>
-<div><label>Nombre del proyecto</label><input data-k="proyecto"></div>
-<div><label>Dirección</label><input data-k="direccion"></div>
-<div><label>Barrio / sector</label><input data-k="barrio"></div>
-<div><label>Parroquia</label><input data-k="parroquia"></div>
-<div><label>PIT / Zona de planeamiento</label><input data-k="pit"></div>
-<div><label>Clave catastral</label><input data-k="clave"></div>
-</div></div>
-<div class="card"><h2>Propietario y profesionales</h2><div class="grid">
-<div><label>Tratamiento</label><select data-k="tratamiento"><option>el señor</option><option>la señora</option><option>los señores</option><option>las señoras</option></select></div>
-<div><label>Propietario(s)</label><input data-k="propietarios"></div>
-<div><label>C.I./RUC propietario</label><input data-k="ci_prop"></div>
-<div><label>Proyectista</label><input data-k="proyectista"></div>
-<div><label>RUC/C.I. proyectista</label><input data-k="ruc_proy"></div>
-<div><label>Técnico revisor</label><input data-k="tecnico"></div>
-<div class="full"><label>Cargo técnico revisor</label><input data-k="cargo"></div>
-</div></div>
+ <div class="side-widget active card" id="widget-identificacion">
+  <h2>1. Identificación del informe</h2>
+  <div class="field"><label>Nro. eGOB Principal *</label><input id="egob" inputmode="numeric" placeholder="Ej.: 1157249"></div>
+  <div class="field"><label>Fecha de ingreso del trámite</label><input type="date" id="fechaIngreso"></div>
+  <div class="field"><label>Tipo de informe *</label><select id="tipoInforme"><option selected>Informe Técnico Aprobatorio</option></select></div>
+  <div class="field"><label>Fecha de emisión *</label><input type="date" id="fechaEmision"><div class="mini">Fecha de emisión para registro del informe aprobatorio.</div></div>
+  <div class="side-actions">
+   <div class="side-actions-title">Acciones del informe</div>
+   <button class="secondary" onclick="tabAnterior()">Atrás</button>
+   <button class="secondary" onclick="nuevoFormulario()">Nuevo</button>
+   <button class="success" onclick="guardarFormulario()">Guardar</button>
+   <button class="success" onclick="guardarYSeguir()">Guardar y sig.</button>
+  </div>
+ </div>
+
+ <div class="side-widget card" id="widget-pit">
+  <h2>2. Detalle del código PIT</h2>
+  <div class="field"><label>Buscar por PIT</label><select id="pitSelect"><option value="">Cargando PIT...</option></select></div>
+  <div class="pit-map-actions"><button type="button" onclick="openPitMapModal()">Agrandar mapa</button></div>
+  <div id="pitMap" class="pit-map"></div>
+  <div class="legend"><span><i class="swatch"></i> Polígono PIT</span><span><i class="red-dot"></i> Punto de referencia</span></div>
+  <table class="pit-table" id="pitDetailTable"></table>
+  <div id="pitLoadMsg" class="mini"></div>
+ </div>
+</aside>
+
+<section>
+ <div class="tabs no-print">
+  <button class="tab-btn active" data-tab="tab-datos" onclick="showTab('tab-datos')">Datos generales</button>
+  <button class="tab-btn" data-tab="tab-propuesta" onclick="showTab('tab-propuesta')">Propuesta Proyecto</button>
+  <button class="tab-btn" data-tab="tab-vista" onclick="showTab('tab-vista')">Vista del Informe</button>
+ </div>
+
+ <div id="tab-datos" class="tab active card no-print">
+  <h2>Datos generales</h2>
+
+  <div class="section-title">1. Datos del propietario y proyectista</div>
+  <div class="row3">
+   <div class="field"><label>Tratamiento</label><select id="tratamiento"><option>el señor</option><option>la señora</option><option>los señores</option><option>las señoras</option></select></div>
+   <div class="field"><label>Propietario(s)</label><input id="propietarios"></div>
+   <div class="field"><label>CI/RUC propietario</label><input id="ciProp"></div>
+   <div class="field"><label>Proyectista</label><input id="proyectista"></div>
+   <div class="field"><label>RUC/Cédula proyectista</label><input id="rucProy"></div>
+   <div class="field"><label>Técnico revisor</label><input id="tecnico"></div>
+  </div>
+
+  <div class="section-title">2. Ubicación del predio</div>
+  <div class="field"><label>Clave catastral</label>
+   <div class="catastral-panel">
+    <div class="mini">Buscador de clave catastral. Por defecto: Prov. 06 y Cant. 01.</div>
+    <div class="catastral-line">
+     <div><label>PROV</label><input id="catProv" value="06" maxlength="2"></div>
+     <div><label>CANT</label><input id="catCant" value="01" maxlength="2"></div>
+     <div><label>PARR</label><select id="catParro"><option value=""></option></select></div>
+     <div><label>ZONA</label><select id="catZona"><option value=""></option></select></div>
+     <div><label>SECT</label><input id="catSect" maxlength="4"></div>
+     <div><label>POLG</label><input id="catPolg" maxlength="6"></div>
+     <div><label>PRED</label><input id="catPred" maxlength="12"></div>
+     <button type="button" onclick="buscarClaveCatastral()">🔍</button>
+    </div>
+    <div style="margin-top:7px"><label class="inline-check"><input type="checkbox" id="claveManualToggle"> Ingresar Clave Catastral Manualmente</label></div>
+    <div id="claveManualWrap" class="field hidden"><label>Clave catastral manual</label><input id="claveManual"></div>
+    <div class="catastral-info">
+     <div><label>Parroquia</label><input id="catParroquia" readonly></div>
+     <div><label>Urbano / Rural</label><input id="catUrbanoRural" readonly></div>
+     <div><label>Clave generada</label><input id="catClave" readonly></div>
+    </div>
+   </div>
+  </div>
+  <div class="row">
+   <div class="field"><label>Dirección</label><input id="direccion"></div>
+   <div class="field"><label>Barrio / sector</label><input id="barrio"></div>
+  </div>
+  <div class="field"><label>Nombre del proyecto</label><input id="proyectoNombre"></div>
+
+  <div class="section-title">3. Certificado de gravamen e IPRUS</div>
+  <div class="row3">
+   <div class="field"><label>Fojas gravamen</label><input id="gFojas"></div>
+   <div class="field"><label>Carpeta gravamen</label><input id="gCarpeta"></div>
+   <div class="field"><label>Ficha registral</label><input id="gFicha"></div>
+   <div class="field"><label>Nro. certificado</label><input id="gCert"></div>
+   <div class="field"><label>Referencia</label><input id="gRef"></div>
+   <div class="field"><label>Fecha certificado</label><input type="date" id="gFecha"></div>
+   <div class="field"><label>Área gravamen (m²)</label><input type="number" step="0.01" id="areaGrav"></div>
+   <div class="field"><label>Fojas IPRUS</label><input id="iFojas"></div>
+   <div class="field"><label>Carpeta IPRUS</label><input id="iCarpeta"></div>
+   <div class="field"><label>Nro. IPRUS</label><input id="nroIprus"></div>
+   <div class="field"><label>Técnico IPRUS</label><input id="tecnicoIprus"></div>
+   <div class="field"><label>Área IPRUS (m²)</label><input type="number" step="0.01" id="areaIprus"></div>
+  </div>
+  <div class="field"><label>Texto de dominio / calidad de propietario</label><textarea id="textoGrav"></textarea></div>
+  <div class="field"><label>Linderos y dimensiones generales</label><textarea id="linderos"></textarea></div>
+  <div class="mini">Los parámetros urbanísticos del PIT no se repiten aquí: se cargan automáticamente desde el panel lateral “Detalle del código PIT”.</div>
+
+  <div class="section-title">4. Factibilidades, predial, RUC y patente</div>
+  <h3>RIOBAMBA EP</h3>
+  <div class="row3">
+   <div class="field"><label>Fojas</label><input id="epFojas"></div><div class="field"><label>Carpeta</label><input id="epCarpeta"></div><div class="field"><label>Tipo documento</label><input id="epTipo"></div>
+   <div class="field"><label>Nro. oficio</label><input id="epOficio"></div><div class="field"><label>Fecha</label><input type="date" id="epFecha"></div><div class="field"><label>Técnico/a</label><input id="epTecnico"></div>
+  </div>
+  <div class="field"><label>Solicitado por</label><input id="epSolicita"></div><div class="field"><label>Datos / texto de factibilidad</label><textarea id="epDatos"></textarea></div>
+
+  <h3>EERSA</h3>
+  <div class="row3">
+   <div class="field"><label>Fojas</label><input id="eeFojas"></div><div class="field"><label>Carpeta</label><input id="eeCarpeta"></div><div class="field"><label>Nro. EERSA-DIC-</label><input id="eeOficio"></div>
+   <div class="field"><label>Fecha</label><input type="date" id="eeFecha"></div><div class="field"><label>Técnico EERSA</label><input id="eeTecnico"></div>
+  </div>
+  <div class="field"><label>Datos / texto EERSA</label><textarea id="eeDatos"></textarea></div>
+
+  <h3>CNT</h3>
+  <div class="row3">
+   <div class="field"><label>Fojas</label><input id="cntFojas"></div><div class="field"><label>Carpeta</label><input id="cntCarpeta"></div><div class="field"><label>Nro. CNTEP-RG3-CH-TEC-</label><input id="cntOficio"></div>
+   <div class="field"><label>Fecha</label><input type="date" id="cntFecha"></div><div class="field"><label>Técnico CNT</label><input id="cntTecnico"></div><div class="field"><label>Nro. líneas</label><input type="number" id="cntLineas"></div>
+  </div>
+  <div class="field"><label>Datos / texto CNT</label><textarea id="cntDatos"></textarea></div>
+
+  <h3>Impuesto predial</h3>
+  <div class="row3">
+   <div class="field"><label>Fojas</label><input id="pFojas"></div><div class="field"><label>Carpeta</label><input id="pCarpeta"></div><div class="field"><label>Año</label><input id="pAnio"></div>
+   <div class="field"><label>Nro. emisión</label><input id="pEmision"></div><div class="field"><label>Dirección predio</label><input id="pDireccion"></div><div class="field"><label>Área total</label><input type="number" step="0.01" id="pArea"></div>
+   <div class="field"><label>Área construcción</label><input type="number" step="0.01" id="pConst"></div>
+  </div>
+
+  <h3>RUC y patente del proyectista</h3>
+  <div class="row3">
+   <div class="field"><label>Fojas RUC</label><input id="rFojas"></div><div class="field"><label>Carpeta RUC</label><input id="rCarpeta"></div><div class="field"><label>Fojas patente</label><input id="patFojas"></div>
+   <div class="field"><label>Carpeta patente</label><input id="patCarpeta"></div><div class="field"><label>Año patente</label><input id="patAnio"></div><div class="field"><label>Nro. emisión patente</label><input id="patEmision"></div>
+   <div class="field"><label>Nombre comercial</label><input id="comercial"></div><div class="field"><label>Actividad</label><input id="actividad"></div><div class="field"><label>Base imponible</label><input type="number" step="0.01" id="baseImp"></div>
+  </div>
+
+  <div class="buttons"><button class="secondary" onclick="tabAnterior()">Atrás</button><button class="success" onclick="guardarYSeguir()">Guardar y siguiente</button></div>
+ </div>
+
+ <div id="tab-propuesta" class="tab card no-print">
+  <h2>Propuesta Proyecto</h2>
+  <div class="section-title">5. Propuesta del proyecto</div>
+  <div class="field"><label>Ejes viales / descripción técnica</label><textarea id="datosTecnicos"></textarea></div>
+  <div class="row3">
+   <div class="field"><label>¿Contempla vías internas?</label><select id="viasInternas"><option>No</option><option>Sí</option></select></div>
+   <div class="field"><label>¿Presenta afectación vial?</label><select id="presentaAfectacion"><option>No</option><option>Sí</option></select></div>
+   <div class="field"><label>Área afectación vial (m²)</label><input type="number" step="0.01" id="areaAfectada"></div>
+   <div class="field"><label>Área afectación vial propuesta (m²)</label><input type="number" step="0.01" id="areaAfectadaProp"></div>
+   <div class="field"><label>Densidad bruta (hab/ha)</label><input type="number" step="0.01" id="densBruta"></div>
+   <div class="field"><label>Densidad neta (hab/ha)</label><input type="number" step="0.01" id="densNeta"></div>
+  </div>
+  <div class="field"><label>Texto adicional de propuesta de vías</label><textarea id="viasTexto"></textarea></div>
+  <div class="field"><label>Memoria técnica · área verde y equipamiento</label><textarea id="memoria"></textarea></div>
+
+  <div class="section-title">6. Loteamiento y cuadro de áreas</div>
+  <div class="row"><div class="field"><label>Número de lotes</label><select id="nLotes"></select></div><div class="field"><label>&nbsp;</label><button class="secondary" onclick="renderLots()">Actualizar tabla</button></div></div>
+  <table class="form-table"><thead><tr><th>Lote</th><th>Área (m²)</th></tr></thead><tbody id="lotsBody"></tbody><tfoot><tr><th>Total útil</th><th id="sumLots">0.00</th></tr></tfoot></table>
+  <div class="kpis" style="margin-top:10px"><div class="kpi"><b>Área IPRUS</b><div id="kIprus">0.00 m²</div></div><div class="kpi"><b>Área útil lotes</b><div id="kLotes">0.00 m²</div></div><div class="kpi"><b>Área útil urbanizable</b><div id="kUrb">0.00 m²</div></div></div>
+
+  <div class="section-title">7. Vías, retiros y área verde</div>
+  <div class="field"><label>Texto adicional de retiros y adosamientos</label><textarea id="retirosExtra"></textarea></div>
+  <div class="field"><label>Observación adicional de afectación vial</label><textarea id="afExtra"></textarea></div>
+  <div class="field"><label>Observación adicional de área verde / equipamiento</label><textarea id="verdeExtra"></textarea></div>
+
+  <div class="section-title">8. Recomendaciones y adjuntos</div>
+  <div class="field"><label>Recomendaciones adicionales</label><textarea id="recomExtra"></textarea></div>
+  <div class="field"><label>Detalle de adjuntos / carpetas</label><textarea id="adjuntos"></textarea></div>
+  <div class="buttons"><button class="secondary" onclick="tabAnterior()">Atrás</button><button class="success" onclick="guardarYSeguir()">Guardar y siguiente</button></div>
+ </div>
+
+ <div id="tab-vista" class="tab">
+  <div class="copy-panel no-print"><button onclick="copyEgob()" title="Copiar texto para eGOB">📋 Copiar eGOB</button><button onclick="window.print()">PDF</button></div>
+  <div class="card no-print"><h2>Texto para eGOB</h2><div id="egobText" style="white-space:pre-wrap;font-size:12px;line-height:1.4"></div></div>
+  <div class="report-wrap"><div id="report" class="report"></div></div>
+ </div>
 </section>
-
-<section class="tab" id="gravamen">
-<div class="card"><h2>Certificado de gravamen</h2><div class="grid3">
-<div><label>Fojas</label><input data-k="g_fojas"></div><div><label>Carpeta</label><input data-k="g_carpeta"></div><div><label>Ficha registral</label><input data-k="ficha"></div>
-<div><label>Nro. certificado</label><input data-k="g_cert"></div><div><label>Referencia</label><input data-k="g_ref"></div><div><label>Fecha</label><input type="date" data-k="g_fecha"></div>
-<div><label>Área gravamen (m²)</label><input type="number" step="0.01" data-k="area_grav"></div>
-<div class="full"><label>Texto de dominio / calidad de propietario</label><textarea data-k="g_texto"></textarea></div>
-<div class="full"><label>Linderos y dimensiones</label><textarea data-k="linderos"></textarea></div>
-</div></div>
-<div class="card"><h2>IPRUS</h2><div class="grid3">
-<div><label>Fojas</label><input data-k="i_fojas"></div><div><label>Carpeta</label><input data-k="i_carpeta"></div><div><label>Nro. IPRUS</label><input data-k="iprus"></div>
-<div><label>Técnico IPRUS</label><input data-k="i_tecnico"></div><div><label>Área IPRUS (m²)</label><input type="number" step="0.01" data-k="area_iprus"></div><div><label>Implantación</label><input data-k="implantacion"></div>
-<div><label>Uso principal</label><input data-k="uso"></div><div><label>Lote mínimo (m²)</label><input type="number" step="0.01" data-k="lote_min"></div><div><label>Frente mínimo (m)</label><input type="number" step="0.01" data-k="frente_min"></div>
-<div><label>Nro. pisos</label><input data-k="pisos"></div><div><label>Retiro frontal</label><input type="number" step="0.01" data-k="rf"></div><div><label>Retiro lateral</label><input type="number" step="0.01" data-k="rl"></div>
-<div><label>Retiro posterior</label><input type="number" step="0.01" data-k="rp"></div><div><label>COS PB (%)</label><input type="number" step="0.01" data-k="cos_pb"></div><div><label>COS Total (%)</label><input type="number" step="0.01" data-k="cos_total"></div>
-</div><div class="hint">Estos parámetros quedan listos para conectarse posteriormente con <b>data/iprus_pit_lookup.geojson</b> a partir del PIT.</div></div>
-</section>
-
-<section class="tab" id="fact">
-<div class="card"><h2>RIOBAMBA EP · Agua potable y alcantarillado</h2><div class="grid3">
-<div><label>Fojas</label><input data-k="ep_fojas"></div><div><label>Carpeta</label><input data-k="ep_carpeta"></div><div><label>Tipo documento</label><input data-k="ep_tipo" placeholder="Informe de factibilidad / Parámetros de Diseño"></div>
-<div><label>Nro. oficio</label><input data-k="ep_oficio"></div><div><label>Fecha</label><input type="date" data-k="ep_fecha"></div><div><label>Técnico/a</label><input data-k="ep_tecnico"></div>
-<div class="full"><label>Solicitado por</label><input data-k="ep_solicitante"></div><div class="full"><label>Datos / texto de factibilidad</label><textarea data-k="ep_datos"></textarea></div>
-</div></div>
-<div class="card"><h2>EERSA</h2><div class="grid3">
-<div><label>Fojas</label><input data-k="ee_fojas"></div><div><label>Carpeta</label><input data-k="ee_carpeta"></div><div><label>Nro. EERSA-DIC-</label><input data-k="ee_oficio"></div>
-<div><label>Fecha</label><input type="date" data-k="ee_fecha"></div><div><label>Técnico EERSA</label><input data-k="ee_tecnico"></div><div class="full"><label>Datos / texto EERSA</label><textarea data-k="ee_datos"></textarea></div>
-</div></div>
-<div class="card"><h2>CNT</h2><div class="grid3">
-<div><label>Fojas</label><input data-k="cnt_fojas"></div><div><label>Carpeta</label><input data-k="cnt_carpeta"></div><div><label>Nro. CNTEP-RG3-CH-TEC-</label><input data-k="cnt_oficio"></div>
-<div><label>Fecha</label><input type="date" data-k="cnt_fecha"></div><div><label>Técnico CNT</label><input data-k="cnt_tecnico"></div><div><label>Nro. líneas</label><input type="number" data-k="cnt_lineas"></div>
-<div class="full"><label>Datos / texto CNT</label><textarea data-k="cnt_datos"></textarea></div>
-</div></div>
-</section>
-
-<section class="tab" id="tributos">
-<div class="card"><h2>Impuesto predial</h2><div class="grid3">
-<div><label>Fojas</label><input data-k="p_fojas"></div><div><label>Carpeta</label><input data-k="p_carpeta"></div><div><label>Año</label><input data-k="p_anio"></div>
-<div><label>Nro. emisión</label><input data-k="p_emision"></div><div><label>Dirección predio</label><input data-k="p_direccion"></div><div><label>Área total</label><input type="number" step="0.01" data-k="p_area"></div>
-<div><label>Área construcción</label><input type="number" step="0.01" data-k="p_const"></div>
-</div></div>
-<div class="card"><h2>RUC y patente del proyectista</h2><div class="grid3">
-<div><label>Fojas RUC</label><input data-k="r_fojas"></div><div><label>Carpeta RUC</label><input data-k="r_carpeta"></div><div><label>Fojas patente</label><input data-k="pat_fojas"></div>
-<div><label>Carpeta patente</label><input data-k="pat_carpeta"></div><div><label>Año patente</label><input data-k="pat_anio"></div><div><label>Nro. emisión patente</label><input data-k="pat_emision"></div>
-<div><label>Nombre comercial</label><input data-k="comercial"></div><div><label>Actividad</label><input data-k="actividad"></div><div><label>Base imponible</label><input type="number" step="0.01" data-k="base"></div>
-</div></div>
-</section>
-
-<section class="tab" id="propuesta">
-<div class="card"><h2>Propuesta del proyecto</h2><div class="grid">
-<div class="full"><label>Ejes viales / descripción técnica</label><textarea data-k="datos_tecnicos"></textarea></div>
-<div><label>¿Contempla vías internas?</label><select data-k="vias_int"><option>No</option><option>Sí</option></select></div>
-<div><label>¿Presenta afectación vial?</label><select data-k="afecta"><option>No</option><option>Sí</option></select></div>
-<div><label>Área afectación vial (m²)</label><input type="number" step="0.01" data-k="area_af"></div>
-<div><label>Área afectación vial propuesta (m²)</label><input type="number" step="0.01" data-k="area_af_prop"></div>
-<div><label>Densidad bruta (hab/ha)</label><input type="number" step="0.01" data-k="dens_b"></div>
-<div><label>Densidad neta (hab/ha)</label><input type="number" step="0.01" data-k="dens_n"></div>
-<div class="full"><label>Texto adicional de propuesta de vías</label><textarea data-k="vias_texto"></textarea></div>
-<div class="full"><label>Memoria técnica · área verde y equipamiento</label><textarea data-k="memoria"></textarea></div>
-</div></div>
-</section>
-
-<section class="tab" id="lotes">
-<div class="card"><h2>Loteamiento</h2><div class="grid">
-<div><label>Número de lotes</label><select data-k="n_lotes" id="n_lotes"></select></div>
-<div style="align-self:end"><button class="btn" onclick="renderLots()">Actualizar tabla</button></div>
 </div>
-<div class="scroll" style="margin-top:12px"><table><thead><tr><th>Lote</th><th>Área (m²)</th></tr></thead><tbody id="lots"></tbody><tfoot><tr><th>Total útil</th><th id="sumLots">0.00</th></tr></tfoot></table></div>
-</div>
-<div class="card"><h2>Cálculos</h2><div class="kpis"><div class="kpi"><b>Área IPRUS</b><div id="k1">0.00 m²</div></div><div class="kpi"><b>Área útil de lotes</b><div id="k2">0.00 m²</div></div><div class="kpi"><b>Área útil urbanizable</b><div id="k3">0.00 m²</div></div></div></div>
-</section>
+</main>
 
-<section class="tab" id="vias">
-<div class="card"><h2>Retiros, vías y área verde</h2><div class="grid">
-<div class="full"><label>Texto adicional de retiros y adosamientos</label><textarea data-k="retiros_extra"></textarea></div>
-<div class="full"><label>Observación adicional de afectación vial</label><textarea data-k="af_extra"></textarea></div>
-<div class="full"><label>Observación adicional de área verde/equipamiento</label><textarea data-k="verde_extra"></textarea></div>
-</div></div>
-</section>
+<div id="pitMapModal" class="map-modal"><div class="map-modal-box"><div class="map-modal-head"><span>Mapa PIT / IPRUS</span><button onclick="closePitMapModal()">Cerrar</button></div><div id="pitMapModalCanvas"></div></div></div>
+<div id="toast" class="alert hidden" style="position:fixed;right:18px;bottom:18px;z-index:1200;max-width:420px"></div>
 
-<section class="tab" id="cierre">
-<div class="card"><h2>Recomendaciones y adjuntos</h2><div class="grid">
-<div class="full"><label>Recomendaciones adicionales</label><textarea data-k="recom_extra"></textarea></div>
-<div class="full"><label>Detalle de adjuntos / carpetas</label><textarea data-k="adjuntos" placeholder="Carpeta 1: ...&#10;Carpeta 2: ..."></textarea></div>
-</div></div>
-</section>
-
-<section class="tab" id="preview">
-<div class="card preview-actions"><div class="actions"><button class="btn primary" onclick="renderPreview()">Actualizar vista</button><button class="btn" onclick="copyEgob()">Copiar texto eGOB</button><button class="btn" onclick="window.print()">Imprimir / Guardar PDF</button></div></div>
-<div class="preview-grid">
-<div class="card egob-card"><h2>Texto para eGOB</h2><div class="egob" id="egobText"></div></div>
-<div class="page" id="report"></div>
-</div>
-</section>
-
-</main></div>
 <script>
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const v=k=>($(`[data-k="${k}"]`)?.value||'').trim(), n=k=>parseFloat(v(k)||0)||0;
+const state={pitItems:[],pitMap:null,catastralBase:[],sideIndex:0};
+let miniMap=null,miniLayer=null,modalMap=null,modalLayer=null;
+const $=id=>document.getElementById(id);
+const v=id=>($(id)?.value||'').trim();
+const num=id=>parseFloat(v(id)||0)||0;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-const nl=s=>esc(s).replace(/\n/g,'<br>'); const fmt=x=>Number(x||0).toFixed(2);
-const dlong=s=>{if(!s)return'';let[a,b,c]=s.split('-');return new Date(+a,+b-1,+c).toLocaleDateString('es-EC',{day:'2-digit',month:'long',year:'numeric'})}
-function showTab(id){$$('.tab').forEach(x=>x.classList.remove('active'));$$('nav button').forEach(x=>x.classList.remove('active'));$('#'+id).classList.add('active');$(`nav button[data-t="${id}"]`)?.classList.add('active');if(id==='preview')renderPreview()}
-function initLots(){for(let i=2;i<=10;i++)$('#n_lotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);renderLots()}
-function renderLots(){let c=parseInt(v('n_lotes')||2),old={};$$('[data-lot]').forEach(x=>old[x.dataset.lot]=x.value);$('#lots').innerHTML='';for(let i=1;i<=c;i++)$('#lots').insertAdjacentHTML('beforeend',`<tr><td>LOTE ${i}</td><td><input type="number" step="0.01" data-lot="${i}" value="${old[i]||''}"></td></tr>`);$$('[data-lot]').forEach(x=>x.oninput=()=>{calc();renderPreview()});calc()}
-function lotData(){return $$('[data-lot]').map((x,i)=>({i:i+1,a:parseFloat(x.value||0)||0}))}
-function calc(){let s=lotData().reduce((a,b)=>a+b.a,0),u=n('area_iprus')-n('area_af')-n('area_af_prop');$('#sumLots').textContent=fmt(s);$('#k1').textContent=fmt(n('area_iprus'))+' m²';$('#k2').textContent=fmt(s)+' m²';$('#k3').textContent=fmt(u)+' m²'}
+const nl=s=>esc(s).replace(/\n/g,'<br>');
+const fmt=n=>Number(n||0).toFixed(2);
+function notify(msg,ok=false){const t=$('toast');t.textContent=msg;t.className='alert'+(ok?' ok':'');t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3200)}
+function parseCSV(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());if(!lines.length)return[];const sep=lines[0].includes(';')?';':',';const h=lines.shift().split(sep).map(x=>x.trim());return lines.map(line=>{const c=line.split(sep);const o={};h.forEach((k,i)=>o[k]=(c[i]||'').trim());return o})}
+function dateLong(s){if(!s)return'';const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('es-EC',{day:'2-digit',month:'long',year:'numeric'})}
+
+function sideShow(i){state.sideIndex=(i+2)%2;['widget-identificacion','widget-pit'].forEach((id,j)=>$(id).classList.toggle('active',j===state.sideIndex));document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===state.sideIndex));$('sideTitle').textContent=state.sideIndex===0?'1. Identificación del informe':'2. Detalle del código PIT';if(state.sideIndex===1)setTimeout(()=>initMiniMap(),80)}
+function sidePrev(){sideShow(state.sideIndex-1)} function sideNext(){sideShow(state.sideIndex+1)}
+function showTab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-tab="${id}"]`)?.classList.add('active');if(id==='tab-vista')renderReport()}
+function tabAnterior(){const a=['tab-datos','tab-propuesta','tab-vista'];const cur=a.findIndex(id=>$(id).classList.contains('active'));showTab(a[Math.max(0,cur-1)])}
+function guardarYSeguir(){guardarFormulario(false);const a=['tab-datos','tab-propuesta','tab-vista'];const cur=a.findIndex(id=>$(id).classList.contains('active'));showTab(a[Math.min(a.length-1,cur+1)])}
+
+async function loadPit(){
+ try{
+  const r=await fetch('data/iprus_pit_lookup.geojson?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);
+  const gj=await r.json(), seen=new Map();
+  (gj.features||[]).forEach(ft=>{const p=ft.properties||{},code=String(p.codigo_pit||p.pit||'').trim();if(code&&!seen.has(code))seen.set(code,{code,properties:p,geometry:ft.geometry})});
+  state.pitItems=[...seen.values()].sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true}));
+  $('pitSelect').innerHTML='<option value="">Seleccione un PIT...</option>'+state.pitItems.map(x=>`<option value="${esc(x.code)}">${esc(x.code)}</option>`).join('');
+  $('pitLoadMsg').textContent=`Base PIT cargada: ${state.pitItems.length} códigos disponibles.`;
+ }catch(e){$('pitSelect').innerHTML='<option value="">No se pudo cargar la base PIT</option>';$('pitLoadMsg').textContent='Verifique data/iprus_pit_lookup.geojson';console.error(e)}
+}
+function pget(p,...keys){for(const k of keys){if(p?.[k]!=null&&String(p[k]).trim()!=='')return p[k]}return''}
+function selectedPit(){return state.pitItems.find(x=>x.code===v('pitSelect'))||null}
+function pitProp(item,...keys){return pget(item?.properties||{},...keys)}
+function normPct(x){return String(x||'').replace(/\s+/g,' ')}
+function renderPit(){
+ const item=selectedPit();if(!item){$('pitDetailTable').innerHTML='';return}
+ const p=item.properties;
+ const rows=[
+ ['Parroquia',pget(p,'parroquia')],['Clasificación suelo',pget(p,'clase_suelo','clas_suelo')],
+ ['Código PIT',item.code],['Lote mínimo',pget(p,'lote_minimo','lote_min')],['Altura edificación',pget(p,'altura_edificacion')],
+ ['Implantación',pget(p,'implantacion','implantac')],['Frente mínimo',pget(p,'frente_minimo','f_min')],
+ ['Retiro frontal',pget(p,'retiro_frontal','r_frontal')],['Retiro lateral',pget(p,'retiro_lateral','r_lateral')],
+ ['Retiro posterior',pget(p,'retiro_posterior','r_posterio')],['COS planta baja',normPct(pget(p,'cos_planta_baja','cos_pb'))],
+ ['COS total',normPct(pget(p,'cos_total'))],['COS creado',normPct(pget(p,'cos_creado','cos_total_c'))],['Uso principal',pget(p,'uso_principal','u_principa')]
+ ];
+ $('pitDetailTable').innerHTML=rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1]||'—')}</td></tr>`).join('');
+ const par=pget(p,'parroquia');if(par)$('catParroquia').value=par;
+ renderReport();setTimeout(initMiniMap,50);
+}
+function utm17sToLatLng(easting,northing){
+ const a=6378137,eccSquared=.00669438,k0=.9996;let x=Number(easting)-500000,y=Number(northing)-10000000,longOrigin=-81;
+ const eccPrimeSquared=eccSquared/(1-eccSquared),M=y/k0,mu=M/(a*(1-eccSquared/4-3*eccSquared**2/64-5*eccSquared**3/256));
+ const e1=(1-Math.sqrt(1-eccSquared))/(1+Math.sqrt(1-eccSquared)),J1=3*e1/2-27*e1**3/32,J2=21*e1**2/16-55*e1**4/32,J3=151*e1**3/96,J4=1097*e1**4/512;
+ const fp=mu+J1*Math.sin(2*mu)+J2*Math.sin(4*mu)+J3*Math.sin(6*mu)+J4*Math.sin(8*mu),s=Math.sin(fp),c=Math.cos(fp),t=Math.tan(fp),C1=eccPrimeSquared*c*c,T1=t*t,N1=a/Math.sqrt(1-eccSquared*s*s),R1=a*(1-eccSquared)/(1-eccSquared*s*s)**1.5,D=x/(N1*k0);
+ let lat=fp-(N1*t/R1)*(D*D/2-(5+3*T1+10*C1-4*C1*C1-9*eccPrimeSquared)*D**4/24+(61+90*T1+298*C1+45*T1*T1-252*eccPrimeSquared-3*C1*C1)*D**6/720);lat=lat*180/Math.PI;
+ let lon=(D-(1+2*T1+C1)*D**3/6+(5-2*C1+28*T1-3*C1*C1+8*eccPrimeSquared+24*T1*T1)*D**5/120)/c;lon=longOrigin+lon*180/Math.PI;return[lat,lon]
+}
+function transformCoords(c){if(!Array.isArray(c))return c;if(c.length>=2&&typeof c[0]==='number'){const[lat,lon]=utm17sToLatLng(c[0],c[1]);return[lon,lat]}return c.map(transformCoords)}
+function wgsGeom(g){return g?{type:g.type,coordinates:transformCoords(g.coordinates)}:null}
+function baseLayers(){return{sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Imágenes © Esri'}),osm:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'})}}
+function drawMap(map,item,large=false){if(!map||!item)return;const g=L.geoJSON(wgsGeom(item.geometry),{style:{color:'#0b5cab',weight:2,fillColor:'#73bdf8',fillOpacity:.35}}).addTo(map);map.fitBounds(g.getBounds().pad(.15));const center=g.getBounds().getCenter();L.circleMarker(center,{radius:large?7:6,color:'#fff',weight:2,fillColor:'#d71920',fillOpacity:1}).addTo(map);return g}
+function initMiniMap(){if(!window.L)return;const item=selectedPit();if(miniMap){miniMap.remove();miniMap=null}$('pitMap').innerHTML='';const {sat,osm}=baseLayers();miniMap=L.map('pitMap',{zoomControl:true,layers:[sat]});L.control.layers({'Satélite':sat,'Mapa base':osm},null,{collapsed:true}).addTo(miniMap);if(item)drawMap(miniMap,item);else miniMap.setView([-1.67,-78.65],12);setTimeout(()=>miniMap.invalidateSize(),100)}
+function openPitMapModal(){$('pitMapModal').classList.add('open');setTimeout(()=>{if(modalMap){modalMap.remove();modalMap=null}$('pitMapModalCanvas').innerHTML='';const {sat,osm}=baseLayers();modalMap=L.map('pitMapModalCanvas',{layers:[sat]});L.control.layers({'Satélite':sat,'Mapa base':osm},null,{collapsed:false}).addTo(modalMap);const item=selectedPit();if(item)drawMap(modalMap,item,true);else modalMap.setView([-1.67,-78.65],12)},80)}
+function closePitMapModal(){$('pitMapModal').classList.remove('open')}
+
+async function loadCatastral(){
+ try{
+  const r=await fetch('data/base_clave_catastral_parroquia_zona.csv?v='+Date.now(),{cache:'no-store'});const rows=parseCSV(await r.text());
+  state.catastralBase=rows.filter(x=>!['no','false','0','inactivo'].includes(String(x.Activo||'Sí').toLowerCase())).map(r=>({prov:r.Prov||'06',cant:r.Cant||'01',parro:String(r.Parro||'').padStart(2,'0'),parroquia:r.Parroquia||'',zona:String(r.Zona||'').padStart(3,'0'),zonaNombre:r.Zona_Nombre||'',urbanoRural:r.Urbano_Rural||''}));
+  const seen=new Map();state.catastralBase.forEach(x=>{if(x.parro&&!seen.has(x.parro))seen.set(x.parro,x)});
+  $('catParro').innerHTML='<option value=""></option>'+[...seen.values()].sort((a,b)=>a.parro.localeCompare(b.parro)).map(x=>`<option value="${x.parro}">${x.parro}-${esc(x.parroquia)}</option>`).join('');
+ }catch(e){console.error(e)}
+}
+function updateZones(){const p=v('catParro');const rows=state.catastralBase.filter(x=>x.parro===p).sort((a,b)=>a.zona.localeCompare(b.zona));$('catZona').innerHTML='<option value=""></option>'+rows.map(x=>`<option value="${x.zona}">${x.zona}-${esc(x.zonaNombre||('Zona '+x.zona))}</option>`).join('');syncCatastral()}
+function syncCatastral(){const p=v('catParro'),z=v('catZona'),row=state.catastralBase.find(x=>x.parro===p&&x.zona===z)||state.catastralBase.find(x=>x.parro===p);if(row){$('catParroquia').value=row.parroquia;$('catUrbanoRural').value=row.urbanoRural}const clave=$('claveManualToggle').checked?v('claveManual'):[v('catProv')||'06',v('catCant')||'01',p,z,v('catSect'),v('catPolg'),v('catPred')].join('');$('catClave').value=clave;renderReport()}
+function buscarClaveCatastral(){syncCatastral();notify(v('catParroquia')?`Clave catastral reconocida: ${v('catParroquia')} / ${v('catUrbanoRural')}.`:'Seleccione parroquia y zona o continúe manualmente.',!!v('catParroquia'))}
+
+function initLots(){for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);renderLots()}
+function renderLots(){let n=parseInt(v('nLotes')||2),old={};document.querySelectorAll('[data-lot]').forEach(x=>old[x.dataset.lot]=x.value);$('lotsBody').innerHTML='';for(let i=1;i<=n;i++)$('lotsBody').insertAdjacentHTML('beforeend',`<tr><td>LOTE ${i}</td><td><input type="number" step="0.01" data-lot="${i}" value="${old[i]||''}"></td></tr>`);document.querySelectorAll('[data-lot]').forEach(x=>x.oninput=()=>{calc();renderReport()});calc()}
+function lotData(){return [...document.querySelectorAll('[data-lot]')].map((x,i)=>({i:i+1,a:parseFloat(x.value||0)||0}))}
+function calc(){const s=lotData().reduce((a,b)=>a+b.a,0),u=num('areaIprus')-num('areaAfectada')-num('areaAfectadaProp');$('sumLots').textContent=fmt(s);$('kIprus').textContent=fmt(num('areaIprus'))+' m²';$('kLotes').textContent=fmt(s)+' m²';$('kUrb').textContent=fmt(u)+' m²'}
+function pitVal(...keys){const i=selectedPit();return i?String(pitProp(i,...keys)||''):''}
+function cleanPct(x){return String(x||'').replace('%','').trim()}
 function pct(a,b){return b?(a/b*100).toFixed(2)+'%':'0.00%'}
-function lotWords(x){return ({2:'dos (2)',3:'tres (3)',4:'cuatro (4)',5:'cinco (5)',6:'seis (6)',7:'siete (7)',8:'ocho (8)',9:'nueve (9)',10:'diez (10)'})[x]||x}
-function lotTable(){let d=lotData(),r=d.map(x=>`<tr><td>LOTE ${x.i}</td><td>${fmt(x.a)}</td></tr>`).join('');return `<table><tr><th>Nro.</th><th>ÁREA</th></tr>${r}<tr><th>TOTAL ÚTIL</th><th>${fmt(d.reduce((a,b)=>a+b.a,0))}</th></tr></table>`}
-function areaTable(){let ip=n('area_iprus'),g=n('area_grav'),a=n('area_af'),p=n('area_af_prop'),l=lotData().reduce((x,y)=>x+y.a,0),u=ip-a-p;return `<table><tr><th>DESCRIPCIÓN</th><th>ÁREA</th><th>U</th><th>PORCENTAJE</th></tr><tr><td>Área Total del Lote (gravamen)</td><td>${fmt(g)}</td><td>m²</td><td>${pct(g,ip)}</td></tr><tr><td>Área Total del Lote (IPRUS)</td><td>${fmt(ip)}</td><td>m²</td><td>${ip?'100.00%':'0.00%'}</td></tr><tr><td>Área útil de lotes</td><td>${fmt(l)}</td><td>m²</td><td>${pct(l,ip)}</td></tr><tr><td>Área de afectación vial</td><td>${fmt(a)}</td><td>m²</td><td>${pct(a,ip)}</td></tr><tr><td>Área de afectación vial propuesta</td><td>${fmt(p)}</td><td>m²</td><td>${pct(p,ip)}</td></tr><tr><td>Área Útil Urbanizable</td><td>${fmt(u)}</td><td>m²</td><td>${pct(u,ip)}</td></tr><tr><td>COS PB</td><td>${esc(v('cos_pb'))}</td><td>%</td><td>-</td></tr><tr><td>COS Total</td><td>${esc(v('cos_total'))}</td><td>%</td><td>-</td></tr><tr><td>Densidad Bruta</td><td>${esc(v('dens_b'))}</td><td>hab/ha</td><td>-</td></tr><tr><td>Densidad Neta</td><td>${esc(v('dens_n'))}</td><td>hab/ha</td><td>-</td></tr></table>`}
-function renderPreview(){calc();let y=(new Date()).getFullYear(),memo=`GADMR-GPHDU-MTI-${y}-${v('ita')||'___'}-ITA`,t=v('tratamiento'),L=parseInt(v('n_lotes')||2);
-let vias=v('vias_int')==='Sí'?(v('vias_texto')||'Según la propuesta presentada, el proyecto contempla vías planificadas internas dentro del predio.'):'Según la propuesta presentada el proyecto no contempla vías planificadas internas dentro del predio.';
-let afect=`El predio ${v('afecta')==='Sí'?'sí':'no'} presenta afectación vial según IPRUS Nro. ${esc(v('iprus'))}, suscrito por ${esc(v('i_tecnico'))}, Técnico Coordinador del IPRUS${v('afecta')==='Sí'?`, con un área de ${fmt(n('area_af'))} m²`:''}.`;
-$('#report').innerHTML=`<div class="meta">MEMORANDO Nro. ${esc(memo)}<br>Trámite Nro. ${esc(v('egob'))}<br>Riobamba, ${esc(dlong(v('fecha')))}</div>
-<p class="subject">ASUNTO: INFORME TÉCNICO FAVORABLE PARA REVISIÓN Y APROBACIÓN DE ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS, DENOMINADO "${esc(v('proyecto'))}" (eGOB ${esc(v('egob'))})</p>
-<p>De mi consideración:</p>
-<p>En relación con el procedimiento administrativo signado con el trámite Nro. ${esc(v('egob'))} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${esc(v('proyecto'))}" ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(v('pit'))}, parroquia ${esc(v('parroquia'))} de la ciudad de Riobamba, de propiedad de ${esc(t)} ${esc(v('propietarios'))} del predio con clave catastral ${esc(v('clave'))}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el <b>INFORME TÉCNICO FAVORABLE</b> en los siguientes términos:</p>
-<h3>ANTECEDENTES:</h3>
-<p><b>1.</b> En el expediente de fojas ${esc(v('g_fojas'))} carpeta ${esc(v('g_carpeta'))}, consta ficha registral Nro. ${esc(v('ficha'))}, certificado Nro. ${esc(v('g_cert'))}, Ref.: ${esc(v('g_ref'))} el ${esc(dlong(v('g_fecha')))}, del cual se desprende que ${esc(t)} ${esc(v('propietarios'))} ${nl(v('g_texto'))}, con una superficie de ${fmt(n('area_grav'))} metros cuadrados, según certificado de gravamen y cuyos linderos y dimensiones son: ${nl(v('linderos'))}</p>
-<p><b>2.</b> En el expediente de fojas ${esc(v('i_fojas'))} carpeta ${esc(v('i_carpeta'))}, consta el IPRUS Nro. ${esc(v('iprus'))}, suscrito por ${esc(v('i_tecnico'))}, quien certifica una superficie de ${fmt(n('area_iprus'))} m². Zona ${esc(v('pit'))}; Implantación: ${esc(v('implantacion'))}; lote mínimo: ${esc(v('lote_min'))} m²; frente mínimo: ${esc(v('frente_min'))} m; retiros: frontal ${esc(v('rf'))} m, lateral ${esc(v('rl'))} m, posterior ${esc(v('rp'))} m.</p>
-<p><b>3.</b> RIOBAMBA EP: fojas ${esc(v('ep_fojas'))}, carpeta ${esc(v('ep_carpeta'))}, ${esc(v('ep_tipo'))} Nro. ${esc(v('ep_oficio'))}, fecha ${esc(dlong(v('ep_fecha')))}, emitido por ${esc(v('ep_tecnico'))}. ${nl(v('ep_datos'))}</p>
-<p><b>4.</b> EERSA: fojas ${esc(v('ee_fojas'))}, carpeta ${esc(v('ee_carpeta'))}, Oficio Nro. EERSA-DIC-${esc(v('ee_oficio'))}-OF, fecha ${esc(dlong(v('ee_fecha')))}, emitido por ${esc(v('ee_tecnico'))}. ${nl(v('ee_datos'))}</p>
-<p><b>5.</b> CNT: fojas ${esc(v('cnt_fojas'))}, carpeta ${esc(v('cnt_carpeta'))}, Certificado CNTEP-RG3-CH-TEC-${esc(v('cnt_oficio'))}-O, fecha ${esc(dlong(v('cnt_fecha')))}, emitido por ${esc(v('cnt_tecnico'))}; líneas: ${esc(v('cnt_lineas'))}. ${nl(v('cnt_datos'))}</p>
-<p><b>6.</b> Pago predial: fojas ${esc(v('p_fojas'))}, carpeta ${esc(v('p_carpeta'))}, cliente ${esc(v('propietarios'))}, Ruc/Cédula ${esc(v('ci_prop'))}, año ${esc(v('p_anio'))}, emisión ${esc(v('p_emision'))}, dirección ${esc(v('p_direccion'))}, área total ${esc(v('p_area'))}, área construcción ${esc(v('p_const'))}, referencia ${esc(v('clave'))}.</p>
-<p><b>7.</b> RUC de ${esc(v('proyectista'))}: ${esc(v('ruc_proy'))}, fojas ${esc(v('r_fojas'))}, carpeta ${esc(v('r_carpeta'))}.</p>
-<p><b>8.</b> Patente de ${esc(v('proyectista'))}: año ${esc(v('pat_anio'))}, emisión ${esc(v('pat_emision'))}, nombre comercial ${esc(v('comercial'))}, actividad ${esc(v('actividad'))}, base imponible ${esc(v('base'))}.</p>
-<h3>INFORME TÉCNICO</h3><h3>1. UBICACIÓN:</h3><p>Proyecto "${esc(v('proyecto'))}", calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, zona ${esc(v('pit'))}, parroquia ${esc(v('parroquia'))}, propiedad de ${esc(t)} ${esc(v('propietarios'))}.<br><b>Clave catastral:</b> ${esc(v('clave'))}</p>
-<h3>2. LINDEROS GENERALES:</h3><p>${nl(v('linderos'))}<br><b>Área Total:</b> ${fmt(n('area_iprus'))} m²</p>
-<h3>3. PROPUESTA DEL PROYECTO:</h3><p>${nl(v('datos_tecnicos'))}</p>
-<table><tr><th colspan="4">ZONA DE PLANEAMIENTO ${esc(v('pit'))}</th></tr><tr><td>Implantación</td><td>${esc(v('implantacion'))}</td><td>Uso Principal</td><td>${esc(v('uso'))}</td></tr><tr><td>Lote Mínimo</td><td>${esc(v('lote_min'))}</td><td>Nro. Pisos</td><td>${esc(v('pisos'))}</td></tr><tr><td>Frente Mínimo</td><td>${esc(v('frente_min'))}</td><td>Retiro Frontal</td><td>${esc(v('rf'))}</td></tr><tr><td>COS PB %</td><td>${esc(v('cos_pb'))}</td><td>Retiro Lateral</td><td>${esc(v('rl'))}</td></tr><tr><td></td><td></td><td>Retiro Posterior</td><td>${esc(v('rp'))}</td></tr><tr><td></td><td></td><td>COS TOTAL %</td><td>${esc(v('cos_total'))}</td></tr></table>
-<h3>4. DESCRIPCIÓN DE LOTEAMIENTO:</h3><p>El predio en mención se propone subdividir en ${L} lotes, cumpliendo con el lote y frente mínimo de la zona de planeamiento.</p>${lotTable()}
-<h3>5. LINDEROS Y DIMENSIONES:</h3><p>Se propone la urbanización en ${lotWords(L)} lotes, cuyos linderos y dimensiones se encuentran detallados en el formulario FRM – SCO – R - 003 y concuerdan con los planos y memoria descriptiva suscritos por Arq. ${esc(v('proyectista'))}.</p><p><b><i>Nota: Los linderos y dimensiones son de exclusiva responsabilidad del proyectista y/o propietario.</i></b></p>
-<h3>6. PROPUESTA DE RETIROS Y ADOSAMIENTOS:</h3><p>Según la propuesta presentada, se propone una Implantación ${esc(v('implantacion'))} con retiro frontal: ${esc(v('rf'))} m, retiro lateral: ${esc(v('rl'))} m, retiro posterior: ${esc(v('rp'))} m. ${nl(v('retiros_extra'))}</p>
-<h3>7. PROPUESTA DE VÍAS</h3><p>${nl(vias)}</p><h3>8. VÍAS Y AFECTACIÓN VIAL</h3><p>${afect} ${nl(v('af_extra'))}</p>
-<h3>9. ÁREA VERDE Y EQUIPAMIENTO COMUNITARIO:</h3><p>La propuesta del anteproyecto "${esc(v('proyecto'))}", conforme consta en la memoria técnica suscrita por Arq. ${esc(v('proyectista'))}, establece expresamente que: “(…) ${nl(v('memoria'))} (…)”. ${nl(v('verde_extra'))}</p>
-<h3>10. CUADRO DE ÁREAS</h3>${areaTable()}
-<h3>11. INFRAESTRUCTURA BÁSICA</h3><p>El predio dispone de las factibilidades correspondientes para realizar los estudios de dotación de servicios, conforme los documentos de RIOBAMBA EP, EERSA y CNT descritos en antecedentes.</p>
-<h3>12. OBSERVACIONES Y RECOMENDACIONES PARA APROBACIÓN DEL PROYECTO DEFINITIVO</h3><p>- Adjuntar los requisitos establecidos en el Artículo 53 de la Ordenanza 016-2023.<br>- Verificar que el proyecto técnico cumpla los parámetros del Artículo 54 de la Ordenanza 016-2023.</p><p>${nl(v('recom_extra'))}</p>
-<h3>13. CONCLUSIÓN</h3><p>De conformidad con el artículo 39 de la Ordenanza 016-2023, se emite <b>INFORME TÉCNICO FAVORABLE</b> para revisión y aprobación de Subdivisión Predial de dos a diez lotes con obras, denominado "${esc(v('proyecto'))}", ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(v('pit'))}, parroquia ${esc(v('parroquia'))}, de propiedad de ${esc(t)} ${esc(v('propietarios'))}, con clave catastral ${esc(v('clave'))}.</p><p><b><i>El presente informe técnico está emitido con base en los documentos detallados en los antecedentes, siendo la veracidad de los mismos, responsabilidad de quien los suscribe.</i></b></p><p>Atentamente;</p><p><b>${esc(v('tecnico'))}</b><br><b>${esc(v('cargo'))}</b></p><p><u>Adjunto:</u><br>${nl(v('adjuntos'))}</p>`;
-$('#egobText').textContent=`De mi consideración
+function lotWords(n){return({2:'dos (2)',3:'tres (3)',4:'cuatro (4)',5:'cinco (5)',6:'seis (6)',7:'siete (7)',8:'ocho (8)',9:'nueve (9)',10:'diez (10)'})[n]||n}
+function lotTable(){const d=lotData();return `<table class="form-table"><tr><th>Nro.</th><th>Área</th></tr>${d.map(x=>`<tr><td>LOTE ${x.i}</td><td>${fmt(x.a)}</td></tr>`).join('')}<tr><th>TOTAL ÚTIL</th><th>${fmt(d.reduce((a,b)=>a+b.a,0))}</th></tr></table>`}
+function areaTable(){const ip=num('areaIprus'),g=num('areaGrav'),a=num('areaAfectada'),p=num('areaAfectadaProp'),l=lotData().reduce((x,y)=>x+y.a,0),u=ip-a-p;return `<table class="form-table"><tr><th>Descripción</th><th>Área</th><th>U</th><th>Porcentaje</th></tr><tr><td>Área Total del Lote (gravamen)</td><td>${fmt(g)}</td><td>m²</td><td>${pct(g,ip)}</td></tr><tr><td>Área Total del Lote (IPRUS)</td><td>${fmt(ip)}</td><td>m²</td><td>${ip?'100.00%':'0.00%'}</td></tr><tr><td>Área útil de lotes</td><td>${fmt(l)}</td><td>m²</td><td>${pct(l,ip)}</td></tr><tr><td>Área afectación vial</td><td>${fmt(a)}</td><td>m²</td><td>${pct(a,ip)}</td></tr><tr><td>Área afectación vial propuesta</td><td>${fmt(p)}</td><td>m²</td><td>${pct(p,ip)}</td></tr><tr><td>Área Útil Urbanizable</td><td>${fmt(u)}</td><td>m²</td><td>${pct(u,ip)}</td></tr><tr><td>COS PB</td><td>${esc(cleanPct(pitVal('cos_planta_baja','cos_pb')))}</td><td>%</td><td>-</td></tr><tr><td>COS Total</td><td>${esc(cleanPct(pitVal('cos_total')))}</td><td>%</td><td>-</td></tr><tr><td>Densidad Bruta</td><td>${esc(v('densBruta'))}</td><td>hab/ha</td><td>-</td></tr><tr><td>Densidad Neta</td><td>${esc(v('densNeta'))}</td><td>hab/ha</td><td>-</td></tr></table>`}
 
-En relación con el procedimiento administrativo signado con el trámite Nro. ${v('egob')} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${v('proyecto')}" ubicado en la calle ${v('direccion')}, barrio ${v('barrio')}, Zona de planeamiento ${v('pit')}, parroquia ${v('parroquia')} de la ciudad de Riobamba, de propiedad de ${t} ${v('propietarios')} del predio con clave catastral ${v('clave')}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el INFORME TÉCNICO FAVORABLE contenido en MEMORANDO Nro. ${memo}, el cual fue elaborado y corregido en base al cumplimiento de las disposiciones técnicas, normas arquitectónicas y normativa vigente aplicable. En tal virtud, se solicita muy comedidamente se sirva revisar la documentación anexa y de considerarlo procedente, disponer la continuación del trámite conforme a la normativa vigente.
+function renderReport(){
+ calc();const pit=v('pitSelect'),par=pitVal('parroquia')||v('catParroquia'),uso=pitVal('uso_principal','u_principa'),imp=pitVal('implantacion','implantac'),lm=pitVal('lote_minimo','lote_min'),fm=pitVal('frente_minimo','f_min'),rf=pitVal('retiro_frontal','r_frontal'),rl=pitVal('retiro_lateral','r_lateral'),rp=pitVal('retiro_posterior','r_posterio'),cosPB=pitVal('cos_planta_baja','cos_pb'),cosT=pitVal('cos_total'),alt=pitVal('altura_edificacion');const y=new Date().getFullYear(),memo=`GADMR-GPHDU-MTI-${y}-${v('ita')||'___'}-ITA`,L=parseInt(v('nLotes')||2),t=v('tratamiento');
+ const vias=v('viasInternas')==='Sí'?(v('viasTexto')||'Según la propuesta presentada, el proyecto contempla vías planificadas internas dentro del predio.'):'Según la propuesta presentada el proyecto no contempla vías planificadas internas dentro del predio.';
+ $('report').innerHTML=`<div style="text-align:right;font-weight:700">MEMORANDO Nro. ${esc(memo)}<br>Trámite Nro. ${esc(v('egob'))}<br>Riobamba, ${esc(dateLong(v('fechaEmision')))}</div>
+ <p><b>ASUNTO: INFORME TÉCNICO FAVORABLE PARA REVISIÓN Y APROBACIÓN DE ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS, DENOMINADO "${esc(v('proyectoNombre')||'')}" (eGOB ${esc(v('egob'))})</b></p>
+ <p>De mi consideración:</p><p>En relación con el procedimiento administrativo signado con el trámite Nro. ${esc(v('egob'))} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${esc(v('proyectoNombre')||'')}" ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(pit)}, parroquia ${esc(par)} de la ciudad de Riobamba, de propiedad de ${esc(t)} ${esc(v('propietarios'))} del predio con clave catastral ${esc(v('catClave'))}; emito el <b>INFORME TÉCNICO FAVORABLE</b>.</p>
+ <h2>ANTECEDENTES</h2>
+ <p><b>1.</b> En el expediente de fojas ${esc(v('gFojas'))} carpeta ${esc(v('gCarpeta'))}, consta ficha registral Nro. ${esc(v('gFicha'))}, certificado Nro. ${esc(v('gCert'))}, Ref.: ${esc(v('gRef'))} el ${esc(dateLong(v('gFecha')))}, del cual se desprende que ${esc(t)} ${esc(v('propietarios'))} ${nl(v('textoGrav'))}, con una superficie de ${fmt(num('areaGrav'))} metros cuadrados y cuyos linderos y dimensiones son: ${nl(v('linderos'))}</p>
+ <p><b>2.</b> En el expediente de fojas ${esc(v('iFojas'))} carpeta ${esc(v('iCarpeta'))}, consta el IPRUS Nro. ${esc(v('nroIprus'))}, suscrito por ${esc(v('tecnicoIprus'))}, quien certifica una superficie de ${fmt(num('areaIprus'))} m². Zona ${esc(pit)}; Implantación ${esc(imp)}; lote mínimo ${esc(lm)}; frente mínimo ${esc(fm)}; retiros frontal ${esc(rf)}, lateral ${esc(rl)}, posterior ${esc(rp)}.</p>
+ <p><b>3.</b> RIOBAMBA EP: ${esc(v('epTipo'))} Nro. ${esc(v('epOficio'))}, fecha ${esc(dateLong(v('epFecha')))}. ${nl(v('epDatos'))}</p>
+ <p><b>4.</b> EERSA: Oficio Nro. EERSA-DIC-${esc(v('eeOficio'))}-OF, fecha ${esc(dateLong(v('eeFecha')))}. ${nl(v('eeDatos'))}</p>
+ <p><b>5.</b> CNT: Certificado CNTEP-RG3-CH-TEC-${esc(v('cntOficio'))}-O, fecha ${esc(dateLong(v('cntFecha')))}. ${nl(v('cntDatos'))}</p>
+ <h2>INFORME TÉCNICO</h2>
+ <h3>1. UBICACIÓN</h3><p>Predio ubicado en ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, parroquia ${esc(par)}, código PIT ${esc(pit)}, clave catastral ${esc(v('catClave'))}.</p>
+ <h3>2. LINDEROS GENERALES</h3><p>${nl(v('linderos'))}<br><b>Área Total:</b> ${fmt(num('areaIprus'))} m²</p>
+ <h3>3. PROPUESTA DEL PROYECTO</h3><p>${nl(v('datosTecnicos'))}</p><table class="form-table"><tr><th colspan="4">ZONA DE PLANEAMIENTO ${esc(pit)}</th></tr><tr><td>Implantación</td><td>${esc(imp)}</td><td>Uso Principal</td><td>${esc(uso)}</td></tr><tr><td>Lote Mínimo</td><td>${esc(lm)}</td><td>Altura edificación</td><td>${esc(alt)}</td></tr><tr><td>Frente mínimo</td><td>${esc(fm)}</td><td>Retiro frontal</td><td>${esc(rf)}</td></tr><tr><td>COS PB</td><td>${esc(cosPB)}</td><td>Retiro lateral</td><td>${esc(rl)}</td></tr><tr><td></td><td></td><td>Retiro posterior</td><td>${esc(rp)}</td></tr><tr><td></td><td></td><td>COS TOTAL</td><td>${esc(cosT)}</td></tr></table>
+ <h3>4. DESCRIPCIÓN DE LOTEAMIENTO</h3><p>El predio se propone subdividir en ${L} lotes.</p>${lotTable()}
+ <h3>5. LINDEROS Y DIMENSIONES</h3><p>Se propone la urbanización en ${lotWords(L)} lotes, conforme planos y memoria descriptiva suscritos por Arq. ${esc(v('proyectista'))}.</p>
+ <h3>6. PROPUESTA DE RETIROS Y ADOSAMIENTOS</h3><p>Implantación ${esc(imp)} con retiro frontal ${esc(rf)}, lateral ${esc(rl)} y posterior ${esc(rp)}. ${nl(v('retirosExtra'))}</p>
+ <h3>7. PROPUESTA DE VÍAS</h3><p>${nl(vias)}</p>
+ <h3>8. VÍAS Y AFECTACIÓN VIAL</h3><p>El predio ${v('presentaAfectacion')==='Sí'?'sí':'no'} presenta afectación vial. ${nl(v('afExtra'))}</p>
+ <h3>9. ÁREA VERDE Y EQUIPAMIENTO COMUNITARIO</h3><p>${nl(v('memoria'))} ${nl(v('verdeExtra'))}</p>
+ <h3>10. CUADRO DE ÁREAS</h3>${areaTable()}
+ <h3>11. INFRAESTRUCTURA BÁSICA</h3><p>El predio dispone de las factibilidades correspondientes de RIOBAMBA EP, EERSA y CNT conforme los antecedentes.</p>
+ <h3>12. OBSERVACIONES Y RECOMENDACIONES</h3><p>- Adjuntar todos los requisitos establecidos en el Artículo 53 de la Ordenanza 016-2023.<br>- Verificar que el proyecto técnico cumpla los parámetros del Artículo 54 de la Ordenanza 016-2023.</p><p>${nl(v('recomExtra'))}</p>
+ <h3>13. CONCLUSIÓN</h3><p>De conformidad con el artículo 39 de la Ordenanza 016-2023, se emite <b>INFORME TÉCNICO FAVORABLE</b> para revisión y aprobación de Subdivisión Predial de dos a diez lotes con obras.</p><p><b>${esc(v('tecnico'))}</b></p><p><u>Adjunto:</u><br>${nl(v('adjuntos'))}</p>`;
+ $('egobText').textContent=`De mi consideración
 
-En virtud de lo establecido en el artículo 39 de la Ordenanza 016-2023, solicito de la manera más comedida que, por su intermedio, se remita a la Dirección de Procuraduría Institucional para que se complemente con el informe legal suscrito por su delegado conforme MEMORANDO Nro. GADMR-PROC-2026-0252-M, junto con su respectiva propuesta de resolución administrativa.
+En relación con el procedimiento administrativo signado con el trámite Nro. ${v('egob')} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras, ubicado en la calle ${v('direccion')}, barrio ${v('barrio')}, Zona de planeamiento ${pit}, parroquia ${par} de la ciudad de Riobamba, de propiedad de ${t} ${v('propietarios')} del predio con clave catastral ${v('catClave')}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el INFORME TÉCNICO FAVORABLE contenido en MEMORANDO Nro. ${memo}.
 
-Con sentimientos de estima y consideración.`}
-function snap(){let d={};$$('[data-k]').forEach(x=>d[x.dataset.k]=x.value);d.lots=lotData().map(x=>x.a);return d}
-function saveDraft(){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO',JSON.stringify(snap()));alert('Borrador guardado.')}
-function loadDraft(){let x=localStorage.getItem('ALLPA_SUBDIVISION_APROBATORIO');if(!x)return alert('No hay borrador guardado.');let d=JSON.parse(x);$$('[data-k]').forEach(el=>{if(d[el.dataset.k]!=null)el.value=d[el.dataset.k]});renderLots();if(d.lots)$$('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');calc();renderPreview()}
-async function copyEgob(){try{await navigator.clipboard.writeText($('#egobText').textContent);alert('Texto eGOB copiado.')}catch(e){alert('Selecciona y copia el texto manualmente.')}}
-document.addEventListener('input',e=>{if(e.target.matches('[data-k]')){calc();renderPreview()}});document.addEventListener('change',e=>{if(e.target.dataset.k==='n_lotes')renderLots();else if(e.target.matches('[data-k]'))renderPreview()});
-initLots();$('[data-k="fecha"]').value=new Date().toISOString().slice(0,10);renderPreview();
+En virtud de lo establecido en el artículo 39 de la Ordenanza 016-2023, solicito que, por su intermedio, se remita a la Dirección de Procuraduría Institucional para que se complemente con el informe legal conforme MEMORANDO Nro. GADMR-PROC-2026-0252-M, junto con su respectiva propuesta de resolución administrativa.
+
+Con sentimientos de estima y consideración.`;
+}
+function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.lots=lotData().map(x=>x.a);return d}
+function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();renderReport()}
+function guardarFormulario(show=true){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO_V2',JSON.stringify(snapshot()));if(show)notify('Informe guardado en este navegador.',true);return true}
+function nuevoFormulario(){if(!confirm('¿Crear un formulario nuevo? Se limpiarán los datos no guardados.'))return;localStorage.removeItem('ALLPA_SUBDIVISION_APROBATORIO_V2');location.reload()}
+async function copyEgob(){try{await navigator.clipboard.writeText($('egobText').textContent);notify('Texto para eGOB copiado.',true)}catch(e){notify('No se pudo copiar automáticamente.')}}
+function bind(){
+ $('pitSelect').addEventListener('change',renderPit);$('catParro').addEventListener('change',updateZones);$('catZona').addEventListener('change',syncCatastral);
+ ['catProv','catCant','catSect','catPolg','catPred','claveManual'].forEach(id=>$(id).addEventListener('input',syncCatastral));
+ $('claveManualToggle').addEventListener('change',()=>{$('claveManualWrap').classList.toggle('hidden',!$('claveManualToggle').checked);['catProv','catCant','catParro','catZona','catSect','catPolg','catPred'].forEach(id=>$(id).disabled=$('claveManualToggle').checked);syncCatastral()});
+ document.querySelectorAll('input,select,textarea').forEach(el=>{if(!['pitSelect','catParro','catZona','nLotes'].includes(el.id))el.addEventListener('input',renderReport)});
+ $('nLotes').addEventListener('change',renderLots);
+}
+async function init(){for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);$('fechaEmision').value=new Date().toISOString().slice(0,10);bind();await Promise.all([loadPit(),loadCatastral()]);renderLots();initMiniMap();const saved=localStorage.getItem('ALLPA_SUBDIVISION_APROBATORIO_V2');if(saved){try{applySnapshot(JSON.parse(saved))}catch(e){}}renderReport()}
+init();
 </script>
-</body></html>
+</body>
+</html>
