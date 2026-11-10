@@ -61,7 +61,7 @@ textarea{min-height:76px;resize:vertical}.field{margin-bottom:11px}.row{display:
 .catastral-info{display:grid;grid-template-columns:1.2fr .55fr 1.2fr;gap:8px;margin-top:10px}.inline-check{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:10px;font-weight:700;text-transform:none}.inline-check input{width:auto}
 table.form-table{width:100%;border-collapse:collapse;font-size:12px}.form-table th,.form-table td{border:1px solid var(--linea);padding:7px}.form-table th{background:#edf2f7;color:var(--azul)}
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{padding:10px;border:1px solid var(--linea);border-radius:10px;background:#f8fafc}
-.report-wrap{background:#fff;border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra);padding:24px}.report{font-family:Arial,sans-serif;color:#111;line-height:1.35;font-size:12px}.report h2{font-size:14px;color:#111;border-bottom:1px solid #333;padding-bottom:4px}.report h3{font-size:12.5px;color:#111}.report p{text-align:justify}
+.report-wrap{background:#fff;border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra);padding:24px}.report{font-family:Arial,sans-serif;color:#111;line-height:1.35;font-size:12pt}.report h2{font-size:14px;color:#111;border-bottom:1px solid #333;padding-bottom:4px}.report h3{font-size:12.5px;color:#111}.report p{text-align:justify}
 .copy-panel{display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px}.copy-panel button:first-child{background:#087443;font-size:16px}
 .map-modal{position:fixed;inset:0;background:#0008;z-index:1000;display:none;place-items:center;padding:24px}.map-modal.open{display:grid}.map-modal-box{background:#fff;width:min(1000px,95vw);border-radius:16px;padding:12px}.map-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:900;color:var(--azul)}#pitMapModalCanvas{height:70vh;border-radius:12px;overflow:hidden}
 .alert{padding:10px 12px;border-radius:12px;background:#fff7e6;border:1px solid #ffe0a3;color:#664500;margin:10px 0;font-size:12px}.hidden{display:none!important}
@@ -103,7 +103,7 @@ main{max-width:none;width:100%;height:calc(100vh - 68px);margin:0;padding:12px 1
 .report-wrap{position:relative;padding:0;overflow:hidden;background:#fff}
 .report-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none}
 .report{position:relative;z-index:1;min-height:297mm;padding:35mm 20mm 28mm;background:transparent}
-#egobText{display:none}
+#egobText{display:block}
 @media(max-width:1000px){
  html,body{overflow:auto;height:auto}
  main{height:auto;overflow:visible}
@@ -118,6 +118,67 @@ main{max-width:none;width:100%;height:calc(100vh - 68px);margin:0;padding:12px 1
  #tab-vista{display:block!important}
  .report-wrap{box-shadow:none;border:0;border-radius:0}
  .report{min-height:297mm}
+}
+</style>
+
+
+<style id="subdivision-v4">
+/* Propietarios / apoderados */
+.party-block{margin-bottom:12px}
+.party-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 5px}
+.party-title b{font-size:11px;color:#153652}
+.party-table{width:100%;border-collapse:collapse}
+.party-table th,.party-table td{border:1px solid #d1dce6;padding:7px}
+.party-table th{background:#e7eff6;color:#143752;font-size:10px;text-transform:uppercase;text-align:left}
+.party-table input{border-radius:8px}
+.party-actions{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap}
+.party-actions button{font-size:10px;padding:8px 11px;background:#075a84}
+.party-remove{background:#c92d43!important}
+.hidden-party{display:none}
+
+/* Proyectista */
+.project-prof-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+#proyectista{width:100%}
+
+/* Vista del informe */
+.egob-panel{background:#fff;border:1px solid var(--linea);border-radius:12px;box-shadow:var(--sombra);margin-bottom:12px;overflow:hidden}
+.egob-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:#eef4f8;border-bottom:1px solid var(--linea)}
+.egob-head h3{margin:0;font-size:12px;color:#153652}
+.egob-body{padding:14px;font-family:Arial,sans-serif;font-size:12pt;line-height:1.45;white-space:pre-wrap;color:#111}
+.egob-head button{background:#0a5b84;padding:8px 13px;font-size:10px}
+.pdf-toolbar{position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;gap:8px;background:var(--gris);padding:4px 0 8px}
+.pdf-toolbar button{background:#17704e;font-size:10px}
+.report-wrap{background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+#report{background:transparent!important;padding:0!important;min-height:0!important}
+.report-source{position:absolute;left:-99999px;top:0;width:210mm;visibility:hidden;pointer-events:none}
+.report-page{position:relative;width:210mm;min-height:297mm;margin:0 auto 14px;background:#fff;box-shadow:0 2px 10px #0002;overflow:hidden;font-family:Arial,sans-serif;font-size:12pt;line-height:1.35;color:#111}
+.report-page-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none}
+.report-page-inner{position:relative;z-index:1;padding:25.4mm;width:100%;min-height:297mm}
+.report-page-inner *{font-family:Arial,sans-serif!important;font-size:12pt!important}
+.report-page-inner h2,.report-page-inner h3{font-weight:700!important;color:#111!important}
+.report-page-inner h2{margin:12pt 0 7pt;border-bottom:1px solid #333;padding-bottom:3pt}
+.report-page-inner h3{margin:9pt 0 5pt}
+.report-page-inner p{margin:0 0 8pt;text-align:justify}
+.report-page-inner table{width:100%;border-collapse:collapse;margin:7pt 0;font-size:12pt!important}
+.report-page-inner th,.report-page-inner td{border:1px solid #777;padding:4pt;vertical-align:top;font-size:12pt!important}
+.report-page-inner .report-meta{text-align:right;font-weight:700;margin-bottom:10pt}
+.report-page-inner .report-subject{font-weight:700;text-align:justify}
+.report-page-inner .keep-together{break-inside:avoid;page-break-inside:avoid}
+
+/* El fondo viejo ya no se usa directamente */
+.report-bg{display:none!important}
+
+@page{size:A4;margin:0}
+@media print{
+ .egob-panel,.pdf-toolbar{display:none!important}
+ .report-page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+ .report-page:last-child{page-break-after:auto;break-after:auto}
+ .report-page-inner{padding:25.4mm}
+}
+@media(max-width:1100px){
+ .project-prof-row{grid-template-columns:1fr}
+ .report-page{width:100%;min-height:auto}
+ .report-page-inner{padding:24px;min-height:auto}
 }
 </style>
 
@@ -177,17 +238,33 @@ main{max-width:none;width:100%;height:calc(100vh - 68px);margin:0;padding:12px 1
   <h2>Datos generales</h2>
 
   <div class="section-title">1. Datos del propietario y proyectista</div>
-  <table class="owner-table">
-   <thead><tr><th>Tipo</th><th>Nombre del propietario / apoderado *</th><th>CI/RUC *</th><th>Acción</th></tr></thead>
-   <tbody id="ownersBody"></tbody>
-  </table>
-  <div class="owner-actions">
-   <button type="button" onclick="addOwner('PROPIETARIO')">Agregar propietario</button>
-   <button type="button" onclick="addOwner('APODERADO')">Agregar apoderado</button>
+
+  <div class="party-block">
+   <div class="party-title"><b>PROPIETARIO(S)</b></div>
+   <table class="party-table">
+    <thead><tr><th>Nombre del propietario *</th><th>CI/RUC *</th><th>Acción</th></tr></thead>
+    <tbody id="ownersBody"></tbody>
+   </table>
+   <div class="party-actions">
+    <button type="button" onclick="addOwner()">Agregar propietario</button>
+    <button type="button" onclick="addProxy()">Agregar apoderado</button>
+   </div>
   </div>
-  <div class="row" style="margin-top:12px">
-   <div class="field"><label>Proyectista</label><input id="proyectista"></div>
-   <div class="field"><label>RUC/Cédula proyectista</label><input id="rucProy"></div>
+
+  <div class="party-block hidden-party" id="proxyBlock">
+   <div class="party-title"><b>APODERADO(S)</b></div>
+   <table class="party-table">
+    <thead><tr><th>Nombre del apoderado</th><th>CI/RUC del apoderado</th><th>Acción</th></tr></thead>
+    <tbody id="proxiesBody"></tbody>
+   </table>
+  </div>
+
+  <div class="project-prof-row" style="margin-top:12px">
+   <div class="field"><label>Proyectista</label>
+    <select id="proyectista"><option value="">Seleccione un profesional registrado...</option></select>
+   </div>
+   <div class="field"><label>Registro Municipal</label><input id="registroMunicipal" readonly></div>
+   <div class="field"><label>RUC/Cédula proyectista</label><input id="rucProy" readonly></div>
   </div>
 
   <div class="section-title">2. Ubicación del predio</div>
@@ -306,9 +383,16 @@ main{max-width:none;width:100%;height:calc(100vh - 68px);margin:0;padding:12px 1
  </div>
 
  <div id="tab-vista" class="tab">
-  <div id="egobText" style="display:none"></div>
-  <div class="report-actions no-print"><button onclick="copyEgob()">COPIAR</button><button class="pdf" onclick="window.print()">PDF</button></div>
-  <div class="report-wrap"><img class="report-bg" src="assets/fondo_institucional.png" alt="" aria-hidden="true"><div id="report" class="report"></div></div>
+  <div class="egob-panel">
+   <div class="egob-head"><h3>Texto para copiar en eGOB</h3><button type="button" onclick="copyEgob()">COPIAR TEXTO</button></div>
+   <div id="egobText" class="egob-body"></div>
+  </div>
+  <div class="pdf-toolbar no-print">
+   <button type="button" onclick="renderReport()">ACTUALIZAR VISTA</button>
+   <button type="button" onclick="window.print()">GENERAR / GUARDAR PDF</button>
+  </div>
+  <div class="report-wrap"><div id="report"></div></div>
+  <div id="reportSource" class="report-source"></div>
  </div>
  </div>
 </section>
@@ -323,7 +407,7 @@ const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
 const SUPABASE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});
 let profile=null;
-const state={pitItems:[],pitMap:null,catastralBase:[],sideIndex:0,owners:[]};
+const state={pitItems:[],pitMap:null,catastralBase:[],sideIndex:0,owners:[],proxies:[],professionals:[]};
 let miniMap=null,miniLayer=null,modalMap=null,modalLayer=null;
 const $=id=>document.getElementById(id);
 const v=id=>($(id)?.value||'').trim();
@@ -346,38 +430,101 @@ async function authGuard(){
 }
 function technicianName(){return String(profile?.firma_nombre||profile?.nombre_completo||'').trim()}
 function technicianCargo(){return String(profile?.firma_cargo||profile?.cargo||'').trim()}
-function addOwner(tipo='PROPIETARIO',nombre='',doc=''){
- state.owners.push({tipo,nombre,doc});renderOwners();renderReport();
+function addOwner(nombre='',doc=''){
+ state.owners.push({nombre,doc});renderOwners();renderReport();
 }
-function removeOwner(i){state.owners.splice(i,1);if(!state.owners.length)addOwner('PROPIETARIO');else{renderOwners();renderReport()}}
+function removeOwner(i){
+ state.owners.splice(i,1);
+ if(!state.owners.length)state.owners=[{nombre:'',doc:''}];
+ renderOwners();renderReport();
+}
+function addProxy(nombre='',doc=''){
+ state.proxies.push({nombre,doc});renderProxies();renderReport();
+}
+function removeProxy(i){
+ state.proxies.splice(i,1);renderProxies();renderReport();
+}
 function renderOwners(){
  const body=$('ownersBody'); if(!body)return;
  body.innerHTML=state.owners.map((o,i)=>`<tr>
- <td><select data-owner-type="${i}"><option ${o.tipo==='PROPIETARIO'?'selected':''}>PROPIETARIO</option><option ${o.tipo==='APODERADO'?'selected':''}>APODERADO</option></select></td>
  <td><input data-owner-name="${i}" value="${esc(o.nombre||'')}"></td>
  <td><input data-owner-doc="${i}" value="${esc(o.doc||'')}"></td>
- <td><button type="button" class="owner-remove" onclick="removeOwner(${i})">QUITAR</button></td></tr>`).join('');
- body.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',()=>{
-  const i=Number(el.dataset.ownerName??el.dataset.ownerDoc??el.dataset.ownerType);
+ <td><button type="button" class="party-remove" onclick="removeOwner(${i})">QUITAR</button></td></tr>`).join('');
+ body.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{
+  const i=Number(el.dataset.ownerName??el.dataset.ownerDoc);
   if(el.dataset.ownerName!=null)state.owners[i].nombre=el.value;
   if(el.dataset.ownerDoc!=null)state.owners[i].doc=el.value;
-  if(el.dataset.ownerType!=null)state.owners[i].tipo=el.value;
   renderReport();
  }));
 }
-function ownerRecords(){return state.owners.filter(x=>x.tipo==='PROPIETARIO'&&String(x.nombre||'').trim())}
+function renderProxies(){
+ const block=$('proxyBlock'),body=$('proxiesBody'); if(!block||!body)return;
+ block.classList.toggle('hidden-party',state.proxies.length===0);
+ body.innerHTML=state.proxies.map((o,i)=>`<tr>
+ <td><input data-proxy-name="${i}" value="${esc(o.nombre||'')}"></td>
+ <td><input data-proxy-doc="${i}" value="${esc(o.doc||'')}"></td>
+ <td><button type="button" class="party-remove" onclick="removeProxy(${i})">QUITAR</button></td></tr>`).join('');
+ body.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{
+  const i=Number(el.dataset.proxyName??el.dataset.proxyDoc);
+  if(el.dataset.proxyName!=null)state.proxies[i].nombre=el.value;
+  if(el.dataset.proxyDoc!=null)state.proxies[i].doc=el.value;
+  renderReport();
+ }));
+}
+function ownerRecords(){return state.owners.filter(x=>String(x.nombre||'').trim())}
 function ownersText(){return ownerRecords().map(x=>x.nombre.trim()).join(', ').replace(/, ([^,]*)$/, ' y $1')}
 function ownerDocs(){return ownerRecords().map(x=>x.doc.trim()).filter(Boolean).join(', ')}
-function ownerTreatment(){
- const n=ownerRecords().length;
- return n>1?'los señores':(n===1?'el/la señor/a':'el/la señor/a');
-}
-function asignarNumero(){
- const actual=v('ita'); const x=prompt('Ingrese el Nro. del Informe Técnico Aprobatorio:',actual||'');
- if(x===null)return;$('ita').value=String(x).trim();updateNroButton();renderReport();guardarFormulario(false);
-}
-function updateNroButton(){$('nroBtn').textContent='NRO. '+(v('ita')||'—')}
+function ownerTreatment(){return ownerRecords().length>1?'los señores':'el/la señor/a'}
+function proxyText(){return state.proxies.filter(x=>String(x.nombre||'').trim()).map(x=>x.nombre.trim()).join(', ').replace(/, ([^,]*)$/, ' y $1')}
 
+function parseSemicolonCSV(text){
+ const rows=[];let row=[],cell='',q=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i],n=text[i+1];
+  if(c==='"'){
+   if(q&&n==='"'){cell+='"';i++}else q=!q;
+  }else if(c===';'&&!q){row.push(cell);cell=''}
+  else if((c==='\\n'||c==='\\r')&&!q){
+   if(c==='\\r'&&n==='\\n')i++;
+   row.push(cell);cell='';
+   if(row.some(x=>String(x).trim()!==''))rows.push(row);
+   row=[];
+  }else cell+=c;
+ }
+ if(cell||row.length){row.push(cell);rows.push(row)}
+ return rows;
+}
+async function loadProfessionals(){
+ try{
+  const r=await fetch('data/profesionales.csv',{cache:'no-store'});
+  if(!r.ok)throw new Error('No se pudo cargar profesionales.csv');
+  const txt=await r.text();
+  const rows=parseSemicolonCSV(txt.replace(/^\\uFEFF/,''));
+  if(rows.length<2)return;
+  const h=rows[0].map(x=>x.trim().toLowerCase());
+  const idx=n=>h.indexOf(n.toLowerCase());
+  const I={reg:idx('registro municipal'),nombre:idx('nombre'),activo:idx('activo'),titulo:idx('titulo'),ced:idx('# de cedula'),cad:idx('fecha de caducidad')};
+  state.professionals=rows.slice(1).map(r=>({
+   registro:(r[I.reg]||'').trim(),nombre:(r[I.nombre]||'').replace(/\\s+/g,' ').trim(),
+   activo:(r[I.activo]||'').trim(),titulo:(r[I.titulo]||'').trim(),cedula:(r[I.ced]||'').trim(),
+   caducidad:(r[I.cad]||'').trim()
+  })).filter(p=>p.reg&&p.nombre&&/^s[ií]$/i.test(p.activo)&&/^arquitect[oa]$/i.test(p.titulo)&&p.nombre.toUpperCase()!=='NA')
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  const sel=$('proyectista');
+  sel.innerHTML='<option value="">Seleccione un profesional registrado...</option>'+
+   state.professionals.map((p,i)=>`<option value="${i}">${esc(p.nombre)} · Reg. ${esc(p.registro)}</option>`).join('');
+ }catch(e){console.error(e);notify('No se pudo cargar la lista de proyectistas registrados.')}
+}
+function syncProfessional(){
+ const i=Number(v('proyectista'));
+ const p=Number.isInteger(i)?state.professionals[i]:null;
+ $('registroMunicipal').value=p?.registro||'';
+ $('rucProy').value=p?.cedula||'';
+ renderReport();
+}
+function professionalName(){
+ const i=Number(v('proyectista'));return Number.isInteger(i)&&state.professionals[i]?state.professionals[i].nombre:'';
+}
 function sideShow(i){state.sideIndex=(i+2)%2;['widget-identificacion','widget-pit'].forEach((id,j)=>$(id).classList.toggle('active',j===state.sideIndex));document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===state.sideIndex));$('sideTitle').textContent=state.sideIndex===0?'1. Identificación del informe':'2. Detalle del código PIT';if(state.sideIndex===1)setTimeout(()=>initMiniMap(),80)}
 function sidePrev(){sideShow(state.sideIndex-1)} function sideNext(){sideShow(state.sideIndex+1)}
 function showTab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-tab="${id}"]`)?.classList.add('active');if(id==='tab-vista')renderReport()}
@@ -452,10 +599,33 @@ function lotWords(n){return({2:'dos (2)',3:'tres (3)',4:'cuatro (4)',5:'cinco (5
 function lotTable(){const d=lotData();return `<table class="form-table"><tr><th>Nro.</th><th>Área</th></tr>${d.map(x=>`<tr><td>LOTE ${x.i}</td><td>${fmt(x.a)}</td></tr>`).join('')}<tr><th>TOTAL ÚTIL</th><th>${fmt(d.reduce((a,b)=>a+b.a,0))}</th></tr></table>`}
 function areaTable(){const ip=num('areaIprus'),g=num('areaGrav'),a=num('areaAfectada'),p=num('areaAfectadaProp'),l=lotData().reduce((x,y)=>x+y.a,0),u=ip-a-p;return `<table class="form-table"><tr><th>Descripción</th><th>Área</th><th>U</th><th>Porcentaje</th></tr><tr><td>Área Total del Lote (gravamen)</td><td>${fmt(g)}</td><td>m²</td><td>${pct(g,ip)}</td></tr><tr><td>Área Total del Lote (IPRUS)</td><td>${fmt(ip)}</td><td>m²</td><td>${ip?'100.00%':'0.00%'}</td></tr><tr><td>Área útil de lotes</td><td>${fmt(l)}</td><td>m²</td><td>${pct(l,ip)}</td></tr><tr><td>Área afectación vial</td><td>${fmt(a)}</td><td>m²</td><td>${pct(a,ip)}</td></tr><tr><td>Área afectación vial propuesta</td><td>${fmt(p)}</td><td>m²</td><td>${pct(p,ip)}</td></tr><tr><td>Área Útil Urbanizable</td><td>${fmt(u)}</td><td>m²</td><td>${pct(u,ip)}</td></tr><tr><td>COS PB</td><td>${esc(cleanPct(pitVal('cos_planta_baja','cos_pb')))}</td><td>%</td><td>-</td></tr><tr><td>COS Total</td><td>${esc(cleanPct(pitVal('cos_total')))}</td><td>%</td><td>-</td></tr><tr><td>Densidad Bruta</td><td>${esc(v('densBruta'))}</td><td>hab/ha</td><td>-</td></tr><tr><td>Densidad Neta</td><td>${esc(v('densNeta'))}</td><td>hab/ha</td><td>-</td></tr></table>`}
 
+
+function makeReportPage(){
+ const page=document.createElement('div');page.className='report-page';
+ page.innerHTML='<img class="report-page-bg" src="assets/fondo_institucional.png" alt=""><div class="report-page-inner"></div>';
+ return page;
+}
+function paginateReport(html){
+ const report=$('report'),src=$('reportSource');
+ src.innerHTML=`<div class="report-page"><div class="report-page-inner">${html}</div></div>`;
+ const sourceInner=src.querySelector('.report-page-inner');
+ report.innerHTML='';
+ let page=makeReportPage(),inner=page.querySelector('.report-page-inner');report.appendChild(page);
+ const limitMm=297-50.8; // A4 menos márgenes superior e inferior
+ const pxPerMm=96/25.4, maxHeight=limitMm*pxPerMm;
+ [...sourceInner.children].forEach(node=>{
+  const clone=node.cloneNode(true);inner.appendChild(clone);
+  if(inner.scrollHeight>maxHeight && inner.children.length>1){
+    inner.removeChild(clone);
+    page=makeReportPage();inner=page.querySelector('.report-page-inner');report.appendChild(page);inner.appendChild(clone);
+  }
+ });
+ src.innerHTML='';
+}
 function renderReport(){
- calc();const pit=v('pitSelect'),par=pitVal('parroquia')||v('catParroquia'),uso=pitVal('uso_principal','u_principa'),imp=pitVal('implantacion','implantac'),lm=pitVal('lote_minimo','lote_min'),fm=pitVal('frente_minimo','f_min'),rf=pitVal('retiro_frontal','r_frontal'),rl=pitVal('retiro_lateral','r_lateral'),rp=pitVal('retiro_posterior','r_posterio'),cosPB=pitVal('cos_planta_baja','cos_pb'),cosT=pitVal('cos_total'),alt=pitVal('altura_edificacion');const y=new Date().getFullYear(),memo=`GADMR-GPHDU-MTI-${y}-${v('ita')||'___'}-ITA`,L=parseInt(v('nLotes')||2),t=ownerTreatment(),owners=ownersText();
+ calc();const pit=v('pitSelect'),par=pitVal('parroquia')||v('catParroquia'),uso=pitVal('uso_principal','u_principa'),imp=pitVal('implantacion','implantac'),lm=pitVal('lote_minimo','lote_min'),fm=pitVal('frente_minimo','f_min'),rf=pitVal('retiro_frontal','r_frontal'),rl=pitVal('retiro_lateral','r_lateral'),rp=pitVal('retiro_posterior','r_posterio'),cosPB=pitVal('cos_planta_baja','cos_pb'),cosT=pitVal('cos_total'),alt=pitVal('altura_edificacion');const y=new Date().getFullYear(),memo=`GADMR-GPHDU-MTI-${y}-${v('ita')||'___'}-ITA`,L=parseInt(v('nLotes')||2),t=ownerTreatment(),owners=ownersText(),proy=professionalName();
  const vias=v('viasInternas')==='Sí'?(v('viasTexto')||'Según la propuesta presentada, el proyecto contempla vías planificadas internas dentro del predio.'):'Según la propuesta presentada el proyecto no contempla vías planificadas internas dentro del predio.';
- $('report').innerHTML=`<div style="text-align:right;font-weight:700">MEMORANDO Nro. ${esc(memo)}<br>Trámite Nro. ${esc(v('egob'))}<br>Riobamba, ${esc(dateLong(v('fechaEmision')))}</div>
+ const reportHtml=`<div style="text-align:right;font-weight:700">MEMORANDO Nro. ${esc(memo)}<br>Trámite Nro. ${esc(v('egob'))}<br>Riobamba, ${esc(dateLong(v('fechaEmision')))}</div>
  <p><b>ASUNTO: INFORME TÉCNICO FAVORABLE PARA REVISIÓN Y APROBACIÓN DE ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS, DENOMINADO "${esc(v('proyectoNombre')||'')}" (eGOB ${esc(v('egob'))})</b></p>
  <p>De mi consideración:</p><p>En relación con el procedimiento administrativo signado con el trámite Nro. ${esc(v('egob'))} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${esc(v('proyectoNombre')||'')}" ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(pit)}, parroquia ${esc(par)} de la ciudad de Riobamba, de propiedad de ${esc(t)} ${esc(owners)} del predio con clave catastral ${esc(v('catClave'))}; emito el <b>INFORME TÉCNICO FAVORABLE</b>.</p>
  <h2>ANTECEDENTES</h2>
@@ -469,7 +639,7 @@ function renderReport(){
  <h3>2. LINDEROS GENERALES</h3><p>${nl(v('linderos'))}<br><b>Área Total:</b> ${fmt(num('areaIprus'))} m²</p>
  <h3>3. PROPUESTA DEL PROYECTO</h3><p>${nl(v('datosTecnicos'))}</p><table class="form-table"><tr><th colspan="4">ZONA DE PLANEAMIENTO ${esc(pit)}</th></tr><tr><td>Implantación</td><td>${esc(imp)}</td><td>Uso Principal</td><td>${esc(uso)}</td></tr><tr><td>Lote Mínimo</td><td>${esc(lm)}</td><td>Altura edificación</td><td>${esc(alt)}</td></tr><tr><td>Frente mínimo</td><td>${esc(fm)}</td><td>Retiro frontal</td><td>${esc(rf)}</td></tr><tr><td>COS PB</td><td>${esc(cosPB)}</td><td>Retiro lateral</td><td>${esc(rl)}</td></tr><tr><td></td><td></td><td>Retiro posterior</td><td>${esc(rp)}</td></tr><tr><td></td><td></td><td>COS TOTAL</td><td>${esc(cosT)}</td></tr></table>
  <h3>4. DESCRIPCIÓN DE LOTEAMIENTO</h3><p>El predio se propone subdividir en ${L} lotes.</p>${lotTable()}
- <h3>5. LINDEROS Y DIMENSIONES</h3><p>Se propone la urbanización en ${lotWords(L)} lotes, conforme planos y memoria descriptiva suscritos por Arq. ${esc(v('proyectista'))}.</p>
+ <h3>5. LINDEROS Y DIMENSIONES</h3><p>Se propone la urbanización en ${lotWords(L)} lotes, conforme planos y memoria descriptiva suscritos por Arq. ${esc(proy)}.</p>
  <h3>6. PROPUESTA DE RETIROS Y ADOSAMIENTOS</h3><p>Implantación ${esc(imp)} con retiro frontal ${esc(rf)}, lateral ${esc(rl)} y posterior ${esc(rp)}. ${nl(v('retirosExtra'))}</p>
  <h3>7. PROPUESTA DE VÍAS</h3><p>${nl(vias)}</p>
  <h3>8. VÍAS Y AFECTACIÓN VIAL</h3><p>El predio ${v('presentaAfectacion')==='Sí'?'sí':'no'} presenta afectación vial. ${nl(v('afExtra'))}</p>
@@ -478,6 +648,7 @@ function renderReport(){
  <h3>11. INFRAESTRUCTURA BÁSICA</h3><p>El predio dispone de las factibilidades correspondientes de RIOBAMBA EP, EERSA y CNT conforme los antecedentes.</p>
  <h3>12. OBSERVACIONES Y RECOMENDACIONES</h3><p>- Adjuntar todos los requisitos establecidos en el Artículo 53 de la Ordenanza 016-2023.<br>- Verificar que el proyecto técnico cumpla los parámetros del Artículo 54 de la Ordenanza 016-2023.</p><p>${nl(v('recomExtra'))}</p>
  <h3>13. CONCLUSIÓN</h3><p>De conformidad con el artículo 39 de la Ordenanza 016-2023, se emite <b>INFORME TÉCNICO FAVORABLE</b> para revisión y aprobación de Subdivisión Predial de dos a diez lotes con obras.</p><p><b>${esc(technicianName())}</b><br>${esc(technicianCargo())}</p><p><u>Adjunto:</u><br>${nl(v('adjuntos'))}</p>`;
+ paginateReport(reportHtml);
  $('egobText').textContent=`De mi consideración
 
 En relación con el procedimiento administrativo signado con el trámite Nro. ${v('egob')} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras, ubicado en la calle ${v('direccion')}, barrio ${v('barrio')}, Zona de planeamiento ${pit}, parroquia ${par} de la ciudad de Riobamba, de propiedad de ${t} ${owners} del predio con clave catastral ${v('catClave')}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el INFORME TÉCNICO FAVORABLE contenido en MEMORANDO Nro. ${memo}.
@@ -486,22 +657,22 @@ En virtud de lo establecido en el artículo 39 de la Ordenanza 016-2023, solicit
 
 Con sentimientos de estima y consideración.`;
 }
-function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.lots=lotData().map(x=>x.a);d.owners=state.owners;return d}
+function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.lots=lotData().map(x=>x.a);d.owners=state.owners;d.proxies=state.proxies;return d}
 function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});
- if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;renderOwners();updateNroButton();updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();renderReport()}
+ if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;if(Array.isArray(d.proxies))state.proxies=d.proxies;renderOwners();renderProxies();updateNroButton();updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();renderReport()}
 function guardarFormulario(show=true){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO_V2',JSON.stringify(snapshot()));if(show)notify('Informe guardado en este navegador.',true);return true}
 function nuevoFormulario(){if(!confirm('¿Crear un formulario nuevo? Se limpiarán los datos no guardados.'))return;localStorage.removeItem('ALLPA_SUBDIVISION_APROBATORIO_V2');location.reload()}
 async function copyEgob(){try{await navigator.clipboard.writeText($('egobText').textContent);notify('Texto para eGOB copiado.',true)}catch(e){notify('No se pudo copiar automáticamente.')}}
 function bind(){
- $('pitSelect').addEventListener('change',renderPit);$('catParro').addEventListener('change',updateZones);$('catZona').addEventListener('change',syncCatastral);
+ $('pitSelect').addEventListener('change',renderPit);$('proyectista').addEventListener('change',syncProfessional);$('catParro').addEventListener('change',updateZones);$('catZona').addEventListener('change',syncCatastral);
  ['catProv','catCant','catSect','catPolg','catPred','claveManual'].forEach(id=>$(id).addEventListener('input',syncCatastral));
  $('claveManualToggle').addEventListener('change',()=>{$('claveManualWrap').classList.toggle('hidden',!$('claveManualToggle').checked);['catProv','catCant','catParro','catZona','catSect','catPolg','catPred'].forEach(id=>$(id).disabled=$('claveManualToggle').checked);syncCatastral()});
  document.querySelectorAll('input,select,textarea').forEach(el=>{if(!['pitSelect','catParro','catZona','nLotes'].includes(el.id))el.addEventListener('input',renderReport)});
  $('nLotes').addEventListener('change',renderLots);
 }
 async function init(){try{if(!await authGuard())return}catch(e){notify(e.message||String(e));return}
- if(!state.owners.length)state.owners=[{tipo:'PROPIETARIO',nombre:'',doc:''}];renderOwners();
- for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);$('fechaEmision').value=new Date().toISOString().slice(0,10);bind();await Promise.all([loadPit(),loadCatastral()]);renderLots();initMiniMap();const saved=localStorage.getItem('ALLPA_SUBDIVISION_APROBATORIO_V2');if(saved){try{applySnapshot(JSON.parse(saved))}catch(e){}}updateNroButton();renderReport()}
+ if(!state.owners.length)state.owners=[{nombre:'',doc:''}];renderOwners();renderProxies();
+ for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);$('fechaEmision').value=new Date().toISOString().slice(0,10);bind();await Promise.all([loadPit(),loadCatastral(),loadProfessionals()]);renderLots();initMiniMap();const saved=localStorage.getItem('ALLPA_SUBDIVISION_APROBATORIO_V2');if(saved){try{applySnapshot(JSON.parse(saved))}catch(e){}}updateNroButton();syncProfessional();renderReport()}
 init();
 </script>
 </body>
