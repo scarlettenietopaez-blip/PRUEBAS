@@ -1,0 +1,4 @@
+# ALLPA · FirmaEC · V8.4.1
+
+[functions.firmaec-retorno]
+verify_jwt = false
