@@ -45073,7 +45073,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV8410==='function')p=window.buildEgobBodyV8410();
+    if(typeof window.buildEgobBodyV8411==='function')p=window.buildEgobBodyV8411();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45271,20 +45271,20 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
 
 
 <!-- ==========================================================
-     ALLPA V8.4.10 · HTML ESPECÍFICO PARA eGOB
+     ALLPA V8.4.11 · HTML ESPECÍFICO PARA eGOB
      - Evita que e-DOC trate filas largas como bloques indivisibles.
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v8410">
+<script id="allpa-egob-body-v8411">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V8410__) return;
-window.__ALLPA_EGOB_BODY_V8410__=true;
+if(window.__ALLPA_EGOB_BODY_V8411__) return;
+window.__ALLPA_EGOB_BODY_V8411__=true;
 
-const FLOW='data-egob-flow-v8410';
-const UNIT='data-egob-flow-unit-v8410';
-const PREP='data-allpa-egob-prepared-v8410';
+const FLOW='data-egob-flow-v8411';
+const UNIT='data-egob-flow-unit-v8411';
+const PREP='data-allpa-egob-prepared-v8411';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45377,13 +45377,13 @@ function miniTable(classes,widths){
   return t;
 }
 
-const EGOB_BORDER_V8410='0.75pt solid #000';
+const EGOB_BORDER_V8411='0.75pt solid #000';
 
 function styleCell(td,{top=true,bottom=true,align='left',font='8.5pt',line='1.15',pad='2px 5px'}={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V8410,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V8410,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V8410:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8410:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8411,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8411,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8411:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8411:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45412,7 +45412,75 @@ function cloneHeaderTable(src,widths){
   return t;
 }
 
-function requirementCatalogueV8410(){
+
+function logicalTableV8411(src,widths){
+  const t=document.createElement('table');
+  t.className=src?.className||'';
+  t.setAttribute('width','100%');
+  t.setAttribute('cellspacing','0');
+  t.style.setProperty('width','100%','important');
+  t.style.setProperty('max-width','100%','important');
+  t.style.setProperty('table-layout','auto','important');
+  t.style.setProperty('border-collapse','collapse','important');
+  t.style.setProperty('border-spacing','0','important');
+  t.style.setProperty('margin','0','important');
+  t.style.setProperty('page-break-inside','auto','important');
+  t.style.setProperty('break-inside','auto','important');
+  t.style.setProperty('background','transparent','important');
+
+  if(widths?.length){
+    const cg=document.createElement('colgroup');
+    widths.forEach(w=>{
+      const c=document.createElement('col');
+      c.style.width=w+'%';
+      cg.appendChild(c);
+    });
+    t.appendChild(cg);
+  }
+  return t;
+}
+
+function styleLogicalCellV8411(td,{
+  align='left',
+  font='8.5pt',
+  line='1.12',
+  pad='2px 4px',
+  vertical='top',
+  top=true,
+  bottom=true
+}={}){
+  td.style.setProperty('border-left',EGOB_BORDER_V8411,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8411,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8411:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8411:'0','important');
+  td.style.setProperty('padding',pad,'important');
+  td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
+  td.style.setProperty('font-size',font,'important');
+  td.style.setProperty('line-height',line,'important');
+  td.style.setProperty('vertical-align',vertical,'important');
+  td.style.setProperty('text-align',align,'important');
+  td.style.setProperty('white-space','normal','important');
+  td.style.setProperty('word-break','normal','important');
+  td.style.setProperty('overflow-wrap','normal','important');
+  td.style.setProperty('background','transparent','important');
+}
+
+function styleLogicalHeaderV8411(thead){
+  thead.style.setProperty('display','table-header-group','important');
+  [...thead.querySelectorAll('th,td')].forEach(cell=>{
+    styleLogicalCellV8411(cell,{
+      align:'center',
+      font:'8.2pt',
+      line:'1.05',
+      pad:'3px 4px',
+      vertical:'middle'
+    });
+    cell.style.setProperty('font-weight','700','important');
+    cell.style.setProperty('background','#d9d9d9','important');
+  });
+}
+
+function requirementCatalogueV8411(){
   let catalogue=[];
   try{
     if(typeof DATA!=='undefined' && Array.isArray(DATA?.requisitos)) catalogue=DATA.requisitos;
@@ -45452,8 +45520,8 @@ function requirementCatalogueV8410(){
   });
 }
 
-function buildRequirementsSourceV8410(){
-  const reqs=requirementCatalogueV8410();
+function buildRequirementsSourceV8411(){
+  const reqs=requirementCatalogueV8411();
   if(!reqs.length) return null;
 
   const table=document.createElement('table');
@@ -45499,7 +45567,7 @@ function buildRequirementsSourceV8410(){
   return table;
 }
 
-function ensureRequirementsSourceV8410(root){
+function ensureRequirementsSourceV8411(root){
   // 1. Reutilizar cualquier tabla de requisitos ya generada por el informe,
   // aunque la clase ante-req-report-v52 no haya sido aplicada.
   let src=root.querySelector(
@@ -45512,7 +45580,7 @@ function ensureRequirementsSourceV8410(root){
   }
 
   // 2. Si el rerender dejó el texto fallback, reconstruir desde STATE.
-  const generated=buildRequirementsSourceV8410();
+  const generated=buildRequirementsSourceV8411();
   if(!generated) return null;
 
   const fallback=[...root.querySelectorAll('p')].find(p=>
@@ -45560,187 +45628,115 @@ function ensureRequirementsSourceV8410(root){
 }
 
 function prepareRequirements(root){
-  ensureRequirementsSourceV8410(root);
+  ensureRequirementsSourceV8411(root);
 
   root.querySelectorAll(
     'table.ante-req-report-v52, table.req-report-v94'
   ).forEach(src=>{
-    if(src.closest(`[${FLOW}="requirements"]`)) return;
+    if(src.dataset.egobLogicalV8411==='1') return;
 
-    const widths=[67,33];
-    const wrapper=document.createElement('div');
-    wrapper.setAttribute(FLOW,'requirements');
-    wrapper.style.cssText=
-      'width:100%!important;margin:0!important;padding:0!important;'+
-      'page-break-inside:auto!important;break-inside:auto!important;';
+    const t=logicalTableV8411(src,[67,33]);
+    t.dataset.egobLogicalV8411='1';
 
-    // Encabezado una sola vez.
-    wrapper.appendChild(cloneHeaderTable(src,widths));
+    const thead=src.querySelector('thead');
+    if(thead){
+      const h=thead.cloneNode(true);
+      styleLogicalHeaderV8411(h);
+      t.appendChild(h);
+    }
 
-    const rows=[...src.querySelectorAll('tbody > tr')];
+    const tbody=document.createElement('tbody');
+    tbody.style.setProperty('page-break-inside','auto','important');
+    tbody.style.setProperty('break-inside','auto','important');
 
-    // IMPORTANTE V8.4.9:
-    // una fila del informe = un requisito completo.
-    // No se divide su texto en filas artificiales.
-    rows.forEach(row=>{
-      const t=miniTable(src.className,widths);
-      const b=document.createElement('tbody');
+    [...src.querySelectorAll('tbody > tr')].forEach(row=>{
       const tr=row.cloneNode(true);
+      tr.style.setProperty('page-break-inside','avoid','important');
+      tr.style.setProperty('break-inside','avoid','important');
 
-      tr.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));
-
-      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
-
-      cells.forEach((cell,idx)=>{
-        styleCell(cell,{
-          top:true,
-          bottom:true,
+      [...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName)).forEach(cell=>{
+        cell.removeAttribute('rowspan');
+        styleLogicalCellV8411(cell,{
           align:'left',
           font:'8.5pt',
           line:'1.12',
-          pad:'2px 4px'
+          pad:'2px 4px',
+          vertical:'top'
         });
-
-        cell.style.setProperty('vertical-align','top','important');
       });
 
-      b.appendChild(tr);
-      t.appendChild(b);
-      wrapper.appendChild(t);
+      tbody.appendChild(tr);
     });
 
-    src.replaceWith(wrapper);
+    t.appendChild(tbody);
+    src.replaceWith(t);
   });
 }
 
 
 function prepareConclusion(root){
   root.querySelectorAll('table.conclusion-report').forEach(src=>{
-    if(src.closest(`[${FLOW}="conclusion"]`)) return;
+    if(src.dataset.egobLogicalV8411==='1') return;
 
-    // DESCRIPCIÓN ocupa las dos primeras columnas.
-    // Se conserva una columna auxiliar para niveles cuando exista.
-    const widths=[60,12,18,10];
+    const t=logicalTableV8411(src,[60,12,18,10]);
+    t.dataset.egobLogicalV8411='1';
 
-    const wrapper=document.createElement('div');
-    wrapper.setAttribute(FLOW,'conclusion');
-    wrapper.style.cssText=
-      'width:100%!important;margin:0!important;padding:0!important;'+
-      'page-break-inside:auto!important;break-inside:auto!important;';
+    const thead=src.querySelector('thead');
+    if(thead){
+      const h=thead.cloneNode(true);
+      styleLogicalHeaderV8411(h);
+      t.appendChild(h);
+    }
 
-    wrapper.appendChild(cloneHeaderTable(src,widths));
+    const tbody=document.createElement('tbody');
+    tbody.style.setProperty('page-break-inside','auto','important');
+    tbody.style.setProperty('break-inside','auto','important');
 
-    const rows=[...src.querySelectorAll('tbody > tr')];
-
-    rows.forEach(row=>{
-      const t=miniTable(src.className,widths);
-      const b=document.createElement('tbody');
+    [...src.querySelectorAll('tbody > tr')].forEach(row=>{
       const tr=row.cloneNode(true);
-
-      tr.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));
+      tr.style.setProperty('page-break-inside','avoid','important');
+      tr.style.setProperty('break-inside','avoid','important');
 
       const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
-
-      // Mantener colspan originales y únicamente normalizar el acabado.
       cells.forEach((cell,idx)=>{
-        let align='center';
-
-        // Primera celda = descripción.
-        if(idx===0) align='left';
-
-        styleCell(cell,{
-          top:true,
-          bottom:true,
-          align,
+        cell.removeAttribute('rowspan');
+        styleLogicalCellV8411(cell,{
+          align:idx===0?'left':'center',
           font:'8.2pt',
           line:'1.06',
-          pad:'2px 4px'
+          pad:'2px 4px',
+          vertical:'middle'
         });
-
-        cell.style.setProperty(
-          'vertical-align',
-          idx===0?'middle':'middle',
-          'important'
-        );
       });
 
-      b.appendChild(tr);
-      t.appendChild(b);
-      wrapper.appendChild(t);
+      tbody.appendChild(tr);
     });
 
-    src.replaceWith(wrapper);
+    t.appendChild(tbody);
+    src.replaceWith(t);
   });
 }
 
-function isZeroBorderV8410(value){
+
+function isZeroBorderV8411(value){
   const v=String(value||'').trim().toLowerCase();
   return !v || v==='0' || v==='0px' || v==='none' ||
          v.startsWith('0px ') || v.startsWith('0pt ');
 }
 
-function applyUniformThinBordersV8410(root){
-  // MODELO DE BORDE ÚNICO:
-  // - 0.75 pt negro para que e-DOC/PDF lo renderice con claridad.
-  // - cada unión horizontal se dibuja UNA sola vez:
-  //   borde inferior de la unidad anterior, sin borde superior duplicado.
-  // - verticales siempre visibles.
-
+function applyUniformThinBordersV8411(root){
+  // Las tablas lógicas V8.4.11 ya tienen un único sistema de bordes.
+  // Solo normalizamos cualquier tabla residual del informe.
   root.querySelectorAll('table').forEach(table=>{
     table.style.setProperty('border-collapse','collapse','important');
     table.style.setProperty('border-spacing','0','important');
-    table.style.setProperty('border','0','important');
     table.style.setProperty('outline','0','important');
   });
 
-  root.querySelectorAll('th,td').forEach(cell=>{
-    cell.style.setProperty('border-left',EGOB_BORDER_V8410,'important');
-    cell.style.setProperty('border-right',EGOB_BORDER_V8410,'important');
-    cell.style.setProperty('border-bottom',EGOB_BORDER_V8410,'important');
-
-    // Por defecto cada celda conserva su borde superior.
-    // Después se elimina en las unidades siguientes del mismo flujo.
-    cell.style.setProperty('border-top',EGOB_BORDER_V8410,'important');
-  });
-
-  // En los flujos construidos con mini-tablas consecutivas:
-  // solo la PRIMERA unidad dibuja borde superior.
-  root.querySelectorAll(`[${FLOW}]`).forEach(wrapper=>{
-    const units=[...wrapper.children].filter(el=>
-      el.matches?.(`table[${UNIT}]`)
-    );
-
-    units.forEach((table,index)=>{
-      const firstRowCells=[
-        ...table.querySelectorAll(
-          ':scope > thead:first-child > tr:first-child > th,'+
-          ':scope > thead:first-child > tr:first-child > td,'+
-          ':scope > tbody:first-child > tr:first-child > th,'+
-          ':scope > tbody:first-child > tr:first-child > td'
-        )
-      ];
-
-      if(index>0){
-        firstRowCells.forEach(cell=>{
-          cell.style.setProperty('border-top','0','important');
-        });
-      }
+  root.querySelectorAll('table:not([data-egob-logical-v8411="1"]) th, table:not([data-egob-logical-v8411="1"]) td')
+    .forEach(cell=>{
+      cell.style.setProperty('border',EGOB_BORDER_V8411,'important');
     });
-  });
-
-  // Mantener ocultos los bordes internos que la paginación usa para
-  // simular una celda continua en Factibilidades.
-  root.querySelectorAll(
-    '[data-egob-keep-top-zero="1"]'
-  ).forEach(cell=>{
-    cell.style.setProperty('border-top','0','important');
-  });
-
-  root.querySelectorAll(
-    '[data-egob-keep-bottom-zero="1"]'
-  ).forEach(cell=>{
-    cell.style.setProperty('border-bottom','0','important');
-  });
 }
 
 function evidenceRow(row){
@@ -45762,63 +45758,153 @@ function evidenceParts(row){
 }
 
 function prepareFactibilities(root){
-  root.querySelectorAll('table.combined-studies-v13, table.combined-studies-v145, table.estudios-table').forEach(src=>{
-    const head=[...src.querySelectorAll('thead tr:first-child > th, thead tr:first-child > td')];
+  root.querySelectorAll(
+    'table.combined-studies-v13, table.combined-studies-v145, table.estudios-table'
+  ).forEach(src=>{
+    const head=[
+      ...src.querySelectorAll('thead tr:first-child > th, thead tr:first-child > td')
+    ];
     const widths=head.length>=4?[20,16,46,18]:(head.length===3?[20,62,18]:[20,80]);
-    const wrapper=document.createElement('div');
-    wrapper.setAttribute(FLOW,'factibilities');
-    wrapper.style.cssText='width:100%!important;margin:0!important;padding:0!important;page-break-inside:auto!important;break-inside:auto!important;';
-    wrapper.appendChild(cloneHeaderTable(src,widths));
+
+    const t=logicalTableV8411(src,widths);
+    t.dataset.egobLogicalV8411='1';
+
+    const thead=src.querySelector('thead');
+    if(thead){
+      const h=thead.cloneNode(true);
+      styleLogicalHeaderV8411(h);
+      t.appendChild(h);
+    }
+
+    const tbody=document.createElement('tbody');
+    tbody.style.setProperty('page-break-inside','auto','important');
+    tbody.style.setProperty('break-inside','auto','important');
+
     const rows=[...src.querySelectorAll('tbody > tr')];
     let currentEntity=null;
+
     for(let i=0;i<rows.length;i++){
       const row=rows[i];
-      if(evidenceRow(row))continue;
+      if(evidenceRow(row)) continue;
+
       const entity=row.querySelector(':scope > td.entity-v13, :scope > td.entity-v145');
-      if(entity)currentEntity=entity.cloneNode(true);
+      if(entity) currentEntity=entity.cloneNode(true);
+
       const type=row.querySelector(':scope > td.type-v13');
-      const cells=[...row.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
+
       if(!type || widths.length<4){
-        const t=miniTable(src.className,widths);const b=document.createElement('tbody');const cl=row.cloneNode(true);cl.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));b.appendChild(cl);t.appendChild(b);wrapper.appendChild(t);continue;
+        const tr=row.cloneNode(true);
+        tr.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));
+        tr.style.setProperty('page-break-inside','avoid','important');
+        tr.style.setProperty('break-inside','avoid','important');
+        [...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName)).forEach(cell=>{
+          styleLogicalCellV8411(cell,{
+            align:'center',
+            font:'8.2pt',
+            line:'1.05',
+            pad:'2px 4px',
+            vertical:'middle'
+          });
+        });
+        tbody.appendChild(tr);
+        continue;
       }
-      const doc=type.nextElementSibling, date=doc?.nextElementSibling;
-      if(!doc||!date)continue;
-      const t=miniTable(src.className,widths);const b=document.createElement('tbody');const tr=document.createElement('tr');
-      const ent=document.createElement('td');ent.className=(currentEntity?.className||'entity-v13');ent.innerHTML=currentEntity?.innerHTML||'&nbsp;';
-      const typ=type.cloneNode(true), d=doc.cloneNode(true), dt=date.cloneNode(true);
-      [ent,typ,d,dt].forEach(x=>{x.removeAttribute('rowspan');x.removeAttribute('colspan');});
-      styleCell(ent,{top:true,bottom:true,align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px'});ent.style.setProperty('vertical-align','middle','important');
-      styleCell(typ,{top:true,bottom:true,align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px'});typ.style.setProperty('vertical-align','middle','important');typ.style.setProperty('font-weight','700','important');
-      styleCell(d,{top:true,bottom:true,align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px'});d.style.setProperty('vertical-align','middle','important');
-      styleCell(dt,{top:true,bottom:true,align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px'});dt.style.setProperty('vertical-align','middle','important');
-      tr.append(ent,typ,d,dt);b.appendChild(tr);t.appendChild(b);wrapper.appendChild(t);
+
+      const doc=type.nextElementSibling;
+      const date=doc?.nextElementSibling;
+      if(!doc||!date) continue;
+
+      const tr=document.createElement('tr');
+      tr.style.setProperty('page-break-inside','avoid','important');
+      tr.style.setProperty('break-inside','avoid','important');
+
+      const ent=document.createElement('td');
+      ent.className=currentEntity?.className||'entity-v13';
+      ent.innerHTML=currentEntity?.innerHTML||'&nbsp;';
+
+      const typ=type.cloneNode(true);
+      const d=doc.cloneNode(true);
+      const dt=date.cloneNode(true);
+
+      [ent,typ,d,dt].forEach(x=>{
+        x.removeAttribute('rowspan');
+        x.removeAttribute('colspan');
+      });
+
+      styleLogicalCellV8411(ent,{
+        align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
+      });
+      styleLogicalCellV8411(typ,{
+        align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
+      });
+      typ.style.setProperty('font-weight','700','important');
+      styleLogicalCellV8411(d,{
+        align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
+      });
+      styleLogicalCellV8411(dt,{
+        align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
+      });
+
+      tr.append(ent,typ,d,dt);
+      tbody.appendChild(tr);
 
       const next=rows[i+1];
       if(next&&evidenceRow(next)){
         const {label,detail}=evidenceParts(next);
+
         if(detail){
-          const lines=wrapCell(detail,370);
+          // Filas pequeñas para que e-DOC pueda paginar, pero dentro de
+          // UNA sola tabla: no hay bordes externos duplicados.
+          const lines=wrapCell(detail,95);
           const labelHtml=label&&norm(label.textContent)?label.innerHTML:'';
+
           for(let k=0;k<lines.length;k++){
-            const lt=miniTable(src.className,[20,16,64]);
-            const lb=document.createElement('tbody'), lr=document.createElement('tr');
-            const blank=document.createElement('td'), lab=document.createElement('td'), det=document.createElement('td');
-            blank.innerHTML='&nbsp;';lab.innerHTML=(k===0&&labelHtml)?labelHtml:'&nbsp;';det.innerHTML=lineHtml(lines[k]);
-            const top=k===0, bottom=k===lines.length-1;
-            styleCell(blank,{top,bottom,align:'center',font:'8.1pt',line:'1.05',pad:'1px 3px'});
-            styleCell(lab,{top,bottom,align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px'});if(k===0)lab.style.setProperty('font-weight','700','important');
-            styleCell(det,{top,bottom,align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px'});
-            lr.append(blank,lab,det);lb.appendChild(lr);lt.appendChild(lb);wrapper.appendChild(lt);
+            const lr=document.createElement('tr');
+            lr.style.setProperty('page-break-inside','avoid','important');
+            lr.style.setProperty('break-inside','avoid','important');
+
+            const blank=document.createElement('td');
+            const lab=document.createElement('td');
+            const det=document.createElement('td');
+            det.colSpan=2;
+
+            blank.innerHTML='&nbsp;';
+            lab.innerHTML=(k===0&&labelHtml)?labelHtml:'&nbsp;';
+            det.innerHTML=lineHtml(lines[k]);
+
+            const first=k===0;
+            const last=k===lines.length-1;
+
+            styleLogicalCellV8411(blank,{
+              align:'center',font:'8.1pt',line:'1.05',pad:'1px 3px',
+              vertical:'top',top:first,bottom:last
+            });
+            styleLogicalCellV8411(lab,{
+              align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px',
+              vertical:'top',top:first,bottom:last
+            });
+            if(first) lab.style.setProperty('font-weight','700','important');
+
+            styleLogicalCellV8411(det,{
+              align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px',
+              vertical:'top',top:first,bottom:last
+            });
+
+            lr.append(blank,lab,det);
+            tbody.appendChild(lr);
           }
         }
         i++;
       }
     }
-    src.replaceWith(wrapper);
+
+    t.appendChild(tbody);
+    src.replaceWith(t);
   });
 }
 
-window.buildEgobBodyV8410=function(){
+
+window.buildEgobBodyV8411=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -45833,11 +45919,11 @@ window.buildEgobBodyV8410=function(){
     prepareRequirements(report);
     prepareConclusion(report);
     prepareFactibilities(report);
-    applyUniformThinBordersV8410(report);
+    applyUniformThinBordersV8411(report);
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.10] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.11] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
