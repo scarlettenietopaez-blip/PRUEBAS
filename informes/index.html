@@ -45073,7 +45073,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV8412==='function')p=window.buildEgobBodyV8412();
+    if(typeof window.buildEgobBodyV8413==='function')p=window.buildEgobBodyV8413();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45271,20 +45271,20 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
 
 
 <!-- ==========================================================
-     ALLPA V8.4.12 · HTML ESPECÍFICO PARA eGOB
+     ALLPA V8.4.13 · HTML ESPECÍFICO PARA eGOB
      - Evita que e-DOC trate filas largas como bloques indivisibles.
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v8412">
+<script id="allpa-egob-body-v8413">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V8412__) return;
-window.__ALLPA_EGOB_BODY_V8412__=true;
+if(window.__ALLPA_EGOB_BODY_V8413__) return;
+window.__ALLPA_EGOB_BODY_V8413__=true;
 
-const FLOW='data-egob-flow-v8412';
-const UNIT='data-egob-flow-unit-v8412';
-const PREP='data-allpa-egob-prepared-v8412';
+const FLOW='data-egob-flow-v8413';
+const UNIT='data-egob-flow-unit-v8413';
+const PREP='data-allpa-egob-prepared-v8413';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45377,13 +45377,13 @@ function miniTable(classes,widths){
   return t;
 }
 
-const EGOB_BORDER_V8412='0.75pt solid #000';
+const EGOB_BORDER_V8413='0.75pt solid #000';
 
 function styleCell(td,{top=true,bottom=true,align='left',font='8.5pt',line='1.15',pad='2px 5px'}={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V8412,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V8412,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V8412:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8412:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8413,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8413,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8413:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8413:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45413,7 +45413,7 @@ function cloneHeaderTable(src,widths){
 }
 
 
-function logicalTableV8412(src,widths){
+function logicalTableV8413(src,widths){
   const t=document.createElement('table');
   t.className=src?.className||'';
   t.setAttribute('width','100%');
@@ -45440,7 +45440,7 @@ function logicalTableV8412(src,widths){
   return t;
 }
 
-function styleLogicalCellV8412(td,{
+function styleLogicalCellV8413(td,{
   align='left',
   font='8.5pt',
   line='1.12',
@@ -45449,10 +45449,10 @@ function styleLogicalCellV8412(td,{
   top=true,
   bottom=true
 }={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V8412,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V8412,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V8412:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8412:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8413,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8413,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8413:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8413:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45465,10 +45465,10 @@ function styleLogicalCellV8412(td,{
   td.style.setProperty('background','transparent','important');
 }
 
-function styleLogicalHeaderV8412(thead){
+function styleLogicalHeaderV8413(thead){
   thead.style.setProperty('display','table-header-group','important');
   [...thead.querySelectorAll('th,td')].forEach(cell=>{
-    styleLogicalCellV8412(cell,{
+    styleLogicalCellV8413(cell,{
       align:'center',
       font:'8.2pt',
       line:'1.05',
@@ -45480,7 +45480,7 @@ function styleLogicalHeaderV8412(thead){
   });
 }
 
-function requirementCatalogueV8412(){
+function requirementCatalogueV8413(){
   let catalogue=[];
   try{
     if(typeof DATA!=='undefined' && Array.isArray(DATA?.requisitos)) catalogue=DATA.requisitos;
@@ -45520,8 +45520,8 @@ function requirementCatalogueV8412(){
   });
 }
 
-function buildRequirementsSourceV8412(){
-  const reqs=requirementCatalogueV8412();
+function buildRequirementsSourceV8413(){
+  const reqs=requirementCatalogueV8413();
   if(!reqs.length) return null;
 
   const table=document.createElement('table');
@@ -45567,7 +45567,7 @@ function buildRequirementsSourceV8412(){
   return table;
 }
 
-function ensureRequirementsSourceV8412(root){
+function ensureRequirementsSourceV8413(root){
   // 1. Reutilizar cualquier tabla de requisitos ya generada por el informe,
   // aunque la clase ante-req-report-v52 no haya sido aplicada.
   let src=root.querySelector(
@@ -45580,7 +45580,7 @@ function ensureRequirementsSourceV8412(root){
   }
 
   // 2. Si el rerender dejó el texto fallback, reconstruir desde STATE.
-  const generated=buildRequirementsSourceV8412();
+  const generated=buildRequirementsSourceV8413();
   if(!generated) return null;
 
   const fallback=[...root.querySelectorAll('p')].find(p=>
@@ -45628,7 +45628,7 @@ function ensureRequirementsSourceV8412(root){
 }
 
 function prepareRequirements(root){
-  ensureRequirementsSourceV8412(root);
+  ensureRequirementsSourceV8413(root);
 
   root.querySelectorAll(
     'table.ante-req-report-v52, table.req-report-v94'
@@ -45700,13 +45700,13 @@ function prepareConclusion(root){
   root.querySelectorAll('table.conclusion-report').forEach(src=>{
     if(src.dataset.egobLogicalV8411==='1') return;
 
-    const t=logicalTableV8412(src,[60,12,18,10]);
+    const t=logicalTableV8413(src,[60,12,18,10]);
     t.dataset.egobLogicalV8411='1';
 
     const thead=src.querySelector('thead');
     if(thead){
       const h=thead.cloneNode(true);
-      styleLogicalHeaderV8412(h);
+      styleLogicalHeaderV8413(h);
       t.appendChild(h);
     }
 
@@ -45722,7 +45722,7 @@ function prepareConclusion(root){
       const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
       cells.forEach((cell,idx)=>{
         cell.removeAttribute('rowspan');
-        styleLogicalCellV8412(cell,{
+        styleLogicalCellV8413(cell,{
           align:idx===0?'left':'center',
           font:'8.2pt',
           line:'1.06',
@@ -45740,13 +45740,13 @@ function prepareConclusion(root){
 }
 
 
-function isZeroBorderV8412(value){
+function isZeroBorderV8413(value){
   const v=String(value||'').trim().toLowerCase();
   return !v || v==='0' || v==='0px' || v==='none' ||
          v.startsWith('0px ') || v.startsWith('0pt ');
 }
 
-function applyUniformThinBordersV8412(root){
+function applyUniformThinBordersV8413(root){
   root.querySelectorAll('table').forEach(table=>{
     table.style.setProperty('border-collapse','collapse','important');
     table.style.setProperty('border-spacing','0','important');
@@ -45760,13 +45760,13 @@ function applyUniformThinBordersV8412(root){
   ).forEach(cell=>{
     // No reemplazar top/bottom si ya fueron definidos por la lógica de paginación.
     if(!cell.style.getPropertyValue('border-left'))
-      cell.style.setProperty('border-left',EGOB_BORDER_V8412,'important');
+      cell.style.setProperty('border-left',EGOB_BORDER_V8413,'important');
     if(!cell.style.getPropertyValue('border-right'))
-      cell.style.setProperty('border-right',EGOB_BORDER_V8412,'important');
+      cell.style.setProperty('border-right',EGOB_BORDER_V8413,'important');
     if(!cell.style.getPropertyValue('border-top'))
-      cell.style.setProperty('border-top',EGOB_BORDER_V8412,'important');
+      cell.style.setProperty('border-top',EGOB_BORDER_V8413,'important');
     if(!cell.style.getPropertyValue('border-bottom'))
-      cell.style.setProperty('border-bottom',EGOB_BORDER_V8412,'important');
+      cell.style.setProperty('border-bottom',EGOB_BORDER_V8413,'important');
   });
 }
 
@@ -45789,7 +45789,7 @@ function evidenceParts(row){
 }
 
 
-function prepareAnteFactibilitiesV8412(root){
+function prepareAnteFactibilitiesV8413(root){
   root.querySelectorAll('table.factibilidades-ante-v52').forEach(src=>{
     if(src.dataset.egobAnteFactV8412==='1') return;
 
@@ -45823,7 +45823,7 @@ function prepareAnteFactibilitiesV8412(root){
     ['EMPRESA','DOCUMENTO / TRÁMITE','FECHA'].forEach(text=>{
       const th=document.createElement('th');
       th.textContent=text;
-      styleLogicalCellV8412(th,{
+      styleLogicalCellV8413(th,{
         align:'center',
         font:'8.2pt',
         line:'1.05',
@@ -45852,7 +45852,7 @@ function prepareAnteFactibilitiesV8412(root){
         tc.forEach((cell,idx)=>{
           cell.removeAttribute('rowspan');
           cell.removeAttribute('colspan');
-          styleLogicalCellV8412(cell,{
+          styleLogicalCellV8413(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
@@ -45902,15 +45902,15 @@ function prepareAnteFactibilitiesV8412(root){
           const first=index===0;
           const last=index===lines.length-1;
 
-          styleLogicalCellV8412(blank,{
+          styleLogicalCellV8413(blank,{
             align:'center',font:'8.0pt',line:'1.05',pad:'1px 3px',
             vertical:'top',top:first,bottom:last
           });
-          styleLogicalCellV8412(lab,{
+          styleLogicalCellV8413(lab,{
             align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px',
             vertical:'top',top:first,bottom:last
           });
-          styleLogicalCellV8412(det,{
+          styleLogicalCellV8413(det,{
             align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px',
             vertical:'top',top:first,bottom:last
           });
@@ -45931,53 +45931,213 @@ function prepareAnteFactibilitiesV8412(root){
 
 function prepareFactibilities(root){
   root.querySelectorAll(
-    'table.combined-studies-v13, table.combined-studies-v145, table.estudios-table'
+    'table.combined-studies-v13, table.combined-studies-v145, table.estudios-table, table.factibilidades-ante-v52'
   ).forEach(src=>{
+    if(src.dataset.egobFactPreparedV8413==='1') return;
+    src.dataset.egobFactPreparedV8413='1';
+
     const head=[
       ...src.querySelectorAll('thead tr:first-child > th, thead tr:first-child > td')
     ];
-    const widths=head.length>=4?[20,16,46,18]:(head.length===3?[20,62,18]:[20,80]);
 
-    const t=logicalTableV8412(src,widths);
+    const bodyRows=[...src.querySelectorAll('tbody > tr')];
+    const firstMainRow=bodyRows.find(row=>{
+      if(evidenceRow(row)) return false;
+      const cells=[...row.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
+      return cells.length>=2;
+    });
+
+    const firstMainCells=firstMainRow
+      ? [...firstMainRow.children].filter(x=>/^(TD|TH)$/.test(x.tagName))
+      : [];
+
+    // CLAVE V8.4.13:
+    // Anteproyecto puede tener encabezado de 2 celdas:
+    // EMPRESA | DOCUMENTO/TRÁMITE (colspan=2)
+    // pero las filas reales son 3:
+    // EMPRESA | DOCUMENTO | FECHA.
+    const isThreeColumnAnte =
+      firstMainCells.length===3 &&
+      !firstMainRow?.querySelector(':scope > td.type-v13, :scope > td.type-v145');
+
+    const widths = isThreeColumnAnte
+      ? [20,65,15]
+      : (head.length>=4
+          ? [20,16,46,18]
+          : (firstMainCells.length===3 ? [20,65,15] : [20,80]));
+
+    const t=logicalTableV8413(src,widths);
     t.dataset.egobLogicalV8411='1';
+    t.dataset.egobFactPreparedV8413='1';
 
-    const thead=src.querySelector('thead');
-    if(thead){
-      const h=thead.cloneNode(true);
-      styleLogicalHeaderV8412(h);
-      t.appendChild(h);
+    if(isThreeColumnAnte){
+      // El ancho debe ser físico y estable para que e-DOC no reduzca FECHA.
+      t.style.setProperty('table-layout','fixed','important');
+
+      const thead=document.createElement('thead');
+      const hr=document.createElement('tr');
+
+      ['EMPRESA','DOCUMENTO / TRÁMITE','FECHA'].forEach((text,idx)=>{
+        const th=document.createElement('th');
+        th.textContent=text;
+        styleLogicalCellV8413(th,{
+          align:'center',
+          font:'8.2pt',
+          line:'1.05',
+          pad:'3px 4px',
+          vertical:'middle'
+        });
+        th.style.setProperty('font-weight','700','important');
+        th.style.setProperty('background','#d9d9d9','important');
+
+        if(idx===2){
+          th.setAttribute('width','15%');
+          th.style.setProperty('width','15%','important');
+          th.style.setProperty('min-width','15%','important');
+          th.style.setProperty('white-space','nowrap','important');
+        }
+
+        hr.appendChild(th);
+      });
+
+      thead.appendChild(hr);
+      t.appendChild(thead);
+    }else{
+      const thead=src.querySelector('thead');
+      if(thead){
+        const h=thead.cloneNode(true);
+        styleLogicalHeaderV8413(h);
+        t.appendChild(h);
+      }
     }
 
     const tbody=document.createElement('tbody');
     tbody.style.setProperty('page-break-inside','auto','important');
     tbody.style.setProperty('break-inside','auto','important');
 
-    const rows=[...src.querySelectorAll('tbody > tr')];
     let currentEntity=null;
 
-    for(let i=0;i<rows.length;i++){
-      const row=rows[i];
+    for(let i=0;i<bodyRows.length;i++){
+      const row=bodyRows[i];
       if(evidenceRow(row)) continue;
 
-      const entity=row.querySelector(':scope > td.entity-v13, :scope > td.entity-v145');
-      if(entity) currentEntity=entity.cloneNode(true);
+      const cells=[...row.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
 
-      const type=row.querySelector(':scope > td.type-v13');
-
-      if(!type || widths.length<4){
+      // -------------------------------
+      // Variante Anteproyecto 3 columnas
+      // -------------------------------
+      if(isThreeColumnAnte && cells.length===3){
         const tr=row.cloneNode(true);
-        tr.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));
-        tr.style.setProperty('page-break-inside','avoid','important');
-        tr.style.setProperty('break-inside','avoid','important');
-        [...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName)).forEach(cell=>{
-          styleLogicalCellV8412(cell,{
+        const tc=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
+
+        tc.forEach((cell,idx)=>{
+          cell.removeAttribute('rowspan');
+          cell.removeAttribute('colspan');
+
+          styleLogicalCellV8413(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
             pad:'2px 4px',
             vertical:'middle'
           });
+
+          if(idx===0 || idx===1){
+            cell.style.setProperty('font-weight','700','important');
+          }
         });
+
+        // FECHA: ancho real reservado + texto indivisible.
+        if(tc[2]){
+          tc[2].setAttribute('width','15%');
+          tc[2].style.setProperty('width','15%','important');
+          tc[2].style.setProperty('min-width','15%','important');
+          tc[2].style.setProperty('max-width','15%','important');
+          tc[2].style.setProperty('white-space','nowrap','important');
+          tc[2].style.setProperty('word-break','normal','important');
+          tc[2].style.setProperty('overflow-wrap','normal','important');
+          tc[2].style.setProperty('text-align','center','important');
+        }
+
+        tr.style.setProperty('page-break-inside','avoid','important');
+        tr.style.setProperty('break-inside','avoid','important');
+        tbody.appendChild(tr);
+
+        const next=bodyRows[i+1];
+        if(next&&evidenceRow(next)){
+          const {label,detail}=evidenceParts(next);
+
+          if(detail){
+            const lines=wrapCell(detail,95);
+            const labelHtml=label&&norm(label.textContent)?label.innerHTML:'';
+
+            lines.forEach((line,k)=>{
+              const lr=document.createElement('tr');
+              lr.style.setProperty('page-break-inside','avoid','important');
+              lr.style.setProperty('break-inside','avoid','important');
+
+              const blank=document.createElement('td');
+              const lab=document.createElement('td');
+              const det=document.createElement('td');
+              det.colSpan=2;
+
+              blank.innerHTML='&nbsp;';
+              lab.innerHTML=(k===0&&labelHtml)?labelHtml:'&nbsp;';
+              det.innerHTML=lineHtml(line);
+
+              const first=k===0;
+              const last=k===lines.length-1;
+
+              styleLogicalCellV8413(blank,{
+                align:'center',font:'8.0pt',line:'1.05',pad:'1px 3px',
+                vertical:'top',top:first,bottom:last
+              });
+              styleLogicalCellV8413(lab,{
+                align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px',
+                vertical:'top',top:first,bottom:last
+              });
+              styleLogicalCellV8413(det,{
+                align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px',
+                vertical:'top',top:first,bottom:last
+              });
+
+              lr.append(blank,lab,det);
+              tbody.appendChild(lr);
+            });
+          }
+          i++;
+        }
+
+        continue;
+      }
+
+      // --------------------------------
+      // Variante general 4 columnas
+      // --------------------------------
+      const entity=row.querySelector(':scope > td.entity-v13, :scope > td.entity-v145');
+      if(entity) currentEntity=entity.cloneNode(true);
+
+      const type=row.querySelector(':scope > td.type-v13, :scope > td.type-v145');
+
+      if(!type || widths.length<4){
+        const tr=row.cloneNode(true);
+        tr.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));
+        tr.style.setProperty('page-break-inside','avoid','important');
+        tr.style.setProperty('break-inside','avoid','important');
+
+        [...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName)).forEach((cell,idx)=>{
+          styleLogicalCellV8413(cell,{
+            align:'center',
+            font:'8.2pt',
+            line:'1.05',
+            pad:'2px 4px',
+            vertical:'middle'
+          });
+          if(idx===2 && cells.length===3){
+            cell.style.setProperty('white-space','nowrap','important');
+          }
+        });
+
         tbody.appendChild(tr);
         continue;
       }
@@ -46003,30 +46163,29 @@ function prepareFactibilities(root){
         x.removeAttribute('colspan');
       });
 
-      styleLogicalCellV8412(ent,{
+      styleLogicalCellV8413(ent,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
-      styleLogicalCellV8412(typ,{
+      styleLogicalCellV8413(typ,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
       typ.style.setProperty('font-weight','700','important');
-      styleLogicalCellV8412(d,{
+      styleLogicalCellV8413(d,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
-      styleLogicalCellV8412(dt,{
+      styleLogicalCellV8413(dt,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
+      dt.style.setProperty('white-space','nowrap','important');
 
       tr.append(ent,typ,d,dt);
       tbody.appendChild(tr);
 
-      const next=rows[i+1];
+      const next=bodyRows[i+1];
       if(next&&evidenceRow(next)){
         const {label,detail}=evidenceParts(next);
 
         if(detail){
-          // Filas pequeñas para que e-DOC pueda paginar, pero dentro de
-          // UNA sola tabla: no hay bordes externos duplicados.
           const lines=wrapCell(detail,95);
           const labelHtml=label&&norm(label.textContent)?label.innerHTML:'';
 
@@ -46047,17 +46206,15 @@ function prepareFactibilities(root){
             const first=k===0;
             const last=k===lines.length-1;
 
-            styleLogicalCellV8412(blank,{
+            styleLogicalCellV8413(blank,{
               align:'center',font:'8.1pt',line:'1.05',pad:'1px 3px',
               vertical:'top',top:first,bottom:last
             });
-            styleLogicalCellV8412(lab,{
+            styleLogicalCellV8413(lab,{
               align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px',
               vertical:'top',top:first,bottom:last
             });
-            if(first) lab.style.setProperty('font-weight','700','important');
-
-            styleLogicalCellV8412(det,{
+            styleLogicalCellV8413(det,{
               align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px',
               vertical:'top',top:first,bottom:last
             });
@@ -46076,7 +46233,7 @@ function prepareFactibilities(root){
 }
 
 
-window.buildEgobBodyV8412=function(){
+window.buildEgobBodyV8413=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -46090,13 +46247,12 @@ window.buildEgobBodyV8412=function(){
     report.setAttribute(PREP,'1');
     prepareRequirements(report);
     prepareConclusion(report);
-    prepareAnteFactibilitiesV8412(report);
     prepareFactibilities(report);
-    applyUniformThinBordersV8412(report);
+    applyUniformThinBordersV8413(report);
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.12] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.13] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
