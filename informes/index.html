@@ -45073,7 +45073,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV849==='function')p=window.buildEgobBodyV849();
+    if(typeof window.buildEgobBodyV8410==='function')p=window.buildEgobBodyV8410();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45271,20 +45271,20 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
 
 
 <!-- ==========================================================
-     ALLPA V8.4.9 · HTML ESPECÍFICO PARA eGOB
+     ALLPA V8.4.10 · HTML ESPECÍFICO PARA eGOB
      - Evita que e-DOC trate filas largas como bloques indivisibles.
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v849">
+<script id="allpa-egob-body-v8410">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V849__) return;
-window.__ALLPA_EGOB_BODY_V849__=true;
+if(window.__ALLPA_EGOB_BODY_V8410__) return;
+window.__ALLPA_EGOB_BODY_V8410__=true;
 
-const FLOW='data-egob-flow-v849';
-const UNIT='data-egob-flow-unit-v849';
-const PREP='data-allpa-egob-prepared-v849';
+const FLOW='data-egob-flow-v8410';
+const UNIT='data-egob-flow-unit-v8410';
+const PREP='data-allpa-egob-prepared-v8410';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45377,13 +45377,13 @@ function miniTable(classes,widths){
   return t;
 }
 
-const EGOB_BORDER_V849='0.5pt solid #000';
+const EGOB_BORDER_V8410='0.75pt solid #000';
 
 function styleCell(td,{top=true,bottom=true,align='left',font='8.5pt',line='1.15',pad='2px 5px'}={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V849,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V849,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V849:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V849:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8410,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8410,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8410:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8410:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45412,7 +45412,7 @@ function cloneHeaderTable(src,widths){
   return t;
 }
 
-function requirementCatalogueV849(){
+function requirementCatalogueV8410(){
   let catalogue=[];
   try{
     if(typeof DATA!=='undefined' && Array.isArray(DATA?.requisitos)) catalogue=DATA.requisitos;
@@ -45452,8 +45452,8 @@ function requirementCatalogueV849(){
   });
 }
 
-function buildRequirementsSourceV849(){
-  const reqs=requirementCatalogueV849();
+function buildRequirementsSourceV8410(){
+  const reqs=requirementCatalogueV8410();
   if(!reqs.length) return null;
 
   const table=document.createElement('table');
@@ -45499,7 +45499,7 @@ function buildRequirementsSourceV849(){
   return table;
 }
 
-function ensureRequirementsSourceV849(root){
+function ensureRequirementsSourceV8410(root){
   // 1. Reutilizar cualquier tabla de requisitos ya generada por el informe,
   // aunque la clase ante-req-report-v52 no haya sido aplicada.
   let src=root.querySelector(
@@ -45512,7 +45512,7 @@ function ensureRequirementsSourceV849(root){
   }
 
   // 2. Si el rerender dejó el texto fallback, reconstruir desde STATE.
-  const generated=buildRequirementsSourceV849();
+  const generated=buildRequirementsSourceV8410();
   if(!generated) return null;
 
   const fallback=[...root.querySelectorAll('p')].find(p=>
@@ -45560,7 +45560,7 @@ function ensureRequirementsSourceV849(root){
 }
 
 function prepareRequirements(root){
-  ensureRequirementsSourceV849(root);
+  ensureRequirementsSourceV8410(root);
 
   root.querySelectorAll(
     'table.ante-req-report-v52, table.req-report-v94'
@@ -45673,15 +45673,19 @@ function prepareConclusion(root){
   });
 }
 
-function isZeroBorderV849(value){
+function isZeroBorderV8410(value){
   const v=String(value||'').trim().toLowerCase();
   return !v || v==='0' || v==='0px' || v==='none' ||
          v.startsWith('0px ') || v.startsWith('0pt ');
 }
 
-function applyUniformThinBordersV849(root){
-  // Un solo borde fino por celda. Evitamos shorthand globales que
-  // pueden reactivar bordes previamente anulados.
+function applyUniformThinBordersV8410(root){
+  // MODELO DE BORDE ÚNICO:
+  // - 0.75 pt negro para que e-DOC/PDF lo renderice con claridad.
+  // - cada unión horizontal se dibuja UNA sola vez:
+  //   borde inferior de la unidad anterior, sin borde superior duplicado.
+  // - verticales siempre visibles.
+
   root.querySelectorAll('table').forEach(table=>{
     table.style.setProperty('border-collapse','collapse','important');
     table.style.setProperty('border-spacing','0','important');
@@ -45690,42 +45694,52 @@ function applyUniformThinBordersV849(root){
   });
 
   root.querySelectorAll('th,td').forEach(cell=>{
-    const top=cell.style.getPropertyValue('border-top');
-    const bottom=cell.style.getPropertyValue('border-bottom');
+    cell.style.setProperty('border-left',EGOB_BORDER_V8410,'important');
+    cell.style.setProperty('border-right',EGOB_BORDER_V8410,'important');
+    cell.style.setProperty('border-bottom',EGOB_BORDER_V8410,'important');
 
-    cell.style.setProperty('border-left',EGOB_BORDER_V849,'important');
-    cell.style.setProperty('border-right',EGOB_BORDER_V849,'important');
-
-    if(isZeroBorderV849(top) && top){
-      cell.style.setProperty('border-top','0','important');
-    }else{
-      cell.style.setProperty('border-top',EGOB_BORDER_V849,'important');
-    }
-
-    if(isZeroBorderV849(bottom) && bottom){
-      cell.style.setProperty('border-bottom','0','important');
-    }else{
-      cell.style.setProperty('border-bottom',EGOB_BORDER_V849,'important');
-    }
+    // Por defecto cada celda conserva su borde superior.
+    // Después se elimina en las unidades siguientes del mismo flujo.
+    cell.style.setProperty('border-top',EGOB_BORDER_V8410,'important');
   });
 
-  // En mini-tablas consecutivas, la línea inferior de la unidad anterior
-  // es la única línea horizontal compartida. La siguiente no dibuja top.
+  // En los flujos construidos con mini-tablas consecutivas:
+  // solo la PRIMERA unidad dibuja borde superior.
   root.querySelectorAll(`[${FLOW}]`).forEach(wrapper=>{
-    const units=[...wrapper.querySelectorAll(`:scope > table[${UNIT}]`)];
+    const units=[...wrapper.children].filter(el=>
+      el.matches?.(`table[${UNIT}]`)
+    );
 
     units.forEach((table,index)=>{
-      if(index===0) return;
+      const firstRowCells=[
+        ...table.querySelectorAll(
+          ':scope > thead:first-child > tr:first-child > th,'+
+          ':scope > thead:first-child > tr:first-child > td,'+
+          ':scope > tbody:first-child > tr:first-child > th,'+
+          ':scope > tbody:first-child > tr:first-child > td'
+        )
+      ];
 
-      table.querySelectorAll(
-        ':scope > thead:first-child > tr:first-child > th,'+
-        ':scope > thead:first-child > tr:first-child > td,'+
-        ':scope > tbody:first-child > tr:first-child > th,'+
-        ':scope > tbody:first-child > tr:first-child > td'
-      ).forEach(cell=>{
-        cell.style.setProperty('border-top','0','important');
-      });
+      if(index>0){
+        firstRowCells.forEach(cell=>{
+          cell.style.setProperty('border-top','0','important');
+        });
+      }
     });
+  });
+
+  // Mantener ocultos los bordes internos que la paginación usa para
+  // simular una celda continua en Factibilidades.
+  root.querySelectorAll(
+    '[data-egob-keep-top-zero="1"]'
+  ).forEach(cell=>{
+    cell.style.setProperty('border-top','0','important');
+  });
+
+  root.querySelectorAll(
+    '[data-egob-keep-bottom-zero="1"]'
+  ).forEach(cell=>{
+    cell.style.setProperty('border-bottom','0','important');
   });
 }
 
@@ -45804,7 +45818,7 @@ function prepareFactibilities(root){
   });
 }
 
-window.buildEgobBodyV849=function(){
+window.buildEgobBodyV8410=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -45819,11 +45833,11 @@ window.buildEgobBodyV849=function(){
     prepareRequirements(report);
     prepareConclusion(report);
     prepareFactibilities(report);
-    applyUniformThinBordersV849(report);
+    applyUniformThinBordersV8410(report);
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.9] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.10] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
