@@ -1,4 +1,8 @@
-# ALLPA · FirmaEC · V8.4.1
+# ALLPA · Supabase Edge Functions · FirmaEC V8.4.2
+# La autenticación se valida dentro de cada función.
+
+[functions.firmaec-iniciar]
+verify_jwt = false
 
 [functions.firmaec-retorno]
 verify_jwt = false
