@@ -45073,7 +45073,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV848==='function')p=window.buildEgobBodyV848();
+    if(typeof window.buildEgobBodyV849==='function')p=window.buildEgobBodyV849();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45271,20 +45271,20 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
 
 
 <!-- ==========================================================
-     ALLPA V8.4.8 · HTML ESPECÍFICO PARA eGOB
+     ALLPA V8.4.9 · HTML ESPECÍFICO PARA eGOB
      - Evita que e-DOC trate filas largas como bloques indivisibles.
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v848">
+<script id="allpa-egob-body-v849">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V848__) return;
-window.__ALLPA_EGOB_BODY_V848__=true;
+if(window.__ALLPA_EGOB_BODY_V849__) return;
+window.__ALLPA_EGOB_BODY_V849__=true;
 
-const FLOW='data-egob-flow-v848';
-const UNIT='data-egob-flow-unit-v848';
-const PREP='data-allpa-egob-prepared-v848';
+const FLOW='data-egob-flow-v849';
+const UNIT='data-egob-flow-unit-v849';
+const PREP='data-allpa-egob-prepared-v849';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45377,13 +45377,13 @@ function miniTable(classes,widths){
   return t;
 }
 
-const EGOB_BORDER_V848='0.75pt solid #000';
+const EGOB_BORDER_V849='0.5pt solid #000';
 
 function styleCell(td,{top=true,bottom=true,align='left',font='8.5pt',line='1.15',pad='2px 5px'}={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V848,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V848,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V848:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V848:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V849,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V849,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V849:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V849:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45412,7 +45412,7 @@ function cloneHeaderTable(src,widths){
   return t;
 }
 
-function requirementCatalogueV848(){
+function requirementCatalogueV849(){
   let catalogue=[];
   try{
     if(typeof DATA!=='undefined' && Array.isArray(DATA?.requisitos)) catalogue=DATA.requisitos;
@@ -45452,8 +45452,8 @@ function requirementCatalogueV848(){
   });
 }
 
-function buildRequirementsSourceV848(){
-  const reqs=requirementCatalogueV848();
+function buildRequirementsSourceV849(){
+  const reqs=requirementCatalogueV849();
   if(!reqs.length) return null;
 
   const table=document.createElement('table');
@@ -45499,7 +45499,7 @@ function buildRequirementsSourceV848(){
   return table;
 }
 
-function ensureRequirementsSourceV848(root){
+function ensureRequirementsSourceV849(root){
   // 1. Reutilizar cualquier tabla de requisitos ya generada por el informe,
   // aunque la clase ante-req-report-v52 no haya sido aplicada.
   let src=root.querySelector(
@@ -45512,7 +45512,7 @@ function ensureRequirementsSourceV848(root){
   }
 
   // 2. Si el rerender dejó el texto fallback, reconstruir desde STATE.
-  const generated=buildRequirementsSourceV848();
+  const generated=buildRequirementsSourceV849();
   if(!generated) return null;
 
   const fallback=[...root.querySelectorAll('p')].find(p=>
@@ -45560,69 +45560,53 @@ function ensureRequirementsSourceV848(root){
 }
 
 function prepareRequirements(root){
-  ensureRequirementsSourceV848(root);
+  ensureRequirementsSourceV849(root);
 
   root.querySelectorAll(
     'table.ante-req-report-v52, table.req-report-v94'
   ).forEach(src=>{
-    // Evitar procesar dos veces la misma tabla.
     if(src.closest(`[${FLOW}="requirements"]`)) return;
 
     const widths=[67,33];
     const wrapper=document.createElement('div');
     wrapper.setAttribute(FLOW,'requirements');
-    wrapper.style.cssText='width:100%!important;margin:0!important;padding:0!important;page-break-inside:auto!important;break-inside:auto!important;';
+    wrapper.style.cssText=
+      'width:100%!important;margin:0!important;padding:0!important;'+
+      'page-break-inside:auto!important;break-inside:auto!important;';
+
+    // Encabezado una sola vez.
     wrapper.appendChild(cloneHeaderTable(src,widths));
 
     const rows=[...src.querySelectorAll('tbody > tr')];
 
+    // IMPORTANTE V8.4.9:
+    // una fila del informe = un requisito completo.
+    // No se divide su texto en filas artificiales.
     rows.forEach(row=>{
-      const cells=[...row.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
+      const t=miniTable(src.className,widths);
+      const b=document.createElement('tbody');
+      const tr=row.cloneNode(true);
 
-      if(cells.length<2){
-        const t=miniTable(src.className,widths);
-        const b=document.createElement('tbody');
-        b.appendChild(row.cloneNode(true));
-        t.appendChild(b);
-        wrapper.appendChild(t);
-        return;
-      }
+      tr.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));
 
-      const left=wrapCell(cells[0],390);
-      const right=wrapCell(cells[1],185);
-      const n=Math.max(left.length,right.length);
+      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
 
-      for(let i=0;i<n;i++){
-        const t=miniTable(src.className,widths);
-        const b=document.createElement('tbody');
-        const tr=document.createElement('tr');
-        const a=document.createElement('td');
-        const c=document.createElement('td');
-
-        a.className=cells[0].className||'';
-        c.className=cells[1].className||'';
-
-        a.innerHTML=lineHtml(left[i]||[]);
-        c.innerHTML=lineHtml(right[i]||[]);
-
-        styleCell(a,{
-          top:i===0,
-          bottom:i===n-1,
+      cells.forEach((cell,idx)=>{
+        styleCell(cell,{
+          top:true,
+          bottom:true,
           align:'left',
-          pad:'1.5px 4px'
-        });
-        styleCell(c,{
-          top:i===0,
-          bottom:i===n-1,
-          align:'left',
-          pad:'1.5px 4px'
+          font:'8.5pt',
+          line:'1.12',
+          pad:'2px 4px'
         });
 
-        tr.append(a,c);
-        b.appendChild(tr);
-        t.appendChild(b);
-        wrapper.appendChild(t);
-      }
+        cell.style.setProperty('vertical-align','top','important');
+      });
+
+      b.appendChild(tr);
+      t.appendChild(b);
+      wrapper.appendChild(t);
     });
 
     src.replaceWith(wrapper);
@@ -45689,14 +45673,15 @@ function prepareConclusion(root){
   });
 }
 
-function isZeroBorderV848(value){
+function isZeroBorderV849(value){
   const v=String(value||'').trim().toLowerCase();
   return !v || v==='0' || v==='0px' || v==='none' ||
          v.startsWith('0px ') || v.startsWith('0pt ');
 }
 
-function applyUniformThinBordersV848(root){
-  // 1. Todas las tablas del cuerpo eGOB utilizan el mismo borde fino.
+function applyUniformThinBordersV849(root){
+  // Un solo borde fino por celda. Evitamos shorthand globales que
+  // pueden reactivar bordes previamente anulados.
   root.querySelectorAll('table').forEach(table=>{
     table.style.setProperty('border-collapse','collapse','important');
     table.style.setProperty('border-spacing','0','important');
@@ -45708,57 +45693,38 @@ function applyUniformThinBordersV848(root){
     const top=cell.style.getPropertyValue('border-top');
     const bottom=cell.style.getPropertyValue('border-bottom');
 
-    cell.style.setProperty('border-left',EGOB_BORDER_V848,'important');
-    cell.style.setProperty('border-right',EGOB_BORDER_V848,'important');
-    cell.style.setProperty('border-color','#000','important');
-    cell.style.setProperty('border-style','solid','important');
+    cell.style.setProperty('border-left',EGOB_BORDER_V849,'important');
+    cell.style.setProperty('border-right',EGOB_BORDER_V849,'important');
 
-    // Respetar líneas internas que deliberadamente se ocultaron
-    // para que varias líneas parezcan una sola celda.
-    if(isZeroBorderV848(top) && top){
+    if(isZeroBorderV849(top) && top){
       cell.style.setProperty('border-top','0','important');
     }else{
-      cell.style.setProperty('border-top',EGOB_BORDER_V848,'important');
+      cell.style.setProperty('border-top',EGOB_BORDER_V849,'important');
     }
 
-    if(isZeroBorderV848(bottom) && bottom){
+    if(isZeroBorderV849(bottom) && bottom){
       cell.style.setProperty('border-bottom','0','important');
     }else{
-      cell.style.setProperty('border-bottom',EGOB_BORDER_V848,'important');
+      cell.style.setProperty('border-bottom',EGOB_BORDER_V849,'important');
     }
-
-    // Fallback explícito para e-DOC/PDF: si el borde existe, usar 0.75pt negro.
-    if(cell.style.getPropertyValue('border-top') !== '0'){
-      cell.style.setProperty('border-top-width','0.75pt','important');
-      cell.style.setProperty('border-top-style','solid','important');
-      cell.style.setProperty('border-top-color','#000','important');
-    }
-    if(cell.style.getPropertyValue('border-bottom') !== '0'){
-      cell.style.setProperty('border-bottom-width','0.75pt','important');
-      cell.style.setProperty('border-bottom-style','solid','important');
-      cell.style.setProperty('border-bottom-color','#000','important');
-    }
-    cell.style.setProperty('border-left-width','0.75pt','important');
-    cell.style.setProperty('border-left-style','solid','important');
-    cell.style.setProperty('border-left-color','#000','important');
-    cell.style.setProperty('border-right-width','0.75pt','important');
-    cell.style.setProperty('border-right-style','solid','important');
-    cell.style.setProperty('border-right-color','#000','important');
   });
 
-  // 2. En los flujos formados por mini-tablas contiguas, el borde
-  // inferior de la unidad anterior es suficiente. Quitamos el borde
-  // superior de cada unidad posterior para evitar líneas dobles/gruesas.
+  // En mini-tablas consecutivas, la línea inferior de la unidad anterior
+  // es la única línea horizontal compartida. La siguiente no dibuja top.
   root.querySelectorAll(`[${FLOW}]`).forEach(wrapper=>{
     const units=[...wrapper.querySelectorAll(`:scope > table[${UNIT}]`)];
 
     units.forEach((table,index)=>{
       if(index===0) return;
 
-      table.querySelectorAll(':scope > thead:first-child > tr:first-child > th, :scope > thead:first-child > tr:first-child > td, :scope > tbody:first-child > tr:first-child > th, :scope > tbody:first-child > tr:first-child > td')
-        .forEach(cell=>{
-          cell.style.setProperty('border-top','0','important');
-        });
+      table.querySelectorAll(
+        ':scope > thead:first-child > tr:first-child > th,'+
+        ':scope > thead:first-child > tr:first-child > td,'+
+        ':scope > tbody:first-child > tr:first-child > th,'+
+        ':scope > tbody:first-child > tr:first-child > td'
+      ).forEach(cell=>{
+        cell.style.setProperty('border-top','0','important');
+      });
     });
   });
 }
@@ -45838,7 +45804,7 @@ function prepareFactibilities(root){
   });
 }
 
-window.buildEgobBodyV848=function(){
+window.buildEgobBodyV849=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -45853,11 +45819,11 @@ window.buildEgobBodyV848=function(){
     prepareRequirements(report);
     prepareConclusion(report);
     prepareFactibilities(report);
-    applyUniformThinBordersV848(report);
+    applyUniformThinBordersV849(report);
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.8] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.9] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
