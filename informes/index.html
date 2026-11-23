@@ -45073,7 +45073,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV845==='function')p=window.buildEgobBodyV845();
+    if(typeof window.buildEgobBodyV846==='function')p=window.buildEgobBodyV846();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45271,20 +45271,20 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
 
 
 <!-- ==========================================================
-     ALLPA V8.4.5 · HTML ESPECÍFICO PARA eGOB
+     ALLPA V8.4.6 · HTML ESPECÍFICO PARA eGOB
      - Evita que e-DOC trate filas largas como bloques indivisibles.
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v845">
+<script id="allpa-egob-body-v846">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V845__) return;
-window.__ALLPA_EGOB_BODY_V845__=true;
+if(window.__ALLPA_EGOB_BODY_V846__) return;
+window.__ALLPA_EGOB_BODY_V846__=true;
 
-const FLOW='data-egob-flow-v845';
-const UNIT='data-egob-flow-unit-v845';
-const PREP='data-allpa-egob-prepared-v845';
+const FLOW='data-egob-flow-v846';
+const UNIT='data-egob-flow-unit-v846';
+const PREP='data-allpa-egob-prepared-v846';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45410,33 +45410,219 @@ function cloneHeaderTable(src,widths){
   return t;
 }
 
+function requirementCatalogueV846(){
+  let catalogue=[];
+  try{
+    if(typeof DATA!=='undefined' && Array.isArray(DATA?.requisitos)) catalogue=DATA.requisitos;
+  }catch(_e){}
+
+  // Para el informe de Anteproyecto solo interesan los requisitos documentales.
+  // Excluir la matriz de Propuesta Arquitectónica si en una versión futura
+  // comparte el mismo arreglo.
+  const documentary=catalogue.filter(r=>{
+    const sec=String(r?.seccion||'').trim().toUpperCase();
+    return !sec || sec==='DOCUMENTAL';
+  });
+
+  const visibleCumple=documentary.filter(r=>{
+    let visible=true;
+    try{ if(typeof shouldShowReq==='function') visible=!!shouldShowReq(r); }catch(_e){}
+    const estado=String(state?.requisitos?.[r.id]?.estado||'').trim().toUpperCase();
+    return visible && estado==='CUMPLE';
+  });
+
+  if(visibleCumple.length) return visibleCumple;
+
+  // Segunda fuente: catálogo oficial de respaldo de Anteproyecto.
+  let fallback=[];
+  try{
+    if(typeof REQUISITOS_ANTEPROYECTO_FALLBACK_V128!=='undefined' &&
+       Array.isArray(REQUISITOS_ANTEPROYECTO_FALLBACK_V128)){
+      fallback=REQUISITOS_ANTEPROYECTO_FALLBACK_V128;
+    }
+  }catch(_e){}
+
+  return fallback.filter(r=>{
+    let visible=true;
+    try{ if(typeof shouldShowReq==='function') visible=!!shouldShowReq(r); }catch(_e){}
+    const estado=String(state?.requisitos?.[r.id]?.estado||'').trim().toUpperCase();
+    return visible && estado==='CUMPLE';
+  });
+}
+
+function buildRequirementsSourceV846(){
+  const reqs=requirementCatalogueV846();
+  if(!reqs.length) return null;
+
+  const table=document.createElement('table');
+  table.className='req-report-v94 ante-req-report-v52';
+
+  const thead=document.createElement('thead');
+  thead.innerHTML='<tr><th>REQUISITO</th><th>RESULTADO / DETALLE</th></tr>';
+  table.appendChild(thead);
+
+  const tbody=document.createElement('tbody');
+
+  reqs.forEach(r=>{
+    const tr=document.createElement('tr');
+    const tdReq=document.createElement('td');
+    const tdDetail=document.createElement('td');
+    tdDetail.className='req-detail-report-v94';
+
+    let reqText=String(r?.texto||'');
+    try{
+      if(typeof stripReqNumber==='function') reqText=stripReqNumber(reqText);
+    }catch(_e){}
+
+    tdReq.textContent=reqText;
+
+    let detailHtml='';
+    try{
+      if(typeof reqDetailReportHtmlV119W==='function'){
+        detailHtml=String(reqDetailReportHtmlV119W(r)||'');
+      }
+    }catch(_e){}
+
+    if(detailHtml){
+      tdDetail.innerHTML=detailHtml;
+    }else{
+      tdDetail.textContent=String(state?.requisitos?.[r.id]?.estado||'Cumple');
+    }
+
+    tr.append(tdReq,tdDetail);
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  return table;
+}
+
+function ensureRequirementsSourceV846(root){
+  // 1. Reutilizar cualquier tabla de requisitos ya generada por el informe,
+  // aunque la clase ante-req-report-v52 no haya sido aplicada.
+  let src=root.querySelector(
+    'table.ante-req-report-v52, table.req-report-v94'
+  );
+
+  if(src){
+    src.classList.add('ante-req-report-v52');
+    return src;
+  }
+
+  // 2. Si el rerender dejó el texto fallback, reconstruir desde STATE.
+  const generated=buildRequirementsSourceV846();
+  if(!generated) return null;
+
+  const fallback=[...root.querySelectorAll('p')].find(p=>
+    norm(p.textContent).toUpperCase().includes(
+      'NO SE REGISTRAN REQUISITOS PARA ESTA SECCIÓN'
+    ) ||
+    norm(p.textContent).toUpperCase().includes(
+      'NO SE REGISTRAN REQUISITOS PARA ESTA SECCION'
+    )
+  );
+
+  if(fallback){
+    fallback.replaceWith(generated);
+    return generated;
+  }
+
+  // 3. Último respaldo: insertar la tabla dentro de la sección Detalle,
+  // después del párrafo introductorio y antes de la siguiente sección.
+  const headings=[...root.querySelectorAll(
+    '.report-section-title-v157,h2'
+  )];
+
+  const detailHeading=headings.find(h=>{
+    const t=norm(h.textContent).toUpperCase();
+    return t.includes('DETALLE DEL ANTEPROYECTO') ||
+           t.includes('DETALLE DEL PROYECTO');
+  });
+
+  if(detailHeading){
+    let cursor=detailHeading.nextElementSibling;
+    let insertAfter=detailHeading;
+
+    while(cursor){
+      if(cursor.matches?.('.report-section-title-v157,h2')) break;
+      insertAfter=cursor;
+      if(cursor.tagName==='P') break;
+      cursor=cursor.nextElementSibling;
+    }
+
+    insertAfter.insertAdjacentElement('afterend',generated);
+    return generated;
+  }
+
+  return null;
+}
+
 function prepareRequirements(root){
-  root.querySelectorAll('table.ante-req-report-v52').forEach(src=>{
+  ensureRequirementsSourceV846(root);
+
+  root.querySelectorAll(
+    'table.ante-req-report-v52, table.req-report-v94'
+  ).forEach(src=>{
+    // Evitar procesar dos veces la misma tabla.
+    if(src.closest(`[${FLOW}="requirements"]`)) return;
+
     const widths=[67,33];
     const wrapper=document.createElement('div');
     wrapper.setAttribute(FLOW,'requirements');
     wrapper.style.cssText='width:100%!important;margin:0!important;padding:0!important;page-break-inside:auto!important;break-inside:auto!important;';
     wrapper.appendChild(cloneHeaderTable(src,widths));
+
     const rows=[...src.querySelectorAll('tbody > tr')];
+
     rows.forEach(row=>{
       const cells=[...row.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
+
       if(cells.length<2){
-        const t=miniTable(src.className,widths);const b=document.createElement('tbody');b.appendChild(row.cloneNode(true));t.appendChild(b);wrapper.appendChild(t);return;
+        const t=miniTable(src.className,widths);
+        const b=document.createElement('tbody');
+        b.appendChild(row.cloneNode(true));
+        t.appendChild(b);
+        wrapper.appendChild(t);
+        return;
       }
+
       const left=wrapCell(cells[0],390);
       const right=wrapCell(cells[1],185);
       const n=Math.max(left.length,right.length);
+
       for(let i=0;i<n;i++){
         const t=miniTable(src.className,widths);
-        const b=document.createElement('tbody');const tr=document.createElement('tr');
-        const a=document.createElement('td'), c=document.createElement('td');
-        a.className=cells[0].className||''; c.className=cells[1].className||'';
-        a.innerHTML=lineHtml(left[i]||[]); c.innerHTML=lineHtml(right[i]||[]);
-        styleCell(a,{top:i===0,bottom:i===n-1,align:'left',pad:'1.5px 4px'});
-        styleCell(c,{top:i===0,bottom:i===n-1,align:'left',pad:'1.5px 4px'});
-        tr.append(a,c);b.appendChild(tr);t.appendChild(b);wrapper.appendChild(t);
+        const b=document.createElement('tbody');
+        const tr=document.createElement('tr');
+        const a=document.createElement('td');
+        const c=document.createElement('td');
+
+        a.className=cells[0].className||'';
+        c.className=cells[1].className||'';
+
+        a.innerHTML=lineHtml(left[i]||[]);
+        c.innerHTML=lineHtml(right[i]||[]);
+
+        styleCell(a,{
+          top:i===0,
+          bottom:i===n-1,
+          align:'left',
+          pad:'1.5px 4px'
+        });
+        styleCell(c,{
+          top:i===0,
+          bottom:i===n-1,
+          align:'left',
+          pad:'1.5px 4px'
+        });
+
+        tr.append(a,c);
+        b.appendChild(tr);
+        t.appendChild(b);
+        wrapper.appendChild(t);
       }
     });
+
     src.replaceWith(wrapper);
   });
 }
@@ -45516,7 +45702,7 @@ function prepareFactibilities(root){
   });
 }
 
-window.buildEgobBodyV845=function(){
+window.buildEgobBodyV846=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -45533,7 +45719,7 @@ window.buildEgobBodyV845=function(){
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.5] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.6] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
