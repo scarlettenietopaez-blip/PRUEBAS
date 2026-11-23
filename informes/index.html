@@ -3871,6 +3871,7 @@ header.no-print{padding-left:82px!important}
 .allpa-home-v7 svg,#homeProjectBtnV124.home-project-v124 svg{width:22px!important;height:22px!important;display:block!important}
 .allpa-home-v7{left:18px!important;top:15px!important}
 </style>
+<!-- ALLPA V7.9.67 · Informes de Desistimiento sin encabezados institucional/título superior -->
 </head>
 <body>
 <button type="button" class="allpa-home-v7 no-print" id="allpaHomeBackV140" title="Volver al nivel anterior" aria-label="Volver al nivel anterior" onclick="navigateBackAllpaV140()">
@@ -4878,7 +4879,58 @@ function normalizeTableUpperInput(el){
 }
 function onlyDigits(v,max=null){ let s=String(v||'').replace(/\D/g,''); if(max) s=s.slice(0,max); return s; }
 function numVal(v){ return parseFloat(String(v||'').replace(',','.')) || 0; }
-function addBusinessDays(dateStr, days){ if(!dateStr) return ''; const d=new Date(dateStr+'T00:00:00'); let added=0; while(added<days){ d.setDate(d.getDate()+1); const day=d.getDay(); if(day!==0 && day!==6) added++; } return d.toISOString().slice(0,10); }
+/* ALLPA V7.9.77 · Calendario de feriados / días no laborables.
+   Fuente editable: data/feriados.csv
+   Fallback embebido para mantener el cálculo aun si el CSV no carga. */
+const ALLPA_FERIADOS_V7977 = new Set(['2026-11-02','2026-11-03']);
+function normalizeHolidayDateV7977(v){
+  const raw=String(v||'').trim();
+  if(!raw) return '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const m=raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+  if(!m) return '';
+  return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+}
+async function loadFeriadosV7977(){
+  try{
+    const txt=await fetchCSVTextV32('data/feriados.csv');
+    const rows=parseCSVV32(txt);
+    if(!rows.length) return ALLPA_FERIADOS_V7977;
+    const fechas=[];
+    rows.forEach(r=>{
+      if(typeof activeV32==='function' && !activeV32(r)) return;
+      const fecha=normalizeHolidayDateV7977(r.Fecha||r.fecha||r.DATE||r.Date||'');
+      if(fecha) fechas.push(fecha);
+    });
+    if(fechas.length){
+      ALLPA_FERIADOS_V7977.clear();
+      fechas.forEach(f=>ALLPA_FERIADOS_V7977.add(f));
+    }
+  }catch(e){
+    console.warn('V7.9.77: no se pudo cargar data/feriados.csv; se usa el calendario embebido.',e);
+  }
+  return ALLPA_FERIADOS_V7977;
+}
+function isHolidayV7977(dateObj){
+  const y=dateObj.getFullYear();
+  const m=String(dateObj.getMonth()+1).padStart(2,'0');
+  const d=String(dateObj.getDate()).padStart(2,'0');
+  return ALLPA_FERIADOS_V7977.has(`${y}-${m}-${d}`);
+}
+function addBusinessDays(dateStr, days){
+  if(!dateStr) return '';
+  const d=new Date(dateStr+'T00:00:00');
+  let added=0;
+  while(added<days){
+    d.setDate(d.getDate()+1);
+    const day=d.getDay();
+    if(day!==0 && day!==6 && !isHolidayV7977(d)) added++;
+  }
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const dd=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
 
 function openDB(){
  return new Promise((resolve,reject)=>{
@@ -5155,8 +5207,8 @@ function anteproyectoPanelHtml(){
    html+=`<table class="anteproyecto-table form-report-table"><tbody>
     <tr><th>Documento</th><td><input id="antDocumento" value="${esc(a.documento||'')}" placeholder="MEMORANDO / RESOLUCIÓN"></td><th>EGOB</th><td><input id="antEgob" value="${esc(a.egob||'')}" placeholder="EGOB"></td></tr>
     <tr><th>Técnico revisor</th><td colspan="3"><input id="antTecnico" list="listaTecnicos" value="${esc(a.tecnico||'')}" placeholder="TÉCNICO REVISOR"></td></tr>
-    <tr><th>Criterio técnico</th><td><select id="antCriterio"><option></option><option ${a.criterio==='FAVORABLE'?'selected':''}>FAVORABLE</option><option ${a.criterio==='NO FAVORABLE'?'selected':''}>NO FAVORABLE</option></select></td><th>Proyectista</th><td><input id="antCalculista" value="${esc(a.calculista||'')}" placeholder="PROYECTISTA"></td></tr>
-    <tr><th>Reg. SENESCYT</th><td colspan="3"><input id="antSenescyt" value="${esc(a.senescyt||'')}" placeholder="1041-2026-3296002"></td></tr>
+    <tr><th>Criterio técnico</th><td><select id="antCriterio"><option></option><option ${a.criterio==='FAVORABLE'?'selected':''}>FAVORABLE</option><option ${a.criterio==='NO FAVORABLE'?'selected':''}>NO FAVORABLE</option></select></td><th>Proyectista</th><td><input id="antCalculista" value="${esc(a.calculista||'')}" placeholder="PROYECTISTA" autocomplete="off" spellcheck="false" data-lpignore="true"></td></tr>
+    <tr><th>Reg. SENESCYT</th><td colspan="3"><input id="antSenescyt" value="${esc(a.senescyt||'')}" placeholder="1041-2026-3296002" autocomplete="off" spellcheck="false" data-lpignore="true"></td></tr>
    </tbody></table>`;
  }
  html+='</div>';
@@ -5773,7 +5825,7 @@ renderInfoFormCoreV15 = function(){
     if(meta.isArea){type='text'; inputmode='decimal'; extra='pattern="[0-9]+([.][0-9]+)?"';}
     if(meta.isClave){inputmode='numeric'; max='maxlength="27"';}
     if(meta.isX||meta.isY){inputmode='decimal'; placeholder='';}
-    if(meta.isSenescyt){placeholder='0000-0000-0000000, 0000-00-00000 o 0000-00-000000'; max='maxlength="17"';}
+    if(meta.isSenescyt){placeholder='0000-0000-0000000, 0000-0000-000000, 0000-00-00000 o 0000-00-000000'; max='maxlength="17"';}
     if(meta.isProyectista){list='listaProfesionales';}
     if(meta.isClave){
       html+=`<div class="field"><label>${esc(label)}</label><input class="catastral-main-hidden-v37" id="info_${f.key}" type="hidden" value="${esc(val)}"><div class="error-text" id="err_${f.key}"></div>${catastralPanelHtmlV36(f,val)}</div>`;
@@ -5932,7 +5984,7 @@ renderAprobatorioFormCoreV14 = function(){
  <tr><td class="label-cell">TÉCNICO REVISOR:</td><td colspan="4"><input id="estTecnico" list="listaTecnicosEstructurales"></td></tr>
  <tr><td class="label-cell">CRITERIO TÉCNICO:</td><td colspan="4"><select id="estCriterio"><option></option><option>FAVORABLE</option><option>NO FAVORABLE</option></select></td></tr>
  <tr><td class="label-cell">ING. CALCULISTA:</td><td colspan="4"><input id="estCalculista" list="listaCalculistasV39" placeholder="Buscar en profesionales no arquitectos"></td></tr>
- <tr><td class="label-cell">REG. SENESCYT:</td><td colspan="4"><input id="estSenescyt" placeholder="0000-0000-0000000, 0000-00-00000 o 0000-00-000000"></td></tr>
+ <tr><td class="label-cell">REG. SENESCYT:</td><td colspan="4"><input id="estSenescyt" placeholder="0000-0000-0000000, 0000-0000-000000, 0000-00-00000 o 0000-00-000000"></td></tr>
  <tr><td class="label-cell">REG. MUNICIPAL:</td><td colspan="4"><input id="estMunicipal" placeholder="Registro municipal"></td></tr>
  </tbody></table>
  <div class="section-title">Estudios complementarios</div><div id="estudiosTabla"></div>
@@ -9726,14 +9778,14 @@ function renderInformeDesistimientoV69(){
   const title=desTituloV69();
 
   if(!motivo){
-    return `${reportHeader(title)}<div class="apr-alert">Seleccione el motivo de desistimiento en la pestaña Desistimiento.</div>`;
+    return `${''}<div class="apr-alert">Seleccione el motivo de desistimiento en la pestaña Desistimiento.</div>`;
   }
 
   if(motivo==='Por Petición del Administrado'){
     const base=desRowV69('DES_BLG_003').Texto_Base || '';
     const con=desRowV69('DES_CON_003').Texto_Base || 'En base al Artículo 211 del COA, por Petición del Administrado se procede con el Desistimiento del Trámite.';
     const rec=desRowV69('DES_REC_003').Texto_Base || 'Se recomienda remitir el presente trámite para la emisión de la Resolución Administrativa correspondiente.';
-    return `${reportHeader(title)}
+    return `${''}
       <h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
       <h2>Base legal</h2><p class="legal-text">${formatLegalText(base)}</p>
       <h2>Conclusiones</h2><p>${nl2br(con)}</p>
@@ -9745,7 +9797,7 @@ function renderInformeDesistimientoV69(){
   const baseConclusion=desRowV69(conId).Texto_Base || 'Por las conclusiones antes expuestas se emite criterio técnico NO FAVORABLE,';
   const extra=(state.desistimiento?.conclusiones||'').trim();
   const conclusionText=extra ? `${baseConclusion} ${extra}` : baseConclusion;
-  return `${reportHeader(title)}
+  return `${''}
     <h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
     <h2>Criterio técnico</h2>${selectedObsTable()}
     <h2>Base legal</h2>${baseLegalObservacionesV69()}${textosTecnicosSection()}
@@ -12885,9 +12937,9 @@ validateInfoField = function(f, show=true){
     message=`${name}: debe tener 10 dígitos para CI o 13 dígitos para RUC.`;
   }
 
-  if(value && meta.isSenescyt && !(/^\d{4}-\d{4}-\d{7}$/.test(value) || /^\d{4}-\d{2}-\d{5}$/.test(value) || /^\d{4}-\d{2}-\d{6}$/.test(value))){
+  if(value && meta.isSenescyt && !(/^\d{4}-\d{4}-\d{7}$/.test(value) || /^\d{4}-\d{4}-\d{6}$/.test(value) || /^\d{4}-\d{2}-\d{5}$/.test(value) || /^\d{4}-\d{2}-\d{6}$/.test(value))){
     ok=false;
-    message=`${name}: formato requerido 0000-0000-0000000, 0000-00-00000 o 0000-00-000000.`;
+    message=`${name}: formato requerido 0000-0000-0000000, 0000-0000-000000, 0000-00-00000 o 0000-00-000000.`;
   }
 
   if(value && meta.isRegMun && !(parseInt(value,10)>=1)){
@@ -15368,6 +15420,13 @@ window.addEventListener('load',()=>{
 <script>
 /* ==========================================================
    V116 SOBRE V115
+   V7.9.88: Anteproyecto OM — ingreso manual de Proyectista/SENESCYT protegido.
+   - Sin coincidencias parciales.
+   - No autocompleta al perder foco.
+   - SENESCYT manual nunca se sobrescribe.
+   - Se ignoran registros inválidos NA/N/A/S-N.
+
+   
 
    1) Criterio técnico en Anteproyecto y Estructural:
       solo FAVORABLE.
@@ -15391,25 +15450,29 @@ function normV116(v){
     .toUpperCase();
 }
 
+function nombreProfesionalValidoV7988(nombre){
+  const n=normV116(nombre);
+  return !!n && !['NA','N/A','S/N','SN','SIN DATO','SIN DATOS','NO APLICA'].includes(n);
+}
 function profesionalesArquitectosV116(){
-  const list=(DATA.profesionales||[]).filter(p=>{
-    if(!p || !p.nombre) return false;
+  const source=(DATA.profesionales||[]).filter(p=>p && nombreProfesionalValidoV7988(p.nombre));
+  const list=source.filter(p=>{
     if(typeof esArquitectoV39 === 'function') return esArquitectoV39(p);
     const t=normV116(p.titulo || p.Titulo || p.TITULO || '');
     return t.includes('ARQUITECT');
   });
 
-  // Si la base no tiene título cargado, usar todos los profesionales como respaldo.
-  return list.length ? list : (DATA.profesionales||[]).filter(p=>p && p.nombre);
+  // Si la base no tiene título cargado, usar profesionales con nombre válido como respaldo.
+  return list.length ? list : source;
 }
 
 function findArquitectoV116(nombre){
   const n=normV116(nombre);
-  if(!n) return null;
+  if(!nombreProfesionalValidoV7988(n)) return null;
   const lista=profesionalesArquitectosV116();
-  return lista.find(p=>normV116(p.nombre)===n)
-    || lista.find(p=>normV116(p.nombre).includes(n) || n.includes(normV116(p.nombre)))
-    || null;
+  // V7.9.88: solamente coincidencia EXACTA. Se eliminan coincidencias parciales
+  // para que una entrada manual nunca enganche un profesional antiguo.
+  return lista.find(p=>normV116(p.nombre)===n) || null;
 }
 
 function setOnlyFavorableV116(selectId, stateObj, stateKey){
@@ -15460,9 +15523,26 @@ function patchAnteproyectoArquitectosV116(){
 
   input.setAttribute('list','listaArquitectosProyectistasV116');
   input.setAttribute('placeholder','PROYECTISTA ARQUITECTO');
+  input.setAttribute('autocomplete','off');
+  input.setAttribute('spellcheck','false');
+  input.setAttribute('data-lpignore','true');
 
-  if(input.dataset.v116Arquitectos!=='1'){
-    input.dataset.v116Arquitectos='1';
+  const senEl=document.getElementById('antSenescyt');
+  if(senEl){
+    senEl.setAttribute('autocomplete','off');
+    senEl.setAttribute('spellcheck','false');
+    senEl.setAttribute('data-lpignore','true');
+    if(senEl.dataset.v7988ManualTrack!=='1'){
+      senEl.dataset.v7988ManualTrack='1';
+      senEl.addEventListener('input',()=>{
+        // Cualquier edición directa del SENESCYT pasa a ser manual y tiene prioridad.
+        state.aprobatorio.anteproyecto._senescytAutoV7988='';
+      },true);
+    }
+  }
+
+  if(input.dataset.v7988Arquitectos!=='1'){
+    input.dataset.v7988Arquitectos='1';
 
     const fill=()=>{
       const p=findArquitectoV116(input.value);
@@ -15472,18 +15552,24 @@ function patchAnteproyectoArquitectosV116(){
       input.value=p.nombre;
 
       const sen=formatSenescyt(p.registroSenescyt||'');
-      if(sen){
+      const current=String(state.aprobatorio.anteproyecto.senescyt||'').trim();
+      const previousAuto=String(state.aprobatorio.anteproyecto._senescytAutoV7988||'').trim();
+      // Autocompletar SENESCYT solo si está vacío o si todavía contiene el valor
+      // que ALLPA colocó automáticamente antes. Nunca reemplazar una edición manual.
+      if(sen && (!current || current===previousAuto)){
         state.aprobatorio.anteproyecto.senescyt=sen;
-        const senEl=document.getElementById('antSenescyt');
-        if(senEl) senEl.value=sen;
+        state.aprobatorio.anteproyecto._senescytAutoV7988=sen;
+        const liveSen=document.getElementById('antSenescyt');
+        if(liveSen) liveSen.value=sen;
       }
 
       if(typeof renderReport==='function') renderReport();
       if(typeof renderPreview==='function') renderPreview();
     };
 
+    // V7.9.88: no autocompletar al perder foco. Solo procesar una selección/cambio
+    // confirmado y únicamente con coincidencia exacta del profesional.
     input.addEventListener('change',fill);
-    input.addEventListener('blur',fill);
   }
 }
 
@@ -16169,12 +16255,6 @@ const PROJECTS_V123 = {
     nombre:'Anteproyecto de Edificación',
     corto:'Anteproyecto',
     descripcion:'Informes para observaciones, aprobación y desistimiento de anteproyectos de edificación.'
-  },
-  anteproyecto_subdivision:{
-    id:'anteproyecto_subdivision',
-    nombre:'Anteproyecto de Subdivisión Predial de dos a diez lotes con obras',
-    corto:'Anteproyecto de Subdivisión',
-    descripcion:'Mesa Técnica · Informe Técnico Aprobatorio para subdivisión predial de dos a diez lotes con obras.'
   }
 };
 
@@ -16239,11 +16319,6 @@ function ensureProjectEntryV123(){
           <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_edificacion')">
             <span class="num">2</span>
             <span><span class="title">Anteproyecto de Edificación</span><span class="desc">Nuevo proyecto con textos y secciones adaptadas.</span></span>
-            <span class="arrow">→</span>
-          </button>
-          <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_subdivision')">
-            <span class="num">3</span>
-            <span><span class="title">Anteproyecto de Subdivisión Predial</span><span class="desc">Mesa Técnica · Dos a diez lotes con obras.</span></span>
             <span class="arrow">→</span>
           </button>
         </div>
@@ -16525,11 +16600,6 @@ function ensureProjectEntryV123(){
           <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_edificacion')">
             <span class="num">2</span>
             <span class="title">ANTEPROYECTO DE EDIFICACIÓN</span>
-            <span class="arrow">→</span>
-          </button>
-          <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_subdivision')">
-            <span class="num">3</span>
-            <span class="title">ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS</span>
             <span class="arrow">→</span>
           </button>
         </div>
@@ -20587,12 +20657,12 @@ renderInformeDesistimientoV69=function(){
   ensureDesistimientoV69();
   const motivo=normalizeDesMotivoV145(state.desistimiento?.motivo||'');
   const title=desTituloV69();
-  if(!motivo) return `${reportHeader(title)}<div class="apr-alert">Seleccione el motivo de desistimiento en la pestaña Desistimiento.</div>`;
+  if(!motivo) return `${''}<div class="apr-alert">Seleccione el motivo de desistimiento en la pestaña Desistimiento.</div>`;
   if(motivo===DES_MOTIVO_PET_V145){
     const base=desRowV69('DES_BLG_003').Texto_Base||'';
     const con=desRowV69('DES_CON_003').Texto_Base||'';
     const rec=desRowV69('DES_REC_003').Texto_Base||'';
-    return `${reportHeader(title)}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
+    return `${''}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
       <h2>Base legal</h2><p class="legal-text">${formatLegalText(base)}</p>
       <h2>Conclusiones</h2><p>${nl2br(con)}</p>
       <h2>Recomendaciones</h2><p>${nl2br(rec)}</p>${firmaTecnicoSection()}`;
@@ -20600,7 +20670,7 @@ renderInformeDesistimientoV69=function(){
   const baseConclusion=desRowV69('DES_CON_001').Texto_Base||'Por las conclusiones antes expuestas se emite criterio técnico NO FAVORABLE,';
   const extra=String(state.desistimiento?.conclusiones||'').trim();
   const conclusionText=extra?`${baseConclusion} ${extra}`:baseConclusion;
-  return `${reportHeader(title)}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
+  return `${''}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
     <h2>Criterio técnico</h2>${selectedObsTable()}
     <h2>Base legal</h2>${baseLegalObservacionesV69()}${textosTecnicosSection()}
     <h2>Conclusiones</h2><p>${nl2br(conclusionText)}</p>${firmaTecnicoSection()}`;
@@ -20963,8 +21033,8 @@ anteproyectoPanelHtml=function(){
     html+=`<table class="anteproyecto-table form-report-table"><tbody>
       <tr><th>Documento</th><td><input id="antDocumento" value="${esc(a.documento||'')}" placeholder="MEMORANDO / RESOLUCIÓN"></td><th>EGOB</th><td><input id="antEgob" value="${esc(a.egob||'')}" placeholder="EGOB"></td></tr>
       <tr><th>Técnico revisor</th><td colspan="3"><input id="antTecnico" list="listaTecnicos" value="${esc(a.tecnico||'')}" placeholder="TÉCNICO REVISOR"></td></tr>
-      <tr><th>Criterio técnico</th><td><select id="antCriterio"><option></option><option ${a.criterio==='FAVORABLE'?'selected':''}>FAVORABLE</option><option ${a.criterio==='NO FAVORABLE'?'selected':''}>NO FAVORABLE</option></select></td><th>Proyectista</th><td><input id="antCalculista" value="${esc(a.calculista||'')}" placeholder="PROYECTISTA"></td></tr>
-      <tr><th>Reg. SENESCYT</th><td colspan="3"><input id="antSenescyt" value="${esc(a.senescyt||'')}" placeholder="1041-2026-3296002"></td></tr>
+      <tr><th>Criterio técnico</th><td><select id="antCriterio"><option></option><option ${a.criterio==='FAVORABLE'?'selected':''}>FAVORABLE</option><option ${a.criterio==='NO FAVORABLE'?'selected':''}>NO FAVORABLE</option></select></td><th>Proyectista</th><td><input id="antCalculista" list="listaArquitectosProyectistasV7989" value="${esc(a.calculista||'')}" placeholder="PROYECTISTA ARQUITECTO" spellcheck="false"></td></tr>
+      <tr><th>Reg. SENESCYT</th><td colspan="3"><input id="antSenescyt" value="${esc(a.senescyt||'')}" placeholder="1041-2026-3296002" spellcheck="false"></td></tr>
     </tbody></table>`;
     /* Bajo el umbral, la tabla se habilita aquí porque el grupo >2 pisos/400 m² no se muestra. */
     if(!obligatorio){
@@ -21289,6 +21359,7 @@ window.addEventListener('load',()=>{
 
    Formatos válidos:
    - 0000-0000-0000000
+   - 0000-0000-000000
    - 0000-00-00000
    - 0000-00-000000
    - 0000-00-0000000
@@ -21326,6 +21397,7 @@ function formatSenescyt(v){
 function isValidSenescytV150(value){
   const v=String(value||'').trim();
   return /^\d{4}-\d{4}-\d{7}$/.test(v)
+      || /^\d{4}-\d{4}-\d{6}$/.test(v)
       || /^\d{4}-\d{2}-\d{5}$/.test(v)
       || /^\d{4}-\d{2}-\d{6}$/.test(v)
       || /^\d{4}-\d{2}-\d{7}$/.test(v);
@@ -21363,7 +21435,7 @@ validateInfoField=function(f,show=true){
     message=`${name}: campo obligatorio.`;
   }else if(value && !isValidSenescytV150(value)){
     ok=false;
-    message=`${name}: formato requerido 0000-0000-0000000, 0000-00-00000, 0000-00-000000 o 0000-00-0000000.`;
+    message=`${name}: formato requerido 0000-0000-0000000, 0000-0000-000000, 0000-00-00000, 0000-00-000000 o 0000-00-0000000.`;
   }
 
   el.classList.toggle('invalid',!ok);
@@ -21381,7 +21453,7 @@ function patchSenescytInputsV150(){
     const txt=(id+' '+ph+' '+label).toUpperCase();
     if(!txt.includes('SENESCYT')) return;
 
-    el.placeholder='0000-0000-0000000, 0000-00-00000, 0000-00-000000 o 0000-00-0000000';
+    el.placeholder='0000-0000-0000000, 0000-0000-000000, 0000-00-00000, 0000-00-000000 o 0000-00-0000000';
     el.maxLength=17;
 
     if(el.dataset.senescytV150==='1') return;
@@ -28902,6 +28974,7 @@ renderObsSeleccionadas = function(){
 
   /* DEPURACIÓN 13 — CARGADOR EXTERNO CENTRALIZADO */
   window.loadExternalCSVsV32=async function(){
+    await loadFeriadosV7977();
     await loadExternalCSVsCoreV32();
 
     const extras={
@@ -28916,6 +28989,7 @@ renderObsSeleccionadas = function(){
     if(loadedExtras.profesionales.length){
       DATA.profesionales=loadedExtras.profesionales.filter(activeV32).map(r=>({
         nombre:String(r.Nombre||r.Profesional||r.Proyectista||'').trim(),
+        titulo:String(r.Titulo||r.TÍTULO||r.TITULO||r['Título']||'').trim(),
         registroMunicipal:String(r["Registro Municipal"]||r["RegistroMunicipal"]||r["Reg. Municipal"]||'').trim(),
         registroSenescyt:String(r["Registro Senescyt"]||r["Registro SENESCYT"]||r.Senescyt||r.SENESCYT||'').trim()
       })).filter(r=>r.nombre);
@@ -29897,7 +29971,7 @@ renderObsSeleccionadas = function(){
     const nota = notaHtmlV27();
 
     if(!motivo){
-      return `${reportHeader(title)}<div class="apr-alert">Seleccione el motivo de desistimiento en la pestaña Desistimiento.</div>`;
+      return `${''}<div class="apr-alert">Seleccione el motivo de desistimiento en la pestaña Desistimiento.</div>`;
     }
 
     const isPet = (typeof DES_MOTIVO_PET_V145 !== 'undefined' && motivo === DES_MOTIVO_PET_V145)
@@ -29907,7 +29981,7 @@ renderObsSeleccionadas = function(){
       const base = desRowV69('DES_BLG_003').Texto_Base || '';
       const con = desRowV69('DES_CON_003').Texto_Base || '';
       const rec = desRowV69('DES_REC_003').Texto_Base || '';
-      return `${reportHeader(title)}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
+      return `${''}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
         <h2>Base legal</h2><p class="legal-text">${formatLegalText(base)}</p>
         ${nota}<h2>Conclusiones</h2><p>${nl2brNotaV27(con)}</p>
         <h2>Recomendaciones</h2><p>${nl2brNotaV27(rec)}</p>${firmaTecnicoSection()}`;
@@ -29918,7 +29992,7 @@ renderObsSeleccionadas = function(){
     const extra = cleanConclusionExtraV27(state.desistimiento?.conclusiones || '');
     const conclusionText = extra ? `${baseConclusion}\n${extra}` : baseConclusion;
 
-    return `${reportHeader(title)}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
+    return `${''}<h2>Antecedentes</h2>${reportInfoGeneralAprobatorio()}
       <h2>Criterio técnico</h2>${selectedObsTable()}
       <h2>Base legal</h2>${baseLegalObservacionesV69()}${textosTecnicosSection()}
       ${nota}<h2>Conclusiones</h2><p>${nl2brNotaV27(conclusionText)}</p>${firmaTecnicoSection()}`;
@@ -33442,13 +33516,14 @@ textarea.evidencia-text,
         }
       }
 
+<!-- ALLPA V7.9.70 · Corrige pérdida de TRÁMITE E-GOB y PROPIETARIOS al insertar APODERADOS en Información General -->
       /* Fallback V7.8.4: nunca insertar el apoderado al inicio del tbody.
          1) Busca y sustituye cualquier fila legado de APODERADO aunque el renderer
             haya cambiado clases, centrado o espacios.
          2) Si no existe fila legado, inserta las filas justo antes de PROYECTO
             DEFINITIVO, manteniéndolas después de todos los propietarios. */
       if(!replaced){
-        const legacyApodRow=/<tr\b[^>]*>[\s\S]*?<td\b[^>]*>\s*APODERADO\s*<\/td>[\s\S]*?<td\b[^>]*>\s*CI\/RUC APODERADO\s*<\/td>[\s\S]*?<\/tr>/i;
+        const legacyApodRow=/<tr\b[^>]*>(?:(?!<\/tr>)[\s\S])*?<td\b[^>]*>\s*APODERADO\s*<\/td>(?:(?!<\/tr>)[\s\S])*?<td\b[^>]*>\s*CI\/RUC APODERADO\s*<\/td>(?:(?!<\/tr>)[\s\S])*?<\/tr>/i;
         if(legacyApodRow.test(html)){
           html=html.replace(legacyApodRow,multi);
           replaced=true;
@@ -33456,7 +33531,7 @@ textarea.evidencia-text,
       }
 
       if(!replaced){
-        const proyectoRow=/(<tr\b[^>]*>[\s\S]*?<td\b[^>]*>\s*PROYECTO DEFINITIVO\s*<\/td>[\s\S]*?<\/tr>)/i;
+        const proyectoRow=/(<tr\b[^>]*>(?:(?!<\/tr>)[\s\S])*?<td\b[^>]*>\s*PROYECTO DEFINITIVO\s*<\/td>(?:(?!<\/tr>)[\s\S])*?<\/tr>)/i;
         if(proyectoRow.test(html)){
           html=html.replace(proyectoRow,`${multi}$1`);
           replaced=true;
@@ -33743,7 +33818,7 @@ textarea.evidencia-text,
       baseOrder:Number.isFinite(Number(source.baseOrder ?? source._baseOrderV108))
         ? Number(source.baseOrder ?? source._baseOrderV108)
         : index,
-      allowLevels:!!source.allowLevels,
+      allowLevels:roleName==='bruta' ? true : !!source.allowLevels,
       calculated:['brutaTotal','areaAmpliacionTotal','cosPB','cosTotal'].includes(roleName),
       deletable:!['predio','utilPB','utilTotal','brutaTotal','areaAmpliacionTotal','cosPB','cosTotal'].includes(roleName),
       intervention:type,
@@ -33933,6 +34008,9 @@ textarea.evidencia-text,
       const type=rowType(raw);
       raw.intervention=type;
       raw.tipoAreaV13=type; // puente temporal
+      // V7.9.69: toda fila de área bruta, incluida planta baja base,
+      // admite niveles aunque un respaldo histórico traiga allowLevels:false.
+      raw.allowLevels=true;
     }
 
     if(!raw._ctIdV3){
@@ -34205,8 +34283,9 @@ textarea.evidencia-text,
   }
 
   function canLevels(raw,index){
-    if(role(raw,index)!=='bruta') return false;
-    return raw?.allowLevels!==false;
+    // V7.9.69: el rol canónico manda. Una fila de área bruta siempre
+    // permite niveles; allowLevels:false de versiones antiguas no la bloquea.
+    return role(raw,index)==='bruta';
   }
 
   function renderLevels(raw,index){
@@ -35427,6 +35506,8 @@ textarea.evidencia-text,
       if(r==='bruta'){
         raw.intervention=type;
         raw.tipoAreaV13=type;
+        // V7.9.69: normalizar también respaldos antiguos.
+        raw.allowLevels=true;
       }
 
       raw.origin=originOf(raw);
@@ -37751,6 +37832,36 @@ function validate(context='generar el PDF'){
     }
   }catch(_e){}
 
+  /* ALLPA V7.9.73 — PLANOS APROBADOS OBLIGATORIOS EN APROBATORIO DE OBRA MAYOR
+     La sección existe para proyectos de Ampliación/Modificación.
+     - Con Licencia Urbanística: Resolución + Fecha obligatorias; eGOB sigue opcional.
+     - Sin Licencia Urbanística: Fecha de aprobación + Entidad obligatorias.
+     Esta validación alimenta tanto COPIAR como PDF mediante ReportOutputV25B. */
+  try{
+    const esAprobatorio=String(state?.tipoInforme||'').trim()==='Informe Técnico Aprobatorio';
+    const esObraMayor=String(state?.projectType||'').trim()==='obra_mayor_definitivo';
+    const aplicaPlanos=esAprobatorio && esObraMayor &&
+      (typeof ampModV12==='function' ? !!ampModV12() : !!document.getElementById('planosAprobadosV12'));
+
+    if(aplicaPlanos){
+      const p=(typeof ensurePlanosV12==='function')
+        ? ensurePlanosV12()
+        : (state?.aprobatorio?.planosAprobadosV12||{});
+      const clean=v=>String(v==null?'':v).trim();
+
+      if(p?.licencia){
+        if(!clean(p.resolucion)) errors.push('Planos Aprobados: falta el campo obligatorio Resolución de la Licencia Urbanística.');
+        if(!clean(p.fecha)) errors.push('Planos Aprobados: falta el campo obligatorio Fecha de la Licencia Urbanística.');
+      }else{
+        if(!clean(p?.fechaAprobacion)) errors.push('Planos Aprobados: falta el campo obligatorio Fecha de aprobación.');
+        if(!clean(p?.entidad)) errors.push('Planos Aprobados: falta el campo obligatorio Entidad.');
+      }
+    }
+  }catch(err){
+    errors.push('Planos Aprobados: no se pudo comprobar que los campos obligatorios estén completos.');
+    console.warn('ALLPA V7.9.73 validación Planos Aprobados:',err);
+  }
+
   return unique(errors);
 }
 
@@ -38752,8 +38863,9 @@ function planosHtmlV12(){
  const p=ensurePlanosV12();
  return `<div id="planosAprobadosV12"><div class="section-title">Planos aprobados</div><div class="planos-aprobados-v12">
  <label class="check-line"><input type="checkbox" id="planosLicenciaV12" ${p.licencia?'checked':''}> Cuenta con Licencia Urbanística</label>
- ${p.licencia?`<div class="planos-grid-v12"><div><label>Resolución</label><input id="planosResolucionV12" value="${escV12(p.resolucion)}"></div><div><label>eGOB (opcional)</label><input id="planosEgobV12" inputmode="numeric" value="${escV12(p.egob)}"></div><div><label>Fecha</label><input type="date" id="planosFechaV12" value="${escV12(p.fecha)}"></div></div>`:
- `<div class="planos-grid-v12 two"><div><label>Fecha de aprobación</label><input type="date" id="planosFechaAprobacionV12" value="${escV12(p.fechaAprobacion)}"></div><div><label>Entidad</label><input id="planosEntidadV12" value="${escV12(p.entidad)}"></div></div>`}
+ ${p.licencia?`<div class="planos-grid-v12"><div><label>Resolución *</label><input id="planosResolucionV12" value="${escV12(p.resolucion)}"></div><div><label>eGOB (opcional)</label><input id="planosEgobV12" inputmode="numeric" value="${escV12(p.egob)}"></div><div><label>Fecha *</label><input type="date" id="planosFechaV12" value="${escV12(p.fecha)}"></div></div>`:
+ `<div class="planos-grid-v12 two"><div><label>Fecha de aprobación *</label><input type="date" id="planosFechaAprobacionV12" value="${escV12(p.fechaAprobacion)}"></div><div><label>Entidad *</label><input id="planosEntidadV12" value="${escV12(p.entidad)}"></div></div>`}
+ <div style="margin-top:8px;font-size:10px;font-weight:700;color:#9a3412">* Obligatorio para copiar o generar el PDF.</div>
  </div></div>`;
 }
 function mountPlanosV12(){
@@ -39998,6 +40110,56 @@ function validMunicipalEmailV792(value){
   return '';
 }
 
+function normalizedApoderadosPayloadV7980(){
+  const arr=(Array.isArray(state?.apoderados)?state.apoderados:[])
+    .map(a=>({nombre:String(a?.nombre||'').trim(),ci:String(a?.ci||'').trim()}))
+    .filter(a=>a.nombre||a.ci);
+  if(!arr.length&&state?.apoderado?.activo){
+    const legacy={nombre:String(state.apoderado.nombre||'').trim(),ci:String(state.apoderado.ci||'').trim()};
+    if(legacy.nombre||legacy.ci)arr.push(legacy);
+  }
+  /* Persistir simultáneamente el arreglo moderno y el primer apoderado legado. */
+  state.apoderados=arr.map(a=>({...a}));
+  state.apoderado=arr[0]?{activo:true,nombre:arr[0].nombre,ci:arr[0].ci}:{activo:false,nombre:'',ci:''};
+  return arr;
+}
+function legacyApoderadosTextV7980(arr){
+  return (Array.isArray(arr)?arr:[]).map(a=>[String(a?.nombre||'').trim(),String(a?.ci||'').trim()].filter(Boolean).join(' · ')).filter(Boolean).join(' | ');
+}
+
+/* V7.9.82 — Texto plano del acápite 2. CRITERIO TÉCNICO para que
+   Resoluciones pueda reutilizar exactamente la información del informe.
+   No sustituye la tabla del informe: guarda una representación legible en
+   datos_informe junto con el snapshot técnico. */
+function criterioTecnicoDesistimientoParaResolucionV7982(){
+  let rows=[];
+  try{ rows=typeof combinedObsRows==='function'?(combinedObsRows()||[]):[]; }catch(_e){ rows=[]; }
+  return rows.map((raw,i)=>{
+    let o=raw||{};
+    try{ if(typeof formatCriterionRowV783==='function') o=formatCriterionRowV783(o)||o; }catch(_e){}
+    const isReq=o?.source==='req'||o?.source==='prop_req';
+    let art='';
+    if(isReq){
+      art=String(o?.articulo||o?.norma||'').trim();
+    }else{
+      const num=String(o?.articulo||o?.norma||'').trim();
+      const title=String(o?.articuloTitulo||'').trim();
+      const display=String(o?.articuloDisplay||'').trim();
+      art=display || [num,title].filter(Boolean).join(num&&title&&!/[.;:]$/.test(num)?'. ':' ');
+    }
+    let clar='';
+    try{ clar=String(typeof obsSpecificV55==='function'?obsSpecificV55(o):(o?.observacion||o?.correccion||'')).trim(); }catch(_e){ clar=String(o?.observacion||o?.correccion||'').trim(); }
+    if(!clar) clar='No cumple';
+    art=art.replace(/\s+/g,' ').trim();
+    clar=clar.replace(/\s+/g,' ').trim();
+    if(!art&&!clar) return '';
+    const artText=art?art.replace(/[.;:]?$/,''):'';
+    const clarText=clar.replace(/[.]?$/,'.');
+    return `${i+1}. ${artText}${artText?': ':''}${clarText}`;
+  }).filter(Boolean).join('\n');
+}
+window.criterioTecnicoDesistimientoParaResolucionV7982=criterioTecnicoDesistimientoParaResolucionV7982;
+
 function buildDesistimientoPayloadV790(){
   try{if(typeof window.collectTop==='function') window.collectTop(); else if(typeof collectTop==='function') collectTop();}catch(_e){}
   try{if(typeof window.ensurePropietarios==='function') window.ensurePropietarios(); else if(typeof ensurePropietarios==='function') ensurePropietarios();}catch(_e){}
@@ -40007,11 +40169,10 @@ function buildDesistimientoPayloadV790(){
     .map(p=>({nombre:String(p?.nombre||'').trim(),ci:String(p?.ci||'').trim()}))
     .filter(p=>p.nombre||p.ci);
 
+  const apoderados=normalizedApoderadosPayloadV7980();
+  const apoderado=legacyApoderadosTextV7980(apoderados);
   const snapshotResult=sanitizeSnapshotForSupabase(state);
   const snapshot=snapshotResult.value;
-  const apoderado=state?.apoderado?.activo
-    ? [String(state.apoderado.nombre||'').trim(),String(state.apoderado.ci||'').trim()].filter(Boolean).join(' · ')
-    : '';
   const motivo=String(state?.desistimiento?.motivo||'').trim();
   const extra=String(state?.desistimiento?.conclusiones||'').trim();
 
@@ -40026,6 +40187,14 @@ function buildDesistimientoPayloadV790(){
       conclusion=[base,extra].filter(Boolean).join(' ').trim();
     }
   }catch(_e){ conclusion=extra; }
+
+  /* Persistencia auxiliar para Resoluciones. Mantiene el informe original
+     intacto y permite reconstruir fielmente Criterio Técnico / Conclusiones. */
+  if(snapshot && typeof snapshot==='object'){
+    snapshot.apoderados=apoderados.map(a=>({nombre:a.nombre,ci:a.ci}));
+    snapshot.criterio_tecnico_desistimiento=criterioTecnicoDesistimientoParaResolucionV7982();
+    snapshot.conclusiones_desistimiento_resolucion=conclusion;
+  }
 
   return {
     payload:{
@@ -40089,9 +40258,8 @@ function buildPayload(){
   let cosTotal=conclusionAmount(['COS','TOTAL']);
 
   const cleanClave=digits(info('CLAVE CATASTRAL'));
-  const apoderado=state?.apoderado?.activo
-    ? [String(state.apoderado.nombre||'').trim(),String(state.apoderado.ci||'').trim()].filter(Boolean).join(' · ')
-    : '';
+  const apoderados=normalizedApoderadosPayloadV7980();
+  const apoderado=legacyApoderadosTextV7980(apoderados);
 
   const snapshotResult=sanitizeSnapshotForSupabase(state);
   const snapshot=snapshotResult.value;
@@ -42966,7 +43134,6 @@ const rawHide=typeof window.hideProjectEntryV123==='function'? window.hideProjec
   : null;
 
 function validProjectV7913(projectId){
-  if(projectId==='anteproyecto_subdivision') return 'anteproyecto_subdivision';
   return projectId==='anteproyecto_edificacion'
     ? 'anteproyecto_edificacion'
     : 'obra_mayor_definitivo';
@@ -42976,15 +43143,12 @@ function projectFromButtonV7913(btn){
   const code=String(btn?.getAttribute?.('onclick')||'');
   const m=code.match(/selectProjectV123\(\s*['\"]([^'\"]+)['\"]\s*\)/i);
   if(m?.[1]) return validProjectV7913(m[1]);
-  const label=String(btn?.textContent||'').toUpperCase();
-  if(label.includes('SUBDIVISIÓN') || label.includes('SUBDIVISION')) return 'anteproyecto_subdivision';
-  return label.includes('ANTEPROYECTO')
+  return String(btn?.textContent||'').toUpperCase().includes('ANTEPROYECTO')
     ? 'anteproyecto_edificacion'
     : 'obra_mayor_definitivo';
 }
 
 function projectLabelV7913(id){
-  if(id==='anteproyecto_subdivision') return 'Anteproyecto de Subdivisión Predial';
   return id==='anteproyecto_edificacion'
     ? 'Anteproyecto de Edificación'
     : 'Obra Mayor Definitivo';
@@ -43054,12 +43218,6 @@ function startAutosaveWithoutBlockingV7913(){
 }
 
 function routeProjectV7913(id){
-  if(id==='anteproyecto_subdivision'){
-    localStorage.setItem('GADMR_PROJECT_TYPE_V123',id);
-    if(typeof state!=='undefined') state.projectType=id;
-    window.location.href=new URL('anteproyecto_subdivision/index.html',window.location.href).href;
-    return true;
-  }
   const route=window.ProjectNavigationV24D?.selectProject
     || window.RequirementsNavigationV24C?.selectProject;
   if(typeof route!=='function') throw new Error('No se encontró la ruta consolidada de proyectos.');
@@ -43512,6 +43670,47 @@ function ensureSharedAnexos(){
   });
   return state.aprobatorio.anexos;
 }
+function annexSignatureV7965(rows){
+  try{return JSON.stringify((rows||[]).map(r=>({tipo:r.tipo||'folder',fojas:String(r.fojas??''),incluyePlanos:!!r.incluyePlanos,planos:String(r.planos??''),incluyeCds:!!r.incluyeCds,cds:String(r.cds??'')})));}catch(_e){return String(Date.now());}
+}
+function markAnnexEditorSyncedV7965(){
+  const ae=document.getElementById('solicitudEstructuralAnexosEditorV7919');
+  if(ae)ae.dataset.allpaAnexosSignature=annexSignatureV7965(ensureSharedAnexos());
+}
+function renderSolicitudAnexosV7965(force=false){
+  const ae=document.getElementById('solicitudEstructuralAnexosEditorV7919');
+  if(!ae)return;
+  const rows=ensureSharedAnexos();
+  const sig=annexSignatureV7965(rows);
+  const hasTable=!!ae.querySelector('table[data-allpa-anexos-v7965="1"]');
+  const rowCount=ae.querySelectorAll('tbody tr[data-allpa-anexo-row]').length;
+  const editing=!!(document.activeElement&&ae.contains(document.activeElement));
+
+  // CRÍTICO V7.9.65: syncUi/updatePanel se ejecuta muchas veces en ALLPA.
+  // Nunca reconstruimos el editor mientras el técnico está escribiendo.
+  if(!force&&editing)return;
+  if(!force&&hasTable&&rowCount===rows.length&&ae.dataset.allpaAnexosSignature===sig)return;
+
+  ae.innerHTML=`<p class="anexos-help-v163" style="margin:0 0 10px">Los anexos registrados aquí se guardan en el expediente y se reutilizarán automáticamente en el posterior Informe Técnico Aprobatorio de Obra Mayor.</p><table class="anexos-table-v163" data-allpa-anexos-v7965="1">
+      <colgroup><col style="width:9%"><col style="width:18%"><col style="width:14%"><col style="width:18%"><col style="width:16%"><col style="width:13%"><col style="width:12%"></colgroup>
+      <thead><tr><th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th><th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th></tr></thead>
+      <tbody>${rows.map((row,i)=>`<tr data-allpa-anexo-row="${i}">
+        <td>${row.tipo==='carpeta'?`Carpeta ${annexTypeNumber(rows,i,'carpeta')}`:(row.tipo==='folder'?`Folder ${annexTypeNumber(rows,i,'folder')}`:'—')}</td>
+        <td><select onchange="updateSolicitudAnexoV7919(${i},'tipo',this.value)">
+          <option value="folder" ${row.tipo==='folder'?'selected':''}>folder</option>
+          <option value="carpeta" ${row.tipo==='carpeta'?'selected':''}>carpeta</option>
+          <option value="fojas" ${row.tipo==='fojas'?'selected':''}>fojas</option>
+        </select></td>
+        <td><input type="number" min="0" step="1" inputmode="numeric" value="${h(row.fojas)}" placeholder="Fojas" oninput="updateSolicitudAnexoV7919(${i},'fojas',this.value)"></td>
+        <td><div class="anexos-planos-line-v1"><label class="anexos-check-v163"><input type="checkbox" ${row.incluyePlanos?'checked':''} onchange="updateSolicitudAnexoV7919(${i},'incluyePlanos',this.checked)"> incluido</label><input class="anexos-planos-count-v1" type="number" min="0" step="1" inputmode="numeric" value="${h(row.planos)}" placeholder="N.º" ${row.incluyePlanos?'':'disabled'} oninput="updateSolicitudAnexoV7919(${i},'planos',this.value)"><span>planos</span></div></td>
+        <td><label class="anexos-check-v163"><input type="checkbox" ${row.incluyeCds?'checked':''} onchange="updateSolicitudAnexoV7919(${i},'incluyeCds',this.checked)"> + CDs</label></td>
+        <td><input type="number" min="0" step="1" inputmode="numeric" value="${h(row.cds)}" placeholder="CDs" ${row.incluyeCds?'':'disabled'} oninput="updateSolicitudAnexoV7919(${i},'cds',this.value)"></td>
+        <td style="text-align:center"><button type="button" class="danger mini-btn" onclick="removeSolicitudAnexoV7919(${i})" ${rows.length<=1?'disabled':''}>Quitar</button></td>
+      </tr>`).join('')}</tbody>
+    </table>
+    <div class="anexos-actions-v163"><button type="button" class="secondary" onclick="addSolicitudAnexoV7919()">+ Agregar fila</button></div>`;
+  ae.dataset.allpaAnexosSignature=sig;
+}
 function annexTypeNumber(rows,index,type){
   let n=0;
   for(let i=0;i<=index;i++)if(String(rows[i]?.tipo||'folder').toLowerCase()===type)n++;
@@ -43563,17 +43762,20 @@ window.updateSolicitudAnexoV7919=function(index,field,value){
   else rows[index][field]=String(value??'');
   if(field==='incluyePlanos'&&!value)rows[index].planos='';
   if(field==='incluyeCds'&&!value)rows[index].cds='';
+  markAnnexEditorSyncedV7965();
   scheduleDraft();
-  if(field==='tipo'||field==='incluyePlanos'||field==='incluyeCds')updatePanel();
+  // Solo reconstruir cuando cambia la estructura/estado de controles.
+  // Escribir fojas/planos/CDs NO destruye el input ni pierde el foco.
+  if(field==='tipo'||field==='incluyePlanos'||field==='incluyeCds')renderSolicitudAnexosV7965(true);
 };
 window.addSolicitudAnexoV7919=function(){
   ensureSharedAnexos().push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});
-  scheduleDraft();updatePanel();
+  scheduleDraft();renderSolicitudAnexosV7965(true);
 };
 window.removeSolicitudAnexoV7919=function(index){
   const rows=ensureSharedAnexos();
   if(rows.length<=1){if(typeof msg==='function')msg('Debe conservar al menos una fila de anexos.');return;}
-  rows.splice(index,1);scheduleDraft();updatePanel();
+  rows.splice(index,1);scheduleDraft();renderSolicitudAnexosV7965(true);
 };
 function uuid(){
   if(window.crypto?.randomUUID)return window.crypto.randomUUID();
@@ -43664,28 +43866,7 @@ function updatePanel(){
   const x=ensureState();
   const s=document.getElementById('solicitudEstructuralAsuntoV7918');if(s)s.value=subject();
   const b=document.getElementById('solicitudEstructuralCuerpoV7918');if(b)b.innerHTML=bodyHtml();
-  const ae=document.getElementById('solicitudEstructuralAnexosEditorV7919');
-  if(ae){
-    const rows=ensureSharedAnexos();
-    ae.innerHTML=`<p class="anexos-help-v163" style="margin:0 0 10px">Los anexos registrados aquí se guardan en el expediente y se reutilizarán automáticamente en el posterior Informe Técnico Aprobatorio de Obra Mayor.</p><table class="anexos-table-v163">
-      <colgroup><col style="width:9%"><col style="width:18%"><col style="width:14%"><col style="width:18%"><col style="width:16%"><col style="width:13%"><col style="width:12%"></colgroup>
-      <thead><tr><th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th><th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th></tr></thead>
-      <tbody>${rows.map((row,i)=>`<tr>
-        <td>${row.tipo==='carpeta'?`Carpeta ${annexTypeNumber(rows,i,'carpeta')}`:(row.tipo==='folder'?`Folder ${annexTypeNumber(rows,i,'folder')}`:'—')}</td>
-        <td><select onchange="updateSolicitudAnexoV7919(${i},'tipo',this.value)">
-          <option value="folder" ${row.tipo==='folder'?'selected':''}>folder</option>
-          <option value="carpeta" ${row.tipo==='carpeta'?'selected':''}>carpeta</option>
-          <option value="fojas" ${row.tipo==='fojas'?'selected':''}>fojas</option>
-        </select></td>
-        <td><input type="number" min="0" step="1" inputmode="numeric" value="${h(row.fojas)}" placeholder="Fojas" oninput="updateSolicitudAnexoV7919(${i},'fojas',this.value)"></td>
-        <td><div class="anexos-planos-line-v1"><label class="anexos-check-v163"><input type="checkbox" ${row.incluyePlanos?'checked':''} onchange="updateSolicitudAnexoV7919(${i},'incluyePlanos',this.checked)"> incluido</label><input class="anexos-planos-count-v1" type="number" min="0" step="1" inputmode="numeric" value="${h(row.planos)}" placeholder="N.º" ${row.incluyePlanos?'':'disabled'} oninput="updateSolicitudAnexoV7919(${i},'planos',this.value)"><span>planos</span></div></td>
-        <td><label class="anexos-check-v163"><input type="checkbox" ${row.incluyeCds?'checked':''} onchange="updateSolicitudAnexoV7919(${i},'incluyeCds',this.checked)"> + CDs</label></td>
-        <td><input type="number" min="0" step="1" inputmode="numeric" value="${h(row.cds)}" placeholder="CDs" ${row.incluyeCds?'':'disabled'} oninput="updateSolicitudAnexoV7919(${i},'cds',this.value)"></td>
-        <td style="text-align:center"><button type="button" class="danger mini-btn" onclick="removeSolicitudAnexoV7919(${i})" ${rows.length<=1?'disabled':''}>Quitar</button></td>
-      </tr>`).join('')}</tbody>
-    </table>
-    <div class="anexos-actions-v163"><button type="button" class="secondary" onclick="addSolicitudAnexoV7919()">+ Agregar fila</button></div>`;
-  }
+  renderSolicitudAnexosV7965(false);
   const btn=document.getElementById('registrarSolicitudEstructuralV7918');
   if(btn){btn.disabled=registering||!!x.formalizada;btn.textContent=x.formalizada?'SOLICITUD REGISTRADA · '+(x.estadoRevision||'PENDIENTE'):(registering?'REGISTRANDO Y ENVIANDO…':'REGISTRAR Y ENVIAR A REVISIÓN ESTRUCTURAL');}
   if(x.formalizada)setStatus('Solicitud registrada en Revisiones Estructurales. Estado: '+(x.estadoRevision||'PENDIENTE')+'.','ok');
@@ -44091,5 +44272,999 @@ window.AllpaCompatSolicitudEstructuralV7927=API;
 </script>
 
 <!-- ALLPA Informes V7.9.40: navegación jerárquica de casita -->
+<!-- ALLPA V7.9.56 · Registro SENESCYT: admite también formato 0000-0000-000000 -->
+
+
+
+
+
+
+
+
+<style id="allpa-v7-9-65-anexos-estables-css">
+#solicitudEstructuralAnexosEditorV7919 input,
+#solicitudEstructuralAnexosEditorV7919 select,
+#solicitudEstructuralAnexosEditorV7919 button,
+#solicitudEstructuralAnexosEditorV7919 label{pointer-events:auto!important}
+#solicitudEstructuralAnexosEditorV7919 input:not(:disabled),
+#solicitudEstructuralAnexosEditorV7919 select:not(:disabled){user-select:auto!important}
+</style>
+<!-- ALLPA Informes V7.9.65 · Solicitud estructural: editor de anexos estable, sin re-render durante escritura -->
+
+
+
+<!-- ==========================================================
+     ALLPA V7.9.66 · EDITOR DE ANEXOS AISLADO
+     - La tabla de la Solicitud de Revisión Estructural se monta
+       dentro de Shadow DOM para impedir que los renderizadores
+       históricos de Vista reconstruyan o bloqueen sus controles.
+     - Estado compartido: state.aprobatorio.anexos.
+     ========================================================== -->
+<script id="allpa-v7-9-66-anexos-shadow">
+(function(){
+'use strict';
+const VERSION='7.9.66';
+const HOST_ID='solicitudEstructuralAnexosEditorV7919';
+let lastHost=null;
+let lastSignature='';
+
+function rows(){
+  if(typeof state==='undefined'||!state)return [];
+  if(!state.aprobatorio||typeof state.aprobatorio!=='object')state.aprobatorio={};
+  if(!Array.isArray(state.aprobatorio.anexos))state.aprobatorio.anexos=[];
+  if(!state.aprobatorio.anexos.length){
+    state.aprobatorio.anexos.push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});
+  }
+  state.aprobatorio.anexos.forEach(r=>{
+    if(!r||typeof r!=='object')return;
+    const t=String(r.tipo||'folder').toLowerCase().trim();
+    r.tipo=t==='carpeta'?'carpeta':(t==='fojas'||t==='expediente'?'fojas':'folder');
+    if(r.fojas==null)r.fojas='';
+    if(r.planos==null)r.planos='';
+    if(r.cds==null)r.cds='';
+    r.fojas=String(r.fojas);r.planos=String(r.planos);r.cds=String(r.cds);
+    r.incluyePlanos=!!r.incluyePlanos;r.incluyeCds=!!r.incluyeCds;
+  });
+  return state.aprobatorio.anexos;
+}
+function signature(){
+  try{return JSON.stringify(rows().map(r=>({tipo:r.tipo,fojas:r.fojas,incluyePlanos:r.incluyePlanos,planos:r.planos,incluyeCds:r.incluyeCds,cds:r.cds})));}
+  catch(_e){return '';}
+}
+function nOfType(index,type){
+  const a=rows();let n=0;
+  for(let i=0;i<=index;i++)if(a[i]?.tipo===type)n++;
+  return n;
+}
+function notifyChanged(){
+  lastSignature=signature();
+  try{
+    const host=document.getElementById(HOST_ID);
+    if(host)host.dispatchEvent(new Event('input',{bubbles:true,composed:true}));
+  }catch(_e){}
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+function rowHtml(r,i,total){
+  const label=r.tipo==='carpeta'?`Carpeta ${nOfType(i,'carpeta')}`:(r.tipo==='folder'?`Folder ${nOfType(i,'folder')}`:'—');
+  return `<tr data-i="${i}">
+    <td class="num">${esc(label)}</td>
+    <td><select data-field="tipo">
+      <option value="folder" ${r.tipo==='folder'?'selected':''}>folder</option>
+      <option value="carpeta" ${r.tipo==='carpeta'?'selected':''}>carpeta</option>
+      <option value="fojas" ${r.tipo==='fojas'?'selected':''}>fojas</option>
+    </select></td>
+    <td><input data-field="fojas" type="text" inputmode="numeric" value="${esc(r.fojas)}" placeholder="Fojas"></td>
+    <td><div class="inline"><label><input data-field="incluyePlanos" type="checkbox" ${r.incluyePlanos?'checked':''}> incluido</label><input data-field="planos" class="short" type="text" inputmode="numeric" value="${esc(r.planos)}" placeholder="N.º" ${r.incluyePlanos?'':'disabled'}><span>planos</span></div></td>
+    <td><label><input data-field="incluyeCds" type="checkbox" ${r.incluyeCds?'checked':''}> + CDs</label></td>
+    <td><input data-field="cds" type="text" inputmode="numeric" value="${esc(r.cds)}" placeholder="CDs" ${r.incluyeCds?'':'disabled'}></td>
+    <td class="action"><button type="button" data-action="remove" ${total<=1?'disabled':''}>QUITAR</button></td>
+  </tr>`;
+}
+function css(){return `
+:host{display:block;font-family:Arial,sans-serif;color:#0b2b4c}
+*{box-sizing:border-box}
+.help{margin:0 0 10px;color:#243753;font-size:12px;line-height:1.4}
+.wrap{overflow-x:auto}
+table{width:100%;min-width:900px;table-layout:fixed;border-collapse:collapse;background:#fff}
+th,td{border:1px solid #b8cbe0;padding:7px;vertical-align:middle}
+th{background:#e5eef7;font-size:11px;font-weight:900;text-transform:uppercase;text-align:center}
+th:nth-child(1){width:9%}th:nth-child(2){width:18%}th:nth-child(3){width:14%}th:nth-child(4){width:18%}th:nth-child(5){width:16%}th:nth-child(6){width:13%}th:nth-child(7){width:12%}
+.num{font-weight:900;text-align:center}
+input[type=text],select{display:block;width:100%;min-width:0;height:38px;padding:8px;border:1px solid #c8d6e5;border-radius:9px;background:#fff;color:#17324d;font:13px Arial,sans-serif;pointer-events:auto;user-select:text;outline:none}
+input[type=text]:focus,select:focus{border-color:#0b5a7d;box-shadow:0 0 0 3px rgba(11,90,125,.13)}
+input:disabled{background:#f1f5f9;color:#94a3b8}
+input[type=checkbox]{width:18px;height:18px;margin:0;accent-color:#0b5a7d}
+label,.inline{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:800;white-space:nowrap}
+.short{width:58px!important;flex:0 0 58px;text-align:center}
+.action{text-align:center}
+button{border:0;border-radius:11px;padding:10px 14px;font-size:11px;font-weight:900;cursor:pointer}
+button[data-action=remove]{background:#cf2343;color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;justify-content:flex-end;margin-top:10px}
+button[data-action=add]{background:#07567f;color:#fff}
+`}
+function render(force=false){
+  const host=document.getElementById(HOST_ID);if(!host)return false;
+  if(!host.shadowRoot){host.attachShadow({mode:'open'});lastHost=host;}
+  const root=host.shadowRoot;
+  if(!root)return false;
+  const sig=signature();
+  if(!force&&root.activeElement)return true;
+  if(!force&&lastHost===host&&lastSignature===sig&&root.querySelector('table'))return true;
+  const a=rows();
+  root.innerHTML=`<style>${css()}</style><p class="help">Los anexos registrados aquí se guardan en el expediente y se reutilizarán automáticamente en el posterior Informe Técnico Aprobatorio de Obra Mayor.</p><div class="wrap"><table><thead><tr><th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th><th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th></tr></thead><tbody>${a.map((r,i)=>rowHtml(r,i,a.length)).join('')}</tbody></table></div><div class="actions"><button type="button" data-action="add">+ AGREGAR FILA</button></div>`;
+  lastHost=host;lastSignature=sig;
+  bind(root);
+  return true;
+}
+function bind(root){
+  if(root.__allpaV7966Bound)return;root.__allpaV7966Bound=true;
+  root.addEventListener('input',ev=>{
+    const el=ev.target;if(!(el instanceof HTMLInputElement))return;
+    const tr=el.closest('tr[data-i]');if(!tr)return;
+    const i=Number(tr.dataset.i),field=el.dataset.field,a=rows();if(!a[i]||!field)return;
+    if(field==='fojas'||field==='planos'||field==='cds'){
+      el.value=el.value.replace(/[^0-9]/g,'');a[i][field]=el.value;notifyChanged();
+    }
+  });
+  root.addEventListener('change',ev=>{
+    const el=ev.target;const tr=el?.closest?.('tr[data-i]');if(!tr)return;
+    const i=Number(tr.dataset.i),field=el.dataset.field,a=rows();if(!a[i]||!field)return;
+    if(field==='tipo')a[i].tipo=el.value;
+    if(field==='incluyePlanos'){a[i].incluyePlanos=!!el.checked;if(!el.checked)a[i].planos='';}
+    if(field==='incluyeCds'){a[i].incluyeCds=!!el.checked;if(!el.checked)a[i].cds='';}
+    notifyChanged();
+    render(true);
+  });
+  root.addEventListener('click',ev=>{
+    const btn=ev.target?.closest?.('button[data-action]');if(!btn)return;
+    ev.preventDefault();
+    const a=rows();
+    if(btn.dataset.action==='add'){
+      a.push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});notifyChanged();render(true);return;
+    }
+    if(btn.dataset.action==='remove'){
+      const tr=btn.closest('tr[data-i]'),i=Number(tr?.dataset.i);
+      if(a.length<=1)return;
+      if(Number.isInteger(i)&&i>=0&&i<a.length){a.splice(i,1);notifyChanged();render(true);}return;
+    }
+  });
+}
+function mountSoon(){setTimeout(()=>render(false),0);setTimeout(()=>render(false),80);}
+
+const observer=new MutationObserver(()=>{const host=document.getElementById(HOST_ID);if(host&&host!==lastHost)mountSoon();});
+try{observer.observe(document.documentElement,{childList:true,subtree:true});}catch(_e){}
+document.addEventListener('change',ev=>{if(ev.target?.id==='tipoInforme')setTimeout(()=>render(true),60);});
+window.addEventListener('allpa:state-applied',()=>setTimeout(()=>render(true),100));
+window.addEventListener('load',()=>{[100,500,1200,2500,5000].forEach(ms=>setTimeout(()=>render(false),ms));},{once:true});
+setInterval(()=>{const host=document.getElementById(HOST_ID);if(!host)return;if(host.shadowRoot?.activeElement)return;const sig=signature();if(host!==lastHost||sig!==lastSignature)render(true);},1200);
+
+window.AllpaAnexosSolicitudV7966=Object.freeze({VERSION,render:()=>render(true),rows});
+mountSoon();
+})();
+</script>
+<!-- ALLPA Informes V7.9.66 · Anexos de Solicitud Estructural aislados de renderizadores históricos -->
+
+
+<!-- ALLPA V7.9.69 · Conclusión Técnica: niveles habilitados en toda fila con rol bruta, incluida Área bruta planta baja -->
+<!-- ALLPA Informes V7.9.73 · Planos Aprobados obligatorios para Copiar/PDF en Aprobatorio de Obra Mayor -->
+<!-- ALLPA V7.9.77 · feriados externos en data/feriados.csv; 2026-11-02 y 2026-11-03 no laborables -->
+<!-- ALLPA V7.9.80 · Persistencia normalizada de uno o varios apoderados al finalizar Informes -->
+<!-- ALLPA V7.9.82 · Informe de desistimiento persiste Criterio Técnico para Resoluciones -->
+
+<script>
+/* ==========================================================
+   V7.9.89 — Anteproyecto OM: restaurar lista CSV sin sobrescrituras.
+   - Mantiene datalist visible tras cada re-render.
+   - Recarga arquitectos después de cargar profesionales.csv.
+   - Autocompleta SENESCYT solo con coincidencia exacta elegida.
+   - Respeta cualquier SENESCYT escrito manualmente.
+   ========================================================== */
+(function(){
+  const DL_ID='listaArquitectosProyectistasV7989';
+
+  function norm(v){
+    return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/\s+/g,' ').trim().toUpperCase();
+  }
+  function nombreValido(nombre){
+    const n=norm(nombre);
+    return !!n && !['NA','N/A','S/N','SN','SIN DATO','SIN DATOS','NO APLICA'].includes(n);
+  }
+  function arquitectos(){
+    const src=((typeof DATA!=='undefined'&&Array.isArray(DATA.profesionales))?DATA.profesionales:[]).filter(p=>p&&nombreValido(p.nombre));
+    const only=src.filter(p=>{
+      const t=norm(p.titulo||p.Titulo||p.TITULO||'');
+      return t.includes('ARQUITECT');
+    });
+    return only.length?only:src;
+  }
+  function ensureDatalist(){
+    let dl=document.getElementById(DL_ID);
+    if(!dl){
+      dl=document.createElement('datalist');
+      dl.id=DL_ID;
+      document.body.appendChild(dl);
+    }
+    const arr=arquitectos();
+    const html=arr.map(p=>{
+      const sen=String(p.registroSenescyt||'').trim();
+      const title=String(p.titulo||'').trim();
+      return `<option value="${typeof esc==='function'?esc(p.nombre):p.nombre}">${typeof esc==='function'?esc([title,sen].filter(Boolean).join(' · ')):[title,sen].filter(Boolean).join(' · ')}</option>`;
+    }).join('');
+    if(dl.innerHTML!==html) dl.innerHTML=html;
+    return dl;
+  }
+  function exact(nombre){
+    const n=norm(nombre);
+    if(!nombreValido(n)) return null;
+    return arquitectos().find(p=>norm(p.nombre)===n)||null;
+  }
+  function bind(){
+    ensureDatalist();
+    const input=document.getElementById('antCalculista');
+    if(!input) return;
+    input.setAttribute('list',DL_ID);
+    input.setAttribute('placeholder','PROYECTISTA ARQUITECTO');
+    input.removeAttribute('autocomplete');
+    input.setAttribute('spellcheck','false');
+
+    const sen=document.getElementById('antSenescyt');
+    if(sen){
+      sen.removeAttribute('autocomplete');
+      sen.setAttribute('spellcheck','false');
+      if(sen.dataset.v7989Manual!=='1'){
+        sen.dataset.v7989Manual='1';
+        sen.addEventListener('input',()=>{
+          if(typeof state!=='undefined' && state.aprobatorio?.anteproyecto){
+            state.aprobatorio.anteproyecto._senescytManualV7989=true;
+            state.aprobatorio.anteproyecto._senescytAutoV7989='';
+          }
+        },true);
+      }
+    }
+
+    if(input.dataset.v7989List==='1') return;
+    input.dataset.v7989List='1';
+    input.addEventListener('change',()=>{
+      const p=exact(input.value);
+      if(!p || typeof state==='undefined' || !state.aprobatorio?.anteproyecto) return;
+      state.aprobatorio.anteproyecto.calculista=p.nombre;
+      input.value=p.nombre;
+      const senTxt=typeof formatSenescyt==='function'?formatSenescyt(p.registroSenescyt||''):String(p.registroSenescyt||'');
+      const cur=String(state.aprobatorio.anteproyecto.senescyt||'').trim();
+      const prev=String(state.aprobatorio.anteproyecto._senescytAutoV7989||'').trim();
+      const manual=!!state.aprobatorio.anteproyecto._senescytManualV7989;
+      if(senTxt && !manual && (!cur || cur===prev)){
+        state.aprobatorio.anteproyecto.senescyt=senTxt;
+        state.aprobatorio.anteproyecto._senescytAutoV7989=senTxt;
+        const live=document.getElementById('antSenescyt');
+        if(live) live.value=senTxt;
+      }
+      if(typeof renderReport==='function') renderReport();
+      if(typeof renderPreview==='function') renderPreview();
+    });
+  }
+
+  // Reponer la lista después de cargar data/profesionales.csv.
+  if(typeof window.loadExternalCSVsV32==='function' && !window.loadExternalCSVsV32.__v7989){
+    const base=window.loadExternalCSVsV32;
+    const wrapped=async function(){
+      const out=await base.apply(this,arguments);
+      ensureDatalist();
+      setTimeout(bind,0);
+      return out;
+    };
+    wrapped.__v7989=true;
+    window.loadExternalCSVsV32=wrapped;
+  }
+
+  // El formulario se reconstruye varias veces; MutationObserver garantiza que
+  // el input nuevo siempre conserve su datalist.
+  let queued=false;
+  const schedule=()=>{
+    if(queued) return; queued=true;
+    setTimeout(()=>{queued=false;bind();},0);
+  };
+  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
+  window.addEventListener('load',()=>{
+    setTimeout(bind,300); setTimeout(bind,1000); setTimeout(bind,2200);
+  });
+  window.refreshArquitectosAnteproyectoV7989=()=>{ensureDatalist();bind();};
+})();
+</script>
+
+
+<!-- ==========================================================
+     ALLPA V8.3.6 · NOTA RICA CON IMÁGENES EN APROBATORIOS
+     Obra Mayor + Anteproyecto
+     - Texto e imágenes intercaladas en el lugar del cursor.
+     - Pegar imagen con Ctrl+V.
+     - Insertar una o varias imágenes desde archivo.
+     - Compresión automática para persistir en datos_informe.
+     - Compatibilidad con notas antiguas basadas en texto.
+     ========================================================== -->
+<style id="allpa-v836-nota-rich-style">
+  .nota-rich-shell-v836{margin-top:8px}
+  .nota-rich-help-v836{font-size:10px;color:#64748b;line-height:1.35;margin:5px 0 8px}
+  .nota-rich-toolbar-v836{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}
+  .nota-rich-toolbar-v836 button{font-size:10px;padding:6px 10px;border-radius:8px}
+  .nota-rich-toolbar-v836 .danger-note-v836{border-color:#efb0aa;color:#9b231c;background:#fff7f6}
+  .nota-rich-stats-v836{margin-left:auto;font-size:10px;color:#64748b;font-weight:700}
+  .nota-rich-editor-v836{
+    min-height:145px;max-height:430px;overflow:auto;background:#fff;border:1px solid #b7cbe0;
+    border-radius:10px;padding:10px 11px;font-size:12px;line-height:1.45;color:#1f2937;
+    white-space:normal;outline:none
+  }
+  .nota-rich-editor-v836:focus{border-color:#2780b8;box-shadow:0 0 0 2px rgba(39,128,184,.12)}
+  .nota-rich-editor-v836:empty:before{content:attr(data-placeholder);color:#94a3b8;pointer-events:none}
+  .nota-rich-editor-v836 img{display:block;max-width:100%;height:auto;margin:10px auto;border:1px solid #d5dde5;border-radius:4px;cursor:pointer;background:#fff}
+  .nota-rich-editor-v836 img.nota-img-selected-v836{outline:3px solid #1593d1;outline-offset:2px}
+  .nota-rich-file-v836{display:none!important}
+  .nota-rich-report-v836{margin-top:3pt}
+  .nota-rich-report-v836 div,.nota-rich-report-v836 p{margin:0 0 8pt;text-align:justify;line-height:1.15}
+  .nota-rich-report-v836 img{
+    display:block;max-width:100%;height:auto;max-height:230mm;object-fit:contain;margin:8pt auto;
+    break-inside:avoid;page-break-inside:avoid
+  }
+  @media print{
+    .nota-rich-report-v836 img{max-width:100%!important;max-height:230mm!important;break-inside:avoid!important;page-break-inside:avoid!important}
+  }
+</style>
+<script id="allpa-v836-nota-rich-script">
+(function(){
+'use strict';
+const VERSION='8.3.9-nota-rich-imagenes';
+const MAX_IMAGES=8;
+const MAX_TOTAL_BYTES=5*1024*1024;
+const TARGET_IMAGE_CHARS=760000;
+let savedRange=null;
+let selectedImage=null;
+
+function E(v){
+  return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function ensureNote(){
+  if(typeof state==='undefined' || !state) return {activo:false,texto:'',contenidoHtml:''};
+  if(!state.aprobatorio||typeof state.aprobatorio!=='object') state.aprobatorio={};
+  if(!state.aprobatorio.notaPreConclusiones||typeof state.aprobatorio.notaPreConclusiones!=='object'){
+    state.aprobatorio.notaPreConclusiones={activo:false,texto:'',contenidoHtml:''};
+  }
+  const n=state.aprobatorio.notaPreConclusiones;
+  if(typeof n.activo!=='boolean') n.activo=!!n.activo;
+  if(typeof n.texto!=='string') n.texto=String(n.texto||'');
+  if(typeof n.contenidoHtml!=='string') n.contenidoHtml='';
+  if(!n.contenidoHtml.trim() && n.texto.trim()) n.contenidoHtml=plainToHtml(n.texto);
+  return n;
+}
+function plainToHtml(v){
+  return E(String(v||'')).replace(/\r\n?/g,'\n').replace(/\n/g,'<br>');
+}
+function cleanHtml(raw){
+  const box=document.createElement('div');
+  box.innerHTML=String(raw||'');
+  function clean(node){
+    if(node.nodeType===Node.TEXT_NODE) return document.createTextNode(node.nodeValue||'');
+    if(node.nodeType!==Node.ELEMENT_NODE) return document.createDocumentFragment();
+    const tag=node.tagName.toUpperCase();
+    if(tag==='IMG'){
+      const src=String(node.getAttribute('src')||'');
+      if(!/^data:image\/(?:png|jpe?g|webp|gif);base64,/i.test(src)) return document.createDocumentFragment();
+      const img=document.createElement('img');
+      img.src=src;
+      img.alt='Imagen incorporada en la nota';
+      img.setAttribute('data-nota-img-v836','1');
+      return img;
+    }
+    if(tag==='BR') return document.createElement('br');
+    const holder=(tag==='DIV'||tag==='P')?document.createElement(tag.toLowerCase()):document.createDocumentFragment();
+    [...node.childNodes].forEach(ch=>holder.appendChild(clean(ch)));
+    return holder;
+  }
+  const out=document.createElement('div');
+  [...box.childNodes].forEach(ch=>out.appendChild(clean(ch)));
+  return out.innerHTML;
+}
+function htmlText(raw){
+  const box=document.createElement('div');
+  box.innerHTML=cleanHtml(raw);
+  return String(box.innerText||box.textContent||'').replace(/\u00a0/g,' ').trim();
+}
+function countImages(raw){
+  const box=document.createElement('div');box.innerHTML=cleanHtml(raw);return box.querySelectorAll('img').length;
+}
+function imageBytes(raw){
+  const box=document.createElement('div');box.innerHTML=cleanHtml(raw);
+  let total=0;
+  box.querySelectorAll('img').forEach(img=>{
+    const s=String(img.src||''); const comma=s.indexOf(',');
+    if(comma>=0) total+=Math.floor((s.length-comma-1)*0.75);
+  });
+  return total;
+}
+function humanBytes(n){
+  if(n<1024)return n+' B'; if(n<1024*1024)return (n/1024).toFixed(0)+' KB'; return (n/1024/1024).toFixed(1)+' MB';
+}
+function currentEditor(){return document.getElementById('notaAprobatorioRichV836')}
+function sync(editor,rerender=true){
+  const n=ensureNote();
+  const html=cleanHtml(editor?editor.innerHTML:n.contenidoHtml);
+  n.contenidoHtml=html;
+  n.texto=htmlText(html);
+  updateStats();
+  if(rerender){
+    try{if(typeof renderReport==='function')renderReport()}catch(_e){}
+    try{if(typeof renderPreview==='function')renderPreview()}catch(_e){}
+  }
+}
+function updateStats(){
+  const n=ensureNote(), el=document.getElementById('notaAprobatorioStatsV836');
+  if(!el)return;
+  const c=countImages(n.contenidoHtml), b=imageBytes(n.contenidoHtml);
+  el.textContent=c?`${c} imagen(es) · ${humanBytes(b)}`:'Sin imágenes';
+}
+function rangeInsideEditor(range,editor){
+  if(!range||!editor)return false;
+  const c=range.commonAncestorContainer;
+  return c===editor||editor.contains(c.nodeType===Node.ELEMENT_NODE?c:c.parentNode);
+}
+function rememberRange(){
+  const ed=currentEditor(); if(!ed)return;
+  const sel=window.getSelection();
+  if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);if(rangeInsideEditor(r,ed))savedRange=r.cloneRange();}
+}
+function placeRange(editor){
+  editor.focus();
+  const sel=window.getSelection(); sel.removeAllRanges();
+  let r=savedRange&&rangeInsideEditor(savedRange,editor)?savedRange.cloneRange():null;
+  if(!r){r=document.createRange();r.selectNodeContents(editor);r.collapse(false)}
+  sel.addRange(r); return r;
+}
+function insertFragment(fragment){
+  const ed=currentEditor(); if(!ed)return;
+  const r=placeRange(ed); r.deleteContents(); r.insertNode(fragment);
+  const sel=window.getSelection(); const nr=document.createRange(); nr.selectNodeContents(ed); nr.collapse(false);
+  try{
+    const last=ed.lastChild;
+    if(last){nr.setStartAfter(last);nr.collapse(true)}
+  }catch(_e){}
+  sel.removeAllRanges();sel.addRange(nr);savedRange=nr.cloneRange();
+  sync(ed,true);
+}
+function insertText(text){
+  const frag=document.createDocumentFragment();
+  String(text||'').replace(/\r\n?/g,'\n').split('\n').forEach((line,i)=>{
+    if(i)frag.appendChild(document.createElement('br'));
+    if(line)frag.appendChild(document.createTextNode(line));
+  });
+  insertFragment(frag);
+}
+function fileToImage(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onerror=()=>reject(new Error('No se pudo leer la imagen.'));
+    r.onload=()=>{const im=new Image();im.onerror=()=>reject(new Error('La imagen no tiene un formato compatible.'));im.onload=()=>resolve(im);im.src=r.result};
+    r.readAsDataURL(file);
+  });
+}
+async function compress(file){
+  if(!file||!String(file.type||'').startsWith('image/'))throw new Error('Seleccione un archivo de imagen.');
+  const im=await fileToImage(file);
+  let maxDim=1600,quality=.86,data='';
+  for(let attempt=0;attempt<7;attempt++){
+    const scale=Math.min(1,maxDim/Math.max(im.naturalWidth||im.width,im.naturalHeight||im.height));
+    const w=Math.max(1,Math.round((im.naturalWidth||im.width)*scale));
+    const h=Math.max(1,Math.round((im.naturalHeight||im.height)*scale));
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.drawImage(im,0,0,w,h);
+    data=canvas.toDataURL('image/webp',quality);
+    if(data.length<=TARGET_IMAGE_CHARS)break;
+    maxDim=Math.max(720,Math.floor(maxDim*.84)); quality=Math.max(.68,quality-.035);
+  }
+  return data;
+}
+function imageFragment(data){
+  const frag=document.createDocumentFragment();
+  const pre=document.createElement('br'); const img=document.createElement('img'); const post=document.createElement('br');
+  img.src=data;img.alt='Imagen incorporada en la nota';img.setAttribute('data-nota-img-v836','1');
+  frag.append(pre,img,post); return frag;
+}
+async function addFiles(files){
+  const list=[...(files||[])].filter(f=>String(f.type||'').startsWith('image/'));
+  if(!list.length){if(typeof msg==='function')msg('Seleccione una imagen.');return}
+  const n=ensureNote(); let existing=countImages(n.contenidoHtml);
+  if(existing>=MAX_IMAGES){if(typeof msg==='function')msg(`La nota admite hasta ${MAX_IMAGES} imágenes.`);return}
+  for(const file of list.slice(0,MAX_IMAGES-existing)){
+    try{
+      const data=await compress(file);
+      const current=ensureNote();
+      const projected=imageBytes(current.contenidoHtml)+Math.floor(data.length*.75);
+      if(projected>MAX_TOTAL_BYTES){if(typeof msg==='function')msg('No se agregó la imagen porque la nota superaría 5 MB de imágenes.');break}
+      insertFragment(imageFragment(data)); existing++;
+    }catch(err){console.warn('ALLPA V8.3.6 imagen nota:',err);if(typeof msg==='function')msg(err.message||'No se pudo insertar la imagen.')}
+  }
+  if(typeof msg==='function')msg('Imagen agregada en la posición del cursor.',true);
+}
+function paste(ev){
+  const items=[...(ev.clipboardData?.items||[])];
+  const imgs=items.filter(i=>i.kind==='file'&&String(i.type||'').startsWith('image/')).map(i=>i.getAsFile()).filter(Boolean);
+  if(imgs.length){ev.preventDefault();rememberRange();addFiles(imgs);return false}
+  const text=ev.clipboardData?.getData('text/plain');
+  if(typeof text==='string'){ev.preventDefault();insertText(text);return false}
+}
+function drop(ev){
+  const files=[...(ev.dataTransfer?.files||[])].filter(f=>String(f.type||'').startsWith('image/'));
+  if(!files.length)return;
+  ev.preventDefault(); rememberRange(); addFiles(files);
+}
+function clickEditor(ev){
+  const ed=currentEditor();if(!ed)return;
+  ed.querySelectorAll('img').forEach(x=>x.classList.remove('nota-img-selected-v836'));
+  selectedImage=null;
+  if(ev.target?.tagName==='IMG'){selectedImage=ev.target;selectedImage.classList.add('nota-img-selected-v836')}
+  else rememberRange();
+}
+function removeSelected(){
+  if(!selectedImage||!selectedImage.isConnected){if(typeof msg==='function')msg('Primero seleccione una imagen dentro de la nota.');return}
+  const ed=currentEditor();selectedImage.remove();selectedImage=null;sync(ed,true);
+}
+function keydown(ev){
+  if((ev.key==='Delete'||ev.key==='Backspace')&&selectedImage&&selectedImage.isConnected){ev.preventDefault();removeSelected();return false}
+}
+function input(editor){selectedImage=null;rememberRange();sync(editor,true)}
+
+window.notaRichInputV836=input;
+window.notaRichPasteV836=paste;
+window.notaRichDropV836=drop;
+window.notaRichClickV836=clickEditor;
+window.notaRichKeydownV836=keydown;
+window.notaRichRememberRangeV836=rememberRange;
+window.notaRichFilesV836=addFiles;
+window.notaRichRemoveSelectedV836=removeSelected;
+
+/* Reemplaza únicamente el editor de la Nota del Informe Técnico Aprobatorio. */
+window.renderAprobatorioNotaV56=renderAprobatorioNotaV56=function(){
+  const n=ensureNote();
+  const safe=cleanHtml(n.contenidoHtml||plainToHtml(n.texto));
+  n.contenidoHtml=safe;
+  return `<div class="apr-note-v56 nota-rich-shell-v836">
+    <label class="check-line"><input type="checkbox" id="toggleNotaAprobatorioRichV838" ${n.activo?'checked':''}> Incluir nota después de conclusiones</label>
+    <div class="mini">Si se activa, la nota aparecerá después de la sección Conclusión técnica del informe aprobatorio.</div>
+    ${n.activo?`<div class="nota-rich-help-v836">Escriba el texto normalmente. Para insertar una imagen en un punto específico, ubique allí el cursor y use <strong>Ctrl+V</strong> o <strong>Agregar imagen</strong>. Puede continuar escribiendo debajo de cada imagen.</div>
+      <div class="nota-rich-toolbar-v836">
+        <button type="button" class="secondary" onmousedown="notaRichRememberRangeV836()" onclick="document.getElementById('notaAprobatorioFileV836').click()">Agregar imagen</button>
+        <button type="button" class="secondary danger-note-v836" onclick="notaRichRemoveSelectedV836()">Eliminar imagen</button>
+        <span id="notaAprobatorioStatsV836" class="nota-rich-stats-v836"></span>
+        <input class="nota-rich-file-v836" id="notaAprobatorioFileV836" type="file" accept="image/*" multiple onchange="notaRichFilesV836(this.files);this.value=''">
+      </div>
+      <div id="notaAprobatorioRichV836" class="nota-rich-editor-v836" contenteditable="true" spellcheck="true"
+        data-placeholder="Escriba la nota para el informe aprobatorio..."
+        onfocus="notaRichRememberRangeV836()" onkeyup="notaRichRememberRangeV836()" onmouseup="notaRichRememberRangeV836()"
+        oninput="notaRichInputV836(this)" onpaste="return notaRichPasteV836(event,this)" ondrop="notaRichDropV836(event,this)"
+        onclick="notaRichClickV836(event)" onkeydown="return notaRichKeydownV836(event)">${safe}</div>
+      <textarea id="notaAprobatorioTextoV56" hidden>${E(n.texto||'')}</textarea>`:''}
+  </div>`;
+};
+
+/* Render final de la Nota: conserva exactamente el orden texto/imagen/texto. */
+window.notaAprobatorioReportV66=notaAprobatorioReportV66=function(){
+  const n=ensureNote();
+  if(!n.activo)return '';
+  const html=cleanHtml(n.contenidoHtml||plainToHtml(n.texto));
+  if(!htmlText(html)&&countImages(html)===0)return '';
+  return `<h2>Nota</h2><div class="nota-rich-report-v836">${html}</div>`;
+};
+
+function refresh(){
+  try{if(typeof renderAprobatorioForm==='function')renderAprobatorioForm()}catch(_e){}
+  setTimeout(updateStats,0);
+  try{if(typeof renderReport==='function')renderReport()}catch(_e){}
+  try{if(typeof renderPreview==='function')renderPreview()}catch(_e){}
+}
+window.addEventListener('load',()=>{setTimeout(refresh,400);setTimeout(refresh,1800);});
+
+window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,countImages,imageBytes});
+})();
+</script>
+
+
+
+
+<!-- ==========================================================
+     ALLPA V8.3.9 · NOTA RICA APROBATORIOS
+     FIX ESTADO GLOBAL REAL DEL CONTROL DE ACTIVACIÓN
+     - ID exclusivo: evita listeners históricos V56.
+     - Estado único: state.aprobatorio.notaPreConclusiones.
+     - Render local del editor, sin reconstruir toda la pestaña.
+     ========================================================== -->
+<script id="allpa-v838-fix-nota-rich-toggle">
+(function(){
+  'use strict';
+  if(window.__ALLPA_V838_NOTA_RICH_TOGGLE__) return;
+  window.__ALLPA_V838_NOTA_RICH_TOGGLE__=true;
+  const TOGGLE_ID='toggleNotaAprobatorioRichV838';
+
+  function getNote(){
+    try{
+      if(window.AllpaNotaRichV836 && typeof window.AllpaNotaRichV836.ensureNote==='function'){
+        return window.AllpaNotaRichV836.ensureNote();
+      }
+    }catch(_e){}
+    if(typeof state==='undefined' || !state) return null;
+    if(!state.aprobatorio || typeof state.aprobatorio!=='object') state.aprobatorio={};
+    if(!state.aprobatorio.notaPreConclusiones || typeof state.aprobatorio.notaPreConclusiones!=='object'){
+      state.aprobatorio.notaPreConclusiones={activo:false,texto:'',contenidoHtml:''};
+    }
+    const n=state.aprobatorio.notaPreConclusiones;
+    if(typeof n.activo!=='boolean') n.activo=!!n.activo;
+    if(typeof n.texto!=='string') n.texto=String(n.texto||'');
+    if(typeof n.contenidoHtml!=='string') n.contenidoHtml='';
+    return n;
+  }
+
+  function refreshReportOnly(){
+    try{ if(typeof renderReport==='function') renderReport(); }catch(e){console.warn('Nota V838 renderReport',e)}
+    try{ if(typeof renderPreview==='function') renderPreview(); }catch(e){console.warn('Nota V838 renderPreview',e)}
+  }
+
+  function renderNoteBox(focusEditor){
+    const box=document.getElementById('notaAprobatorioBoxV56');
+    if(!box || typeof window.renderAprobatorioNotaV56!=='function') return;
+    box.innerHTML=window.renderAprobatorioNotaV56();
+    if(typeof window.AllpaNotaRichV836?.updateStats==='function'){
+      try{window.AllpaNotaRichV836.updateStats()}catch(_e){}
+    }
+    if(focusEditor){
+      requestAnimationFrame(()=>{
+        const ed=document.getElementById('notaAprobatorioRichV836');
+        if(ed){ try{ed.focus();}catch(_e){} }
+      });
+    }
+  }
+
+  function setActive(value){
+    const n=getNote();
+    if(!n) return;
+    n.activo=!!value;
+    renderNoteBox(n.activo);
+    refreshReportOnly();
+  }
+
+  document.addEventListener('change',function(ev){
+    const el=ev.target;
+    if(!(el instanceof HTMLInputElement) || el.id!==TOGGLE_ID) return;
+    ev.stopImmediatePropagation();
+    setActive(el.checked);
+  },true);
+
+  /* Fallback de teclado/label: el click no cambia estado manualmente;
+     solo verifica después de que el navegador haya aplicado checked. */
+  document.addEventListener('click',function(ev){
+    const el=ev.target;
+    if(!(el instanceof HTMLInputElement) || el.id!==TOGGLE_ID) return;
+    setTimeout(()=>{
+      const live=document.getElementById(TOGGLE_ID);
+      const n=getNote();
+      if(live && n && live.checked!==!!n.activo) setActive(live.checked);
+    },0);
+  },true);
+
+  window.AllpaNotaToggleV838=Object.freeze({setActive,renderNoteBox,getNote});
+})();
+</script>
+
+<!-- ==========================================================
+     ALLPA · INTEGRACIÓN eGOB SIN API · FASE 1 · V8.4.4
+     Alcance exclusivo:
+       - Informe Técnico Aprobatorio · Obra Mayor / Anteproyecto
+       - Informe de Desistimiento · Obra Mayor / Anteproyecto
+       - Solicitud de Revisión Estructural · Obra Mayor
+     Requiere extensión local ALLPA → eGOB Autocompletado V2+.
+     ========================================================== -->
+<style id="allpa-egob-bridge-v844-style">
+  .allpa-egob-bridge-v843{display:none;margin:0 0 14px;padding:13px 14px;border:1px solid #b9d2e6;border-radius:13px;background:#f6fbff;box-shadow:0 4px 14px rgba(18,58,92,.06)}
+  .allpa-egob-bridge-v843.visible{display:block}
+  .allpa-egob-bridge-v843 .egob-bridge-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .allpa-egob-bridge-v843 .egob-bridge-title{font-size:12px;font-weight:950;color:#123a5c;text-transform:uppercase;letter-spacing:.15px}
+  .allpa-egob-bridge-v843 .egob-bridge-help{font-size:10px;line-height:1.35;color:#617286;margin-top:3px}
+  .allpa-egob-bridge-v843 .egob-bridge-badge{flex:0 0 auto;border:1px solid #9fc9ad;background:#edf9f1;color:#17613a;border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;white-space:nowrap}
+  .allpa-egob-bridge-v843 .egob-principal-grid{display:grid;grid-template-columns:minmax(260px,1fr);gap:9px;margin-bottom:9px}
+  .allpa-egob-bridge-v843 .egob-bridge-grid{display:grid;grid-template-columns:minmax(220px,.72fr) auto;gap:9px;align-items:end}
+  .allpa-egob-bridge-v843 label{display:block;margin:0 0 4px;font-size:9px;font-weight:900;color:#27445f;text-transform:uppercase}
+  .allpa-egob-bridge-v843 input{width:100%;box-sizing:border-box;border:1px solid #b8c8d8;border-radius:9px;padding:9px 10px;background:#fff;color:#17324d;font-size:11px}
+  .allpa-egob-bridge-v843 input[readonly]{background:#eef4f8;color:#486274}
+  .allpa-egob-bridge-v843 .egob-target-hint{margin-top:6px;font-size:9px;color:#4f6578;min-height:13px}
+  .allpa-egob-bridge-v843 .egob-target-hint strong{color:#0b6c43}
+  .allpa-egob-bridge-v843 .egob-open-btn{border:0;border-radius:9px;background:#087443;color:#fff;padding:10px 14px;font-size:10px;font-weight:1000;cursor:pointer;white-space:nowrap}
+  .allpa-egob-bridge-v843 .egob-open-btn:hover{filter:brightness(.96)}
+  .allpa-egob-bridge-v843 .egob-open-btn:disabled{background:#91a7a0;cursor:not-allowed}
+  .allpa-egob-bridge-v843 .egob-parent-ok{margin-top:6px;font-size:9px;color:#17613a;font-weight:800;min-height:13px}
+  .allpa-egob-bridge-v843 .egob-parent-error{color:#9c2e27}
+  #solicitudEstructuralCopyV7918 .se-egob-bridge-v843{margin:0;border:1px solid #9fc9ad;border-radius:11px;background:#f2fbf5;padding:11px}
+  #solicitudEstructuralCopyV7918 .se-egob-bridge-v843 .allpa-egob-bridge-v843{display:block!important;margin:0;padding:0;border:0;box-shadow:none;background:transparent}
+  @media(max-width:760px){.allpa-egob-bridge-v843 .egob-bridge-grid{grid-template-columns:1fr}.allpa-egob-bridge-v843 .egob-open-btn{width:100%}}
+  @media print{.allpa-egob-bridge-v843,.se-egob-bridge-v843{display:none!important}}
+</style>
+<script id="allpa-egob-bridge-v844-script">
+(function(){
+'use strict';
+if(window.__ALLPA_EGOB_BRIDGE_V844__)return;
+window.__ALLPA_EGOB_BRIDGE_V844__=true;
+
+const VERSION='8.4.4';
+const EGOB_NEW='https://egobedoc.gadmriobamba.gob.ec:8081/issues/new';
+const TRACKER_ID='167';
+const MAP_KEY='ALLPA_EGOB_PARENT_MAP_V843';
+const STRUCT_TYPE='Solicitud de Revisión Estructural';
+const APPROVED='Informe Técnico Aprobatorio';
+const WITHDRAWAL='Informe de Desistimiento';
+
+function clean(v){return String(v==null?'':v).replace(/[\u200B-\u200D\u2060\uFEFF]/g,'').trim();}
+function currentType(){try{return clean(state?.tipoInforme||document.getElementById('tipoInforme')?.value);}catch(_e){return clean(document.getElementById('tipoInforme')?.value);}}
+function visibleEgob(){try{return clean(state?.egob||document.getElementById('egob')?.value).replace(/\D/g,'');}catch(_e){return clean(document.getElementById('egob')?.value).replace(/\D/g,'');}}
+function supported(){return [APPROVED,WITHDRAWAL,STRUCT_TYPE].includes(currentType());}
+function isStructural(){return currentType()===STRUCT_TYPE;}
+function loadMap(){try{return JSON.parse(localStorage.getItem(MAP_KEY)||'{}')||{};}catch(_e){return {};}}
+function saveMap(map){try{localStorage.setItem(MAP_KEY,JSON.stringify(map||{}));}catch(_e){}}
+function parseParent(value){
+  const raw=clean(value);
+  if(!raw)return '';
+  if(/^\d+$/.test(raw))return raw;
+  try{
+    const u=new URL(raw,location.href);
+    const q=u.searchParams.get('issue[parent_issue_id]')||u.searchParams.get('parent_issue_id');
+    if(q&&/^\d+$/.test(q))return q;
+    const m=u.pathname.match(/\/issues\/(\d+)(?:\/|$)/);
+    if(m)return m[1];
+  }catch(_e){}
+  const q=raw.match(/(?:parent_issue_id(?:%5D)?=|\/issues\/)(\d+)/i);
+  return q?q[1]:'';
+}
+function storedParent(){
+  let id='';
+  try{id=clean(state?.egobParentIssueId||'');}catch(_e){}
+  if(/^\d+$/.test(id))return id;
+  const e=visibleEgob();
+  const map=loadMap();
+  id=clean(map[e]||'');
+  return /^\d+$/.test(id)?id:'';
+}
+function rememberParent(raw){
+  const id=parseParent(raw);
+  const e=visibleEgob();
+  if(id){
+    try{if(typeof state!=='undefined'&&state){state.egobParentIssueId=id;state.egobIssueUrl=`https://egobedoc.gadmriobamba.gob.ec:8081/issues/${id}`;}}catch(_e){}
+    if(e){const map=loadMap();map[e]=id;saveMap(map);}
+  }
+  return id;
+}
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function b64url(obj){
+  const bytes=new TextEncoder().encode(JSON.stringify(obj));
+  let binary='';
+  const step=0x8000;
+  for(let i=0;i<bytes.length;i+=step)binary+=String.fromCharCode(...bytes.subarray(i,i+step));
+  return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function showMessage(text,ok=true){
+  try{if(typeof msg==='function'){msg(text,ok);return;}}catch(_e){}
+  alert(text);
+}
+function refreshReport(){
+  try{if(typeof collectTop==='function')collectTop();}catch(_e){}
+  try{if(typeof renderReport==='function')renderReport();}catch(_e){}
+  try{window.renderAsuntoVistaV119Z?.();}catch(_e){}
+  try{window.renderDesistimientoSubjectVistaV13?.();}catch(_e){}
+  try{window.renderAnexosVistaV163?.();}catch(_e){}
+}
+function standardSubject(){
+  const type=currentType();
+  if(type===APPROVED)return clean(document.getElementById('asuntoVistaTextV119Z')?.textContent||'');
+  if(type===WITHDRAWAL)return clean(document.querySelector('#asuntoDesistimientoVistaV13 .asunto-des-text-v13')?.textContent||'');
+  return '';
+}
+function standardAnnex(){
+  const box=document.querySelector('#anexosVistaV163 .anexos-vista-text-v163');
+  if(!box)return '';
+  const ps=[...box.querySelectorAll('p')].map(p=>clean(p.textContent)).filter(Boolean);
+  return ps.length?ps.join('\n\n'):clean(box.textContent);
+}
+function standardBody(){
+  let p=null;
+  try{
+    if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
+    else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
+  }catch(_e){}
+  if(p?.html&&p?.plain)return {html:String(p.html),plain:String(p.plain)};
+  const report=document.getElementById('report');
+  if(!report)return {html:'',plain:''};
+  return {html:report.innerHTML||'',plain:clean(report.innerText||report.textContent||'')};
+}
+function structuralAnnex(){
+  let rows=[];
+  try{rows=Array.isArray(state?.aprobatorio?.anexos)?state.aprobatorio.anexos:[];}catch(_e){}
+  if(!rows.length)return '';
+  const typeNo=(idx,type)=>rows.slice(0,idx+1).filter(r=>String(r?.tipo||'folder').toLowerCase()===type).length;
+  return rows.map((row,i)=>{
+    const type=String(row?.tipo||'folder').toLowerCase();
+    const f=clean(row?.fojas),pl=clean(row?.planos),cd=clean(row?.cds);
+    let line=type==='carpeta'?`Carpeta ${typeNo(i,'carpeta')}: ${f} fojas`:type==='folder'?`Folder ${typeNo(i,'folder')}: ${f} fojas`:`${f} fojas`;
+    if(row?.incluyePlanos)line+=` incluido ${pl} ${Number(pl)===1?'plano':'planos'}`;
+    line+=' en su foliado';
+    if(row?.incluyeCds)line+=` + ${cd} ${Number(cd)===1?'CD':'CDs'}`;
+    return line;
+  }).join('\n\n');
+}
+function structuralPayload(){
+  const subject=clean(document.getElementById('solicitudEstructuralAsuntoV7918')?.value||'');
+  const body=document.getElementById('solicitudEstructuralCuerpoV7918');
+  return {subject,anexo:structuralAnnex(),body_html:body?.innerHTML||'',body_text:clean(body?.innerText||body?.textContent||'')};
+}
+function standardPayload(){
+  refreshReport();
+  const body=standardBody();
+  return {subject:standardSubject(),anexo:standardAnnex(),body_html:body.html,body_text:body.plain};
+}
+function payloadErrors(payload){
+  const errors=[];
+  if(!visibleEgob())errors.push('Falta el Nro. eGOB principal.');
+  const subj=clean(payload?.subject); if(!subj||subj.includes('…')||subj.includes('...'))errors.push('El Asunto todavía no está completo o numerado.');
+  const ann=clean(payload?.anexo); if(!ann||ann.includes('…')||ann.includes('...'))errors.push('Complete los Anexos antes de abrir eGOB.');
+  if(!clean(payload?.body_text))errors.push('El Cuerpo del documento está vacío.');
+  return errors;
+}
+function buildEgobUrl(parent,payload){
+  const u=new URL(EGOB_NEW);
+  u.searchParams.set('issue[parent_issue_id]',parent);
+  u.searchParams.set('issue[tracker_id]',TRACKER_ID);
+  const encoded=b64url(payload);
+  const out=u.toString()+'#allpa='+encoded;
+  if(out.length>1800000)throw new Error('El contenido supera el tamaño seguro para transferirlo a eGOB. Revise especialmente imágenes insertadas en la Nota.');
+  return out;
+}
+function findInput(root){return root?.querySelector('[data-egob-parent-v843]')||null;}
+function findTargetInput(root){return root?.querySelector('[data-egob-target-v844]')||null;}
+function setIndicator(root,id,error=''){
+  const el=root?.querySelector('[data-egob-parent-status-v843]');if(!el)return;
+  el.classList.toggle('egob-parent-error',!!error);
+  el.textContent=error|| (id?`Trámite principal guardado: ${id}`:'Pegue una sola vez el enlace del trámite principal o su ID.');
+}
+function setTargetHint(root,id,error=''){
+  const el=root?.querySelector('[data-egob-target-status-v844]');if(!el)return;
+  el.classList.toggle('egob-parent-error',!!error);
+  const principal=storedParent();
+  el.innerHTML=error
+    ? escapeHtml(error)
+    : (id&&id!==principal
+        ? `Se responderá al trámite hijo: <strong>${escapeHtml(id)}</strong>. El principal ${escapeHtml(principal||'')} se conserva.`
+        : `Se responderá al trámite principal: <strong>${escapeHtml(principal||id||'')}</strong>.`);
+}
+function parentChanged(root,input){
+  const id=rememberParent(input?.value||'');
+  setIndicator(root,id,input?.value&&!id?'No se pudo reconocer el ID del trámite principal.':'');
+  const target=findTargetInput(root);
+  if(id && target && (!target.value || target.dataset.usingPrincipalV844==='1')){
+    target.value=id;
+    target.dataset.usingPrincipalV844='1';
+    setTargetHint(root,id);
+  }
+}
+function targetChanged(root,input){
+  const raw=clean(input?.value||'');
+  const id=parseParent(raw);
+  const principal=storedParent();
+  if(!raw){
+    input.value=principal||'';
+    input.dataset.usingPrincipalV844='1';
+    setTargetHint(root,principal);
+    return;
+  }
+  if(!id){
+    input.dataset.usingPrincipalV844='0';
+    setTargetHint(root,'','Digite únicamente el N.º/ID del trámite hijo o pegue su enlace eGOB.');
+    return;
+  }
+  input.value=id;
+  input.dataset.usingPrincipalV844=id===principal?'1':'0';
+  setTargetHint(root,id);
+}
+function openEgob(root){
+  const principalInput=findInput(root);
+  const principal=rememberParent(principalInput?.value||'')||storedParent();
+  if(!principal){setIndicator(root,'','Pegue primero el enlace del trámite principal eGOB o su ID.');principalInput?.focus();return;}
+  if(principalInput&&!principalInput.value)principalInput.value=principal;
+
+  const targetInput=findTargetInput(root);
+  const rawTarget=clean(targetInput?.value||'');
+  let target=rawTarget?parseParent(rawTarget):principal;
+  if(rawTarget&&!target){
+    setTargetHint(root,'','El N.º de trámite a responder no es válido.');
+    targetInput?.focus();
+    return;
+  }
+  if(!target)target=principal;
+  if(targetInput){targetInput.value=target;targetInput.dataset.usingPrincipalV844=target===principal?'1':'0';}
+  setTargetHint(root,target);
+
+  const payload=isStructural()?structuralPayload():standardPayload();
+  const errors=payloadErrors(payload);
+  if(errors.length){showMessage('No se puede abrir eGOB todavía:\n\n- '+errors.join('\n- '),false);return;}
+  try{
+    const url=buildEgobUrl(target,payload);
+    window.open(url,'_blank','noopener');
+    showMessage(
+      target===principal
+        ? 'eGOB abierto sobre el trámite principal. La extensión completará DOCUMENTOS, Asunto, Anexo y Cuerpo.'
+        : `eGOB abierto para responder al trámite hijo ${target}. El trámite principal ${principal} se mantiene guardado.`,
+      true
+    );
+  }catch(err){showMessage('No se pudo preparar eGOB: '+String(err?.message||err),false);}
+}
+function bridgeMarkup(structural=false){
+  const id=storedParent();
+  return `<div class="allpa-egob-bridge-v843 visible" data-allpa-egob-bridge-inner="1">
+    <div class="egob-bridge-head"><div><div class="egob-bridge-title">Abrir / Firmar en eGOB</div><div class="egob-bridge-help">El trámite principal queda guardado como referencia del expediente. Si debe responder a un trámite hijo, cambie únicamente el campo “N.º trámite a responder”.</div></div><span class="egob-bridge-badge">eGOB · MEMORANDO V6</span></div>
+    <div class="egob-principal-grid">
+      <div><label>Trámite principal eGOB · enlace / ID</label><input type="text" data-egob-parent-v843 value="${escapeHtml(id)}" placeholder="https://.../issues/1274428  ó  1274428"><div class="egob-parent-ok" data-egob-parent-status-v843>${id?`Trámite principal guardado: ${escapeHtml(id)}`:'Pegue una sola vez el enlace del trámite principal o su ID.'}</div></div>
+    </div>
+    <div class="egob-bridge-grid">
+      <div><label>N.º trámite a responder</label><input type="text" inputmode="numeric" data-egob-target-v844 data-using-principal-v844="1" value="${escapeHtml(id)}" placeholder="${escapeHtml(id||'ID del trámite principal o hijo')}"><div class="egob-target-hint" data-egob-target-status-v844>${id?`Se responderá al trámite principal: <strong>${escapeHtml(id)}</strong>.`:'Primero registre el trámite principal.'}</div></div>
+      <button type="button" class="egob-open-btn" data-egob-open-v843>ABRIR / FIRMAR EN eGOB</button>
+    </div>
+  </div>`;
+}
+function bindRoot(root){
+  if(!root||root.dataset.egobBridgeBoundV843==='1')return;
+  root.dataset.egobBridgeBoundV843='1';
+  const input=findInput(root);
+  const target=findTargetInput(root);
+  input?.addEventListener('input',()=>parentChanged(root,input));
+  input?.addEventListener('change',()=>parentChanged(root,input));
+  target?.addEventListener('input',()=>targetChanged(root,target));
+  target?.addEventListener('change',()=>targetChanged(root,target));
+  root.querySelector('[data-egob-open-v843]')?.addEventListener('click',()=>openEgob(root));
+}
+function ensureStandardPanel(){
+  const tab=document.getElementById('tab-vista');if(!tab)return;
+  let box=document.getElementById('allpaEgobBridgeV843');
+  const active=supported()&&!isStructural();
+  if(!box){box=document.createElement('section');box.id='allpaEgobBridgeV843';box.className='allpa-egob-bridge-v843 no-print';tab.appendChild(box);}
+  box.classList.toggle('visible',active);
+  if(!active){box.innerHTML='';box.dataset.egobBridgeBoundV843='';return;}
+  const current=idFromRoot(box);
+  const desired=storedParent();
+  if(!box.querySelector('[data-allpa-egob-bridge-inner]')){box.innerHTML=bridgeMarkup(false);box.dataset.egobBridgeBoundV843='';bindRoot(box);}
+  else if(desired&&findInput(box)&&!findInput(box).value){findInput(box).value=desired;setIndicator(box,desired);}
+  const target=findTargetInput(box);if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){target.value=desired;target.dataset.usingPrincipalV844='1';setTargetHint(box,desired);}
+  const reportWrap=tab.querySelector('.report-wrap');
+  const copy=document.getElementById('copyPanelAprobatorio');
+  if(copy&&copy.parentNode===tab){const after=copy.nextSibling;if(after!==box)tab.insertBefore(box,after);}
+  else if(reportWrap&&box.nextSibling!==reportWrap)tab.insertBefore(box,reportWrap);
+}
+function idFromRoot(root){return parseParent(findInput(root)?.value||'');}
+function ensureStructuralPanel(){
+  const panel=document.getElementById('solicitudEstructuralCopyV7918');
+  if(!panel||!isStructural())return;
+  const grid=panel.querySelector('.se-grid');if(!grid)return;
+  let host=panel.querySelector('.se-egob-bridge-v843');
+  if(!host){host=document.createElement('div');host.className='se-egob-bridge-v843';host.innerHTML=bridgeMarkup(true);const reg=document.getElementById('registrarSolicitudEstructuralV7918');if(reg&&reg.parentNode===grid)grid.insertBefore(host,reg);else grid.appendChild(host);bindRoot(host);}
+  else{
+    const desired=storedParent();const input=findInput(host);if(desired&&input&&!input.value){input.value=desired;setIndicator(host,desired);}const target=findTargetInput(host);if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){target.value=desired;target.dataset.usingPrincipalV844='1';setTargetHint(host,desired);}
+  }
+}
+function sync(){ensureStandardPanel();ensureStructuralPanel();}
+
+/* Mantener la integración aunque los renderizadores históricos reconstruyan Vista. */
+const observer=new MutationObserver(()=>{clearTimeout(sync._t);sync._t=setTimeout(sync,40);});
+observer.observe(document.documentElement,{childList:true,subtree:true});
+document.addEventListener('change',ev=>{if(ev.target?.id==='tipoInforme'||ev.target?.id==='egob')setTimeout(sync,0);},true);
+window.addEventListener('load',()=>{setTimeout(sync,250);setTimeout(sync,1100);});
+setTimeout(sync,0);
+
+window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openEgob,standardPayload,structuralPayload});
+})();
+</script>
+
 </body>
 </html>
