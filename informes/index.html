@@ -45073,7 +45073,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV846==='function')p=window.buildEgobBodyV846();
+    if(typeof window.buildEgobBodyV847==='function')p=window.buildEgobBodyV847();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45271,20 +45271,20 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
 
 
 <!-- ==========================================================
-     ALLPA V8.4.6 · HTML ESPECÍFICO PARA eGOB
+     ALLPA V8.4.7 · HTML ESPECÍFICO PARA eGOB
      - Evita que e-DOC trate filas largas como bloques indivisibles.
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v846">
+<script id="allpa-egob-body-v847">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V846__) return;
-window.__ALLPA_EGOB_BODY_V846__=true;
+if(window.__ALLPA_EGOB_BODY_V847__) return;
+window.__ALLPA_EGOB_BODY_V847__=true;
 
-const FLOW='data-egob-flow-v846';
-const UNIT='data-egob-flow-unit-v846';
-const PREP='data-allpa-egob-prepared-v846';
+const FLOW='data-egob-flow-v847';
+const UNIT='data-egob-flow-unit-v847';
+const PREP='data-allpa-egob-prepared-v847';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45377,11 +45377,13 @@ function miniTable(classes,widths){
   return t;
 }
 
+const EGOB_BORDER_V847='0.6px solid #333';
+
 function styleCell(td,{top=true,bottom=true,align='left',font='8.5pt',line='1.15',pad='2px 5px'}={}){
-  td.style.setProperty('border-left','1px solid #000','important');
-  td.style.setProperty('border-right','1px solid #000','important');
-  td.style.setProperty('border-top',top?'1px solid #000':'0','important');
-  td.style.setProperty('border-bottom',bottom?'1px solid #000':'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V847,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V847,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V847:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V847:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45410,7 +45412,7 @@ function cloneHeaderTable(src,widths){
   return t;
 }
 
-function requirementCatalogueV846(){
+function requirementCatalogueV847(){
   let catalogue=[];
   try{
     if(typeof DATA!=='undefined' && Array.isArray(DATA?.requisitos)) catalogue=DATA.requisitos;
@@ -45450,8 +45452,8 @@ function requirementCatalogueV846(){
   });
 }
 
-function buildRequirementsSourceV846(){
-  const reqs=requirementCatalogueV846();
+function buildRequirementsSourceV847(){
+  const reqs=requirementCatalogueV847();
   if(!reqs.length) return null;
 
   const table=document.createElement('table');
@@ -45497,7 +45499,7 @@ function buildRequirementsSourceV846(){
   return table;
 }
 
-function ensureRequirementsSourceV846(root){
+function ensureRequirementsSourceV847(root){
   // 1. Reutilizar cualquier tabla de requisitos ya generada por el informe,
   // aunque la clase ante-req-report-v52 no haya sido aplicada.
   let src=root.querySelector(
@@ -45510,7 +45512,7 @@ function ensureRequirementsSourceV846(root){
   }
 
   // 2. Si el rerender dejó el texto fallback, reconstruir desde STATE.
-  const generated=buildRequirementsSourceV846();
+  const generated=buildRequirementsSourceV847();
   if(!generated) return null;
 
   const fallback=[...root.querySelectorAll('p')].find(p=>
@@ -45558,7 +45560,7 @@ function ensureRequirementsSourceV846(root){
 }
 
 function prepareRequirements(root){
-  ensureRequirementsSourceV846(root);
+  ensureRequirementsSourceV847(root);
 
   root.querySelectorAll(
     'table.ante-req-report-v52, table.req-report-v94'
@@ -45624,6 +45626,120 @@ function prepareRequirements(root){
     });
 
     src.replaceWith(wrapper);
+  });
+}
+
+
+function prepareConclusion(root){
+  root.querySelectorAll('table.conclusion-report').forEach(src=>{
+    if(src.closest(`[${FLOW}="conclusion"]`)) return;
+
+    // DESCRIPCIÓN ocupa las dos primeras columnas.
+    // Se conserva una columna auxiliar para niveles cuando exista.
+    const widths=[60,12,18,10];
+
+    const wrapper=document.createElement('div');
+    wrapper.setAttribute(FLOW,'conclusion');
+    wrapper.style.cssText=
+      'width:100%!important;margin:0!important;padding:0!important;'+
+      'page-break-inside:auto!important;break-inside:auto!important;';
+
+    wrapper.appendChild(cloneHeaderTable(src,widths));
+
+    const rows=[...src.querySelectorAll('tbody > tr')];
+
+    rows.forEach(row=>{
+      const t=miniTable(src.className,widths);
+      const b=document.createElement('tbody');
+      const tr=row.cloneNode(true);
+
+      tr.querySelectorAll('[rowspan]').forEach(x=>x.removeAttribute('rowspan'));
+
+      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
+
+      // Mantener colspan originales y únicamente normalizar el acabado.
+      cells.forEach((cell,idx)=>{
+        let align='center';
+
+        // Primera celda = descripción.
+        if(idx===0) align='left';
+
+        styleCell(cell,{
+          top:true,
+          bottom:true,
+          align,
+          font:'8.2pt',
+          line:'1.06',
+          pad:'2px 4px'
+        });
+
+        cell.style.setProperty(
+          'vertical-align',
+          idx===0?'middle':'middle',
+          'important'
+        );
+      });
+
+      b.appendChild(tr);
+      t.appendChild(b);
+      wrapper.appendChild(t);
+    });
+
+    src.replaceWith(wrapper);
+  });
+}
+
+function isZeroBorderV847(value){
+  const v=String(value||'').trim().toLowerCase();
+  return !v || v==='0' || v==='0px' || v==='none' ||
+         v.startsWith('0px ') || v.startsWith('0pt ');
+}
+
+function applyUniformThinBordersV847(root){
+  // 1. Todas las tablas del cuerpo eGOB utilizan el mismo borde fino.
+  root.querySelectorAll('table').forEach(table=>{
+    table.style.setProperty('border-collapse','collapse','important');
+    table.style.setProperty('border-spacing','0','important');
+    table.style.setProperty('border','0','important');
+    table.style.setProperty('outline','0','important');
+  });
+
+  root.querySelectorAll('th,td').forEach(cell=>{
+    const top=cell.style.getPropertyValue('border-top');
+    const bottom=cell.style.getPropertyValue('border-bottom');
+
+    cell.style.setProperty('border-left',EGOB_BORDER_V847,'important');
+    cell.style.setProperty('border-right',EGOB_BORDER_V847,'important');
+
+    // Respetar líneas internas que deliberadamente se ocultaron
+    // para que varias líneas parezcan una sola celda.
+    if(isZeroBorderV847(top) && top){
+      cell.style.setProperty('border-top','0','important');
+    }else{
+      cell.style.setProperty('border-top',EGOB_BORDER_V847,'important');
+    }
+
+    if(isZeroBorderV847(bottom) && bottom){
+      cell.style.setProperty('border-bottom','0','important');
+    }else{
+      cell.style.setProperty('border-bottom',EGOB_BORDER_V847,'important');
+    }
+  });
+
+  // 2. En los flujos formados por mini-tablas contiguas, el borde
+  // inferior de la unidad anterior es suficiente. Quitamos el borde
+  // superior de cada unidad posterior para evitar líneas dobles/gruesas.
+  root.querySelectorAll(`[${FLOW}]`).forEach(wrapper=>{
+    const units=[...wrapper.querySelectorAll(`:scope > table[${UNIT}]`)];
+
+    units.forEach((table,index)=>{
+      if(index===0) return;
+
+      table.querySelectorAll(':scope > thead:first-child > tr:first-child > th, :scope > thead:first-child > tr:first-child > td, :scope > tbody:first-child > tr:first-child > th, :scope > tbody:first-child > tr:first-child > td')
+        .forEach(cell=>{
+          cell.style.setProperty('border-top','0','important');
+        });
+    });
   });
 }
 
@@ -45702,7 +45818,7 @@ function prepareFactibilities(root){
   });
 }
 
-window.buildEgobBodyV846=function(){
+window.buildEgobBodyV847=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -45715,11 +45831,13 @@ window.buildEgobBodyV846=function(){
     if(!report)return p;
     report.setAttribute(PREP,'1');
     prepareRequirements(report);
+    prepareConclusion(report);
     prepareFactibilities(report);
+    applyUniformThinBordersV847(report);
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.6] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.7] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
