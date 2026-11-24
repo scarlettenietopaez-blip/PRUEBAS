@@ -44955,7 +44955,7 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 </script>
 
 <!-- ==========================================================
-     ALLPA · INTEGRACIÓN eGOB SIN API · FASE 1 · V8.4.28
+     ALLPA · INTEGRACIÓN eGOB SIN API · FASE 1 · V8.4.29
      Alcance exclusivo:
        - Informe Técnico Aprobatorio · Obra Mayor / Anteproyecto
        - Informe de Desistimiento · Obra Mayor / Anteproyecto
@@ -44983,7 +44983,7 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 if(window.__ALLPA_EGOB_BRIDGE_V844__)return;
 window.__ALLPA_EGOB_BRIDGE_V844__=true;
 
-const VERSION='8.4.28';
+const VERSION='8.4.29';
 const EGOB_NEW='https://egobedoc.gadmriobamba.gob.ec:8081/issues/new';
 const TRACKER_ID='167';
 const MAP_KEY='ALLPA_EGOB_PARENT_MAP_V843';
@@ -45064,7 +45064,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV8428==='function')p=window.buildEgobBodyV8428();
+    if(typeof window.buildEgobBodyV8429==='function')p=window.buildEgobBodyV8429();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45301,15 +45301,15 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v8428">
+<script id="allpa-egob-body-v8429">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V8428__) return;
-window.__ALLPA_EGOB_BODY_V8428__=true;
+if(window.__ALLPA_EGOB_BODY_V8429__) return;
+window.__ALLPA_EGOB_BODY_V8429__=true;
 
-const FLOW='data-egob-flow-v8428';
-const UNIT='data-egob-flow-unit-v8428';
-const PREP='data-allpa-egob-prepared-v8428';
+const FLOW='data-egob-flow-v8429';
+const UNIT='data-egob-flow-unit-v8429';
+const PREP='data-allpa-egob-prepared-v8429';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45374,12 +45374,12 @@ function wrapCell(cell,maxPx){
 // El ancho útil de las tablas en el PDF e-DOC es aprox. 500 px.
 // Esta función calcula el ancho de línea según el porcentaje real
 // que ocupa la celda dentro de la tabla.
-const EGOB_PRINTABLE_TABLE_PX_V8428 = 500;
+const EGOB_PRINTABLE_TABLE_PX_V8429 = 500;
 
-function wrapCellForTablePctV8428(cell, pct){
+function wrapCellForTablePctV8429(cell, pct){
   const p = Math.max(10, Math.min(100, Number(pct) || 100));
   // Descontar padding/bordes para evitar que la última palabra rebose.
-  const usable = Math.max(120, (EGOB_PRINTABLE_TABLE_PX_V8428 * p / 100) - 12);
+  const usable = Math.max(120, (EGOB_PRINTABLE_TABLE_PX_V8429 * p / 100) - 12);
   return wrapCell(cell, usable);
 }
 
@@ -45390,7 +45390,7 @@ function wrapCellForTablePctV8428(cell, pct){
 // línea, agregamos una segunda línea invisible de ancho 100 %. Así la línea
 // visible deja de ser la última línea del bloque y el motor WebKit/PDF aplica
 // text-align:justify de forma real.
-function justifyPhysicalLineV8428(html, forceJustify){
+function justifyPhysicalLineV8429(html, forceJustify){
   const content=html||'&nbsp;';
   if(!forceJustify)return content;
 
@@ -45443,13 +45443,13 @@ function miniTable(classes,widths){
   return t;
 }
 
-const EGOB_BORDER_V8428='0.75pt solid #000';
+const EGOB_BORDER_V8429='0.75pt solid #000';
 
 function styleCell(td,{top=true,bottom=true,align='left',font='8.5pt',line='1.15',pad='2px 5px'}={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V8428,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V8428,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V8428:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8428:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8429,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8429,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8429:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8429:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45479,7 +45479,7 @@ function cloneHeaderTable(src,widths){
 }
 
 
-function logicalTableV8428(src,widths){
+function logicalTableV8429(src,widths){
   const t=document.createElement('table');
   t.className=src?.className||'';
   t.setAttribute('width','100%');
@@ -45506,7 +45506,7 @@ function logicalTableV8428(src,widths){
   return t;
 }
 
-function styleLogicalCellV8428(td,{
+function styleLogicalCellV8429(td,{
   align='left',
   font='8.5pt',
   line='1.12',
@@ -45515,10 +45515,10 @@ function styleLogicalCellV8428(td,{
   top=true,
   bottom=true
 }={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V8428,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V8428,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V8428:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8428:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8429,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8429,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8429:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8429:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45531,7 +45531,7 @@ function styleLogicalCellV8428(td,{
   td.style.setProperty('background','transparent','important');
 }
 
-function styleLogicalHeaderV8428(thead){
+function styleLogicalHeaderV8429(thead){
   // V8.4.21:
   // El encabezado debe aparecer UNA sola vez. "table-header-group"
   // hace que eGOB lo repita automáticamente en cada página.
@@ -45539,7 +45539,7 @@ function styleLogicalHeaderV8428(thead){
   thead.style.setProperty('page-break-inside','avoid','important');
   thead.style.setProperty('break-inside','avoid','important');
   [...thead.querySelectorAll('th,td')].forEach(cell=>{
-    styleLogicalCellV8428(cell,{
+    styleLogicalCellV8429(cell,{
       align:'center',
       font:'8.2pt',
       line:'1.05',
@@ -45699,175 +45699,277 @@ function ensureRequirementsSourceV8414(root){
 }
 
 
-function prepareDesistimientoEgobV8428(root){
-  if(!root?.classList?.contains('report-desistimiento')) return;
+function prepareDesistimientoEgobV8429(root){
+  const isDesistimiento =
+    !!root?.classList?.contains('report-desistimiento') ||
+    String((typeof state!=='undefined' && state?.tipoInforme)||'').trim()==='Informe de Desistimiento' ||
+    /INFORME\s+T[ÉE]CNICO\s+DE\s+DESISTIMIENTO/i.test(root?.textContent||'');
 
-  // ==========================================================
-  // 1. CRITERIO TÉCNICO
-  //    Vista ALLPA definida: 7 % / 46.5 % / 46.5 %.
-  // ==========================================================
-  root.querySelectorAll('table.criterio-simple-v55').forEach(table=>{
-    table.style.setProperty('width','100%','important');
-    table.style.setProperty('max-width','100%','important');
-    table.style.setProperty('table-layout','fixed','important');
-    table.style.setProperty('border-collapse','collapse','important');
-    table.style.setProperty('border-spacing','0','important');
-    table.style.setProperty('page-break-inside','auto','important');
-    table.style.setProperty('break-inside','auto','important');
+  if(!isDesistimiento) return;
 
-    // Colgroup físico para que eGOB no recalcule las proporciones.
-    table.querySelector(':scope > colgroup.egob-des-criterio-cols-v8428')?.remove();
+  const BORDER=EGOB_BORDER_V8429;
+
+  function makeTable(widths, cls){
+    const t=document.createElement('table');
+    t.className=cls||'';
+    t.setAttribute('width','100%');
+    t.setAttribute('cellspacing','0');
+    t.setAttribute('data-egob-logical-v8412','1');
+    t.style.setProperty('width','100%','important');
+    t.style.setProperty('max-width','100%','important');
+    t.style.setProperty('table-layout','fixed','important');
+    t.style.setProperty('border-collapse','collapse','important');
+    t.style.setProperty('border-spacing','0','important');
+    t.style.setProperty('border','0','important');
+    t.style.setProperty('outline','0','important');
+    t.style.setProperty('margin','0','important');
+    t.style.setProperty('page-break-inside','avoid','important');
+    t.style.setProperty('break-inside','avoid','important');
+    t.style.setProperty('background','transparent','important');
+
     const cg=document.createElement('colgroup');
-    cg.className='egob-des-criterio-cols-v8428';
-    [7,46.5,46.5].forEach(pct=>{
+    widths.forEach(pct=>{
       const col=document.createElement('col');
       col.setAttribute('width',pct+'%');
       col.style.setProperty('width',pct+'%','important');
       cg.appendChild(col);
     });
-    table.insertBefore(cg,table.firstChild);
+    t.appendChild(cg);
+    return t;
+  }
 
-    // Para impedir DEFINITIVAMENTE la repetición del encabezado:
-    // convertir THEAD en una fila normal al inicio de TBODY.
-    const thead=table.querySelector(':scope > thead');
-    let tbody=table.querySelector(':scope > tbody');
-    if(!tbody){
-      tbody=document.createElement('tbody');
-      table.appendChild(tbody);
+  function styleCriterionCell(cell, idx, header=false, top=true, bottom=true){
+    const pct=idx===0?7:46.5;
+    cell.removeAttribute('rowspan');
+    cell.removeAttribute('colspan');
+    cell.setAttribute('width',pct+'%');
+    cell.style.setProperty('width',pct+'%','important');
+    cell.style.setProperty('min-width',pct+'%','important');
+    cell.style.setProperty('max-width',pct+'%','important');
+    cell.style.setProperty('box-sizing','border-box','important');
+    cell.style.setProperty('border-left',BORDER,'important');
+    cell.style.setProperty('border-right',BORDER,'important');
+    cell.style.setProperty('border-top',top?BORDER:'0','important');
+    cell.style.setProperty('border-bottom',bottom?BORDER:'0','important');
+    cell.style.setProperty('padding',header?'3px 4px':'3px 5px','important');
+    cell.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
+    cell.style.setProperty('font-size',header?'8.2pt':'8.4pt','important');
+    cell.style.setProperty('line-height','1.12','important');
+    cell.style.setProperty('vertical-align',header?'middle':'top','important');
+    cell.style.setProperty('text-align',header?'center':(idx===0?'center':'left'),'important');
+    cell.style.setProperty('white-space',idx===0?'nowrap':'normal','important');
+    cell.style.setProperty('word-break','normal','important');
+    cell.style.setProperty('overflow-wrap','break-word','important');
+    if(header){
+      cell.style.setProperty('font-weight','700','important');
+      cell.style.setProperty('background','#d9d9d9','important');
+      cell.style.setProperty('background-color','#d9d9d9','important');
+    }else{
+      cell.style.setProperty('background','transparent','important');
+    }
+  }
+
+  // ==========================================================
+  // CRITERIO TÉCNICO
+  // Una cabecera física + una mini-tabla por observación.
+  // eGOB ya no puede repetir la cabecera ni recalcular columnas.
+  // ==========================================================
+  root.querySelectorAll('table.criterio-simple-v55').forEach(src=>{
+    const wrapper=document.createElement('div');
+    wrapper.className='egob-des-criterio-flow-v8429';
+    wrapper.setAttribute('data-egob-flow','desistimiento-criterio');
+    wrapper.style.setProperty('width','100%','important');
+    wrapper.style.setProperty('margin','0','important');
+    wrapper.style.setProperty('padding','0','important');
+    wrapper.style.setProperty('page-break-inside','auto','important');
+    wrapper.style.setProperty('break-inside','auto','important');
+
+    // Encabezado UNA sola vez, como tabla independiente.
+    const headTable=makeTable([7,46.5,46.5],'egob-des-criterio-header-v8429');
+    const headBody=document.createElement('tbody');
+    const sourceHead=src.querySelector('thead tr');
+    const hr=sourceHead ? sourceHead.cloneNode(true) : document.createElement('tr');
+
+    if(!sourceHead){
+      ['Nro.','Artículo / Norma','Aclaración'].forEach(txt=>{
+        const th=document.createElement('th');
+        th.textContent=txt;
+        hr.appendChild(th);
+      });
     }
 
-    if(thead){
-      const headerRow=thead.querySelector(':scope > tr')?.cloneNode(true);
-      if(headerRow){
-        headerRow.classList.add('egob-des-header-row-v8428');
-        [...headerRow.children].forEach((cell,idx)=>{
-          cell.style.setProperty('background','#d9d9d9','important');
-          cell.style.setProperty('font-weight','700','important');
-          cell.style.setProperty('text-align','center','important');
-          cell.style.setProperty('vertical-align','middle','important');
-          cell.style.setProperty('white-space','normal','important');
-          cell.style.setProperty('line-height','1.05','important');
-          cell.style.setProperty('padding','3px 4px','important');
+    [...hr.children].forEach((cell,idx)=>styleCriterionCell(cell,idx,true,true,true));
+    headBody.appendChild(hr);
+    headTable.appendChild(headBody);
+    wrapper.appendChild(headTable);
 
-          if(idx===0){
-            // Nro. lo bastante ancho para que "Nro." no quede vertical.
-            cell.style.setProperty('width','7%','important');
-            cell.style.setProperty('min-width','7%','important');
-            cell.style.setProperty('max-width','7%','important');
-            cell.style.setProperty('white-space','nowrap','important');
-          }else{
-            cell.style.setProperty('width','46.5%','important');
-          }
-        });
-        tbody.insertBefore(headerRow,tbody.firstChild);
-      }
-      thead.remove();
-    }
+    const rows=[...src.querySelectorAll('tbody > tr')];
+    rows.forEach(row=>{
+      const t=makeTable([7,46.5,46.5],'egob-des-criterio-row-v8429');
+      const b=document.createElement('tbody');
+      const tr=row.cloneNode(true);
+      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
 
-    // Proporciones también en cada celda del cuerpo, en línea.
-    [...tbody.querySelectorAll(':scope > tr')].forEach((tr,rowIndex)=>{
+      cells.forEach((cell,idx)=>styleCriterionCell(cell,idx,false,false,true));
+
       tr.style.setProperty('page-break-inside','avoid','important');
       tr.style.setProperty('break-inside','avoid','important');
-
-      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
-      cells.forEach((cell,idx)=>{
-        const pct=idx===0?7:46.5;
-        cell.style.setProperty('width',pct+'%','important');
-        if(idx===0){
-          cell.style.setProperty('min-width','7%','important');
-          cell.style.setProperty('max-width','7%','important');
-          cell.style.setProperty('text-align','center','important');
-          cell.style.setProperty('vertical-align','top','important');
-          cell.style.setProperty('white-space','nowrap','important');
-        }else{
-          cell.style.setProperty('vertical-align','top','important');
-          cell.style.setProperty('white-space','normal','important');
-          cell.style.setProperty('overflow-wrap','break-word','important');
-          cell.style.setProperty('word-break','normal','important');
-        }
-      });
+      b.appendChild(tr);
+      t.appendChild(b);
+      wrapper.appendChild(t);
     });
+
+    src.replaceWith(wrapper);
   });
 
   // ==========================================================
-  // 2. SUSTENTO TÉCNICO + IMÁGENES
-  //    Respetar las dimensiones ya definidas en la vista ALLPA.
+  // SUSTENTO TÉCNICO
+  // Una cabecera física + una mini-tabla por observación.
+  // Las imágenes se reconstruyen con ancho FÍSICO y centrado.
   // ==========================================================
-  root.querySelectorAll('table.tech-note-table').forEach(table=>{
-    table.style.setProperty('width','100%','important');
-    table.style.setProperty('max-width','100%','important');
-    table.style.setProperty('table-layout','fixed','important');
-    table.style.setProperty('border-collapse','collapse','important');
+  root.querySelectorAll('table.tech-note-table').forEach(src=>{
+    const wrapper=document.createElement('div');
+    wrapper.className='egob-des-sustento-flow-v8429';
+    wrapper.setAttribute('data-egob-flow','desistimiento-sustento');
+    wrapper.style.setProperty('width','100%','important');
+    wrapper.style.setProperty('margin','0','important');
+    wrapper.style.setProperty('padding','0','important');
+    wrapper.style.setProperty('page-break-inside','auto','important');
+    wrapper.style.setProperty('break-inside','auto','important');
 
-    // Nro. = 13 mm; texto = resto.
-    let cg=table.querySelector(':scope > colgroup.colgroup-sustento-v119v');
-    if(!cg){
-      cg=document.createElement('colgroup');
-      cg.className='colgroup-sustento-v119v';
-      cg.innerHTML='<col class="col-nro-v119v"><col class="col-texto-v119v">';
-      table.insertBefore(cg,table.firstChild);
-    }
-    const cols=cg.querySelectorAll('col');
-    if(cols[0]){
-      cols[0].setAttribute('width','13mm');
-      cols[0].style.setProperty('width','13mm','important');
-    }
-    if(cols[1]){
-      cols[1].style.setProperty('width','auto','important');
-    }
-
-    // No repetir encabezado del sustento tampoco.
-    const thead=table.querySelector(':scope > thead');
-    if(thead){
-      thead.style.setProperty('display','table-row-group','important');
-    }
-
-    table.querySelectorAll('tr.sustento-img-row-v55').forEach(row=>{
-      row.style.setProperty('page-break-inside','avoid','important');
-      row.style.setProperty('break-inside','avoid','important');
-
-      const td=row.querySelector(':scope > td');
-      if(td){
-        td.setAttribute('colspan','2');
-        td.style.setProperty('width','100%','important');
-        td.style.setProperty('padding','5px','important');
-        td.style.setProperty('text-align','center','important');
-        td.style.setProperty('vertical-align','top','important');
+    function styleSustentoCell(cell,idx,header=false,top=true,bottom=true){
+      const pct=idx===0?7:93;
+      cell.removeAttribute('rowspan');
+      cell.removeAttribute('colspan');
+      cell.setAttribute('width',pct+'%');
+      cell.style.setProperty('width',pct+'%','important');
+      cell.style.setProperty('min-width',pct+'%','important');
+      cell.style.setProperty('max-width',pct+'%','important');
+      cell.style.setProperty('box-sizing','border-box','important');
+      cell.style.setProperty('border-left',BORDER,'important');
+      cell.style.setProperty('border-right',BORDER,'important');
+      cell.style.setProperty('border-top',top?BORDER:'0','important');
+      cell.style.setProperty('border-bottom',bottom?BORDER:'0','important');
+      cell.style.setProperty('padding',header?'3px 4px':'3px 5px','important');
+      cell.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
+      cell.style.setProperty('font-size',header?'8.2pt':'8.3pt','important');
+      cell.style.setProperty('line-height','1.12','important');
+      cell.style.setProperty('vertical-align',header?'middle':'top','important');
+      cell.style.setProperty('text-align',header?'center':(idx===0?'center':'left'),'important');
+      cell.style.setProperty('white-space',idx===0?'nowrap':'normal','important');
+      if(header){
+        cell.style.setProperty('font-weight','700','important');
+        cell.style.setProperty('background','#d9d9d9','important');
+      }else{
+        cell.style.setProperty('background','transparent','important');
       }
+    }
 
-      const gallery=row.querySelector('.sustento-img-gallery-v113');
-      if(gallery){
-        gallery.style.setProperty('display','block','important');
-        gallery.style.setProperty('width','100%','important');
-        gallery.style.setProperty('max-width','100%','important');
-        gallery.style.setProperty('text-align','center','important');
-        gallery.style.setProperty('margin','0 auto','important');
-        gallery.style.setProperty('page-break-inside','avoid','important');
-        gallery.style.setProperty('break-inside','avoid','important');
-      }
-
-      const imgs=[...row.querySelectorAll('img.sustento-img-v55, .sustento-img-gallery-v113 img')];
-      const many=imgs.length>1;
-
-      imgs.forEach(img=>{
-        // Dimensiones históricas de la vista del informe:
-        // una imagen hasta 145 mm x 80 mm, centrada;
-        // varias imágenes hasta 70 mm x 55 mm cada una.
-        img.removeAttribute('width');
-        img.removeAttribute('height');
-        img.style.setProperty('display',many?'inline-block':'block','important');
-        img.style.setProperty('width','auto','important');
-        img.style.setProperty('height','auto','important');
-        img.style.setProperty('max-width',many?'70mm':'145mm','important');
-        img.style.setProperty('max-height',many?'55mm':'80mm','important');
-        img.style.setProperty('object-fit','contain','important');
-        img.style.setProperty('margin',many?'3mm 2mm':'4mm auto','important');
-        img.style.setProperty('vertical-align','top','important');
-        img.style.setProperty('page-break-inside','avoid','important');
-        img.style.setProperty('break-inside','avoid','important');
-        img.style.setProperty('box-sizing','border-box','important');
+    // Encabezado una sola vez.
+    const headTable=makeTable([7,93],'egob-des-sustento-header-v8429');
+    const headBody=document.createElement('tbody');
+    const sourceHead=src.querySelector('thead tr');
+    const hr=sourceHead ? sourceHead.cloneNode(true) : document.createElement('tr');
+    if(!sourceHead){
+      ['Nro.','Texto del artículo'].forEach(txt=>{
+        const th=document.createElement('th');
+        th.textContent=txt;
+        hr.appendChild(th);
       });
-    });
+    }
+    [...hr.children].forEach((cell,idx)=>styleSustentoCell(cell,idx,true,true,true));
+    headBody.appendChild(hr);
+    headTable.appendChild(headBody);
+    wrapper.appendChild(headTable);
+
+    const rows=[...src.querySelectorAll('tbody > tr')];
+
+    for(let i=0;i<rows.length;i++){
+      const row=rows[i];
+
+      if(row.classList.contains('sustento-img-row-v55')) continue;
+
+      // Fila de texto de la observación.
+      const t=makeTable([7,93],'egob-des-sustento-row-v8429');
+      const b=document.createElement('tbody');
+      const tr=row.cloneNode(true);
+      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
+      cells.forEach((cell,idx)=>styleSustentoCell(cell,idx,false,false,true));
+      tr.style.setProperty('page-break-inside','avoid','important');
+      tr.style.setProperty('break-inside','avoid','important');
+      b.appendChild(tr);
+      t.appendChild(b);
+      wrapper.appendChild(t);
+
+      // Imágenes asociadas a esta observación.
+      const next=rows[i+1];
+      if(next?.classList?.contains('sustento-img-row-v55')){
+        const imgs=[...next.querySelectorAll('img')];
+        if(imgs.length){
+          const imgTable=makeTable([100],'egob-des-sustento-images-v8429');
+          const imgBody=document.createElement('tbody');
+          const ir=document.createElement('tr');
+          const td=document.createElement('td');
+
+          td.style.setProperty('border-left',BORDER,'important');
+          td.style.setProperty('border-right',BORDER,'important');
+          td.style.setProperty('border-top','0','important');
+          td.style.setProperty('border-bottom',BORDER,'important');
+          td.style.setProperty('padding','4mm 3mm','important');
+          td.style.setProperty('text-align','center','important');
+          td.style.setProperty('vertical-align','top','important');
+          td.style.setProperty('background','transparent','important');
+          td.style.setProperty('page-break-inside','avoid','important');
+          td.style.setProperty('break-inside','avoid','important');
+
+          const gallery=document.createElement('div');
+          gallery.style.setProperty('width','100%','important');
+          gallery.style.setProperty('text-align','center','important');
+          gallery.style.setProperty('margin','0 auto','important');
+          gallery.style.setProperty('page-break-inside','avoid','important');
+          gallery.style.setProperty('break-inside','avoid','important');
+
+          const many=imgs.length>1;
+
+          imgs.forEach((srcImg,idx)=>{
+            const holder=document.createElement(many?'span':'div');
+            holder.style.setProperty('display',many?'inline-block':'block','important');
+            holder.style.setProperty('width',many?'70mm':'145mm','important');
+            holder.style.setProperty('max-width',many?'70mm':'145mm','important');
+            holder.style.setProperty('margin',many?'2mm':'0 auto','important');
+            holder.style.setProperty('text-align','center','important');
+            holder.style.setProperty('vertical-align','top','important');
+
+            const img=srcImg.cloneNode(true);
+            img.removeAttribute('width');
+            img.removeAttribute('height');
+            img.setAttribute('width',many?'265':'548');
+            img.style.setProperty('display','block','important');
+            img.style.setProperty('width','100%','important');
+            img.style.setProperty('max-width','100%','important');
+            img.style.setProperty('height','auto','important');
+            img.style.setProperty('max-height',many?'55mm':'80mm','important');
+            img.style.setProperty('object-fit','contain','important');
+            img.style.setProperty('margin','0 auto','important');
+            img.style.setProperty('box-sizing','border-box','important');
+            img.style.setProperty('page-break-inside','avoid','important');
+            img.style.setProperty('break-inside','avoid','important');
+
+            holder.appendChild(img);
+            gallery.appendChild(holder);
+          });
+
+          td.appendChild(gallery);
+          ir.appendChild(td);
+          imgBody.appendChild(ir);
+          imgTable.appendChild(imgBody);
+          wrapper.appendChild(imgTable);
+        }
+        i++;
+      }
+    }
+
+    src.replaceWith(wrapper);
   });
 }
 
@@ -45951,13 +46053,13 @@ function prepareConclusion(root){
   root.querySelectorAll('table.conclusion-report').forEach(src=>{
     if(src.dataset.egobLogicalV8411==='1') return;
 
-    const t=logicalTableV8428(src,[60,12,18,10]);
+    const t=logicalTableV8429(src,[60,12,18,10]);
     t.dataset.egobLogicalV8411='1';
 
     const thead=src.querySelector('thead');
     if(thead){
       const h=thead.cloneNode(true);
-      styleLogicalHeaderV8428(h);
+      styleLogicalHeaderV8429(h);
       t.appendChild(h);
     }
 
@@ -45973,7 +46075,7 @@ function prepareConclusion(root){
       const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
       cells.forEach((cell,idx)=>{
         cell.removeAttribute('rowspan');
-        styleLogicalCellV8428(cell,{
+        styleLogicalCellV8429(cell,{
           align:idx===0?'left':'center',
           font:'8.2pt',
           line:'1.06',
@@ -45991,13 +46093,13 @@ function prepareConclusion(root){
 }
 
 
-function isZeroBorderV8428(value){
+function isZeroBorderV8429(value){
   const v=String(value||'').trim().toLowerCase();
   return !v || v==='0' || v==='0px' || v==='none' ||
          v.startsWith('0px ') || v.startsWith('0pt ');
 }
 
-function applyUniformThinBordersV8428(root){
+function applyUniformThinBordersV8429(root){
   root.querySelectorAll('table').forEach(table=>{
     table.style.setProperty('border-collapse','collapse','important');
     table.style.setProperty('border-spacing','0','important');
@@ -46011,13 +46113,13 @@ function applyUniformThinBordersV8428(root){
   ).forEach(cell=>{
     // No reemplazar top/bottom si ya fueron definidos por la lógica de paginación.
     if(!cell.style.getPropertyValue('border-left'))
-      cell.style.setProperty('border-left',EGOB_BORDER_V8428,'important');
+      cell.style.setProperty('border-left',EGOB_BORDER_V8429,'important');
     if(!cell.style.getPropertyValue('border-right'))
-      cell.style.setProperty('border-right',EGOB_BORDER_V8428,'important');
+      cell.style.setProperty('border-right',EGOB_BORDER_V8429,'important');
     if(!cell.style.getPropertyValue('border-top'))
-      cell.style.setProperty('border-top',EGOB_BORDER_V8428,'important');
+      cell.style.setProperty('border-top',EGOB_BORDER_V8429,'important');
     if(!cell.style.getPropertyValue('border-bottom'))
-      cell.style.setProperty('border-bottom',EGOB_BORDER_V8428,'important');
+      cell.style.setProperty('border-bottom',EGOB_BORDER_V8429,'important');
   });
 }
 
@@ -46092,7 +46194,7 @@ function prepareAnteFactibilitiesV8413(root){
     ['EMPRESA','DOCUMENTO / TRÁMITE','FECHA'].forEach(text=>{
       const th=document.createElement('th');
       th.textContent=text;
-      styleLogicalCellV8428(th,{
+      styleLogicalCellV8429(th,{
         align:'center',
         font:'8.2pt',
         line:'1.05',
@@ -46121,7 +46223,7 @@ function prepareAnteFactibilitiesV8413(root){
         tc.forEach((cell,idx)=>{
           cell.removeAttribute('rowspan');
           cell.removeAttribute('colspan');
-          styleLogicalCellV8428(cell,{
+          styleLogicalCellV8429(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
@@ -46151,7 +46253,7 @@ function prepareAnteFactibilitiesV8413(root){
       const detail=row.querySelector('.fact-evidencia-v52');
 
       if(detail){
-        const lines=wrapCellForTablePctV8428(detail,80);
+        const lines=wrapCellForTablePctV8429(detail,80);
         const labelHtml=label?.innerHTML||'';
 
         lines.forEach((line,index)=>{
@@ -46171,15 +46273,15 @@ function prepareAnteFactibilitiesV8413(root){
           const first=index===0;
           const last=index===lines.length-1;
 
-          styleLogicalCellV8428(blank,{
+          styleLogicalCellV8429(blank,{
             align:'center',font:'8.0pt',line:'1.05',pad:'1px 3px',
             vertical:'top',top:first,bottom:last
           });
-          styleLogicalCellV8428(lab,{
+          styleLogicalCellV8429(lab,{
             align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px',
             vertical:'top',top:first,bottom:last
           });
-          styleLogicalCellV8428(det,{
+          styleLogicalCellV8429(det,{
             align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px',
             vertical:'top',top:first,bottom:last
           });
@@ -46199,7 +46301,7 @@ function prepareAnteFactibilitiesV8413(root){
 }
 
 
-function prepareObraMayorStudiesByEntityV8428(root){
+function prepareObraMayorStudiesByEntityV8429(root){
   // Solo Obra Mayor.
   try{
     if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()) return;
@@ -46232,7 +46334,7 @@ function prepareObraMayorStudiesByEntityV8428(root){
   wrapper.style.setProperty('break-inside','auto','important');
 
   function createStudyTable(){
-    const t=logicalTableV8428(src,widths);
+    const t=logicalTableV8429(src,widths);
 
     // CRÍTICO V8.4.25:
     // Quitar las clases que prepareFactibilities() busca.
@@ -46251,7 +46353,7 @@ function prepareObraMayorStudiesByEntityV8428(root){
     const original=src.querySelector(':scope > thead');
     if(!original) return null;
     const h=original.cloneNode(true);
-    styleLogicalHeaderV8428(h);
+    styleLogicalHeaderV8429(h);
     // Encabezado UNA sola vez; no repetir al cambiar de página.
     h.style.setProperty('display','table-row-group','important');
     h.style.setProperty('page-break-inside','avoid','important');
@@ -46262,7 +46364,7 @@ function prepareObraMayorStudiesByEntityV8428(root){
   function evidenceLines(cell){
     // Trabajar sobre el contenido REAL del informe final.
     // Esto preserva toda Evidencia/Detalle sin depender de state.
-    return wrapCellForTablePctV8428(cell,100);
+    return wrapCellForTablePctV8429(cell,100);
   }
 
   let currentEntity='';
@@ -46321,7 +46423,7 @@ function prepareObraMayorStudiesByEntityV8428(root){
     });
 
     [ent,typ,d,dt].forEach((cell,idx)=>{
-      styleLogicalCellV8428(cell,{
+      styleLogicalCellV8429(cell,{
         align:'center',
         font:'8.2pt',
         line:'1.05',
@@ -46372,14 +46474,14 @@ function prepareObraMayorStudiesByEntityV8428(root){
 
           const last=lineIndex===lines.length-1;
           cell.colSpan=4;
-          cell.innerHTML=justifyPhysicalLineV8428(
+          cell.innerHTML=justifyPhysicalLineV8429(
             lineHtml(line),
             !last
           );
 
           const first=lineIndex===0;
 
-          styleLogicalCellV8428(cell,{
+          styleLogicalCellV8429(cell,{
             align:'justify',
             font:'8.1pt',
             line:'1.08',
@@ -46456,7 +46558,7 @@ function prepareFactibilities(root){
           ? [20,16,46,18]
           : (firstMainCells.length===3 ? [20,65,15] : [20,80]));
 
-    const t=logicalTableV8428(src,widths);
+    const t=logicalTableV8429(src,widths);
     t.dataset.egobLogicalV8411='1';
     t.dataset.egobFactPreparedV8413='1';
 
@@ -46470,7 +46572,7 @@ function prepareFactibilities(root){
       ['EMPRESA','DOCUMENTO / TRÁMITE','FECHA'].forEach((text,idx)=>{
         const th=document.createElement('th');
         th.textContent=text;
-        styleLogicalCellV8428(th,{
+        styleLogicalCellV8429(th,{
           align:'center',
           font:'8.2pt',
           line:'1.05',
@@ -46500,7 +46602,7 @@ function prepareFactibilities(root){
       const thead=src.querySelector('thead');
       if(thead){
         const h=thead.cloneNode(true);
-        styleLogicalHeaderV8428(h);
+        styleLogicalHeaderV8429(h);
         t.appendChild(h);
       }
     }
@@ -46528,7 +46630,7 @@ function prepareFactibilities(root){
           cell.removeAttribute('rowspan');
           cell.removeAttribute('colspan');
 
-          styleLogicalCellV8428(cell,{
+          styleLogicalCellV8429(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
@@ -46565,7 +46667,7 @@ function prepareFactibilities(root){
 
           if(detail){
             // Evidencia ocupa las 3 columnas: 100 % del ancho útil.
-            const lines=wrapCellForTablePctV8428(detail,100);
+            const lines=wrapCellForTablePctV8429(detail,100);
             const labelHtml=label&&norm(label.textContent)?label.innerHTML:'';
 
             lines.forEach((line,k)=>{
@@ -46581,7 +46683,7 @@ function prepareFactibilities(root){
 
               const first=k===0;
               const last=k===lines.length-1;
-              const lineContent=justifyPhysicalLineV8428(
+              const lineContent=justifyPhysicalLineV8429(
                 lineHtml(line),
                 !last
               );
@@ -46594,7 +46696,7 @@ function prepareFactibilities(root){
                 det.innerHTML=lineContent;
               }
 
-              styleLogicalCellV8428(det,{
+              styleLogicalCellV8429(det,{
                 align:'justify',
                 font:'8.1pt',
                 line:'1.08',
@@ -46633,7 +46735,7 @@ function prepareFactibilities(root){
         tr.style.setProperty('break-inside','avoid','important');
 
         [...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName)).forEach((cell,idx)=>{
-          styleLogicalCellV8428(cell,{
+          styleLogicalCellV8429(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
@@ -46670,17 +46772,17 @@ function prepareFactibilities(root){
         x.removeAttribute('colspan');
       });
 
-      styleLogicalCellV8428(ent,{
+      styleLogicalCellV8429(ent,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
-      styleLogicalCellV8428(typ,{
+      styleLogicalCellV8429(typ,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
       typ.style.setProperty('font-weight','700','important');
-      styleLogicalCellV8428(d,{
+      styleLogicalCellV8429(d,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
-      styleLogicalCellV8428(dt,{
+      styleLogicalCellV8429(dt,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
       dt.style.setProperty('white-space','nowrap','important');
@@ -46697,7 +46799,7 @@ function prepareFactibilities(root){
           // Evidencia/Detalle ocupa TODO el ancho de la tabla:
           // ENTIDAD + TIPO + DOCUMENTO/TRÁMITE + FECHA.
           // El texto visible "Evidencia / detalle" se elimina.
-          const lines=wrapCellForTablePctV8428(detail,100);
+          const lines=wrapCellForTablePctV8429(detail,100);
 
           for(let k=0;k<lines.length;k++){
             const lr=document.createElement('tr');
@@ -46710,12 +46812,12 @@ function prepareFactibilities(root){
             const first=k===0;
             const last=k===lines.length-1;
 
-            det.innerHTML=justifyPhysicalLineV8428(
+            det.innerHTML=justifyPhysicalLineV8429(
               lineHtml(lines[k]),
               !last
             );
 
-            styleLogicalCellV8428(det,{
+            styleLogicalCellV8429(det,{
               align:'justify',
               font:'8.1pt',
               line:'1.08',
@@ -46743,7 +46845,7 @@ function prepareFactibilities(root){
 }
 
 
-window.buildEgobBodyV8428=function(){
+window.buildEgobBodyV8429=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -46757,16 +46859,16 @@ window.buildEgobBodyV8428=function(){
     report.setAttribute(PREP,'1');
     // Marcador estable: la extensión debe respetar este HTML tal como ALLPA lo preparó.
     report.setAttribute('data-allpa-egob-prepared','1');
-    prepareDesistimientoEgobV8428(report);
+    prepareDesistimientoEgobV8429(report);
     prepareRequirements(report);
     prepareConclusion(report);
-    prepareObraMayorStudiesByEntityV8428(report);
+    prepareObraMayorStudiesByEntityV8429(report);
     prepareFactibilities(report);
-    applyUniformThinBordersV8428(report);
+    applyUniformThinBordersV8429(report);
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.28] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.29] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
