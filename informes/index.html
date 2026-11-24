@@ -44955,7 +44955,7 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 </script>
 
 <!-- ==========================================================
-     ALLPA · INTEGRACIÓN eGOB SIN API · FASE 1 · V8.4.4
+     ALLPA · INTEGRACIÓN eGOB SIN API · FASE 1 · V8.4.27
      Alcance exclusivo:
        - Informe Técnico Aprobatorio · Obra Mayor / Anteproyecto
        - Informe de Desistimiento · Obra Mayor / Anteproyecto
@@ -44965,22 +44965,13 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 <style id="allpa-egob-bridge-v844-style">
   .allpa-egob-bridge-v843{display:none;margin:0 0 14px;padding:13px 14px;border:1px solid #b9d2e6;border-radius:13px;background:#f6fbff;box-shadow:0 4px 14px rgba(18,58,92,.06)}
   .allpa-egob-bridge-v843.visible{display:block}
-  .allpa-egob-bridge-v843 .egob-bridge-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
-  .allpa-egob-bridge-v843 .egob-bridge-title{font-size:12px;font-weight:950;color:#123a5c;text-transform:uppercase;letter-spacing:.15px}
-  .allpa-egob-bridge-v843 .egob-bridge-help{font-size:10px;line-height:1.35;color:#617286;margin-top:3px}
-  .allpa-egob-bridge-v843 .egob-bridge-badge{flex:0 0 auto;border:1px solid #9fc9ad;background:#edf9f1;color:#17613a;border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;white-space:nowrap}
-  .allpa-egob-bridge-v843 .egob-principal-grid{display:grid;grid-template-columns:minmax(260px,1fr);gap:9px;margin-bottom:9px}
-  .allpa-egob-bridge-v843 .egob-bridge-grid{display:grid;grid-template-columns:minmax(220px,.72fr) auto;gap:9px;align-items:end}
+  .allpa-egob-bridge-v843 .egob-bridge-grid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(220px,38%);gap:9px;align-items:end}
   .allpa-egob-bridge-v843 label{display:block;margin:0 0 4px;font-size:9px;font-weight:900;color:#27445f;text-transform:uppercase}
   .allpa-egob-bridge-v843 input{width:100%;box-sizing:border-box;border:1px solid #b8c8d8;border-radius:9px;padding:9px 10px;background:#fff;color:#17324d;font-size:11px}
   .allpa-egob-bridge-v843 input[readonly]{background:#eef4f8;color:#486274}
-  .allpa-egob-bridge-v843 .egob-target-hint{margin-top:6px;font-size:9px;color:#4f6578;min-height:13px}
-  .allpa-egob-bridge-v843 .egob-target-hint strong{color:#0b6c43}
   .allpa-egob-bridge-v843 .egob-open-btn{border:0;border-radius:9px;background:#087443;color:#fff;padding:10px 14px;font-size:10px;font-weight:1000;cursor:pointer;white-space:nowrap}
   .allpa-egob-bridge-v843 .egob-open-btn:hover{filter:brightness(.96)}
   .allpa-egob-bridge-v843 .egob-open-btn:disabled{background:#91a7a0;cursor:not-allowed}
-  .allpa-egob-bridge-v843 .egob-parent-ok{margin-top:6px;font-size:9px;color:#17613a;font-weight:800;min-height:13px}
-  .allpa-egob-bridge-v843 .egob-parent-error{color:#9c2e27}
   #solicitudEstructuralCopyV7918 .se-egob-bridge-v843{margin:0;border:1px solid #9fc9ad;border-radius:11px;background:#f2fbf5;padding:11px}
   #solicitudEstructuralCopyV7918 .se-egob-bridge-v843 .allpa-egob-bridge-v843{display:block!important;margin:0;padding:0;border:0;box-shadow:none;background:transparent}
   @media(max-width:760px){.allpa-egob-bridge-v843 .egob-bridge-grid{grid-template-columns:1fr}.allpa-egob-bridge-v843 .egob-open-btn{width:100%}}
@@ -44992,7 +44983,7 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 if(window.__ALLPA_EGOB_BRIDGE_V844__)return;
 window.__ALLPA_EGOB_BRIDGE_V844__=true;
 
-const VERSION='8.4.4';
+const VERSION='8.4.27';
 const EGOB_NEW='https://egobedoc.gadmriobamba.gob.ec:8081/issues/new';
 const TRACKER_ID='167';
 const MAP_KEY='ALLPA_EGOB_PARENT_MAP_V843';
@@ -45173,22 +45164,30 @@ function targetChanged(root,input){
   setTargetHint(root,id);
 }
 function openEgob(root){
-  const principalInput=findInput(root);
-  const principal=rememberParent(principalInput?.value||'')||storedParent();
-  if(!principal){setIndicator(root,'','Pegue primero el enlace del trámite principal eGOB o su ID.');principalInput?.focus();return;}
-  if(principalInput&&!principalInput.value)principalInput.value=principal;
+  // El principal se toma siempre del informe actual.
+  // El único campo visible puede conservarlo o ser reemplazado por un trámite hijo.
+  const principal=visibleEgob()||storedParent();
+  if(principal)rememberParent(principal);
 
   const targetInput=findTargetInput(root);
   const rawTarget=clean(targetInput?.value||'');
   let target=rawTarget?parseParent(rawTarget):principal;
+
   if(rawTarget&&!target){
-    setTargetHint(root,'','El N.º de trámite a responder no es válido.');
+    showMessage('El N.º de trámite a responder no es válido.',false);
     targetInput?.focus();
     return;
   }
-  if(!target)target=principal;
-  if(targetInput){targetInput.value=target;targetInput.dataset.usingPrincipalV844=target===principal?'1':'0';}
-  setTargetHint(root,target);
+  if(!target){
+    showMessage('No existe un N.º de trámite eGOB para responder.',false);
+    targetInput?.focus();
+    return;
+  }
+
+  if(targetInput){
+    targetInput.value=target;
+    targetInput.dataset.usingPrincipalV844=target===principal?'1':'0';
+  }
 
   const payload=isStructural()?structuralPayload():standardPayload();
   const errors=payloadErrors(payload);
@@ -45197,22 +45196,20 @@ function openEgob(root){
     const url=buildEgobUrl(target,payload);
     window.open(url,'_blank','noopener');
     showMessage(
-      target===principal
-        ? 'eGOB abierto sobre el trámite principal. La extensión completará DOCUMENTOS, Asunto, Anexo y Cuerpo.'
-        : `eGOB abierto para responder al trámite hijo ${target}. El trámite principal ${principal} se mantiene guardado.`,
+      `eGOB abierto para responder al trámite ${target}. La extensión completará DOCUMENTOS, Asunto, Anexo y Cuerpo.`,
       true
     );
   }catch(err){showMessage('No se pudo preparar eGOB: '+String(err?.message||err),false);}
 }
 function bridgeMarkup(structural=false){
-  const id=storedParent();
+  const principal=visibleEgob()||storedParent();
+  if(principal)rememberParent(principal);
   return `<div class="allpa-egob-bridge-v843 visible" data-allpa-egob-bridge-inner="1">
-    <div class="egob-bridge-head"><div><div class="egob-bridge-title">Abrir / Firmar en eGOB</div><div class="egob-bridge-help">El trámite principal queda guardado como referencia del expediente. Si debe responder a un trámite hijo, cambie únicamente el campo “N.º trámite a responder”.</div></div><span class="egob-bridge-badge">eGOB · MEMORANDO V6</span></div>
-    <div class="egob-principal-grid">
-      <div><label>Trámite principal eGOB · enlace / ID</label><input type="text" data-egob-parent-v843 value="${escapeHtml(id)}" placeholder="https://.../issues/1274428  ó  1274428"><div class="egob-parent-ok" data-egob-parent-status-v843>${id?`Trámite principal guardado: ${escapeHtml(id)}`:'Pegue una sola vez el enlace del trámite principal o su ID.'}</div></div>
-    </div>
     <div class="egob-bridge-grid">
-      <div><label>N.º trámite a responder</label><input type="text" inputmode="numeric" data-egob-target-v844 data-using-principal-v844="1" value="${escapeHtml(id)}" placeholder="${escapeHtml(id||'ID del trámite principal o hijo')}"><div class="egob-target-hint" data-egob-target-status-v844>${id?`Se responderá al trámite principal: <strong>${escapeHtml(id)}</strong>.`:'Primero registre el trámite principal.'}</div></div>
+      <div>
+        <label>N.º trámite a responder</label>
+        <input type="text" inputmode="numeric" data-egob-target-v844 data-using-principal-v844="1" value="${escapeHtml(principal)}" placeholder="ID del trámite eGOB">
+      </div>
       <button type="button" class="egob-open-btn" data-egob-open-v843>ABRIR / FIRMAR EN eGOB</button>
     </div>
   </div>`;
@@ -45220,10 +45217,7 @@ function bridgeMarkup(structural=false){
 function bindRoot(root){
   if(!root||root.dataset.egobBridgeBoundV843==='1')return;
   root.dataset.egobBridgeBoundV843='1';
-  const input=findInput(root);
   const target=findTargetInput(root);
-  input?.addEventListener('input',()=>parentChanged(root,input));
-  input?.addEventListener('change',()=>parentChanged(root,input));
   target?.addEventListener('input',()=>targetChanged(root,target));
   target?.addEventListener('change',()=>targetChanged(root,target));
   root.querySelector('[data-egob-open-v843]')?.addEventListener('click',()=>openEgob(root));
@@ -45232,29 +45226,60 @@ function ensureStandardPanel(){
   const tab=document.getElementById('tab-vista');if(!tab)return;
   let box=document.getElementById('allpaEgobBridgeV843');
   const active=supported()&&!isStructural();
-  if(!box){box=document.createElement('section');box.id='allpaEgobBridgeV843';box.className='allpa-egob-bridge-v843 no-print';tab.appendChild(box);}
+
+  if(!box){
+    box=document.createElement('section');
+    box.id='allpaEgobBridgeV843';
+    box.className='allpa-egob-bridge-v843 no-print';
+    tab.insertBefore(box,tab.firstChild);
+  }
+
   box.classList.toggle('visible',active);
   if(!active){box.innerHTML='';box.dataset.egobBridgeBoundV843='';return;}
-  const current=idFromRoot(box);
-  const desired=storedParent();
-  if(!box.querySelector('[data-allpa-egob-bridge-inner]')){box.innerHTML=bridgeMarkup(false);box.dataset.egobBridgeBoundV843='';bindRoot(box);}
-  else if(desired&&findInput(box)&&!findInput(box).value){findInput(box).value=desired;setIndicator(box,desired);}
-  const target=findTargetInput(box);if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){target.value=desired;target.dataset.usingPrincipalV844='1';setTargetHint(box,desired);}
-  const reportWrap=tab.querySelector('.report-wrap');
-  const copy=document.getElementById('copyPanelAprobatorio');
-  if(copy&&copy.parentNode===tab){const after=copy.nextSibling;if(after!==box)tab.insertBefore(box,after);}
-  else if(reportWrap&&box.nextSibling!==reportWrap)tab.insertBefore(box,reportWrap);
+
+  const desired=visibleEgob()||storedParent();
+  if(desired)rememberParent(desired);
+
+  if(!box.querySelector('[data-allpa-egob-bridge-inner]')){
+    box.innerHTML=bridgeMarkup(false);
+    box.dataset.egobBridgeBoundV843='';
+    bindRoot(box);
+  }
+
+  const target=findTargetInput(box);
+  if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){
+    target.value=desired;
+    target.dataset.usingPrincipalV844='1';
+  }
+
+  // Siempre al inicio de la pestaña: antes de Anexos, Asunto e Informe precargado.
+  if(tab.firstChild!==box)tab.insertBefore(box,tab.firstChild);
 }
-function idFromRoot(root){return parseParent(findInput(root)?.value||'');}
+function idFromRoot(root){return parseParent(findTargetInput(root)?.value||'');}
 function ensureStructuralPanel(){
   const panel=document.getElementById('solicitudEstructuralCopyV7918');
   if(!panel||!isStructural())return;
   const grid=panel.querySelector('.se-grid');if(!grid)return;
+
   let host=panel.querySelector('.se-egob-bridge-v843');
-  if(!host){host=document.createElement('div');host.className='se-egob-bridge-v843';host.innerHTML=bridgeMarkup(true);const reg=document.getElementById('registrarSolicitudEstructuralV7918');if(reg&&reg.parentNode===grid)grid.insertBefore(host,reg);else grid.appendChild(host);bindRoot(host);}
-  else{
-    const desired=storedParent();const input=findInput(host);if(desired&&input&&!input.value){input.value=desired;setIndicator(host,desired);}const target=findTargetInput(host);if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){target.value=desired;target.dataset.usingPrincipalV844='1';setTargetHint(host,desired);}
+  if(!host){
+    host=document.createElement('div');
+    host.className='se-egob-bridge-v843';
+    host.innerHTML=bridgeMarkup(true);
+    grid.insertBefore(host,grid.firstChild);
+    bindRoot(host);
   }
+
+  const desired=visibleEgob()||storedParent();
+  if(desired)rememberParent(desired);
+
+  const target=findTargetInput(host);
+  if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){
+    target.value=desired;
+    target.dataset.usingPrincipalV844='1';
+  }
+
+  if(grid.firstChild!==host)grid.insertBefore(host,grid.firstChild);
 }
 function sync(){ensureStandardPanel();ensureStructuralPanel();}
 
