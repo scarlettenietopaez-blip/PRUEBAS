@@ -111,6 +111,144 @@ section.right{min-height:0;overflow:hidden}
   overscroll-behavior:contain;
 }
 
+
+/* =========================
+   ANEXOS · estilo institucional
+   ========================= */
+.anexos-box{
+  margin-top:14px;
+  padding:14px;
+  border:1px solid #b8cbe0;
+  border-radius:14px;
+  background:#f8fbff;
+}
+.anexos-title{
+  margin:0 0 6px;
+  padding:10px 12px;
+  border-left:4px solid var(--rojo);
+  background:#eef4fa;
+  color:#0b2b4c;
+  font-size:15px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.anexos-help{
+  margin:0 0 12px;
+  color:#667085;
+  font-size:11px;
+}
+.anexos-table{
+  width:100%;
+  table-layout:fixed;
+  border-collapse:collapse;
+  background:#fff;
+}
+.anexos-table th,.anexos-table td{
+  border:1px solid #b8cbe0;
+  padding:7px;
+  vertical-align:middle;
+}
+.anexos-table th{
+  background:#e5eef7;
+  color:#0b2b4c;
+  font-size:10px;
+  font-weight:900;
+  text-transform:uppercase;
+  text-align:center;
+}
+.anexos-table td:first-child{
+  font-weight:900;
+  color:#0b2b4c;
+  text-align:center;
+}
+.anexos-table input[type="number"],.anexos-table select{
+  width:100%;
+  padding:8px;
+  border:1px solid #c8d6e5;
+  border-radius:9px;
+}
+.anexos-table input[type="checkbox"]{width:18px;height:18px;margin:0}
+.anexos-check{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin:0;
+  color:#17324d;
+  font-size:10px;
+  font-weight:800;
+  text-transform:none;
+}
+.anexos-planos{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  white-space:nowrap;
+}
+.anexos-planos input[type="number"]{width:58px;flex:0 0 58px;text-align:center;padding:6px 5px}
+.anexos-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.anexos-copy-box{
+  margin-bottom:12px;
+  padding:10px 12px;
+  border:1px solid #b8cbe0;
+  border-radius:11px;
+  background:#f8fbff;
+}
+.anexos-copy-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
+.anexos-copy-head strong{font-size:12px;color:#0b2b4c}
+.anexos-copy-body{
+  padding:9px 10px;
+  border:1px dashed #9bb3ca;
+  border-radius:8px;
+  background:#fff;
+  font-size:11px;
+  line-height:1.45;
+}
+.anexos-copy-body p{margin:0 0 5px}.anexos-copy-body p:last-child{margin-bottom:0}
+
+/* Páginas A4: flujo continuo */
+.report-page{
+  width:210mm;
+  height:297mm;
+  min-height:297mm;
+  max-height:297mm;
+  overflow:hidden;
+}
+.report-page-inner{
+  height:297mm;
+  min-height:297mm;
+  padding:25.4mm;
+  overflow:hidden;
+}
+.report-page-inner > *:first-child{margin-top:0}
+.report-page-inner > *:last-child{margin-bottom:0}
+.report-page-inner h2,.report-page-inner h3{
+  break-after:avoid;
+  page-break-after:avoid;
+}
+.report-page-inner table{
+  break-inside:auto;
+  page-break-inside:auto;
+}
+.report-page-inner tr{
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.report-continuation{
+  margin-top:0!important;
+  text-indent:0;
+}
+@media(max-width:900px){
+  .anexos-box{overflow-x:auto}
+  .anexos-table{min-width:850px;table-layout:auto}
+}
+@media print{
+  .anexos-box,.anexos-copy-box{display:none!important}
+  .report-page{height:297mm;max-height:297mm}
+  .report-page-inner{height:297mm}
+}
+
 </style>
 </head>
 <body>
@@ -327,9 +465,25 @@ section.right{min-height:0;overflow:hidden}
   <div class="field"><label>Observación adicional de afectación vial</label><textarea id="afExtra"></textarea></div>
   <div class="field"><label>Observación adicional de área verde / equipamiento</label><textarea id="verdeExtra"></textarea></div>
 
-  <div class="section-title">8. Recomendaciones y adjuntos</div>
+  <div class="section-title">8. Recomendaciones y Adjuntos</div>
   <div class="field"><label>Recomendaciones adicionales</label><textarea id="recomExtra"></textarea></div>
-  <div class="field"><label>Detalle de adjuntos / carpetas</label><textarea id="adjuntos"></textarea></div>
+
+  <section class="anexos-box" id="anexosBox">
+   <div class="anexos-title">ANEXOS</div>
+   <p class="anexos-help">Esta información no forma parte del cuerpo del informe. El resultado y el botón “Copiar anexos” se encuentran en Vista del Informe.</p>
+   <table class="anexos-table">
+    <colgroup>
+     <col style="width:9%"><col style="width:18%"><col style="width:14%">
+     <col style="width:23%"><col style="width:14%"><col style="width:13%"><col style="width:12%">
+    </colgroup>
+    <thead><tr>
+     <th>Numeración</th><th>Tipo</th><th>N.º de fojas</th><th>Planos incluidos</th>
+     <th>Agregar CDs</th><th>N.º de CDs</th><th>Acción</th>
+    </tr></thead>
+    <tbody id="anexosBody"></tbody>
+   </table>
+   <div class="anexos-actions"><button type="button" onclick="addAnexo()">+ Agregar fila</button></div>
+  </section>
  </div>
 
  <div id="tab-vista" class="tab">
@@ -337,6 +491,12 @@ section.right{min-height:0;overflow:hidden}
    <div class="egob-head"><h3>Texto para copiar en eGOB</h3><button onclick="copyEgob()">Copiar texto</button></div>
    <div id="egobText" class="egob-body"></div>
   </div>
+
+  <div class="anexos-copy-box no-print">
+   <div class="anexos-copy-head"><strong>ANEXOS</strong><button type="button" onclick="copyAnexos()">Copiar anexos</button></div>
+   <div id="anexosVista" class="anexos-copy-body"></div>
+  </div>
+
   <div class="pdf-toolbar no-print"><button onclick="renderReport()">Actualizar vista</button><button onclick="window.print()">Generar / Guardar PDF</button></div>
   <div id="report"></div>
   <div id="reportSource" class="report-source"></div>
@@ -354,7 +514,7 @@ const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
 const SUPABASE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});
 let profile=null;
-const state={sideIndex:0,pitItems:[],catastralBase:[],owners:[],proxies:[],professionals:[]};
+const state={sideIndex:0,pitItems:[],catastralBase:[],owners:[],proxies:[],professionals:[],anexos:[]};
 let miniMap=null,modalMap=null;
 const $=id=>document.getElementById(id);
 const v=id=>($(id)?.value||'').trim();
@@ -442,6 +602,85 @@ function updateZones(){const p=v('catParro');const rows=state.catastralBase.filt
 function syncCatastral(){const p=v('catParro'),z=v('catZona'),row=state.catastralBase.find(x=>x.parro===p&&x.zona===z)||state.catastralBase.find(x=>x.parro===p);if(row){$('catParroquia').value=row.parroquia;$('catUrbanoRural').value=row.urbanoRural}$('catClave').value=$('claveManualToggle').checked?v('claveManual'):[v('catProv')||'06',v('catCant')||'01',p,z,v('catSect'),v('catPolg'),v('catPred')].join('');renderReport()}
 function buscarClaveCatastral(){syncCatastral()}
 
+
+function ensureAnexos(){
+ if(!Array.isArray(state.anexos)) state.anexos=[];
+ if(!state.anexos.length) state.anexos=[{tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''}];
+ return state.anexos;
+}
+function anexoNumero(index,tipo){
+ let n=0;
+ for(let i=0;i<=index;i++) if((state.anexos[i]?.tipo||'folder')===tipo)n++;
+ return n;
+}
+function anexoLinea(row,index,placeholder=false){
+ const tipo=['folder','carpeta','fojas'].includes(row?.tipo)?row.tipo:'folder';
+ const fojas=String(row?.fojas||'').trim()||(placeholder?'…':'');
+ const planos=String(row?.planos||'').trim()||(placeholder?'…':'');
+ const cds=String(row?.cds||'').trim()||(placeholder?'…':'');
+ let line=tipo==='carpeta'
+   ? `Carpeta ${anexoNumero(index,'carpeta')}: con ${fojas} fojas`
+   : tipo==='folder'
+      ? `Folder ${anexoNumero(index,'folder')}: con ${fojas} fojas`
+      : `${fojas} fojas`;
+ if(row.incluyePlanos){
+   const n=Number(planos);
+   line+=` incluido en su foliado ${planos} ${n===1?'plano':'planos'}`;
+ }else{
+   line+=' incluido en su foliado';
+ }
+ if(row.incluyeCds){
+   const n=Number(cds);
+   line+=` + ${cds}${n===1?'CD':'CDs'}`;
+ }
+ return line;
+}
+function renderAnexos(){
+ const rows=ensureAnexos();
+ const body=$('anexosBody');
+ if(!body)return;
+ body.innerHTML=rows.map((r,i)=>`<tr>
+  <td>${r.tipo==='carpeta'?'Carpeta '+anexoNumero(i,'carpeta'):r.tipo==='folder'?'Folder '+anexoNumero(i,'folder'):'—'}</td>
+  <td><select data-ax="${i}" data-af="tipo">
+   <option value="folder" ${r.tipo==='folder'?'selected':''}>folder</option>
+   <option value="carpeta" ${r.tipo==='carpeta'?'selected':''}>carpeta</option>
+   <option value="fojas" ${r.tipo==='fojas'?'selected':''}>fojas</option>
+  </select></td>
+  <td><input type="number" min="0" step="1" data-ax="${i}" data-af="fojas" value="${esc(r.fojas||'')}" placeholder="Fojas"></td>
+  <td><div class="anexos-planos">
+   <label class="anexos-check"><input type="checkbox" data-ax="${i}" data-af="incluyePlanos" ${r.incluyePlanos?'checked':''}> incluido</label>
+   <input type="number" min="0" step="1" data-ax="${i}" data-af="planos" value="${esc(r.planos||'')}" placeholder="N.º" ${r.incluyePlanos?'':'disabled'}>
+   <span>planos</span>
+  </div></td>
+  <td><label class="anexos-check"><input type="checkbox" data-ax="${i}" data-af="incluyeCds" ${r.incluyeCds?'checked':''}> + CDs</label></td>
+  <td><input type="number" min="0" step="1" data-ax="${i}" data-af="cds" value="${esc(r.cds||'')}" placeholder="CDs" ${r.incluyeCds?'':'disabled'}></td>
+  <td style="text-align:center"><button type="button" class="party-remove" onclick="removeAnexo(${i})" ${rows.length<=1?'disabled':''}>Quitar</button></td>
+ </tr>`).join('');
+ body.querySelectorAll('[data-ax]').forEach(el=>{
+   const evt=(el.type==='checkbox'||el.tagName==='SELECT')?'change':'input';
+   el.addEventListener(evt,()=>{
+     const r=state.anexos[Number(el.dataset.ax)],f=el.dataset.af;
+     r[f]=el.type==='checkbox'?el.checked:el.value;
+     if(f==='incluyePlanos'&&!r[f])r.planos='';
+     if(f==='incluyeCds'&&!r[f])r.cds='';
+     if(el.type==='checkbox'||el.tagName==='SELECT')renderAnexos();
+     renderAnexosVista();renderReport();
+   });
+ });
+ renderAnexosVista();
+}
+function addAnexo(){ensureAnexos().push({tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''});renderAnexos();renderReport()}
+function removeAnexo(i){if(ensureAnexos().length<=1)return notify('Debe conservar al menos una fila de anexos.');state.anexos.splice(i,1);renderAnexos();renderReport()}
+function renderAnexosVista(){
+ const box=$('anexosVista');if(!box)return;
+ box.innerHTML=ensureAnexos().map((r,i)=>`<p>${esc(anexoLinea(r,i,true))}</p>`).join('');
+}
+function anexosText(){return ensureAnexos().map((r,i)=>anexoLinea(r,i,false)).join('\n')}
+async function copyAnexos(){
+ try{await navigator.clipboard.writeText(anexosText());notify('Anexos copiados.')}
+ catch(e){notify('No se pudo copiar automáticamente.')}
+}
+
 function renderLots(){const n=parseInt(v('nLotes')||2),old={};document.querySelectorAll('[data-lot]').forEach(x=>old[x.dataset.lot]=x.value);$('lotsBody').innerHTML='';for(let i=1;i<=n;i++)$('lotsBody').insertAdjacentHTML('beforeend',`<tr><td>LOTE ${i}</td><td><input type="number" step="0.01" data-lot="${i}" value="${old[i]||''}"></td></tr>`);document.querySelectorAll('[data-lot]').forEach(x=>x.addEventListener('input',()=>{calc();renderReport()}));calc()}
 function lotData(){return[...document.querySelectorAll('[data-lot]')].map((x,i)=>({i:i+1,a:parseFloat(x.value||0)||0}))}
 function calc(){const s=lotData().reduce((a,b)=>a+b.a,0),u=num('areaIprus')-num('areaAfectada')-num('areaAfectadaProp');$('sumLots').textContent=fmt(s);$('kIprus').textContent=fmt(num('areaIprus'))+' m²';$('kLotes').textContent=fmt(s)+' m²';$('kUrb').textContent=fmt(u)+' m²'}
@@ -449,8 +688,155 @@ function pct(a,b){return b?(a/b*100).toFixed(2)+'%':'0.00%'}
 function lotTable(){const d=lotData();return`<table><tr><th>Nro.</th><th>Área</th></tr>${d.map(x=>`<tr><td>LOTE ${x.i}</td><td>${fmt(x.a)}</td></tr>`).join('')}<tr><th>TOTAL ÚTIL</th><th>${fmt(d.reduce((a,b)=>a+b.a,0))}</th></tr></table>`}
 function areaTable(){const ip=num('areaIprus'),g=num('areaGrav'),a=num('areaAfectada'),p=num('areaAfectadaProp'),l=lotData().reduce((x,y)=>x+y.a,0),u=ip-a-p;return`<table><tr><th>Descripción</th><th>Área</th><th>U</th><th>Porcentaje</th></tr><tr><td>Área Total del Lote (gravamen)</td><td>${fmt(g)}</td><td>m²</td><td>${pct(g,ip)}</td></tr><tr><td>Área Total del Lote (IPRUS)</td><td>${fmt(ip)}</td><td>m²</td><td>100.00%</td></tr><tr><td>Área útil de lotes</td><td>${fmt(l)}</td><td>m²</td><td>${pct(l,ip)}</td></tr><tr><td>Área afectación vial</td><td>${fmt(a)}</td><td>m²</td><td>${pct(a,ip)}</td></tr><tr><td>Área afectación vial propuesta</td><td>${fmt(p)}</td><td>m²</td><td>${pct(p,ip)}</td></tr><tr><td>Área Útil Urbanizable</td><td>${fmt(u)}</td><td>m²</td><td>${pct(u,ip)}</td></tr><tr><td>COS PB</td><td>${esc(pitVal('cos_planta_baja','cos_pb'))}</td><td>%</td><td>-</td></tr><tr><td>COS Total</td><td>${esc(pitVal('cos_total'))}</td><td>%</td><td>-</td></tr></table>`}
 
-function makeReportPage(){const p=document.createElement('div');p.className='report-page';p.innerHTML='<img class="report-page-bg" src="assets/fondo_institucional.png" alt=""><div class="report-page-inner"></div>';return p}
-function paginateReport(html){const report=$('report'),src=$('reportSource');src.innerHTML=`<div class="report-page"><div class="report-page-inner">${html}</div></div>`;const source=src.querySelector('.report-page-inner');report.innerHTML='';let page=makeReportPage(),inner=page.querySelector('.report-page-inner');report.appendChild(page);const max=(297-50.8)*(96/25.4);[...source.children].forEach(node=>{const c=node.cloneNode(true);inner.appendChild(c);if(inner.scrollHeight>max&&inner.children.length>1){inner.removeChild(c);page=makeReportPage();inner=page.querySelector('.report-page-inner');report.appendChild(page);inner.appendChild(c)}});src.innerHTML=''}
+function makeReportPage(){
+ const p=document.createElement('div');
+ p.className='report-page';
+ p.innerHTML='<img class="report-page-bg" src="assets/fondo_institucional.png" alt=""><div class="report-page-inner"></div>';
+ return p;
+}
+function textNodesOf(root){
+ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+ const a=[];let n;while(n=w.nextNode())a.push(n);return a;
+}
+function textLength(root){return textNodesOf(root).reduce((s,n)=>s+n.nodeValue.length,0)}
+function pointAt(root,offset){
+ const nodes=textNodesOf(root);let left=offset;
+ for(const n of nodes){
+   if(left<=n.nodeValue.length)return{node:n,offset:left};
+   left-=n.nodeValue.length;
+ }
+ const n=nodes[nodes.length-1];
+ return n?{node:n,offset:n.nodeValue.length}:null;
+}
+function fragmentElementByText(root,start,end){
+ const total=textLength(root);
+ start=Math.max(0,Math.min(start,total));end=Math.max(start,Math.min(end,total));
+ const clone=root.cloneNode(false);
+ if(total===0){clone.innerHTML=root.innerHTML;return clone}
+ const a=pointAt(root,start),b=pointAt(root,end);
+ if(!a||!b)return clone;
+ const range=document.createRange();
+ range.setStart(a.node,a.offset);range.setEnd(b.node,b.offset);
+ clone.appendChild(range.cloneContents());
+ return clone;
+}
+function pageOverflows(inner){
+ return inner.scrollHeight>inner.clientHeight+1;
+}
+function addParagraphFlow(original,getInner,newPage){
+ let start=0,total=textLength(original);
+ while(start<total){
+   let inner=getInner(),lo=start+1,hi=total,best=start;
+   while(lo<=hi){
+     let mid=Math.floor((lo+hi)/2);
+     const probe=fragmentElementByText(original,start,mid);
+     probe.classList.add('report-continuation');
+     inner.appendChild(probe);
+     const fits=!pageOverflows(inner);
+     inner.removeChild(probe);
+     if(fits){best=mid;lo=mid+1}else hi=mid-1;
+   }
+   if(best===start){
+     newPage();inner=getInner();
+     continue;
+   }
+   if(best<total){
+     const text=original.textContent||'';
+     let cut=best;
+     while(cut>start+15 && !/\s/.test(text[cut-1]||''))cut--;
+     if(cut>start+15)best=cut;
+   }
+   const piece=fragmentElementByText(original,start,best);
+   if(start>0)piece.classList.add('report-continuation');
+   inner.appendChild(piece);
+   start=best;
+   if(start<total)newPage();
+ }
+}
+function addTableFlow(table,getInner,newPage){
+ const thead=table.querySelector('thead');
+ const allRows=[...table.querySelectorAll('tbody tr')];
+ if(!allRows.length){
+   const rows=[...table.querySelectorAll('tr')];
+   if(rows.length<=1){getInner().appendChild(table.cloneNode(true));return}
+   const first=rows.shift();
+   let idx=0;
+   while(idx<rows.length){
+     let inner=getInner();
+     const t=table.cloneNode(false),body=document.createElement('tbody');
+     body.appendChild(first.cloneNode(true));t.appendChild(body);inner.appendChild(t);
+     while(idx<rows.length){
+       const r=rows[idx].cloneNode(true);body.appendChild(r);
+       if(pageOverflows(inner)){body.removeChild(r);break}
+       idx++;
+     }
+     if(idx<rows.length)newPage();
+   }
+   return;
+ }
+ let idx=0;
+ while(idx<allRows.length){
+   let inner=getInner();
+   const t=table.cloneNode(false);
+   if(thead)t.appendChild(thead.cloneNode(true));
+   const body=document.createElement('tbody');t.appendChild(body);inner.appendChild(t);
+   let added=0;
+   while(idx<allRows.length){
+     const r=allRows[idx].cloneNode(true);body.appendChild(r);
+     if(pageOverflows(inner)){
+       body.removeChild(r);
+       if(added===0){inner.removeChild(t);newPage();break}
+       break;
+     }
+     idx++;added++;
+   }
+   if(idx<allRows.length && added>0)newPage();
+ }
+}
+function paginateReport(html){
+ const report=$('report'),src=$('reportSource');
+ src.innerHTML=`<div class="report-page"><div class="report-page-inner">${html}</div></div>`;
+ const source=src.querySelector('.report-page-inner');
+ report.innerHTML='';
+ let page=null,inner=null;
+ const newPage=()=>{
+   page=makeReportPage();inner=page.querySelector('.report-page-inner');report.appendChild(page);
+ };
+ const getInner=()=>inner;
+ newPage();
+
+ [...source.children].forEach(node=>{
+   const tag=node.tagName;
+   if(tag==='P'){
+     const clone=node.cloneNode(true);inner.appendChild(clone);
+     if(pageOverflows(inner)){
+       inner.removeChild(clone);
+       addParagraphFlow(node,getInner,newPage);
+     }
+     return;
+   }
+   if(tag==='TABLE'){
+     const clone=node.cloneNode(true);inner.appendChild(clone);
+     if(pageOverflows(inner)){
+       inner.removeChild(clone);
+       if(inner.children.length)newPage();
+       addTableFlow(node,getInner,newPage);
+     }
+     return;
+   }
+   const clone=node.cloneNode(true);inner.appendChild(clone);
+   if(pageOverflows(inner)){
+     inner.removeChild(clone);
+     newPage();
+     inner.appendChild(clone);
+     if(pageOverflows(inner) && (tag==='DIV'||tag==='SECTION')){
+       inner.removeChild(clone);
+       addParagraphFlow(node,getInner,newPage);
+     }
+   }
+ });
+ src.innerHTML='';
+}
 
 function renderReport(){
  calc();
@@ -483,7 +869,7 @@ function renderReport(){
  <h3>10. CUADRO DE ÁREAS</h3>${areaTable()}
  <h3>11. INFRAESTRUCTURA BÁSICA</h3><p>El predio dispone de las factibilidades correspondientes de RIOBAMBA EP, EERSA y CNT conforme los antecedentes.</p>
  <h3>12. OBSERVACIONES Y RECOMENDACIONES</h3><p>- Adjuntar todos los requisitos establecidos en el Artículo 53 de la Ordenanza 016-2023.<br>- Verificar que el proyecto técnico cumpla los parámetros del Artículo 54 de la Ordenanza 016-2023.</p><p>${nl(v('recomExtra'))}</p>
- <h3>13. CONCLUSIÓN</h3><p>De conformidad con el artículo 39 de la Ordenanza 016-2023, se emite <b>INFORME TÉCNICO FAVORABLE</b> para revisión y aprobación de Subdivisión Predial de dos a diez lotes con obras.</p><p><b>${esc(technicianName())}</b><br>${esc(technicianCargo())}</p><p><u>Adjunto:</u><br>${nl(v('adjuntos'))}</p>`;
+ <h3>13. CONCLUSIÓN</h3><p>De conformidad con el artículo 39 de la Ordenanza 016-2023, se emite <b>INFORME TÉCNICO FAVORABLE</b> para revisión y aprobación de Subdivisión Predial de dos a diez lotes con obras.</p><p><b>${esc(technicianName())}</b><br>${esc(technicianCargo())}</p><p><u>Adjunto:</u><br>${ensureAnexos().map((r,i)=>esc(anexoLinea(r,i,false))).join("<br>")}</p>`;
  paginateReport(reportHtml);
  $('egobText').textContent=`De mi consideración
 
@@ -493,8 +879,8 @@ En virtud de lo establecido en el artículo 39 de la Ordenanza 016-2023, solicit
 
 Con sentimientos de estima y consideración.`;
 }
-function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.owners=state.owners;d.proxies=state.proxies;d.lots=lotData().map(x=>x.a);return d}
-function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;if(Array.isArray(d.proxies))state.proxies=d.proxies;renderOwners();renderProxies();updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();updateNroButton();renderReport()}
+function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.owners=state.owners;d.proxies=state.proxies;d.anexos=state.anexos;d.lots=lotData().map(x=>x.a);return d}
+function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;if(Array.isArray(d.proxies))state.proxies=d.proxies;if(Array.isArray(d.anexos)&&d.anexos.length)state.anexos=d.anexos;renderOwners();renderProxies();renderAnexos();updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();updateNroButton();renderReport()}
 function guardarFormulario(show=true){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO_V3',JSON.stringify(snapshot()));if(show)notify('Informe guardado.')}
 function nuevoFormulario(){if(confirm('¿Crear un formulario nuevo?')){localStorage.removeItem('ALLPA_SUBDIVISION_APROBATORIO_V3');location.reload()}}
 function asignarNumero(){const x=prompt('Ingrese el Nro. del Informe Técnico Aprobatorio:',v('ita'));if(x!==null){$('ita').value=x.trim();updateNroButton();renderReport()}}
@@ -517,7 +903,7 @@ function bind(){
 }
 async function init(){
  try{await authGuard()}catch(e){}
- state.owners=[{nombre:'',doc:''}];renderOwners();renderProxies();syncEpSolicitante();
+ state.owners=[{nombre:'',doc:''}];state.anexos=[{tipo:'folder',fojas:'',incluyePlanos:false,planos:'',incluyeCds:false,cds:''}];renderOwners();renderProxies();renderAnexos();syncEpSolicitante();
  for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);
  $('fechaEmision').value=new Date().toISOString().slice(0,10);
  bind();
