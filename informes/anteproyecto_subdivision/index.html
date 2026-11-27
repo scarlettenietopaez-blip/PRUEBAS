@@ -47,7 +47,7 @@ input,select,textarea{width:100%;padding:9px 10px;border:1px solid #cbd5e1;borde
 textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini{font-size:10px;color:var(--muted)}
 .party-table,.form-table,.pit-table{width:100%;border-collapse:collapse}.party-table th,.party-table td,.form-table th,.form-table td{border:1px solid var(--linea);padding:7px}.party-table th,.form-table th{background:#e7eff6;color:#143752;font-size:10px;text-transform:uppercase;text-align:left}
 .party-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}.party-actions button{font-size:10px}.party-remove{background:#c92d43!important}.hidden{display:none!important}
-.project-prof-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.inline-check{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;text-transform:none}.inline-check input{width:auto}
+.project-prof-row{display:grid;grid-template-columns:2fr 1fr;gap:10px}.inline-check{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;text-transform:none}.inline-check input{width:auto}
 .catastral-panel{border:1px solid #b8cbe0;border-radius:12px;padding:10px;background:#f8fbff}
 .catastral-line{display:grid;grid-template-columns:46px 46px 86px 86px 70px 70px minmax(160px,1fr) 42px;gap:6px;align-items:end}
 .catastral-info{display:grid;grid-template-columns:1.2fr .55fr 1.2fr;gap:8px;margin-top:10px}
@@ -95,6 +95,20 @@ section.right{
 @media(max-width:1000px){
   section.right{height:auto;overflow:visible}
   .content-scroll{height:auto;overflow:visible;padding-right:0;scrollbar-gutter:auto}
+}
+
+
+/* Scroll exclusivo del panel derecho */
+.grid-main{min-height:0}
+section.right{min-height:0;overflow:hidden}
+.content-scroll{
+  flex:1 1 auto;
+  min-height:0;
+  height:0;
+  overflow-y:scroll;
+  overflow-x:hidden;
+  scrollbar-gutter:stable;
+  overscroll-behavior:contain;
 }
 
 </style>
@@ -169,16 +183,17 @@ section.right{
    </table>
   </div>
 
-  <div class="project-prof-row" style="margin-top:12px">
+  <div class="row" style="margin-top:12px">
    <div class="field">
     <label>Proyectista</label>
-    <select id="proyectistaSelect"><option value="">Cargando profesionales...</option></select>
-    <label class="inline-check" style="margin-top:7px"><input type="checkbox" id="proyectistaManualToggle"> Ingresar proyectista manualmente</label>
-    <input id="proyectistaManual" class="hidden" placeholder="Nombre completo" style="margin-top:7px">
-    <div id="profStatus" class="mini"></div>
+    <input id="proyectista" list="profesionalesList" autocomplete="off" placeholder="Escriba o seleccione un profesional registrado...">
+    <datalist id="profesionalesList"></datalist>
+    <div id="profStatus" class="mini">Puede seleccionar un profesional registrado o escribirlo manualmente.</div>
    </div>
-   <div class="field"><label>Registro Municipal</label><input id="registroMunicipal" readonly></div>
-   <div class="field"><label>RUC/Cédula proyectista</label><input id="rucProy" readonly></div>
+   <div class="field">
+    <label>RUC/Cédula proyectista</label>
+    <input id="rucProy" placeholder="Se autocompleta si el profesional está registrado; también es editable">
+   </div>
   </div>
 
   <div class="section-title">2. Ubicación del predio</div>
@@ -208,27 +223,30 @@ section.right{
   </div>
   <div class="field"><label>Nombre del proyecto</label><input id="proyectoNombre"></div>
 
-  <div class="section-title">3. Certificado de gravamen e IPRUS</div>
+  <div class="section-title">3. Certificado de Gravamen</div>
   <div class="row3">
-   <div class="field"><label>Fojas gravamen</label><input id="gFojas"></div>
-   <div class="field"><label>Carpeta gravamen</label><input id="gCarpeta"></div>
+   <div class="field"><label>Fojas</label><input id="gFojas"></div>
+   <div class="field"><label>Carpeta</label><input id="gCarpeta"></div>
    <div class="field"><label>Ficha registral</label><input id="gFicha"></div>
    <div class="field"><label>Nro. certificado</label><input id="gCert"></div>
    <div class="field"><label>Referencia</label><input id="gRef"></div>
    <div class="field"><label>Fecha certificado</label><input type="date" id="gFecha"></div>
    <div class="field"><label>Área gravamen (m²)</label><input type="number" step="0.01" id="areaGrav"></div>
-   <div class="field"><label>Fojas IPRUS</label><input id="iFojas"></div>
-   <div class="field"><label>Carpeta IPRUS</label><input id="iCarpeta"></div>
-   <div class="field"><label>Nro. IPRUS</label><input id="nroIprus"></div>
-   <div class="field"><label>Técnico IPRUS</label><input id="tecnicoIprus"></div>
-   <div class="field"><label>Área IPRUS (m²)</label><input type="number" step="0.01" id="areaIprus"></div>
   </div>
   <div class="field"><label>Texto de dominio / calidad de propietario</label><textarea id="textoGrav"></textarea></div>
   <div class="field"><label>Linderos y dimensiones generales</label><textarea id="linderos"></textarea></div>
 
-  <div class="section-title">4. Factibilidades, predial, RUC y patente</div>
+  <div class="section-title">4. IPRUS</div>
+  <div class="row3">
+   <div class="field"><label>Fojas</label><input id="iFojas"></div>
+   <div class="field"><label>Carpeta</label><input id="iCarpeta"></div>
+   <div class="field"><label>Nro. IPRUS</label><input id="nroIprus"></div>
+   <div class="field"><label>Técnico IPRUS</label><input id="tecnicoIprus"></div>
+   <div class="field"><label>Área IPRUS (m²)</label><input type="number" step="0.01" id="areaIprus"></div>
+  </div>
 
-  <h3>RIOBAMBA EP</h3>
+  <div class="section-title">5. Factibilidad RIOBAMBA EP</div>
+
   <div class="row3">
    <div class="field"><label>Fojas</label><input id="epFojas"></div>
    <div class="field"><label>Carpeta</label><input id="epCarpeta"></div>
@@ -242,7 +260,7 @@ section.right{
   <div class="field"><label>Solicitado por</label><input id="epSolicita"></div>
   <div class="field"><label>Datos / texto de factibilidad</label><textarea id="epDatos"></textarea></div>
 
-  <h3>EERSA</h3>
+  <div class="section-title">6. Factibilidad EERSA</div>
   <div class="row3">
    <div class="field"><label>Fojas</label><input id="eeFojas"></div>
    <div class="field"><label>Carpeta</label><input id="eeCarpeta"></div>
@@ -252,7 +270,7 @@ section.right{
   </div>
   <div class="field"><label>Datos / texto EERSA</label><textarea id="eeDatos"></textarea></div>
 
-  <h3>CNT</h3>
+  <div class="section-title">7. Factibilidad CNT</div>
   <div class="row3">
    <div class="field"><label>Fojas</label><input id="cntFojas"></div>
    <div class="field"><label>Carpeta</label><input id="cntCarpeta"></div>
@@ -263,18 +281,20 @@ section.right{
   </div>
   <div class="field"><label>Datos / texto CNT</label><textarea id="cntDatos"></textarea></div>
 
-  <h3>Impuesto predial</h3>
+  <div class="section-title">8. Impuesto Predial</div>
   <div class="row">
    <div class="field"><label>Fojas</label><input id="pFojas"></div>
    <div class="field"><label>Carpeta</label><input id="pCarpeta"></div>
   </div>
   <div class="field"><label>Datos del impuesto predial</label><textarea id="datosImpuestoPredial" placeholder="Copie y pegue aquí el texto adicional del comprobante de impuesto predial."></textarea></div>
 
-  <h3>RUC y patente del proyectista</h3>
+  <div class="section-title">9. RUC del Proyectista</div>
   <div class="row">
    <div class="field"><label>Fojas RUC</label><input id="rFojas"></div>
    <div class="field"><label>Carpeta RUC</label><input id="rCarpeta"></div>
   </div>
+
+  <div class="section-title">10. Patente del Proyectista</div>
   <div class="row">
    <div class="field"><label>Fojas patente</label><input id="patFojas"></div>
    <div class="field"><label>Carpeta patente</label><input id="patCarpeta"></div>
@@ -285,7 +305,7 @@ section.right{
  <div id="tab-propuesta" class="tab card no-print">
   <h2>Propuesta Proyecto</h2>
   <div class="section-title">5. Propuesta del proyecto</div>
-  <div class="field"><label>Ejes viales / descripción técnica</label><textarea id="datosTecnicos"></textarea></div>
+  <div class="field"><label>Datos Técnicos — Ejes viales / descripción técnica</label><textarea id="datosTecnicos" placeholder="Corresponde a la variable {{Datos_Técnicos}} de la plantilla."></textarea></div>
   <div class="row3">
    <div class="field"><label>¿Contempla vías internas?</label><select id="viasInternas"><option>No</option><option>Sí</option></select></div>
    <div class="field"><label>¿Presenta afectación vial?</label><select id="presentaAfectacion"><option>No</option><option>Sí</option></select></div>
@@ -295,7 +315,7 @@ section.right{
    <div class="field"><label>Densidad neta (hab/ha)</label><input id="densNeta"></div>
   </div>
   <div class="field"><label>Texto adicional de propuesta de vías</label><textarea id="viasTexto"></textarea></div>
-  <div class="field"><label>Memoria técnica · área verde y equipamiento</label><textarea id="memoria"></textarea></div>
+  <div class="field"><label>Datos de Memoria — Área verde y equipamiento</label><textarea id="memoria" placeholder="Corresponde a la variable {{Datos_Memoria}} de la plantilla."></textarea></div>
 
   <div class="section-title">6. Loteamiento y cuadro de áreas</div>
   <div class="row"><div class="field"><label>Número de lotes</label><select id="nLotes"></select></div><div class="field"><label>&nbsp;</label><button class="secondary" onclick="renderLots()">Actualizar tabla</button></div></div>
@@ -361,13 +381,47 @@ function renderProxies(){$('proxyBlock').classList.toggle('hidden',!state.proxie
 function ownerRecords(){return state.owners.filter(x=>x.nombre.trim())}
 function ownersText(){return ownerRecords().map(x=>x.nombre.trim()).join(', ').replace(/, ([^,]*)$/,' y $1')}
 function ownerTreatment(){return ownerRecords().length>1?'los señores':'el/la señor/a'}
-function syncEpSolicitante(){const el=$('epSolicita');if(el.dataset.manual==='1')return;el.value=ownersText()}
+function syncEpSolicitante(){
+ const el=$('epSolicita');if(!el)return;
+ const owners=ownersText();
+ if(el.dataset.manual==='1') return;
+ el.value=owners;
+ el.dataset.autoValue=owners;
+}
 
 function parseSemicolonCSV(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'){if(q&&n==='"'){cell+='"';i++}else q=!q}else if(c===';'&&!q){row.push(cell);cell=''}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell='';if(row.some(x=>x.trim()))rows.push(row);row=[]}else cell+=c}if(cell||row.length){row.push(cell);rows.push(row)}return rows}
-async function loadProfessionals(){try{const r=await fetch('data/profesionales.csv',{cache:'no-store'});const rows=parseSemicolonCSV((await r.text()).replace(/^\uFEFF/,''));const h=rows.shift().map(x=>x.trim().toLowerCase());const idx=x=>h.indexOf(x);state.professionals=rows.map(r=>({registro:(r[idx('registro municipal')]||'').trim(),nombre:(r[idx('nombre')]||'').replace(/\s+/g,' ').trim(),activo:(r[idx('activo')]||'').trim(),titulo:(r[idx('titulo')]||'').trim(),cedula:(r[idx('# de cedula')]||'').trim()})).filter(p=>p.registro&&p.nombre&&/^s[ií]$/i.test(p.activo)&&/^arquitect[oa]$/i.test(p.titulo)&&p.nombre.toUpperCase()!=='NA').sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));$('proyectistaSelect').innerHTML='<option value="">Seleccione un profesional registrado...</option>'+state.professionals.map((p,i)=>`<option value="${i}">${esc(p.nombre)} · Reg. ${esc(p.registro)}</option>`).join('');$('profStatus').textContent=`${state.professionals.length} profesionales registrados cargados.`}catch(e){$('proyectistaSelect').innerHTML='<option value="">No se pudo cargar la lista</option>';$('profStatus').textContent='Active el ingreso manual.'}}
-function syncProfessional(){if($('proyectistaManualToggle').checked)return;const i=$('proyectistaSelect').value;const p=i===''?null:state.professionals[Number(i)];$('registroMunicipal').value=p?.registro||'';$('rucProy').value=p?.cedula||'';renderReport()}
-function setProfessionalManual(on){$('proyectistaManual').classList.toggle('hidden',!on);$('proyectistaSelect').disabled=on;$('registroMunicipal').readOnly=!on;$('rucProy').readOnly=!on;if(on){const i=$('proyectistaSelect').value;const p=i===''?null:state.professionals[Number(i)];if(!$('proyectistaManual').value)$('proyectistaManual').value=p?.nombre||''}else syncProfessional();renderReport()}
-function professionalName(){if($('proyectistaManualToggle').checked)return v('proyectistaManual');const i=$('proyectistaSelect').value;return i===''?'':(state.professionals[Number(i)]?.nombre||'')}
+async function loadProfessionals(){
+ try{
+  const r=await fetch('data/profesionales.csv',{cache:'no-store'});
+  if(!r.ok) throw new Error('No se pudo cargar profesionales.csv');
+  const rows=parseSemicolonCSV((await r.text()).replace(/^\uFEFF/,''));
+  const h=rows.shift().map(x=>x.trim().toLowerCase());
+  const idx=x=>h.indexOf(x);
+  state.professionals=rows.map(r=>({
+    registro:(r[idx('registro municipal')]||'').trim(),
+    nombre:(r[idx('nombre')]||'').replace(/\s+/g,' ').trim(),
+    activo:(r[idx('activo')]||'').trim(),
+    titulo:(r[idx('titulo')]||'').trim(),
+    cedula:(r[idx('# de cedula')]||'').trim()
+  })).filter(p=>p.nombre&&/^s[ií]$/i.test(p.activo)&&/^arquitect[oa]$/i.test(p.titulo)&&p.nombre.toUpperCase()!=='NA')
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+
+  $('profesionalesList').innerHTML=state.professionals
+    .map(p=>`<option value="${esc(p.nombre)}">${esc(p.cedula||'')}</option>`).join('');
+  $('profStatus').textContent=`${state.professionals.length} profesionales registrados cargados. También puede escribir uno manualmente.`;
+ }catch(e){
+  state.professionals=[];
+  $('profesionalesList').innerHTML='';
+  $('profStatus').textContent='No se pudo cargar la lista. Puede escribir el proyectista manualmente.';
+ }
+}
+function syncProfessional(){
+ const name=v('proyectista').toLocaleUpperCase('es');
+ const p=state.professionals.find(x=>x.nombre.toLocaleUpperCase('es')===name);
+ if(p && !v('rucProy')) $('rucProy').value=p.cedula||'';
+ renderReport();
+}
+function professionalName(){return v('proyectista')}
 
 async function loadPit(){try{const r=await fetch('data/iprus_pit_lookup.geojson?v='+Date.now(),{cache:'no-store'});const gj=await r.json(),seen=new Map();(gj.features||[]).forEach(ft=>{const code=String(ft.properties?.codigo_pit||ft.properties?.pit||'').trim();if(code&&!seen.has(code))seen.set(code,{code,properties:ft.properties||{},geometry:ft.geometry})});state.pitItems=[...seen.values()].sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true}));$('pitSelect').innerHTML='<option value="">Seleccione un PIT...</option>'+state.pitItems.map(x=>`<option>${esc(x.code)}</option>`).join('');$('pitLoadMsg').textContent=`Base PIT cargada: ${state.pitItems.length} códigos.`}catch(e){$('pitSelect').innerHTML='<option>No se pudo cargar PIT</option>'}}
 function selectedPit(){return state.pitItems.find(x=>x.code===v('pitSelect'))}
@@ -440,7 +494,7 @@ En virtud de lo establecido en el artículo 39 de la Ordenanza 016-2023, solicit
 Con sentimientos de estima y consideración.`;
 }
 function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.owners=state.owners;d.proxies=state.proxies;d.lots=lotData().map(x=>x.a);return d}
-function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;if(Array.isArray(d.proxies))state.proxies=d.proxies;renderOwners();renderProxies();setProfessionalManual(!!$('proyectistaManualToggle').checked);updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();updateNroButton();renderReport()}
+function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;if(Array.isArray(d.proxies))state.proxies=d.proxies;renderOwners();renderProxies();updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();updateNroButton();renderReport()}
 function guardarFormulario(show=true){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO_V3',JSON.stringify(snapshot()));if(show)notify('Informe guardado.')}
 function nuevoFormulario(){if(confirm('¿Crear un formulario nuevo?')){localStorage.removeItem('ALLPA_SUBDIVISION_APROBATORIO_V3');location.reload()}}
 function asignarNumero(){const x=prompt('Ingrese el Nro. del Informe Técnico Aprobatorio:',v('ita'));if(x!==null){$('ita').value=x.trim();updateNroButton();renderReport()}}
@@ -452,9 +506,12 @@ function bind(){
  $('catParro').addEventListener('change',updateZones);$('catZona').addEventListener('change',syncCatastral);
  ['catProv','catCant','catSect','catPolg','catPred','claveManual'].forEach(id=>$(id).addEventListener('input',syncCatastral));
  $('claveManualToggle').addEventListener('change',()=>{$('claveManualWrap').classList.toggle('hidden',!$('claveManualToggle').checked);syncCatastral()});
- $('proyectistaSelect').addEventListener('change',syncProfessional);
- $('proyectistaManualToggle').addEventListener('change',e=>setProfessionalManual(e.target.checked));
- $('epSolicita').addEventListener('input',()=>{$('epSolicita').dataset.manual='1'});
+ $('proyectista').addEventListener('input',syncProfessional);
+ $('proyectista').addEventListener('change',syncProfessional);
+ $('epSolicita').addEventListener('input',()=>{
+  const el=$('epSolicita');
+  el.dataset.manual = el.value===el.dataset.autoValue ? '0' : '1';
+ });
  $('nLotes').addEventListener('change',renderLots);
  document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',()=>{if(el.id!=='epSolicita')renderReport()}));
 }
