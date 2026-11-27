@@ -4,78 +4,197 @@
 <base href="../../">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/logo-allpa-20264.png?v=1">
-<link rel="shortcut icon" type="image/png" href="assets/logo-allpa-20264.png?v=1">
-<link rel="apple-touch-icon" href="assets/logo-allpa-20264.png?v=1">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/logo-allpa-20264.png?v=1">
+<link rel="shortcut icon" type="image/png" href="./assets/logo-allpa-20264.png?v=1">
+<link rel="apple-touch-icon" href="./assets/logo-allpa-20264.png?v=1">
 <title>ALLPA - Anteproyecto de Subdivisión Predial</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--azul:#17324d;--azul2:#0d4f77;--azul3:#0b4266;--rojo:#b5162b;--gris:#f3f5f8;--linea:#d8dee8;--texto:#243142;--muted:#667085;--verde:#186044;--sombra:0 8px 22px rgba(17,37,61,.09)}
+:root{
+ --azul:#17324d;--azul2:#0d4f77;--azul3:#0b4266;--rojo:#b5162b;--gris:#f3f5f8;
+ --linea:#d8dee8;--texto:#243142;--muted:#667085;--verde:#186044;--blanco:#fff;
+ --sombra:0 10px 24px rgba(17,37,61,.10);--radio:14px;
+}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;font-family:"Segoe UI",Arial,sans-serif;background:var(--gris);color:var(--texto)}
-button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:var(--azul2);color:#fff;text-transform:uppercase}
-button.secondary{background:#e8eef5;color:var(--azul)}
-header{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:linear-gradient(90deg,#072e52,#42192d);color:#fff;box-shadow:var(--sombra)}
-.header-left,.header-tools{display:flex;align-items:center;gap:9px;min-width:0}
-.home-btn{width:42px;height:42px;padding:0;background:#fff;color:#0b2b4c;font-size:20px}
-.project-pill{max-width:min(55vw,700px);padding:9px 14px;border-radius:999px;background:#ffffff14;border:1px solid #ffffff35;font-size:11px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.project-pill:before{content:"●";color:#e83a4d;margin-right:8px}
-.header-tools b{font-size:17px}
-.header-tool{height:42px;min-width:42px;padding:0 11px;border:1px solid #ffffff55;background:#0b5a83}
-.header-tool.icon{font-size:22px}
-.header-tool.nro{background:#fff;color:#0a4c73;min-width:88px}
-main{height:calc(100vh - 68px);padding:12px 14px;overflow:hidden}
-.grid-main{height:100%;display:grid;grid-template-columns:330px minmax(0,1fr);gap:14px}
-aside{height:100%;overflow:hidden;display:flex;flex-direction:column}
-.card{background:#fff;border:1px solid var(--linea);border-radius:12px;box-shadow:var(--sombra);padding:14px}
-.side-nav{display:grid;grid-template-columns:38px 1fr 38px;gap:8px;align-items:center;margin-bottom:8px;padding:7px;border:1px solid #d2deea;border-radius:14px;background:#fff}
-.side-nav button{width:36px;height:34px;padding:0;background:#e8f0f7;color:#0b2b4c;font-size:19px}
-.side-title{text-align:center;color:#0b2b4c;font-size:10px;font-weight:900;text-transform:uppercase}
-.dots{display:flex;justify-content:center;gap:6px;margin-top:4px}.dot{width:7px;height:7px;border-radius:50%;background:#b7c7d5}.dot.active{width:19px;border-radius:999px;background:var(--rojo)}
-.side-widget{display:none;min-height:0;overflow:auto}.side-widget.active{display:block}
-.side-widget h2,.tab h2{font-size:15px;color:var(--azul);text-transform:uppercase;margin:0 0 12px}
-section.right{height:100%;min-width:0;display:flex;flex-direction:column}
-.tabs{display:flex;gap:8px;flex:0 0 auto;margin-bottom:10px;padding:7px 8px 9px;border-radius:18px;background:#edf3f7}
-.tab-btn{opacity:.68;border-bottom:4px solid transparent}.tab-btn.active{opacity:1;background:var(--azul3);border-bottom-color:#d91f3d}
-.content-scroll{flex:1;min-height:0;overflow:auto;padding-right:5px;padding-bottom:24px}
-.tab{display:none}.tab.active{display:block}
+html,body{margin:0;height:100%;font-family:'Segoe UI',Arial,sans-serif;background:var(--gris);color:var(--texto);overflow:hidden}
+header.no-print{
+ min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px;
+ padding:12px 24px;background:linear-gradient(135deg,var(--azul),#0d2238);color:#fff;box-shadow:var(--sombra)
+}
+.header-left{display:flex;align-items:center;gap:12px;min-width:0}
+.home-btn{width:48px;height:48px;min-width:48px;border-radius:14px;background:#fff;color:#0b2b4c;border:2px solid #fff;display:grid;place-items:center;box-shadow:0 8px 20px rgba(0,0,0,.22);cursor:pointer}
+.home-btn svg{width:24px;height:24px}
+.project-pill{display:inline-flex;align-items:center;gap:8px;max-width:min(46vw,580px);min-height:38px;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);font-size:12px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.project-pill:before{content:"●";color:#e83a4d}
+.header-title{text-align:right}.header-title h1{margin:0;font-size:22px;letter-spacing:.2px}.header-title p{margin:4px 0 0;color:#dbe7f2;font-size:12px}
+.actionbar{max-width:1450px;margin:14px auto 0;padding:0 22px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+button{border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer;background:var(--azul);color:#fff;text-transform:uppercase}
+button.secondary{background:#e8eef5;color:var(--azul)}button.success{background:var(--verde)}button.ghost{background:#fff;color:var(--azul);border:1px solid var(--linea)}
+main{padding:14px 22px 22px;max-width:1450px;margin:auto}
+.grid-main{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra);padding:16px;margin-bottom:16px}
+.card h2{font-size:16px;margin:0 0 12px;color:var(--azul);text-transform:uppercase}
+label{font-size:11px;font-weight:800;color:#344054;display:block;margin-bottom:5px;text-transform:uppercase}
+input,select,textarea{width:100%;border:1px solid #cbd5e1;border-radius:10px;padding:9px 10px;font:inherit;background:#fff;color:var(--texto)}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(23,50,77,.14);border-color:var(--azul)}
+textarea{min-height:76px;resize:vertical}.field{margin-bottom:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini{font-size:11px;color:var(--muted)}
 .section-title{background:#f8fafc;border-left:4px solid var(--rojo);padding:9px 12px;margin:16px 0 10px;font-weight:900;color:var(--azul);text-transform:uppercase}
-label{display:block;margin-bottom:5px;font-size:10px;font-weight:800;color:#344054;text-transform:uppercase}
-input,select,textarea{width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:var(--texto);font:inherit}
-textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.mini{font-size:10px;color:var(--muted)}
-.party-table,.form-table,.pit-table{width:100%;border-collapse:collapse}.party-table th,.party-table td,.form-table th,.form-table td{border:1px solid var(--linea);padding:7px}.party-table th,.form-table th{background:#e7eff6;color:#143752;font-size:10px;text-transform:uppercase;text-align:left}
-.party-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}.party-actions button{font-size:10px}.party-remove{background:#c92d43!important}.hidden{display:none!important}
-.project-prof-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.inline-check{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;text-transform:none}.inline-check input{width:auto}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;position:sticky;top:0;background:rgba(237,243,247,.97);z-index:5;padding:7px 8px 9px;border-radius:18px}
+.tab-btn{position:relative;background:#0d4f77;color:#fff;border:1px solid #0d4f77;border-bottom:4px solid transparent;opacity:.68;font-weight:900;box-shadow:0 6px 13px rgba(11,43,76,.15)}
+.tab-btn:hover{opacity:.88}.tab-btn.active{background:#0b4266;color:#fff;border-color:#0b4266;border-bottom-color:#d91f3d;opacity:1;box-shadow:0 7px 16px rgba(11,43,76,.22),inset 0 -2px 0 #d91f3d}
+.tab{display:none}.tab.active{display:block}
+.side-nav{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:8px;margin:0 0 8px;padding:7px 8px;border:1px solid #d2deea;border-radius:14px;background:#fff;box-shadow:0 6px 16px rgba(11,43,76,.07)}
+.side-nav button{width:36px;height:34px;padding:0;border-radius:10px;background:#e8f0f7;color:#0b2b4c;font-size:19px}
+.side-status{text-align:center;min-width:0}.side-title{color:#0b2b4c;font-size:10px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:4px}.dot{width:7px;height:7px;border-radius:50%;background:#b7c7d5}.dot.active{width:19px;border-radius:999px;background:var(--rojo)}
+.side-widget{display:none}.side-widget.active{display:block}
+.side-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 0;padding:10px;background:#f8fafc;border:1px solid var(--linea);border-radius:12px}
+.side-actions-title{grid-column:1/-1;font-size:11px;font-weight:900;color:var(--azul);text-transform:uppercase}.side-actions button{font-size:10.5px;padding:7px 8px}
+.pit-map-actions button{width:100%;background:#0d5a83}.pit-map{height:190px;border-radius:10px;overflow:hidden;border:1px solid #cbd5e1;margin-top:8px}
+.pit-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:7px}.pit-table td{border-bottom:1px solid #d7e0e8;padding:3px 4px}.pit-table td:first-child{font-weight:900;color:#163b5a;text-transform:uppercase;width:43%}
+.legend{display:flex;gap:8px;font-size:9px;margin-top:4px}.swatch{display:inline-block;width:10px;height:10px;border:1px solid #0b5cab;background:#73bdf855}.red-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#d71920;border:2px solid #fff;box-shadow:0 0 0 1px #d71920}
 .catastral-panel{border:1px solid #b8cbe0;border-radius:12px;padding:10px;background:#f8fbff}
-.catastral-line{display:grid;grid-template-columns:46px 46px 86px 86px 70px 70px minmax(160px,1fr) 42px;gap:6px;align-items:end}
-.catastral-info{display:grid;grid-template-columns:1.2fr .55fr 1.2fr;gap:8px;margin-top:10px}
-.pit-map{height:190px;border-radius:10px;overflow:hidden;border:1px solid #cbd5e1;margin-top:8px}.pit-map-actions button{width:100%}.pit-table{font-size:10px;margin-top:6px}.pit-table td{border-bottom:1px solid #d7e0e8;padding:3px 4px}.pit-table td:first-child{font-weight:900;width:43%;text-transform:uppercase}
+.catastral-line{display:grid;grid-template-columns:46px 46px 72px 80px 70px 70px minmax(150px,1fr) 42px;gap:6px;align-items:end}
+.catastral-line label{font-size:9px;text-align:center;margin-bottom:2px}.catastral-line input,.catastral-line select{padding:8px 5px;text-align:center}
+.catastral-info{display:grid;grid-template-columns:1.2fr .55fr 1.2fr;gap:8px;margin-top:10px}.inline-check{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-size:10px;font-weight:700;text-transform:none}.inline-check input{width:auto}
+table.form-table{width:100%;border-collapse:collapse;font-size:12px}.form-table th,.form-table td{border:1px solid var(--linea);padding:7px}.form-table th{background:#edf2f7;color:var(--azul)}
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{padding:10px;border:1px solid var(--linea);border-radius:10px;background:#f8fafc}
-.egob-panel{background:#fff;border:1px solid var(--linea);border-radius:12px;box-shadow:var(--sombra);margin-bottom:12px;overflow:hidden}.egob-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#eef4f8;border-bottom:1px solid var(--linea)}.egob-head h3{margin:0;color:#153652;font-size:12px}.egob-body{padding:14px;font-family:Arial,sans-serif;font-size:12pt;line-height:1.45;white-space:pre-wrap;color:#111}
-.pdf-toolbar{position:sticky;top:0;z-index:4;display:flex;justify-content:flex-end;gap:8px;padding:4px 0 8px;background:var(--gris)}.pdf-toolbar button{background:#17704e}
-.report-page{position:relative;width:210mm;min-height:297mm;margin:0 auto 14px;background:#fff;box-shadow:0 2px 10px #0002;overflow:hidden;font-family:Arial,sans-serif;font-size:12pt;line-height:1.35;color:#111}.report-page-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0}.report-page-inner{position:relative;z-index:1;padding:25.4mm;min-height:297mm}.report-page-inner *{font-family:Arial,sans-serif!important;font-size:12pt!important}.report-page-inner h2{border-bottom:1px solid #333;padding-bottom:3pt}.report-page-inner p{text-align:justify;margin:0 0 8pt}.report-page-inner table{width:100%;border-collapse:collapse}.report-page-inner th,.report-page-inner td{border:1px solid #777;padding:4pt}
-.report-source{position:absolute;left:-99999px;visibility:hidden;width:210mm}
-.map-modal{position:fixed;inset:0;background:#0008;z-index:1000;display:none;place-items:center;padding:20px}.map-modal.open{display:grid}.map-modal-box{width:min(1000px,95vw);background:#fff;border-radius:16px;padding:12px}.map-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:900;color:var(--azul)}#pitMapModalCanvas{height:70vh;border-radius:12px}
-.alert{position:fixed;right:18px;bottom:18px;z-index:1500;max-width:420px;padding:10px 12px;border-radius:10px;background:#fff7e6;border:1px solid #ffe0a3;color:#664500}
-@page{size:A4;margin:0}
-@media(max-width:1000px){html,body{height:auto;overflow:auto}main{height:auto;overflow:visible}.grid-main{grid-template-columns:1fr}.project-prof-row,.row,.row3,.kpis,.catastral-info{grid-template-columns:1fr}.catastral-line{grid-template-columns:repeat(4,1fr)}aside,section.right,.content-scroll{height:auto;overflow:visible}}
-@media print{header,aside,.tabs,.egob-panel,.pdf-toolbar,.no-print{display:none!important}html,body,main,.grid-main,section.right,.content-scroll{height:auto;overflow:visible;margin:0;padding:0;background:#fff}.grid-main{display:block}.tab{display:none!important}#tab-vista{display:block!important}.report-page{margin:0;box-shadow:none;page-break-after:always}.report-page:last-child{page-break-after:auto}}
+.report-wrap{background:#fff;border:1px solid var(--linea);border-radius:var(--radio);box-shadow:var(--sombra);padding:24px}.report{font-family:Arial,sans-serif;color:#111;line-height:1.35;font-size:12pt}.report h2{font-size:14px;color:#111;border-bottom:1px solid #333;padding-bottom:4px}.report h3{font-size:12.5px;color:#111}.report p{text-align:justify}
+.copy-panel{display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px}.copy-panel button:first-child{background:#087443;font-size:16px}
+.map-modal{position:fixed;inset:0;background:#0008;z-index:1000;display:none;place-items:center;padding:24px}.map-modal.open{display:grid}.map-modal-box{background:#fff;width:min(1000px,95vw);border-radius:16px;padding:12px}.map-modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:900;color:var(--azul)}#pitMapModalCanvas{height:70vh;border-radius:12px;overflow:hidden}
+.alert{padding:10px 12px;border-radius:12px;background:#fff7e6;border:1px solid #ffe0a3;color:#664500;margin:10px 0;font-size:12px}.hidden{display:none!important}
+@media(max-width:1000px){.grid-main{grid-template-columns:1fr}.catastral-line{grid-template-columns:repeat(4,1fr)}.catastral-info,.row,.row3,.kpis{grid-template-columns:1fr}.header-title p{display:none}.project-pill{max-width:54vw}}
+@media print{header,.actionbar,aside,.tabs,.no-print{display:none!important}.grid-main{display:block}main{padding:0}.tab{display:none!important}#tab-vista{display:block!important}.report-wrap{border:0;box-shadow:none;padding:0}}
 </style>
+
+<style id="subdivision-v3-layout">
+header.no-print{height:68px;min-height:68px;padding:0 16px;background:linear-gradient(90deg,#072e52,#42192d)}
+.header-title{display:flex;align-items:center;gap:8px;text-align:left}
+.header-title h1{font-size:17px;letter-spacing:.5px}
+.header-title p{display:none}
+.header-tools{display:flex;align-items:center;gap:8px}
+.header-tool{height:42px;min-width:42px;border:1px solid #ffffff66;border-radius:11px;background:#0b5a83;color:#fff;display:grid;place-items:center;padding:0 11px;font-size:11px;font-weight:900}
+.header-tool.icon{width:42px;padding:0;font-size:24px}
+.header-tool.save{font-size:18px}
+.header-tool.nro{min-width:88px;background:#fff;color:#0a4c73;border-color:#fff}
+.actionbar{display:none!important}
+main{max-width:none;width:100%;height:calc(100vh - 68px);margin:0;padding:12px 14px;overflow:hidden}
+.grid-main{height:100%;grid-template-columns:330px minmax(0,1fr);gap:14px;align-items:stretch}
+.grid-main>aside{height:100%;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.side-nav{flex:0 0 auto}
+.side-widget{min-height:0;overflow-y:auto;margin-bottom:0}
+.grid-main>section{height:100%;min-width:0;min-height:0;display:flex;flex-direction:column}
+.tabs{position:static;top:auto;flex:0 0 auto;margin:0 0 10px}
+.content-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:5px;padding-bottom:24px}
+.tab.card{width:100%;max-width:none}
+.card{border-radius:12px}
+.owner-table{width:100%;border-collapse:collapse;margin-bottom:8px}
+.owner-table th,.owner-table td{border:1px solid #d1dce6;padding:7px}
+.owner-table th{background:#e7eff6;color:#143752;font-size:10px;text-transform:uppercase;text-align:left}
+.owner-table input,.owner-table select{border-radius:8px}
+.owner-actions{display:flex;gap:7px;flex-wrap:wrap}
+.owner-actions button{font-size:10px;padding:8px 11px;background:#075a84}
+.owner-remove{background:#c92d43!important}
+.report-actions{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;position:sticky;top:0;z-index:4;background:var(--gris);padding:4px 0 7px}
+.report-actions button{background:#0a5b84}
+.report-actions .pdf{background:#17704e}
+.report-wrap{position:relative;padding:0;overflow:hidden;background:#fff}
+.report-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none}
+.report{position:relative;z-index:1;min-height:297mm;padding:35mm 20mm 28mm;background:transparent}
+#egobText{display:block}
+@media(max-width:1000px){
+ html,body{overflow:auto;height:auto}
+ main{height:auto;overflow:visible}
+ .grid-main{height:auto;grid-template-columns:1fr}
+ .grid-main>aside,.grid-main>section{height:auto;overflow:visible}
+ .side-widget,.content-scroll{overflow:visible}
+}
+@media print{
+ html,body{overflow:visible;height:auto;background:#fff}
+ header,aside,.tabs,.report-actions,.no-print{display:none!important}
+ main,.grid-main,.grid-main>section,.content-scroll{height:auto;overflow:visible;padding:0;margin:0;display:block}
+ #tab-vista{display:block!important}
+ .report-wrap{box-shadow:none;border:0;border-radius:0}
+ .report{min-height:297mm}
+}
+</style>
+
+
+<style id="subdivision-v4">
+/* Propietarios / apoderados */
+.party-block{margin-bottom:12px}
+.party-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0 5px}
+.party-title b{font-size:11px;color:#153652}
+.party-table{width:100%;border-collapse:collapse}
+.party-table th,.party-table td{border:1px solid #d1dce6;padding:7px}
+.party-table th{background:#e7eff6;color:#143752;font-size:10px;text-transform:uppercase;text-align:left}
+.party-table input{border-radius:8px}
+.party-actions{display:flex;gap:7px;margin-top:7px;flex-wrap:wrap}
+.party-actions button{font-size:10px;padding:8px 11px;background:#075a84}
+.party-remove{background:#c92d43!important}
+.hidden-party{display:none}
+
+/* Proyectista */
+.project-prof-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+#proyectista{width:100%}
+
+/* Vista del informe */
+.egob-panel{background:#fff;border:1px solid var(--linea);border-radius:12px;box-shadow:var(--sombra);margin-bottom:12px;overflow:hidden}
+.egob-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:#eef4f8;border-bottom:1px solid var(--linea)}
+.egob-head h3{margin:0;font-size:12px;color:#153652}
+.egob-body{padding:14px;font-family:Arial,sans-serif;font-size:12pt;line-height:1.45;white-space:pre-wrap;color:#111}
+.egob-head button{background:#0a5b84;padding:8px 13px;font-size:10px}
+.pdf-toolbar{position:sticky;top:0;z-index:5;display:flex;justify-content:flex-end;gap:8px;background:var(--gris);padding:4px 0 8px}
+.pdf-toolbar button{background:#17704e;font-size:10px}
+.report-wrap{background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+#report{background:transparent!important;padding:0!important;min-height:0!important}
+.report-source{position:absolute;left:-99999px;top:0;width:210mm;visibility:hidden;pointer-events:none}
+.report-page{position:relative;width:210mm;min-height:297mm;margin:0 auto 14px;background:#fff;box-shadow:0 2px 10px #0002;overflow:hidden;font-family:Arial,sans-serif;font-size:12pt;line-height:1.35;color:#111}
+.report-page-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none}
+.report-page-inner{position:relative;z-index:1;padding:25.4mm;width:100%;min-height:297mm}
+.report-page-inner *{font-family:Arial,sans-serif!important;font-size:12pt!important}
+.report-page-inner h2,.report-page-inner h3{font-weight:700!important;color:#111!important}
+.report-page-inner h2{margin:12pt 0 7pt;border-bottom:1px solid #333;padding-bottom:3pt}
+.report-page-inner h3{margin:9pt 0 5pt}
+.report-page-inner p{margin:0 0 8pt;text-align:justify}
+.report-page-inner table{width:100%;border-collapse:collapse;margin:7pt 0;font-size:12pt!important}
+.report-page-inner th,.report-page-inner td{border:1px solid #777;padding:4pt;vertical-align:top;font-size:12pt!important}
+.report-page-inner .report-meta{text-align:right;font-weight:700;margin-bottom:10pt}
+.report-page-inner .report-subject{font-weight:700;text-align:justify}
+.report-page-inner .keep-together{break-inside:avoid;page-break-inside:avoid}
+
+/* El fondo viejo ya no se usa directamente */
+.report-bg{display:none!important}
+
+@page{size:A4;margin:0}
+@media print{
+ .egob-panel,.pdf-toolbar{display:none!important}
+ .report-page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+ .report-page:last-child{page-break-after:auto;break-after:auto}
+ .report-page-inner{padding:25.4mm}
+}
+@media(max-width:1100px){
+ .project-prof-row{grid-template-columns:1fr}
+ .report-page{width:100%;min-height:auto}
+ .report-page-inner{padding:24px;min-height:auto}
+}
+</style>
+
 </head>
 <body>
 <header class="no-print">
  <div class="header-left">
-  <button class="home-btn" onclick="location.href='informes/index.html'" title="Volver">⌂</button>
+  <button class="home-btn" title="Volver a Informes Técnicos" onclick="location.href='informes/index.html'"><svg viewBox="0 0 24 24" fill="none"><path d="M3 10.8 12 3l9 7.8v9.2a1 1 0 0 1-1 1h-5.3v-6.2H9.3V21H4a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
   <div class="project-pill">Anteproyecto de Subdivisión Predial de dos a diez lotes con obras</div>
  </div>
  <div class="header-tools">
-  <b>ALLPA</b>
-  <button class="header-tool icon" onclick="nuevoFormulario()" title="Nuevo">+</button>
-  <button class="header-tool icon" onclick="guardarFormulario()" title="Guardar">▣</button>
-  <button class="header-tool nro" id="nroBtn" onclick="asignarNumero()">NRO. —</button>
- </div>
+   <div class="header-title"><h1>ALLPA</h1></div>
+   <button class="header-tool icon" onclick="nuevoFormulario()" title="Nuevo informe" aria-label="Nuevo informe">+</button>
+   <button class="header-tool icon save" onclick="guardarFormulario()" title="Guardar" aria-label="Guardar">▣</button>
+   <button class="header-tool nro" id="nroBtn" onclick="asignarNumero()" title="Número de informe">NRO. —</button>
+  </div>
 </header>
 
 <main>
@@ -83,51 +202,57 @@ textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:
 <aside class="no-print">
  <div class="side-nav">
   <button onclick="sidePrev()">‹</button>
-  <div><div class="side-title" id="sideTitle">1. Identificación del informe</div><div class="dots"><i class="dot active"></i><i class="dot"></i></div></div>
+  <div class="side-status"><div class="side-title" id="sideTitle">1. Identificación del informe</div><div class="dots"><i class="dot active"></i><i class="dot"></i></div></div>
   <button onclick="sideNext()">›</button>
  </div>
 
- <div id="widget-identificacion" class="side-widget active card">
+ <div class="side-widget active card" id="widget-identificacion">
   <h2>1. Identificación del informe</h2>
   <input type="hidden" id="ita">
-  <div class="field"><label>Nro. eGOB Principal *</label><input id="egob" inputmode="numeric"></div>
+  <div class="field"><label>Nro. eGOB Principal *</label><input id="egob" inputmode="numeric" placeholder="Ej.: 1157249"></div>
   <div class="field"><label>Fecha de ingreso del trámite</label><input type="date" id="fechaIngreso"></div>
-  <div class="field"><label>Tipo de informe *</label><select id="tipoInforme"><option>Informe Técnico Aprobatorio</option></select></div>
-  <div class="field"><label>Fecha de emisión *</label><input type="date" id="fechaEmision"></div>
+  <div class="field"><label>Tipo de informe *</label><select id="tipoInforme"><option selected>Informe Técnico Aprobatorio</option></select></div>
+  <div class="field"><label>Fecha de emisión *</label><input type="date" id="fechaEmision"><div class="mini">Fecha de emisión para registro del informe aprobatorio.</div></div>
  </div>
 
- <div id="widget-pit" class="side-widget card">
+ <div class="side-widget card" id="widget-pit">
   <h2>2. Detalle del código PIT</h2>
   <div class="field"><label>Buscar por PIT</label><select id="pitSelect"><option value="">Cargando PIT...</option></select></div>
   <div class="pit-map-actions"><button type="button" onclick="openPitMapModal()">Agrandar mapa</button></div>
   <div id="pitMap" class="pit-map"></div>
-  <table id="pitDetailTable" class="pit-table"></table>
+  <div class="legend"><span><i class="swatch"></i> Polígono PIT</span><span><i class="red-dot"></i> Punto de referencia</span></div>
+  <table class="pit-table" id="pitDetailTable"></table>
   <div id="pitLoadMsg" class="mini"></div>
  </div>
 </aside>
 
-<section class="right">
+<section>
  <div class="tabs no-print">
   <button class="tab-btn active" data-tab="tab-datos" onclick="showTab('tab-datos')">Datos generales</button>
   <button class="tab-btn" data-tab="tab-propuesta" onclick="showTab('tab-propuesta')">Propuesta Proyecto</button>
   <button class="tab-btn" data-tab="tab-vista" onclick="showTab('tab-vista')">Vista del Informe</button>
  </div>
-
  <div class="content-scroll">
+
  <div id="tab-datos" class="tab active card no-print">
   <h2>Datos generales</h2>
 
   <div class="section-title">1. Datos del propietario y proyectista</div>
-  <table class="party-table">
-   <thead><tr><th>Nombre del propietario *</th><th>CI/RUC *</th><th>Acción</th></tr></thead>
-   <tbody id="ownersBody"></tbody>
-  </table>
-  <div class="party-actions">
-   <button type="button" onclick="addOwner()">Agregar propietario</button>
-   <button type="button" onclick="addProxy()">Agregar apoderado</button>
+
+  <div class="party-block">
+   <div class="party-title"><b>PROPIETARIO(S)</b></div>
+   <table class="party-table">
+    <thead><tr><th>Nombre del propietario *</th><th>CI/RUC *</th><th>Acción</th></tr></thead>
+    <tbody id="ownersBody"></tbody>
+   </table>
+   <div class="party-actions">
+    <button type="button" onclick="addOwner()">Agregar propietario</button>
+    <button type="button" onclick="addProxy()">Agregar apoderado</button>
+   </div>
   </div>
 
-  <div id="proxyBlock" class="hidden" style="margin-top:12px">
+  <div class="party-block hidden-party" id="proxyBlock">
+   <div class="party-title"><b>APODERADO(S)</b></div>
    <table class="party-table">
     <thead><tr><th>Nombre del apoderado</th><th>CI/RUC del apoderado</th><th>Acción</th></tr></thead>
     <tbody id="proxiesBody"></tbody>
@@ -135,39 +260,37 @@ textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:
   </div>
 
   <div class="project-prof-row" style="margin-top:12px">
-   <div class="field">
-    <label>Proyectista</label>
-    <select id="proyectistaSelect"><option value="">Cargando profesionales...</option></select>
-    <label class="inline-check" style="margin-top:7px"><input type="checkbox" id="proyectistaManualToggle"> Ingresar proyectista manualmente</label>
-    <input id="proyectistaManual" class="hidden" placeholder="Nombre completo" style="margin-top:7px">
-    <div id="profStatus" class="mini"></div>
+   <div class="field"><label>Proyectista</label>
+    <select id="proyectista"><option value="">Seleccione un profesional registrado...</option></select>
    </div>
    <div class="field"><label>Registro Municipal</label><input id="registroMunicipal" readonly></div>
    <div class="field"><label>RUC/Cédula proyectista</label><input id="rucProy" readonly></div>
   </div>
 
   <div class="section-title">2. Ubicación del predio</div>
-  <div class="catastral-panel">
-   <div class="mini">Buscador de clave catastral. Por defecto: Prov. 06 y Cant. 01.</div>
-   <div class="catastral-line">
-    <div><label>PROV</label><input id="catProv" value="06"></div>
-    <div><label>CANT</label><input id="catCant" value="01"></div>
-    <div><label>PARR</label><select id="catParro"></select></div>
-    <div><label>ZONA</label><select id="catZona"></select></div>
-    <div><label>SECT</label><input id="catSect"></div>
-    <div><label>POLG</label><input id="catPolg"></div>
-    <div><label>PRED</label><input id="catPred"></div>
-    <button onclick="buscarClaveCatastral()">🔍</button>
-   </div>
-   <label class="inline-check" style="justify-content:flex-end;margin-top:7px"><input type="checkbox" id="claveManualToggle"> Ingresar Clave Catastral Manualmente</label>
-   <div id="claveManualWrap" class="field hidden"><label>Clave catastral manual</label><input id="claveManual"></div>
-   <div class="catastral-info">
-    <div><label>Parroquia</label><input id="catParroquia" readonly></div>
-    <div><label>Urbano / Rural</label><input id="catUrbanoRural" readonly></div>
-    <div><label>Clave generada</label><input id="catClave" readonly></div>
+  <div class="field"><label>Clave catastral</label>
+   <div class="catastral-panel">
+    <div class="mini">Buscador de clave catastral. Por defecto: Prov. 06 y Cant. 01.</div>
+    <div class="catastral-line">
+     <div><label>PROV</label><input id="catProv" value="06" maxlength="2"></div>
+     <div><label>CANT</label><input id="catCant" value="01" maxlength="2"></div>
+     <div><label>PARR</label><select id="catParro"><option value=""></option></select></div>
+     <div><label>ZONA</label><select id="catZona"><option value=""></option></select></div>
+     <div><label>SECT</label><input id="catSect" maxlength="4"></div>
+     <div><label>POLG</label><input id="catPolg" maxlength="6"></div>
+     <div><label>PRED</label><input id="catPred" maxlength="12"></div>
+     <button type="button" onclick="buscarClaveCatastral()">🔍</button>
+    </div>
+    <div style="margin-top:7px"><label class="inline-check"><input type="checkbox" id="claveManualToggle"> Ingresar Clave Catastral Manualmente</label></div>
+    <div id="claveManualWrap" class="field hidden"><label>Clave catastral manual</label><input id="claveManual"></div>
+    <div class="catastral-info">
+     <div><label>Parroquia</label><input id="catParroquia" readonly></div>
+     <div><label>Urbano / Rural</label><input id="catUrbanoRural" readonly></div>
+     <div><label>Clave generada</label><input id="catClave" readonly></div>
+    </div>
    </div>
   </div>
-  <div class="row" style="margin-top:12px">
+  <div class="row">
    <div class="field"><label>Dirección</label><input id="direccion"></div>
    <div class="field"><label>Barrio / sector</label><input id="barrio"></div>
   </div>
@@ -190,61 +313,43 @@ textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:
   </div>
   <div class="field"><label>Texto de dominio / calidad de propietario</label><textarea id="textoGrav"></textarea></div>
   <div class="field"><label>Linderos y dimensiones generales</label><textarea id="linderos"></textarea></div>
+  <div class="mini">Los parámetros urbanísticos del PIT no se repiten aquí: se cargan automáticamente desde el panel lateral “Detalle del código PIT”.</div>
 
   <div class="section-title">4. Factibilidades, predial, RUC y patente</div>
-
   <h3>RIOBAMBA EP</h3>
   <div class="row3">
-   <div class="field"><label>Fojas</label><input id="epFojas"></div>
-   <div class="field"><label>Carpeta</label><input id="epCarpeta"></div>
-   <div class="field"><label>Tipo documento</label>
-    <select id="epTipo"><option value="">Seleccione...</option><option>Informe de factibilidad de servicios</option><option>Parámetros de Diseño</option></select>
-   </div>
-   <div class="field"><label>Nro. oficio</label><input id="epOficio"></div>
-   <div class="field"><label>Fecha</label><input type="date" id="epFecha"></div>
-   <div class="field"><label>Técnico/a</label><input id="epTecnico"></div>
+   <div class="field"><label>Fojas</label><input id="epFojas"></div><div class="field"><label>Carpeta</label><input id="epCarpeta"></div><div class="field"><label>Tipo documento</label><input id="epTipo"></div>
+   <div class="field"><label>Nro. oficio</label><input id="epOficio"></div><div class="field"><label>Fecha</label><input type="date" id="epFecha"></div><div class="field"><label>Técnico/a</label><input id="epTecnico"></div>
   </div>
-  <div class="field"><label>Solicitado por</label><input id="epSolicita"></div>
-  <div class="field"><label>Datos / texto de factibilidad</label><textarea id="epDatos"></textarea></div>
+  <div class="field"><label>Solicitado por</label><input id="epSolicita"></div><div class="field"><label>Datos / texto de factibilidad</label><textarea id="epDatos"></textarea></div>
 
   <h3>EERSA</h3>
   <div class="row3">
-   <div class="field"><label>Fojas</label><input id="eeFojas"></div>
-   <div class="field"><label>Carpeta</label><input id="eeCarpeta"></div>
-   <div class="field"><label>Nro. EERSA-DIC-</label><input id="eeOficio"></div>
-   <div class="field"><label>Fecha</label><input type="date" id="eeFecha"></div>
-   <div class="field"><label>Técnico EERSA</label><input id="eeTecnico"></div>
+   <div class="field"><label>Fojas</label><input id="eeFojas"></div><div class="field"><label>Carpeta</label><input id="eeCarpeta"></div><div class="field"><label>Nro. EERSA-DIC-</label><input id="eeOficio"></div>
+   <div class="field"><label>Fecha</label><input type="date" id="eeFecha"></div><div class="field"><label>Técnico EERSA</label><input id="eeTecnico"></div>
   </div>
   <div class="field"><label>Datos / texto EERSA</label><textarea id="eeDatos"></textarea></div>
 
   <h3>CNT</h3>
   <div class="row3">
-   <div class="field"><label>Fojas</label><input id="cntFojas"></div>
-   <div class="field"><label>Carpeta</label><input id="cntCarpeta"></div>
-   <div class="field"><label>Nro. CNTEP-RG3-CH-TEC-</label><input id="cntOficio"></div>
-   <div class="field"><label>Fecha</label><input type="date" id="cntFecha"></div>
-   <div class="field"><label>Técnico CNT</label><input id="cntTecnico"></div>
-   <div class="field"><label>Nro. líneas</label><input id="cntLineas"></div>
+   <div class="field"><label>Fojas</label><input id="cntFojas"></div><div class="field"><label>Carpeta</label><input id="cntCarpeta"></div><div class="field"><label>Nro. CNTEP-RG3-CH-TEC-</label><input id="cntOficio"></div>
+   <div class="field"><label>Fecha</label><input type="date" id="cntFecha"></div><div class="field"><label>Técnico CNT</label><input id="cntTecnico"></div><div class="field"><label>Nro. líneas</label><input type="number" id="cntLineas"></div>
   </div>
   <div class="field"><label>Datos / texto CNT</label><textarea id="cntDatos"></textarea></div>
 
   <h3>Impuesto predial</h3>
-  <div class="row">
-   <div class="field"><label>Fojas</label><input id="pFojas"></div>
-   <div class="field"><label>Carpeta</label><input id="pCarpeta"></div>
+  <div class="row3">
+   <div class="field"><label>Fojas</label><input id="pFojas"></div><div class="field"><label>Carpeta</label><input id="pCarpeta"></div><div class="field"><label>Año</label><input id="pAnio"></div>
+   <div class="field"><label>Nro. emisión</label><input id="pEmision"></div><div class="field"><label>Dirección predio</label><input id="pDireccion"></div><div class="field"><label>Área total</label><input type="number" step="0.01" id="pArea"></div>
+   <div class="field"><label>Área construcción</label><input type="number" step="0.01" id="pConst"></div>
   </div>
-  <div class="field"><label>Datos del impuesto predial</label><textarea id="datosImpuestoPredial" placeholder="Copie y pegue aquí el texto adicional del comprobante de impuesto predial."></textarea></div>
 
   <h3>RUC y patente del proyectista</h3>
-  <div class="row">
-   <div class="field"><label>Fojas RUC</label><input id="rFojas"></div>
-   <div class="field"><label>Carpeta RUC</label><input id="rCarpeta"></div>
+  <div class="row3">
+   <div class="field"><label>Fojas RUC</label><input id="rFojas"></div><div class="field"><label>Carpeta RUC</label><input id="rCarpeta"></div><div class="field"><label>Fojas patente</label><input id="patFojas"></div>
+   <div class="field"><label>Carpeta patente</label><input id="patCarpeta"></div><div class="field"><label>Año patente</label><input id="patAnio"></div><div class="field"><label>Nro. emisión patente</label><input id="patEmision"></div>
+   <div class="field"><label>Nombre comercial</label><input id="comercial"></div><div class="field"><label>Actividad</label><input id="actividad"></div><div class="field"><label>Base imponible</label><input type="number" step="0.01" id="baseImp"></div>
   </div>
-  <div class="row">
-   <div class="field"><label>Fojas patente</label><input id="patFojas"></div>
-   <div class="field"><label>Carpeta patente</label><input id="patCarpeta"></div>
-  </div>
-  <div class="field"><label>Datos de patente</label><textarea id="datosPatente" placeholder="Copie y pegue aquí el texto adicional de la patente municipal."></textarea></div>
  </div>
 
  <div id="tab-propuesta" class="tab card no-print">
@@ -256,8 +361,8 @@ textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:
    <div class="field"><label>¿Presenta afectación vial?</label><select id="presentaAfectacion"><option>No</option><option>Sí</option></select></div>
    <div class="field"><label>Área afectación vial (m²)</label><input type="number" step="0.01" id="areaAfectada"></div>
    <div class="field"><label>Área afectación vial propuesta (m²)</label><input type="number" step="0.01" id="areaAfectadaProp"></div>
-   <div class="field"><label>Densidad bruta (hab/ha)</label><input id="densBruta"></div>
-   <div class="field"><label>Densidad neta (hab/ha)</label><input id="densNeta"></div>
+   <div class="field"><label>Densidad bruta (hab/ha)</label><input type="number" step="0.01" id="densBruta"></div>
+   <div class="field"><label>Densidad neta (hab/ha)</label><input type="number" step="0.01" id="densNeta"></div>
   </div>
   <div class="field"><label>Texto adicional de propuesta de vías</label><textarea id="viasTexto"></textarea></div>
   <div class="field"><label>Memoria técnica · área verde y equipamiento</label><textarea id="memoria"></textarea></div>
@@ -265,7 +370,7 @@ textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:
   <div class="section-title">6. Loteamiento y cuadro de áreas</div>
   <div class="row"><div class="field"><label>Número de lotes</label><select id="nLotes"></select></div><div class="field"><label>&nbsp;</label><button class="secondary" onclick="renderLots()">Actualizar tabla</button></div></div>
   <table class="form-table"><thead><tr><th>Lote</th><th>Área (m²)</th></tr></thead><tbody id="lotsBody"></tbody><tfoot><tr><th>Total útil</th><th id="sumLots">0.00</th></tr></tfoot></table>
-  <div class="kpis" style="margin-top:10px"><div class="kpi"><b>Área IPRUS</b><div id="kIprus"></div></div><div class="kpi"><b>Área útil lotes</b><div id="kLotes"></div></div><div class="kpi"><b>Área útil urbanizable</b><div id="kUrb"></div></div></div>
+  <div class="kpis" style="margin-top:10px"><div class="kpi"><b>Área IPRUS</b><div id="kIprus">0.00 m²</div></div><div class="kpi"><b>Área útil lotes</b><div id="kLotes">0.00 m²</div></div><div class="kpi"><b>Área útil urbanizable</b><div id="kUrb">0.00 m²</div></div></div>
 
   <div class="section-title">7. Vías, retiros y área verde</div>
   <div class="field"><label>Texto adicional de retiros y adosamientos</label><textarea id="retirosExtra"></textarea></div>
@@ -279,11 +384,14 @@ textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:
 
  <div id="tab-vista" class="tab">
   <div class="egob-panel">
-   <div class="egob-head"><h3>Texto para copiar en eGOB</h3><button onclick="copyEgob()">Copiar texto</button></div>
+   <div class="egob-head"><h3>Texto para copiar en eGOB</h3><button type="button" onclick="copyEgob()">COPIAR TEXTO</button></div>
    <div id="egobText" class="egob-body"></div>
   </div>
-  <div class="pdf-toolbar no-print"><button onclick="renderReport()">Actualizar vista</button><button onclick="window.print()">Generar / Guardar PDF</button></div>
-  <div id="report"></div>
+  <div class="pdf-toolbar no-print">
+   <button type="button" onclick="renderReport()">ACTUALIZAR VISTA</button>
+   <button type="button" onclick="window.print()">GENERAR / GUARDAR PDF</button>
+  </div>
+  <div class="report-wrap"><div id="report"></div></div>
   <div id="reportSource" class="report-source"></div>
  </div>
  </div>
@@ -292,101 +400,246 @@ textarea{min-height:82px;resize:vertical}.field{margin-bottom:11px}.row{display:
 </main>
 
 <div id="pitMapModal" class="map-modal"><div class="map-modal-box"><div class="map-modal-head"><span>Mapa PIT / IPRUS</span><button onclick="closePitMapModal()">Cerrar</button></div><div id="pitMapModalCanvas"></div></div></div>
-<div id="toast" class="alert hidden"></div>
+<div id="toast" class="alert hidden" style="position:fixed;right:18px;bottom:18px;z-index:1200;max-width:420px"></div>
 
 <script>
 const SUPABASE_URL='https://lfinvpmobnczgtabtwfs.supabase.co';
 const SUPABASE_KEY='sb_publishable_oARH0ZQa0_d8w_dkYYd1dw_NlWSUn9i';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'allpa-phdu-auth-v1'}});
 let profile=null;
-const state={sideIndex:0,pitItems:[],catastralBase:[],owners:[],proxies:[],professionals:[]};
-let miniMap=null,modalMap=null;
+const state={pitItems:[],pitMap:null,catastralBase:[],sideIndex:0,owners:[],proxies:[],professionals:[]};
+let miniMap=null,miniLayer=null,modalMap=null,modalLayer=null;
 const $=id=>document.getElementById(id);
 const v=id=>($(id)?.value||'').trim();
 const num=id=>parseFloat(v(id)||0)||0;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const nl=s=>esc(s).replace(/\n/g,'<br>');
 const fmt=n=>Number(n||0).toFixed(2);
-function dateLong(s){if(!s)return'';const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('es-EC',{day:'2-digit',month:'long',year:'numeric'})}
-function notify(msg){const t=$('toast');t.textContent=msg;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2800)}
-async function authGuard(){const {data:{session}}=await sb.auth.getSession();if(!session?.user){location.replace('index.html');return false}const {data}=await sb.from('phdu_profiles').select('*').eq('id',session.user.id).single();profile=data||{};return true}
+function notify(msg,ok=false){const t=$('toast');t.textContent=msg;t.className='alert'+(ok?' ok':'');t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3200)}
+function parseCSV(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());if(!lines.length)return[];const sep=lines[0].includes(';')?';':',';const h=lines.shift().split(sep).map(x=>x.trim());return lines.map(line=>{const c=line.split(sep);const o={};h.forEach((k,i)=>o[k]=(c[i]||'').trim());return o})}
+function dateLong(s){if(!s)return'';const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('es-EC',{day:'2-digit',month:'long',year:'numeric'})}
+
+
+async function authGuard(){
+ const {data:{session}}=await sb.auth.getSession();
+ if(!session?.user){location.replace('../../index.html');return false}
+ const {data,error}=await sb.from('phdu_profiles').select('id,correo,nombre_completo,rol,activo,cargo,firma_nombre,firma_cargo').eq('id',session.user.id).single();
+ if(error)throw error;
+ if(!data?.activo)throw new Error('El perfil PHDU está inactivo.');
+ profile=data; return true;
+}
 function technicianName(){return String(profile?.firma_nombre||profile?.nombre_completo||'').trim()}
 function technicianCargo(){return String(profile?.firma_cargo||profile?.cargo||'').trim()}
-
-function sideShow(i){state.sideIndex=(i+2)%2;['widget-identificacion','widget-pit'].forEach((id,j)=>$(id).classList.toggle('active',j===state.sideIndex));document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===state.sideIndex));$('sideTitle').textContent=state.sideIndex===0?'1. Identificación del informe':'2. Detalle del código PIT';if(state.sideIndex===1)setTimeout(initMiniMap,50)}
-function sidePrev(){sideShow(state.sideIndex-1)}function sideNext(){sideShow(state.sideIndex+1)}
-function showTab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-tab="${id}"]`)?.classList.add('active');if(id==='tab-vista')renderReport()}
-
-function addOwner(nombre='',doc=''){state.owners.push({nombre,doc});renderOwners();syncEpSolicitante();renderReport()}
-function removeOwner(i){state.owners.splice(i,1);if(!state.owners.length)state.owners=[{nombre:'',doc:''}];renderOwners();syncEpSolicitante();renderReport()}
-function addProxy(nombre='',doc=''){state.proxies.push({nombre,doc});renderProxies()}
-function removeProxy(i){state.proxies.splice(i,1);renderProxies()}
-function renderOwners(){$('ownersBody').innerHTML=state.owners.map((o,i)=>`<tr><td><input data-owner-name="${i}" value="${esc(o.nombre)}"></td><td><input data-owner-doc="${i}" value="${esc(o.doc)}"></td><td><button class="party-remove" onclick="removeOwner(${i})">Quitar</button></td></tr>`).join('');document.querySelectorAll('[data-owner-name],[data-owner-doc]').forEach(el=>el.addEventListener('input',()=>{const i=Number(el.dataset.ownerName??el.dataset.ownerDoc);if(el.dataset.ownerName!=null)state.owners[i].nombre=el.value;else state.owners[i].doc=el.value;syncEpSolicitante();renderReport()}))}
-function renderProxies(){$('proxyBlock').classList.toggle('hidden',!state.proxies.length);$('proxiesBody').innerHTML=state.proxies.map((o,i)=>`<tr><td><input data-proxy-name="${i}" value="${esc(o.nombre)}"></td><td><input data-proxy-doc="${i}" value="${esc(o.doc)}"></td><td><button class="party-remove" onclick="removeProxy(${i})">Quitar</button></td></tr>`).join('');document.querySelectorAll('[data-proxy-name],[data-proxy-doc]').forEach(el=>el.addEventListener('input',()=>{const i=Number(el.dataset.proxyName??el.dataset.proxyDoc);if(el.dataset.proxyName!=null)state.proxies[i].nombre=el.value;else state.proxies[i].doc=el.value}))}
-function ownerRecords(){return state.owners.filter(x=>x.nombre.trim())}
-function ownersText(){return ownerRecords().map(x=>x.nombre.trim()).join(', ').replace(/, ([^,]*)$/,' y $1')}
+function addOwner(nombre='',doc=''){
+ state.owners.push({nombre,doc});renderOwners();renderReport();
+}
+function removeOwner(i){
+ state.owners.splice(i,1);
+ if(!state.owners.length)state.owners=[{nombre:'',doc:''}];
+ renderOwners();renderReport();
+}
+function addProxy(nombre='',doc=''){
+ state.proxies.push({nombre,doc});renderProxies();renderReport();
+}
+function removeProxy(i){
+ state.proxies.splice(i,1);renderProxies();renderReport();
+}
+function renderOwners(){
+ const body=$('ownersBody'); if(!body)return;
+ body.innerHTML=state.owners.map((o,i)=>`<tr>
+ <td><input data-owner-name="${i}" value="${esc(o.nombre||'')}"></td>
+ <td><input data-owner-doc="${i}" value="${esc(o.doc||'')}"></td>
+ <td><button type="button" class="party-remove" onclick="removeOwner(${i})">QUITAR</button></td></tr>`).join('');
+ body.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{
+  const i=Number(el.dataset.ownerName??el.dataset.ownerDoc);
+  if(el.dataset.ownerName!=null)state.owners[i].nombre=el.value;
+  if(el.dataset.ownerDoc!=null)state.owners[i].doc=el.value;
+  renderReport();
+ }));
+}
+function renderProxies(){
+ const block=$('proxyBlock'),body=$('proxiesBody'); if(!block||!body)return;
+ block.classList.toggle('hidden-party',state.proxies.length===0);
+ body.innerHTML=state.proxies.map((o,i)=>`<tr>
+ <td><input data-proxy-name="${i}" value="${esc(o.nombre||'')}"></td>
+ <td><input data-proxy-doc="${i}" value="${esc(o.doc||'')}"></td>
+ <td><button type="button" class="party-remove" onclick="removeProxy(${i})">QUITAR</button></td></tr>`).join('');
+ body.querySelectorAll('input').forEach(el=>el.addEventListener('input',()=>{
+  const i=Number(el.dataset.proxyName??el.dataset.proxyDoc);
+  if(el.dataset.proxyName!=null)state.proxies[i].nombre=el.value;
+  if(el.dataset.proxyDoc!=null)state.proxies[i].doc=el.value;
+  renderReport();
+ }));
+}
+function ownerRecords(){return state.owners.filter(x=>String(x.nombre||'').trim())}
+function ownersText(){return ownerRecords().map(x=>x.nombre.trim()).join(', ').replace(/, ([^,]*)$/, ' y $1')}
+function ownerDocs(){return ownerRecords().map(x=>x.doc.trim()).filter(Boolean).join(', ')}
 function ownerTreatment(){return ownerRecords().length>1?'los señores':'el/la señor/a'}
-function syncEpSolicitante(){const el=$('epSolicita');if(el.dataset.manual==='1')return;el.value=ownersText()}
+function proxyText(){return state.proxies.filter(x=>String(x.nombre||'').trim()).map(x=>x.nombre.trim()).join(', ').replace(/, ([^,]*)$/, ' y $1')}
 
-function parseSemicolonCSV(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'){if(q&&n==='"'){cell+='"';i++}else q=!q}else if(c===';'&&!q){row.push(cell);cell=''}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell='';if(row.some(x=>x.trim()))rows.push(row);row=[]}else cell+=c}if(cell||row.length){row.push(cell);rows.push(row)}return rows}
-async function loadProfessionals(){try{const r=await fetch('data/profesionales.csv',{cache:'no-store'});const rows=parseSemicolonCSV((await r.text()).replace(/^\uFEFF/,''));const h=rows.shift().map(x=>x.trim().toLowerCase());const idx=x=>h.indexOf(x);state.professionals=rows.map(r=>({registro:(r[idx('registro municipal')]||'').trim(),nombre:(r[idx('nombre')]||'').replace(/\s+/g,' ').trim(),activo:(r[idx('activo')]||'').trim(),titulo:(r[idx('titulo')]||'').trim(),cedula:(r[idx('# de cedula')]||'').trim()})).filter(p=>p.registro&&p.nombre&&/^s[ií]$/i.test(p.activo)&&/^arquitect[oa]$/i.test(p.titulo)&&p.nombre.toUpperCase()!=='NA').sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));$('proyectistaSelect').innerHTML='<option value="">Seleccione un profesional registrado...</option>'+state.professionals.map((p,i)=>`<option value="${i}">${esc(p.nombre)} · Reg. ${esc(p.registro)}</option>`).join('');$('profStatus').textContent=`${state.professionals.length} profesionales registrados cargados.`}catch(e){$('proyectistaSelect').innerHTML='<option value="">No se pudo cargar la lista</option>';$('profStatus').textContent='Active el ingreso manual.'}}
-function syncProfessional(){if($('proyectistaManualToggle').checked)return;const i=$('proyectistaSelect').value;const p=i===''?null:state.professionals[Number(i)];$('registroMunicipal').value=p?.registro||'';$('rucProy').value=p?.cedula||'';renderReport()}
-function setProfessionalManual(on){$('proyectistaManual').classList.toggle('hidden',!on);$('proyectistaSelect').disabled=on;$('registroMunicipal').readOnly=!on;$('rucProy').readOnly=!on;if(on){const i=$('proyectistaSelect').value;const p=i===''?null:state.professionals[Number(i)];if(!$('proyectistaManual').value)$('proyectistaManual').value=p?.nombre||''}else syncProfessional();renderReport()}
-function professionalName(){if($('proyectistaManualToggle').checked)return v('proyectistaManual');const i=$('proyectistaSelect').value;return i===''?'':(state.professionals[Number(i)]?.nombre||'')}
+function parseSemicolonCSV(text){
+ const rows=[];let row=[],cell='',q=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i],n=text[i+1];
+  if(c==='"'){
+   if(q&&n==='"'){cell+='"';i++}else q=!q;
+  }else if(c===';'&&!q){row.push(cell);cell=''}
+  else if((c==='\\n'||c==='\\r')&&!q){
+   if(c==='\\r'&&n==='\\n')i++;
+   row.push(cell);cell='';
+   if(row.some(x=>String(x).trim()!==''))rows.push(row);
+   row=[];
+  }else cell+=c;
+ }
+ if(cell||row.length){row.push(cell);rows.push(row)}
+ return rows;
+}
+async function loadProfessionals(){
+ try{
+  const r=await fetch('data/profesionales.csv',{cache:'no-store'});
+  if(!r.ok)throw new Error('No se pudo cargar profesionales.csv');
+  const txt=await r.text();
+  const rows=parseSemicolonCSV(txt.replace(/^\\uFEFF/,''));
+  if(rows.length<2)return;
+  const h=rows[0].map(x=>x.trim().toLowerCase());
+  const idx=n=>h.indexOf(n.toLowerCase());
+  const I={reg:idx('registro municipal'),nombre:idx('nombre'),activo:idx('activo'),titulo:idx('titulo'),ced:idx('# de cedula'),cad:idx('fecha de caducidad')};
+  state.professionals=rows.slice(1).map(r=>({
+   registro:(r[I.reg]||'').trim(),nombre:(r[I.nombre]||'').replace(/\\s+/g,' ').trim(),
+   activo:(r[I.activo]||'').trim(),titulo:(r[I.titulo]||'').trim(),cedula:(r[I.ced]||'').trim(),
+   caducidad:(r[I.cad]||'').trim()
+  })).filter(p=>p.reg&&p.nombre&&/^s[ií]$/i.test(p.activo)&&/^arquitect[oa]$/i.test(p.titulo)&&p.nombre.toUpperCase()!=='NA')
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+  const sel=$('proyectista');
+  sel.innerHTML='<option value="">Seleccione un profesional registrado...</option>'+
+   state.professionals.map((p,i)=>`<option value="${i}">${esc(p.nombre)} · Reg. ${esc(p.registro)}</option>`).join('');
+ }catch(e){console.error(e);notify('No se pudo cargar la lista de proyectistas registrados.')}
+}
+function syncProfessional(){
+ const i=Number(v('proyectista'));
+ const p=Number.isInteger(i)?state.professionals[i]:null;
+ $('registroMunicipal').value=p?.registro||'';
+ $('rucProy').value=p?.cedula||'';
+ renderReport();
+}
+function professionalName(){
+ const i=Number(v('proyectista'));return Number.isInteger(i)&&state.professionals[i]?state.professionals[i].nombre:'';
+}
+function sideShow(i){state.sideIndex=(i+2)%2;['widget-identificacion','widget-pit'].forEach((id,j)=>$(id).classList.toggle('active',j===state.sideIndex));document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===state.sideIndex));$('sideTitle').textContent=state.sideIndex===0?'1. Identificación del informe':'2. Detalle del código PIT';if(state.sideIndex===1)setTimeout(()=>initMiniMap(),80)}
+function sidePrev(){sideShow(state.sideIndex-1)} function sideNext(){sideShow(state.sideIndex+1)}
+function showTab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');document.querySelector(`[data-tab="${id}"]`)?.classList.add('active');if(id==='tab-vista')renderReport()}
+function tabAnterior(){const a=['tab-datos','tab-propuesta','tab-vista'];const cur=a.findIndex(id=>$(id).classList.contains('active'));showTab(a[Math.max(0,cur-1)])}
+function guardarYSeguir(){guardarFormulario(false);const a=['tab-datos','tab-propuesta','tab-vista'];const cur=a.findIndex(id=>$(id).classList.contains('active'));showTab(a[Math.min(a.length-1,cur+1)])}
 
-async function loadPit(){try{const r=await fetch('data/iprus_pit_lookup.geojson?v='+Date.now(),{cache:'no-store'});const gj=await r.json(),seen=new Map();(gj.features||[]).forEach(ft=>{const code=String(ft.properties?.codigo_pit||ft.properties?.pit||'').trim();if(code&&!seen.has(code))seen.set(code,{code,properties:ft.properties||{},geometry:ft.geometry})});state.pitItems=[...seen.values()].sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true}));$('pitSelect').innerHTML='<option value="">Seleccione un PIT...</option>'+state.pitItems.map(x=>`<option>${esc(x.code)}</option>`).join('');$('pitLoadMsg').textContent=`Base PIT cargada: ${state.pitItems.length} códigos.`}catch(e){$('pitSelect').innerHTML='<option>No se pudo cargar PIT</option>'}}
-function selectedPit(){return state.pitItems.find(x=>x.code===v('pitSelect'))}
-function pget(p,...ks){for(const k of ks)if(p?.[k]!=null&&String(p[k]).trim())return p[k];return''}
-function pitVal(...ks){return String(pget(selectedPit()?.properties,...ks)||'')}
-function renderPit(){const item=selectedPit();if(!item){$('pitDetailTable').innerHTML='';return}const p=item.properties;const rows=[['Parroquia',pget(p,'parroquia')],['Clasificación suelo',pget(p,'clase_suelo','clas_suelo')],['Código PIT',item.code],['Lote mínimo',pget(p,'lote_minimo','lote_min')],['Altura edificación',pget(p,'altura_edificacion')],['Implantación',pget(p,'implantacion','implantac')],['Frente mínimo',pget(p,'frente_minimo','f_min')],['Retiro frontal',pget(p,'retiro_frontal','r_frontal')],['Retiro lateral',pget(p,'retiro_lateral','r_lateral')],['Retiro posterior',pget(p,'retiro_posterior','r_posterio')],['COS planta baja',pget(p,'cos_planta_baja','cos_pb')],['COS total',pget(p,'cos_total')],['Uso principal',pget(p,'uso_principal','u_principa')]];$('pitDetailTable').innerHTML=rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1]||'—')}</td></tr>`).join('');const par=pget(p,'parroquia');if(par)$('catParroquia').value=par;renderReport();setTimeout(initMiniMap,40)}
-function utm17sToLatLng(E,N){const a=6378137,e=.00669438,k=.9996;let x=Number(E)-500000,y=Number(N)-10000000,lo=-81,ep=e/(1-e),M=y/k,mu=M/(a*(1-e/4-3*e**2/64-5*e**3/256)),e1=(1-Math.sqrt(1-e))/(1+Math.sqrt(1-e)),fp=mu+(3*e1/2-27*e1**3/32)*Math.sin(2*mu)+(21*e1**2/16-55*e1**4/32)*Math.sin(4*mu)+(151*e1**3/96)*Math.sin(6*mu)+(1097*e1**4/512)*Math.sin(8*mu),s=Math.sin(fp),c=Math.cos(fp),t=Math.tan(fp),C=ep*c*c,T=t*t,N1=a/Math.sqrt(1-e*s*s),R=a*(1-e)/(1-e*s*s)**1.5,D=x/(N1*k);let lat=fp-(N1*t/R)*(D*D/2-(5+3*T+10*C-4*C*C-9*ep)*D**4/24+(61+90*T+298*C+45*T*T-252*ep-3*C*C)*D**6/720);let lon=(D-(1+2*T+C)*D**3/6+(5-2*C+28*T-3*C*C+8*ep+24*T*T)*D**5/120)/c;return[lat*180/Math.PI,lo+lon*180/Math.PI]}
+async function loadPit(){
+ try{
+  const r=await fetch('data/iprus_pit_lookup.geojson?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);
+  const gj=await r.json(), seen=new Map();
+  (gj.features||[]).forEach(ft=>{const p=ft.properties||{},code=String(p.codigo_pit||p.pit||'').trim();if(code&&!seen.has(code))seen.set(code,{code,properties:p,geometry:ft.geometry})});
+  state.pitItems=[...seen.values()].sort((a,b)=>a.code.localeCompare(b.code,undefined,{numeric:true}));
+  $('pitSelect').innerHTML='<option value="">Seleccione un PIT...</option>'+state.pitItems.map(x=>`<option value="${esc(x.code)}">${esc(x.code)}</option>`).join('');
+  $('pitLoadMsg').textContent=`Base PIT cargada: ${state.pitItems.length} códigos disponibles.`;
+ }catch(e){$('pitSelect').innerHTML='<option value="">No se pudo cargar la base PIT</option>';$('pitLoadMsg').textContent='Verifique data/iprus_pit_lookup.geojson';console.error(e)}
+}
+function pget(p,...keys){for(const k of keys){if(p?.[k]!=null&&String(p[k]).trim()!=='')return p[k]}return''}
+function selectedPit(){return state.pitItems.find(x=>x.code===v('pitSelect'))||null}
+function pitProp(item,...keys){return pget(item?.properties||{},...keys)}
+function normPct(x){return String(x||'').replace(/\s+/g,' ')}
+function renderPit(){
+ const item=selectedPit();if(!item){$('pitDetailTable').innerHTML='';return}
+ const p=item.properties;
+ const rows=[
+ ['Parroquia',pget(p,'parroquia')],['Clasificación suelo',pget(p,'clase_suelo','clas_suelo')],
+ ['Código PIT',item.code],['Lote mínimo',pget(p,'lote_minimo','lote_min')],['Altura edificación',pget(p,'altura_edificacion')],
+ ['Implantación',pget(p,'implantacion','implantac')],['Frente mínimo',pget(p,'frente_minimo','f_min')],
+ ['Retiro frontal',pget(p,'retiro_frontal','r_frontal')],['Retiro lateral',pget(p,'retiro_lateral','r_lateral')],
+ ['Retiro posterior',pget(p,'retiro_posterior','r_posterio')],['COS planta baja',normPct(pget(p,'cos_planta_baja','cos_pb'))],
+ ['COS total',normPct(pget(p,'cos_total'))],['COS creado',normPct(pget(p,'cos_creado','cos_total_c'))],['Uso principal',pget(p,'uso_principal','u_principa')]
+ ];
+ $('pitDetailTable').innerHTML=rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1]||'—')}</td></tr>`).join('');
+ const par=pget(p,'parroquia');if(par)$('catParroquia').value=par;
+ renderReport();setTimeout(initMiniMap,50);
+}
+function utm17sToLatLng(easting,northing){
+ const a=6378137,eccSquared=.00669438,k0=.9996;let x=Number(easting)-500000,y=Number(northing)-10000000,longOrigin=-81;
+ const eccPrimeSquared=eccSquared/(1-eccSquared),M=y/k0,mu=M/(a*(1-eccSquared/4-3*eccSquared**2/64-5*eccSquared**3/256));
+ const e1=(1-Math.sqrt(1-eccSquared))/(1+Math.sqrt(1-eccSquared)),J1=3*e1/2-27*e1**3/32,J2=21*e1**2/16-55*e1**4/32,J3=151*e1**3/96,J4=1097*e1**4/512;
+ const fp=mu+J1*Math.sin(2*mu)+J2*Math.sin(4*mu)+J3*Math.sin(6*mu)+J4*Math.sin(8*mu),s=Math.sin(fp),c=Math.cos(fp),t=Math.tan(fp),C1=eccPrimeSquared*c*c,T1=t*t,N1=a/Math.sqrt(1-eccSquared*s*s),R1=a*(1-eccSquared)/(1-eccSquared*s*s)**1.5,D=x/(N1*k0);
+ let lat=fp-(N1*t/R1)*(D*D/2-(5+3*T1+10*C1-4*C1*C1-9*eccPrimeSquared)*D**4/24+(61+90*T1+298*C1+45*T1*T1-252*eccPrimeSquared-3*C1*C1)*D**6/720);lat=lat*180/Math.PI;
+ let lon=(D-(1+2*T1+C1)*D**3/6+(5-2*C1+28*T1-3*C1*C1+8*eccPrimeSquared+24*T1*T1)*D**5/120)/c;lon=longOrigin+lon*180/Math.PI;return[lat,lon]
+}
 function transformCoords(c){if(!Array.isArray(c))return c;if(c.length>=2&&typeof c[0]==='number'){const[lat,lon]=utm17sToLatLng(c[0],c[1]);return[lon,lat]}return c.map(transformCoords)}
 function wgsGeom(g){return g?{type:g.type,coordinates:transformCoords(g.coordinates)}:null}
-function drawMap(map,item){const g=L.geoJSON(wgsGeom(item.geometry),{style:{color:'#0b5cab',weight:2,fillColor:'#73bdf8',fillOpacity:.35}}).addTo(map);map.fitBounds(g.getBounds().pad(.15));L.circleMarker(g.getBounds().getCenter(),{radius:6,color:'#fff',weight:2,fillColor:'#d71920',fillOpacity:1}).addTo(map)}
-function initMiniMap(){if(!window.L)return;if(miniMap)miniMap.remove();$('pitMap').innerHTML='';const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});miniMap=L.map('pitMap',{layers:[sat]});const item=selectedPit();if(item)drawMap(miniMap,item);else miniMap.setView([-1.67,-78.65],12)}
-function openPitMapModal(){$('pitMapModal').classList.add('open');setTimeout(()=>{if(modalMap)modalMap.remove();$('pitMapModalCanvas').innerHTML='';const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19});modalMap=L.map('pitMapModalCanvas',{layers:[sat]});const item=selectedPit();if(item)drawMap(modalMap,item);else modalMap.setView([-1.67,-78.65],12)},60)}
+function baseLayers(){return{sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Imágenes © Esri'}),osm:L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'})}}
+function drawMap(map,item,large=false){if(!map||!item)return;const g=L.geoJSON(wgsGeom(item.geometry),{style:{color:'#0b5cab',weight:2,fillColor:'#73bdf8',fillOpacity:.35}}).addTo(map);map.fitBounds(g.getBounds().pad(.15));const center=g.getBounds().getCenter();L.circleMarker(center,{radius:large?7:6,color:'#fff',weight:2,fillColor:'#d71920',fillOpacity:1}).addTo(map);return g}
+function initMiniMap(){if(!window.L)return;const item=selectedPit();if(miniMap){miniMap.remove();miniMap=null}$('pitMap').innerHTML='';const {sat,osm}=baseLayers();miniMap=L.map('pitMap',{zoomControl:true,layers:[sat]});L.control.layers({'Satélite':sat,'Mapa base':osm},null,{collapsed:true}).addTo(miniMap);if(item)drawMap(miniMap,item);else miniMap.setView([-1.67,-78.65],12);setTimeout(()=>miniMap.invalidateSize(),100)}
+function openPitMapModal(){$('pitMapModal').classList.add('open');setTimeout(()=>{if(modalMap){modalMap.remove();modalMap=null}$('pitMapModalCanvas').innerHTML='';const {sat,osm}=baseLayers();modalMap=L.map('pitMapModalCanvas',{layers:[sat]});L.control.layers({'Satélite':sat,'Mapa base':osm},null,{collapsed:false}).addTo(modalMap);const item=selectedPit();if(item)drawMap(modalMap,item,true);else modalMap.setView([-1.67,-78.65],12)},80)}
 function closePitMapModal(){$('pitMapModal').classList.remove('open')}
 
-function parseCSV(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean),sep=lines[0]?.includes(';')?';':',';const h=(lines.shift()||'').split(sep);return lines.map(l=>{const c=l.split(sep),o={};h.forEach((k,i)=>o[k.trim()]=(c[i]||'').trim());return o})}
-async function loadCatastral(){try{const r=await fetch('data/base_clave_catastral_parroquia_zona.csv?v='+Date.now());const rows=parseCSV(await r.text());state.catastralBase=rows.map(r=>({parro:String(r.Parro||'').padStart(2,'0'),parroquia:r.Parroquia||'',zona:String(r.Zona||'').padStart(3,'0'),zonaNombre:r.Zona_Nombre||'',urbanoRural:r.Urbano_Rural||''}));const seen=new Map();state.catastralBase.forEach(x=>{if(x.parro&&!seen.has(x.parro))seen.set(x.parro,x)});$('catParro').innerHTML='<option value=""></option>'+[...seen.values()].map(x=>`<option value="${x.parro}">${x.parro}-${esc(x.parroquia)}</option>`).join('')}catch(e){}}
-function updateZones(){const p=v('catParro');const rows=state.catastralBase.filter(x=>x.parro===p);$('catZona').innerHTML='<option value=""></option>'+rows.map(x=>`<option value="${x.zona}">${x.zona}-${esc(x.zonaNombre)}</option>`).join('');syncCatastral()}
-function syncCatastral(){const p=v('catParro'),z=v('catZona'),row=state.catastralBase.find(x=>x.parro===p&&x.zona===z)||state.catastralBase.find(x=>x.parro===p);if(row){$('catParroquia').value=row.parroquia;$('catUrbanoRural').value=row.urbanoRural}$('catClave').value=$('claveManualToggle').checked?v('claveManual'):[v('catProv')||'06',v('catCant')||'01',p,z,v('catSect'),v('catPolg'),v('catPred')].join('');renderReport()}
-function buscarClaveCatastral(){syncCatastral()}
+async function loadCatastral(){
+ try{
+  const r=await fetch('data/base_clave_catastral_parroquia_zona.csv?v='+Date.now(),{cache:'no-store'});const rows=parseCSV(await r.text());
+  state.catastralBase=rows.filter(x=>!['no','false','0','inactivo'].includes(String(x.Activo||'Sí').toLowerCase())).map(r=>({prov:r.Prov||'06',cant:r.Cant||'01',parro:String(r.Parro||'').padStart(2,'0'),parroquia:r.Parroquia||'',zona:String(r.Zona||'').padStart(3,'0'),zonaNombre:r.Zona_Nombre||'',urbanoRural:r.Urbano_Rural||''}));
+  const seen=new Map();state.catastralBase.forEach(x=>{if(x.parro&&!seen.has(x.parro))seen.set(x.parro,x)});
+  $('catParro').innerHTML='<option value=""></option>'+[...seen.values()].sort((a,b)=>a.parro.localeCompare(b.parro)).map(x=>`<option value="${x.parro}">${x.parro}-${esc(x.parroquia)}</option>`).join('');
+ }catch(e){console.error(e)}
+}
+function updateZones(){const p=v('catParro');const rows=state.catastralBase.filter(x=>x.parro===p).sort((a,b)=>a.zona.localeCompare(b.zona));$('catZona').innerHTML='<option value=""></option>'+rows.map(x=>`<option value="${x.zona}">${x.zona}-${esc(x.zonaNombre||('Zona '+x.zona))}</option>`).join('');syncCatastral()}
+function syncCatastral(){const p=v('catParro'),z=v('catZona'),row=state.catastralBase.find(x=>x.parro===p&&x.zona===z)||state.catastralBase.find(x=>x.parro===p);if(row){$('catParroquia').value=row.parroquia;$('catUrbanoRural').value=row.urbanoRural}const clave=$('claveManualToggle').checked?v('claveManual'):[v('catProv')||'06',v('catCant')||'01',p,z,v('catSect'),v('catPolg'),v('catPred')].join('');$('catClave').value=clave;renderReport()}
+function buscarClaveCatastral(){syncCatastral();notify(v('catParroquia')?`Clave catastral reconocida: ${v('catParroquia')} / ${v('catUrbanoRural')}.`:'Seleccione parroquia y zona o continúe manualmente.',!!v('catParroquia'))}
 
-function renderLots(){const n=parseInt(v('nLotes')||2),old={};document.querySelectorAll('[data-lot]').forEach(x=>old[x.dataset.lot]=x.value);$('lotsBody').innerHTML='';for(let i=1;i<=n;i++)$('lotsBody').insertAdjacentHTML('beforeend',`<tr><td>LOTE ${i}</td><td><input type="number" step="0.01" data-lot="${i}" value="${old[i]||''}"></td></tr>`);document.querySelectorAll('[data-lot]').forEach(x=>x.addEventListener('input',()=>{calc();renderReport()}));calc()}
-function lotData(){return[...document.querySelectorAll('[data-lot]')].map((x,i)=>({i:i+1,a:parseFloat(x.value||0)||0}))}
+function initLots(){for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);renderLots()}
+function renderLots(){let n=parseInt(v('nLotes')||2),old={};document.querySelectorAll('[data-lot]').forEach(x=>old[x.dataset.lot]=x.value);$('lotsBody').innerHTML='';for(let i=1;i<=n;i++)$('lotsBody').insertAdjacentHTML('beforeend',`<tr><td>LOTE ${i}</td><td><input type="number" step="0.01" data-lot="${i}" value="${old[i]||''}"></td></tr>`);document.querySelectorAll('[data-lot]').forEach(x=>x.oninput=()=>{calc();renderReport()});calc()}
+function lotData(){return [...document.querySelectorAll('[data-lot]')].map((x,i)=>({i:i+1,a:parseFloat(x.value||0)||0}))}
 function calc(){const s=lotData().reduce((a,b)=>a+b.a,0),u=num('areaIprus')-num('areaAfectada')-num('areaAfectadaProp');$('sumLots').textContent=fmt(s);$('kIprus').textContent=fmt(num('areaIprus'))+' m²';$('kLotes').textContent=fmt(s)+' m²';$('kUrb').textContent=fmt(u)+' m²'}
+function pitVal(...keys){const i=selectedPit();return i?String(pitProp(i,...keys)||''):''}
+function cleanPct(x){return String(x||'').replace('%','').trim()}
 function pct(a,b){return b?(a/b*100).toFixed(2)+'%':'0.00%'}
-function lotTable(){const d=lotData();return`<table><tr><th>Nro.</th><th>Área</th></tr>${d.map(x=>`<tr><td>LOTE ${x.i}</td><td>${fmt(x.a)}</td></tr>`).join('')}<tr><th>TOTAL ÚTIL</th><th>${fmt(d.reduce((a,b)=>a+b.a,0))}</th></tr></table>`}
-function areaTable(){const ip=num('areaIprus'),g=num('areaGrav'),a=num('areaAfectada'),p=num('areaAfectadaProp'),l=lotData().reduce((x,y)=>x+y.a,0),u=ip-a-p;return`<table><tr><th>Descripción</th><th>Área</th><th>U</th><th>Porcentaje</th></tr><tr><td>Área Total del Lote (gravamen)</td><td>${fmt(g)}</td><td>m²</td><td>${pct(g,ip)}</td></tr><tr><td>Área Total del Lote (IPRUS)</td><td>${fmt(ip)}</td><td>m²</td><td>100.00%</td></tr><tr><td>Área útil de lotes</td><td>${fmt(l)}</td><td>m²</td><td>${pct(l,ip)}</td></tr><tr><td>Área afectación vial</td><td>${fmt(a)}</td><td>m²</td><td>${pct(a,ip)}</td></tr><tr><td>Área afectación vial propuesta</td><td>${fmt(p)}</td><td>m²</td><td>${pct(p,ip)}</td></tr><tr><td>Área Útil Urbanizable</td><td>${fmt(u)}</td><td>m²</td><td>${pct(u,ip)}</td></tr><tr><td>COS PB</td><td>${esc(pitVal('cos_planta_baja','cos_pb'))}</td><td>%</td><td>-</td></tr><tr><td>COS Total</td><td>${esc(pitVal('cos_total'))}</td><td>%</td><td>-</td></tr></table>`}
+function lotWords(n){return({2:'dos (2)',3:'tres (3)',4:'cuatro (4)',5:'cinco (5)',6:'seis (6)',7:'siete (7)',8:'ocho (8)',9:'nueve (9)',10:'diez (10)'})[n]||n}
+function lotTable(){const d=lotData();return `<table class="form-table"><tr><th>Nro.</th><th>Área</th></tr>${d.map(x=>`<tr><td>LOTE ${x.i}</td><td>${fmt(x.a)}</td></tr>`).join('')}<tr><th>TOTAL ÚTIL</th><th>${fmt(d.reduce((a,b)=>a+b.a,0))}</th></tr></table>`}
+function areaTable(){const ip=num('areaIprus'),g=num('areaGrav'),a=num('areaAfectada'),p=num('areaAfectadaProp'),l=lotData().reduce((x,y)=>x+y.a,0),u=ip-a-p;return `<table class="form-table"><tr><th>Descripción</th><th>Área</th><th>U</th><th>Porcentaje</th></tr><tr><td>Área Total del Lote (gravamen)</td><td>${fmt(g)}</td><td>m²</td><td>${pct(g,ip)}</td></tr><tr><td>Área Total del Lote (IPRUS)</td><td>${fmt(ip)}</td><td>m²</td><td>${ip?'100.00%':'0.00%'}</td></tr><tr><td>Área útil de lotes</td><td>${fmt(l)}</td><td>m²</td><td>${pct(l,ip)}</td></tr><tr><td>Área afectación vial</td><td>${fmt(a)}</td><td>m²</td><td>${pct(a,ip)}</td></tr><tr><td>Área afectación vial propuesta</td><td>${fmt(p)}</td><td>m²</td><td>${pct(p,ip)}</td></tr><tr><td>Área Útil Urbanizable</td><td>${fmt(u)}</td><td>m²</td><td>${pct(u,ip)}</td></tr><tr><td>COS PB</td><td>${esc(cleanPct(pitVal('cos_planta_baja','cos_pb')))}</td><td>%</td><td>-</td></tr><tr><td>COS Total</td><td>${esc(cleanPct(pitVal('cos_total')))}</td><td>%</td><td>-</td></tr><tr><td>Densidad Bruta</td><td>${esc(v('densBruta'))}</td><td>hab/ha</td><td>-</td></tr><tr><td>Densidad Neta</td><td>${esc(v('densNeta'))}</td><td>hab/ha</td><td>-</td></tr></table>`}
 
-function makeReportPage(){const p=document.createElement('div');p.className='report-page';p.innerHTML='<img class="report-page-bg" src="assets/fondo_institucional.png" alt=""><div class="report-page-inner"></div>';return p}
-function paginateReport(html){const report=$('report'),src=$('reportSource');src.innerHTML=`<div class="report-page"><div class="report-page-inner">${html}</div></div>`;const source=src.querySelector('.report-page-inner');report.innerHTML='';let page=makeReportPage(),inner=page.querySelector('.report-page-inner');report.appendChild(page);const max=(297-50.8)*(96/25.4);[...source.children].forEach(node=>{const c=node.cloneNode(true);inner.appendChild(c);if(inner.scrollHeight>max&&inner.children.length>1){inner.removeChild(c);page=makeReportPage();inner=page.querySelector('.report-page-inner');report.appendChild(page);inner.appendChild(c)}});src.innerHTML=''}
 
+function makeReportPage(){
+ const page=document.createElement('div');page.className='report-page';
+ page.innerHTML='<img class="report-page-bg" src="assets/fondo_institucional.png" alt=""><div class="report-page-inner"></div>';
+ return page;
+}
+function paginateReport(html){
+ const report=$('report'),src=$('reportSource');
+ src.innerHTML=`<div class="report-page"><div class="report-page-inner">${html}</div></div>`;
+ const sourceInner=src.querySelector('.report-page-inner');
+ report.innerHTML='';
+ let page=makeReportPage(),inner=page.querySelector('.report-page-inner');report.appendChild(page);
+ const limitMm=297-50.8; // A4 menos márgenes superior e inferior
+ const pxPerMm=96/25.4, maxHeight=limitMm*pxPerMm;
+ [...sourceInner.children].forEach(node=>{
+  const clone=node.cloneNode(true);inner.appendChild(clone);
+  if(inner.scrollHeight>maxHeight && inner.children.length>1){
+    inner.removeChild(clone);
+    page=makeReportPage();inner=page.querySelector('.report-page-inner');report.appendChild(page);inner.appendChild(clone);
+  }
+ });
+ src.innerHTML='';
+}
 function renderReport(){
- calc();
- const pit=v('pitSelect'),par=pitVal('parroquia')||v('catParroquia'),imp=pitVal('implantacion','implantac'),lm=pitVal('lote_minimo','lote_min'),fm=pitVal('frente_minimo','f_min'),rf=pitVal('retiro_frontal','r_frontal'),rl=pitVal('retiro_lateral','r_lateral'),rp=pitVal('retiro_posterior','r_posterio'),uso=pitVal('uso_principal','u_principa'),cosPB=pitVal('cos_planta_baja','cos_pb'),cosT=pitVal('cos_total'),alt=pitVal('altura_edificacion');
- const y=new Date().getFullYear(),memo=`GADMR-GPHDU-MTI-${y}-${v('ita')||'___'}-ITA`,owners=ownersText(),t=ownerTreatment(),proy=professionalName(),L=parseInt(v('nLotes')||2);
+ calc();const pit=v('pitSelect'),par=pitVal('parroquia')||v('catParroquia'),uso=pitVal('uso_principal','u_principa'),imp=pitVal('implantacion','implantac'),lm=pitVal('lote_minimo','lote_min'),fm=pitVal('frente_minimo','f_min'),rf=pitVal('retiro_frontal','r_frontal'),rl=pitVal('retiro_lateral','r_lateral'),rp=pitVal('retiro_posterior','r_posterio'),cosPB=pitVal('cos_planta_baja','cos_pb'),cosT=pitVal('cos_total'),alt=pitVal('altura_edificacion');const y=new Date().getFullYear(),memo=`GADMR-GPHDU-MTI-${y}-${v('ita')||'___'}-ITA`,L=parseInt(v('nLotes')||2),t=ownerTreatment(),owners=ownersText(),proy=professionalName();
  const vias=v('viasInternas')==='Sí'?(v('viasTexto')||'Según la propuesta presentada, el proyecto contempla vías planificadas internas dentro del predio.'):'Según la propuesta presentada el proyecto no contempla vías planificadas internas dentro del predio.';
  const reportHtml=`<div style="text-align:right;font-weight:700">MEMORANDO Nro. ${esc(memo)}<br>Trámite Nro. ${esc(v('egob'))}<br>Riobamba, ${esc(dateLong(v('fechaEmision')))}</div>
- <p><b>ASUNTO: INFORME TÉCNICO FAVORABLE PARA REVISIÓN Y APROBACIÓN DE ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS, DENOMINADO "${esc(v('proyectoNombre'))}" (eGOB ${esc(v('egob'))})</b></p>
- <p>De mi consideración:</p>
- <p>En relación con el procedimiento administrativo signado con el trámite Nro. ${esc(v('egob'))} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${esc(v('proyectoNombre'))}" ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(pit)}, parroquia ${esc(par)} de la ciudad de Riobamba, de propiedad de ${esc(t)} ${esc(owners)} del predio con clave catastral ${esc(v('catClave'))}; emito el <b>INFORME TÉCNICO FAVORABLE</b>.</p>
+ <p><b>ASUNTO: INFORME TÉCNICO FAVORABLE PARA REVISIÓN Y APROBACIÓN DE ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES CON OBRAS, DENOMINADO "${esc(v('proyectoNombre')||'')}" (eGOB ${esc(v('egob'))})</b></p>
+ <p>De mi consideración:</p><p>En relación con el procedimiento administrativo signado con el trámite Nro. ${esc(v('egob'))} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${esc(v('proyectoNombre')||'')}" ubicado en la calle ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, Zona de planeamiento ${esc(pit)}, parroquia ${esc(par)} de la ciudad de Riobamba, de propiedad de ${esc(t)} ${esc(owners)} del predio con clave catastral ${esc(v('catClave'))}; emito el <b>INFORME TÉCNICO FAVORABLE</b>.</p>
  <h2>ANTECEDENTES</h2>
  <p><b>1.</b> En el expediente de fojas ${esc(v('gFojas'))} carpeta ${esc(v('gCarpeta'))}, consta ficha registral Nro. ${esc(v('gFicha'))}, certificado Nro. ${esc(v('gCert'))}, Ref.: ${esc(v('gRef'))} el ${esc(dateLong(v('gFecha')))}, del cual se desprende que ${esc(t)} ${esc(owners)} ${nl(v('textoGrav'))}, con una superficie de ${fmt(num('areaGrav'))} metros cuadrados y cuyos linderos y dimensiones son: ${nl(v('linderos'))}</p>
  <p><b>2.</b> En el expediente de fojas ${esc(v('iFojas'))} carpeta ${esc(v('iCarpeta'))}, consta el IPRUS Nro. ${esc(v('nroIprus'))}, suscrito por ${esc(v('tecnicoIprus'))}, quien certifica una superficie de ${fmt(num('areaIprus'))} m². Zona ${esc(pit)}; Implantación ${esc(imp)}; lote mínimo ${esc(lm)}; frente mínimo ${esc(fm)}; retiros frontal ${esc(rf)}, lateral ${esc(rl)}, posterior ${esc(rp)}.</p>
- <p><b>3.</b> En el expediente de foja ${esc(v('epFojas'))} carpeta ${esc(v('epCarpeta'))}, consta el ${esc(v('epTipo'))} de Agua Potable y Alcantarillado Nro. ${esc(v('epOficio'))}, con fecha ${esc(dateLong(v('epFecha')))}, emitido por ${esc(v('epTecnico'))} y solicitado por ${esc(v('epSolicita'))}. ${nl(v('epDatos'))}</p>
- <p><b>4.</b> En el expediente de foja ${esc(v('eeFojas'))} carpeta ${esc(v('eeCarpeta'))}, consta el Informe de Factibilidad de Servicio para Subdivisión Predial Oficio Nro. EERSA-DIC-${esc(v('eeOficio'))}-OF, con fecha ${esc(dateLong(v('eeFecha')))}, emitido por ${esc(v('eeTecnico'))}. ${nl(v('eeDatos'))}</p>
- <p><b>5.</b> En el expediente de foja ${esc(v('cntFojas'))} carpeta ${esc(v('cntCarpeta'))}, consta el Certificado de Factibilidad CNTEP-RG3-CH-TEC-${esc(v('cntOficio'))}-O, con fecha ${esc(dateLong(v('cntFecha')))}, emitido por ${esc(v('cntTecnico'))}. ${nl(v('cntDatos'))}</p>
- <p><b>6.</b> En el expediente de foja ${esc(v('pFojas'))} carpeta ${esc(v('pCarpeta'))}, consta el pago de impuesto predial del ${nl(v('datosImpuestoPredial'))}</p>
- <p><b>7.</b> En el expediente de foja ${esc(v('rFojas'))} carpeta ${esc(v('rCarpeta'))}, consta el certificado Registro Único de Contribuyentes de ${esc(proy)} con Ruc/Cédula: ${esc(v('rucProy'))}.</p>
- <p><b>8.</b> En el expediente de foja ${esc(v('patFojas'))} carpeta ${esc(v('patCarpeta'))}, consta el impuesto patente actividades económicas del ${nl(v('datosPatente'))}</p>
+ <p><b>3.</b> RIOBAMBA EP: ${esc(v('epTipo'))} Nro. ${esc(v('epOficio'))}, fecha ${esc(dateLong(v('epFecha')))}. ${nl(v('epDatos'))}</p>
+ <p><b>4.</b> EERSA: Oficio Nro. EERSA-DIC-${esc(v('eeOficio'))}-OF, fecha ${esc(dateLong(v('eeFecha')))}. ${nl(v('eeDatos'))}</p>
+ <p><b>5.</b> CNT: Certificado CNTEP-RG3-CH-TEC-${esc(v('cntOficio'))}-O, fecha ${esc(dateLong(v('cntFecha')))}. ${nl(v('cntDatos'))}</p>
  <h2>INFORME TÉCNICO</h2>
  <h3>1. UBICACIÓN</h3><p>Predio ubicado en ${esc(v('direccion'))}, barrio ${esc(v('barrio'))}, parroquia ${esc(par)}, código PIT ${esc(pit)}, clave catastral ${esc(v('catClave'))}.</p>
  <h3>2. LINDEROS GENERALES</h3><p>${nl(v('linderos'))}<br><b>Área Total:</b> ${fmt(num('areaIprus'))} m²</p>
- <h3>3. PROPUESTA DEL PROYECTO</h3><p>${nl(v('datosTecnicos'))}</p><table><tr><th colspan="4">ZONA DE PLANEAMIENTO ${esc(pit)}</th></tr><tr><td>Implantación</td><td>${esc(imp)}</td><td>Uso Principal</td><td>${esc(uso)}</td></tr><tr><td>Lote Mínimo</td><td>${esc(lm)}</td><td>Altura edificación</td><td>${esc(alt)}</td></tr><tr><td>Frente mínimo</td><td>${esc(fm)}</td><td>Retiro frontal</td><td>${esc(rf)}</td></tr><tr><td>COS PB</td><td>${esc(cosPB)}</td><td>Retiro lateral</td><td>${esc(rl)}</td></tr><tr><td></td><td></td><td>Retiro posterior</td><td>${esc(rp)}</td></tr><tr><td></td><td></td><td>COS TOTAL</td><td>${esc(cosT)}</td></tr></table>
+ <h3>3. PROPUESTA DEL PROYECTO</h3><p>${nl(v('datosTecnicos'))}</p><table class="form-table"><tr><th colspan="4">ZONA DE PLANEAMIENTO ${esc(pit)}</th></tr><tr><td>Implantación</td><td>${esc(imp)}</td><td>Uso Principal</td><td>${esc(uso)}</td></tr><tr><td>Lote Mínimo</td><td>${esc(lm)}</td><td>Altura edificación</td><td>${esc(alt)}</td></tr><tr><td>Frente mínimo</td><td>${esc(fm)}</td><td>Retiro frontal</td><td>${esc(rf)}</td></tr><tr><td>COS PB</td><td>${esc(cosPB)}</td><td>Retiro lateral</td><td>${esc(rl)}</td></tr><tr><td></td><td></td><td>Retiro posterior</td><td>${esc(rp)}</td></tr><tr><td></td><td></td><td>COS TOTAL</td><td>${esc(cosT)}</td></tr></table>
  <h3>4. DESCRIPCIÓN DE LOTEAMIENTO</h3><p>El predio se propone subdividir en ${L} lotes.</p>${lotTable()}
- <h3>5. LINDEROS Y DIMENSIONES</h3><p>Se propone la urbanización en ${L} lotes, conforme planos y memoria descriptiva suscritos por Arq. ${esc(proy)}.</p>
+ <h3>5. LINDEROS Y DIMENSIONES</h3><p>Se propone la urbanización en ${lotWords(L)} lotes, conforme planos y memoria descriptiva suscritos por Arq. ${esc(proy)}.</p>
  <h3>6. PROPUESTA DE RETIROS Y ADOSAMIENTOS</h3><p>Implantación ${esc(imp)} con retiro frontal ${esc(rf)}, lateral ${esc(rl)} y posterior ${esc(rp)}. ${nl(v('retirosExtra'))}</p>
  <h3>7. PROPUESTA DE VÍAS</h3><p>${nl(vias)}</p>
  <h3>8. VÍAS Y AFECTACIÓN VIAL</h3><p>El predio ${v('presentaAfectacion')==='Sí'?'sí':'no'} presenta afectación vial. ${nl(v('afExtra'))}</p>
@@ -398,42 +651,28 @@ function renderReport(){
  paginateReport(reportHtml);
  $('egobText').textContent=`De mi consideración
 
-En relación con el procedimiento administrativo signado con el trámite Nro. ${v('egob')} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras denominado "${v('proyectoNombre')}" ubicado en la calle ${v('direccion')}, barrio ${v('barrio')}, Zona de planeamiento ${pit}, parroquia ${par} de la ciudad de Riobamba, de propiedad de ${t} ${owners} del predio con clave catastral ${v('catClave')}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el INFORME TÉCNICO FAVORABLE contenido en MEMORANDO Nro. ${memo}.
+En relación con el procedimiento administrativo signado con el trámite Nro. ${v('egob')} para el otorgamiento de aprobación de anteproyecto de Subdivisión Predial de dos a diez lotes con obras, ubicado en la calle ${v('direccion')}, barrio ${v('barrio')}, Zona de planeamiento ${pit}, parroquia ${par} de la ciudad de Riobamba, de propiedad de ${t} ${owners} del predio con clave catastral ${v('catClave')}; al respecto, de conformidad con el artículo 39 de la Ordenanza 016-2023, emito el INFORME TÉCNICO FAVORABLE contenido en MEMORANDO Nro. ${memo}.
 
 En virtud de lo establecido en el artículo 39 de la Ordenanza 016-2023, solicito que, por su intermedio, se remita a la Dirección de Procuraduría Institucional para que se complemente con el informe legal conforme MEMORANDO Nro. GADMR-PROC-2026-0252-M, junto con su respectiva propuesta de resolución administrativa.
 
 Con sentimientos de estima y consideración.`;
 }
-function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.owners=state.owners;d.proxies=state.proxies;d.lots=lotData().map(x=>x.a);return d}
-function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;if(Array.isArray(d.proxies))state.proxies=d.proxies;renderOwners();renderProxies();setProfessionalManual(!!$('proyectistaManualToggle').checked);updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();updateNroButton();renderReport()}
-function guardarFormulario(show=true){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO_V3',JSON.stringify(snapshot()));if(show)notify('Informe guardado.')}
-function nuevoFormulario(){if(confirm('¿Crear un formulario nuevo?')){localStorage.removeItem('ALLPA_SUBDIVISION_APROBATORIO_V3');location.reload()}}
-function asignarNumero(){const x=prompt('Ingrese el Nro. del Informe Técnico Aprobatorio:',v('ita'));if(x!==null){$('ita').value=x.trim();updateNroButton();renderReport()}}
-function updateNroButton(){$('nroBtn').textContent='NRO. '+(v('ita')||'—')}
-async function copyEgob(){try{await navigator.clipboard.writeText($('egobText').textContent);notify('Texto eGOB copiado.')}catch(e){notify('Seleccione y copie el texto manualmente.')}}
-
+function snapshot(){const d={};document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)d[el.id]=el.type==='checkbox'?el.checked:el.value});d.lots=lotData().map(x=>x.a);d.owners=state.owners;d.proxies=state.proxies;return d}
+function applySnapshot(d){document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id&&d[el.id]!=null){if(el.type==='checkbox')el.checked=!!d[el.id];else el.value=d[el.id]}});
+ if(Array.isArray(d.owners)&&d.owners.length)state.owners=d.owners;if(Array.isArray(d.proxies))state.proxies=d.proxies;renderOwners();renderProxies();updateNroButton();updateZones();if(d.catZona)$('catZona').value=d.catZona;syncCatastral();renderLots();if(d.lots)document.querySelectorAll('[data-lot]').forEach((el,i)=>el.value=d.lots[i]??'');renderPit();calc();renderReport()}
+function guardarFormulario(show=true){localStorage.setItem('ALLPA_SUBDIVISION_APROBATORIO_V2',JSON.stringify(snapshot()));if(show)notify('Informe guardado en este navegador.',true);return true}
+function nuevoFormulario(){if(!confirm('¿Crear un formulario nuevo? Se limpiarán los datos no guardados.'))return;localStorage.removeItem('ALLPA_SUBDIVISION_APROBATORIO_V2');location.reload()}
+async function copyEgob(){try{await navigator.clipboard.writeText($('egobText').textContent);notify('Texto para eGOB copiado.',true)}catch(e){notify('No se pudo copiar automáticamente.')}}
 function bind(){
- $('pitSelect').addEventListener('change',renderPit);
- $('catParro').addEventListener('change',updateZones);$('catZona').addEventListener('change',syncCatastral);
+ $('pitSelect').addEventListener('change',renderPit);$('proyectista').addEventListener('change',syncProfessional);$('catParro').addEventListener('change',updateZones);$('catZona').addEventListener('change',syncCatastral);
  ['catProv','catCant','catSect','catPolg','catPred','claveManual'].forEach(id=>$(id).addEventListener('input',syncCatastral));
- $('claveManualToggle').addEventListener('change',()=>{$('claveManualWrap').classList.toggle('hidden',!$('claveManualToggle').checked);syncCatastral()});
- $('proyectistaSelect').addEventListener('change',syncProfessional);
- $('proyectistaManualToggle').addEventListener('change',e=>setProfessionalManual(e.target.checked));
- $('epSolicita').addEventListener('input',()=>{$('epSolicita').dataset.manual='1'});
+ $('claveManualToggle').addEventListener('change',()=>{$('claveManualWrap').classList.toggle('hidden',!$('claveManualToggle').checked);['catProv','catCant','catParro','catZona','catSect','catPolg','catPred'].forEach(id=>$(id).disabled=$('claveManualToggle').checked);syncCatastral()});
+ document.querySelectorAll('input,select,textarea').forEach(el=>{if(!['pitSelect','catParro','catZona','nLotes'].includes(el.id))el.addEventListener('input',renderReport)});
  $('nLotes').addEventListener('change',renderLots);
- document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input',()=>{if(el.id!=='epSolicita')renderReport()}));
 }
-async function init(){
- try{await authGuard()}catch(e){}
- state.owners=[{nombre:'',doc:''}];renderOwners();renderProxies();syncEpSolicitante();
- for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);
- $('fechaEmision').value=new Date().toISOString().slice(0,10);
- bind();
- await Promise.all([loadPit(),loadCatastral(),loadProfessionals()]);
- renderLots();initMiniMap();
- const saved=localStorage.getItem('ALLPA_SUBDIVISION_APROBATORIO_V3');if(saved){try{applySnapshot(JSON.parse(saved))}catch(e){}}
- updateNroButton();renderReport();
-}
+async function init(){try{if(!await authGuard())return}catch(e){notify(e.message||String(e));return}
+ if(!state.owners.length)state.owners=[{nombre:'',doc:''}];renderOwners();renderProxies();
+ for(let i=2;i<=10;i++)$('nLotes').insertAdjacentHTML('beforeend',`<option>${i}</option>`);$('fechaEmision').value=new Date().toISOString().slice(0,10);bind();await Promise.all([loadPit(),loadCatastral(),loadProfessionals()]);renderLots();initMiniMap();const saved=localStorage.getItem('ALLPA_SUBDIVISION_APROBATORIO_V2');if(saved){try{applySnapshot(JSON.parse(saved))}catch(e){}}updateNroButton();syncProfessional();renderReport()}
 init();
 </script>
 </body>
