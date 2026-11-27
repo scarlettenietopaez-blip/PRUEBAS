@@ -938,8 +938,8 @@ html.allpa-project-preboot body::before{
 }
 .sustento-img-v55{
   display:block;
-  max-width:70mm;
-  max-height:45mm;
+  max-width:145mm;
+  max-height:80mm;
   object-fit:contain;
   border:1px solid #999;
   border-radius:4px;
@@ -16600,11 +16600,6 @@ function ensureProjectEntryV123(){
           <button type="button" class="project-option-v123" onclick="selectProjectV123('anteproyecto_edificacion')">
             <span class="num">2</span>
             <span class="title">ANTEPROYECTO DE EDIFICACIÓN</span>
-            <span class="arrow">→</span>
-          </button>
-          <button type="button" class="project-option-v123" data-subdivision-project="1" onclick="openSubdivisionProjectV999(event)">
-            <span class="num">3</span>
-            <span class="title">ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES SIN OBRAS</span>
             <span class="arrow">→</span>
           </button>
         </div>
@@ -44960,7 +44955,7 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 </script>
 
 <!-- ==========================================================
-     ALLPA · INTEGRACIÓN eGOB SIN API · FASE 1 · V8.4.32
+     ALLPA · INTEGRACIÓN eGOB SIN API · FASE 1 · V8.4.4
      Alcance exclusivo:
        - Informe Técnico Aprobatorio · Obra Mayor / Anteproyecto
        - Informe de Desistimiento · Obra Mayor / Anteproyecto
@@ -44970,13 +44965,22 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 <style id="allpa-egob-bridge-v844-style">
   .allpa-egob-bridge-v843{display:none;margin:0 0 14px;padding:13px 14px;border:1px solid #b9d2e6;border-radius:13px;background:#f6fbff;box-shadow:0 4px 14px rgba(18,58,92,.06)}
   .allpa-egob-bridge-v843.visible{display:block}
-  .allpa-egob-bridge-v843 .egob-bridge-grid{display:grid;grid-template-columns:minmax(260px,1fr) minmax(220px,38%);gap:9px;align-items:end}
+  .allpa-egob-bridge-v843 .egob-bridge-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .allpa-egob-bridge-v843 .egob-bridge-title{font-size:12px;font-weight:950;color:#123a5c;text-transform:uppercase;letter-spacing:.15px}
+  .allpa-egob-bridge-v843 .egob-bridge-help{font-size:10px;line-height:1.35;color:#617286;margin-top:3px}
+  .allpa-egob-bridge-v843 .egob-bridge-badge{flex:0 0 auto;border:1px solid #9fc9ad;background:#edf9f1;color:#17613a;border-radius:999px;padding:5px 9px;font-size:9px;font-weight:900;white-space:nowrap}
+  .allpa-egob-bridge-v843 .egob-principal-grid{display:grid;grid-template-columns:minmax(260px,1fr);gap:9px;margin-bottom:9px}
+  .allpa-egob-bridge-v843 .egob-bridge-grid{display:grid;grid-template-columns:minmax(220px,.72fr) auto;gap:9px;align-items:end}
   .allpa-egob-bridge-v843 label{display:block;margin:0 0 4px;font-size:9px;font-weight:900;color:#27445f;text-transform:uppercase}
   .allpa-egob-bridge-v843 input{width:100%;box-sizing:border-box;border:1px solid #b8c8d8;border-radius:9px;padding:9px 10px;background:#fff;color:#17324d;font-size:11px}
   .allpa-egob-bridge-v843 input[readonly]{background:#eef4f8;color:#486274}
+  .allpa-egob-bridge-v843 .egob-target-hint{margin-top:6px;font-size:9px;color:#4f6578;min-height:13px}
+  .allpa-egob-bridge-v843 .egob-target-hint strong{color:#0b6c43}
   .allpa-egob-bridge-v843 .egob-open-btn{border:0;border-radius:9px;background:#087443;color:#fff;padding:10px 14px;font-size:10px;font-weight:1000;cursor:pointer;white-space:nowrap}
   .allpa-egob-bridge-v843 .egob-open-btn:hover{filter:brightness(.96)}
   .allpa-egob-bridge-v843 .egob-open-btn:disabled{background:#91a7a0;cursor:not-allowed}
+  .allpa-egob-bridge-v843 .egob-parent-ok{margin-top:6px;font-size:9px;color:#17613a;font-weight:800;min-height:13px}
+  .allpa-egob-bridge-v843 .egob-parent-error{color:#9c2e27}
   #solicitudEstructuralCopyV7918 .se-egob-bridge-v843{margin:0;border:1px solid #9fc9ad;border-radius:11px;background:#f2fbf5;padding:11px}
   #solicitudEstructuralCopyV7918 .se-egob-bridge-v843 .allpa-egob-bridge-v843{display:block!important;margin:0;padding:0;border:0;box-shadow:none;background:transparent}
   @media(max-width:760px){.allpa-egob-bridge-v843 .egob-bridge-grid{grid-template-columns:1fr}.allpa-egob-bridge-v843 .egob-open-btn{width:100%}}
@@ -44988,7 +44992,7 @@ window.AllpaNotaRichV836=Object.freeze({version:VERSION,ensureNote,cleanHtml,cou
 if(window.__ALLPA_EGOB_BRIDGE_V844__)return;
 window.__ALLPA_EGOB_BRIDGE_V844__=true;
 
-const VERSION='8.4.32';
+const VERSION='8.4.4';
 const EGOB_NEW='https://egobedoc.gadmriobamba.gob.ec:8081/issues/new';
 const TRACKER_ID='167';
 const MAP_KEY='ALLPA_EGOB_PARENT_MAP_V843';
@@ -45069,7 +45073,7 @@ function standardAnnex(){
 function standardBody(){
   let p=null;
   try{
-    if(typeof window.buildEgobBodyV8432==='function')p=window.buildEgobBodyV8432();
+    if(typeof window.buildEgobBodyV8414==='function')p=window.buildEgobBodyV8414();
     if(!p?.html || !p?.plain){
       if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
       else if(typeof buildClipboardPayloadV153==='function')p=buildClipboardPayloadV153();
@@ -45169,30 +45173,22 @@ function targetChanged(root,input){
   setTargetHint(root,id);
 }
 function openEgob(root){
-  // El principal se toma siempre del informe actual.
-  // El único campo visible puede conservarlo o ser reemplazado por un trámite hijo.
-  const principal=visibleEgob()||storedParent();
-  if(principal)rememberParent(principal);
+  const principalInput=findInput(root);
+  const principal=rememberParent(principalInput?.value||'')||storedParent();
+  if(!principal){setIndicator(root,'','Pegue primero el enlace del trámite principal eGOB o su ID.');principalInput?.focus();return;}
+  if(principalInput&&!principalInput.value)principalInput.value=principal;
 
   const targetInput=findTargetInput(root);
   const rawTarget=clean(targetInput?.value||'');
   let target=rawTarget?parseParent(rawTarget):principal;
-
   if(rawTarget&&!target){
-    showMessage('El N.º de trámite a responder no es válido.',false);
+    setTargetHint(root,'','El N.º de trámite a responder no es válido.');
     targetInput?.focus();
     return;
   }
-  if(!target){
-    showMessage('No existe un N.º de trámite eGOB para responder.',false);
-    targetInput?.focus();
-    return;
-  }
-
-  if(targetInput){
-    targetInput.value=target;
-    targetInput.dataset.usingPrincipalV844=target===principal?'1':'0';
-  }
+  if(!target)target=principal;
+  if(targetInput){targetInput.value=target;targetInput.dataset.usingPrincipalV844=target===principal?'1':'0';}
+  setTargetHint(root,target);
 
   const payload=isStructural()?structuralPayload():standardPayload();
   const errors=payloadErrors(payload);
@@ -45201,20 +45197,22 @@ function openEgob(root){
     const url=buildEgobUrl(target,payload);
     window.open(url,'_blank','noopener');
     showMessage(
-      `eGOB abierto para responder al trámite ${target}. La extensión completará DOCUMENTOS, Asunto, Anexo y Cuerpo.`,
+      target===principal
+        ? 'eGOB abierto sobre el trámite principal. La extensión completará DOCUMENTOS, Asunto, Anexo y Cuerpo.'
+        : `eGOB abierto para responder al trámite hijo ${target}. El trámite principal ${principal} se mantiene guardado.`,
       true
     );
   }catch(err){showMessage('No se pudo preparar eGOB: '+String(err?.message||err),false);}
 }
 function bridgeMarkup(structural=false){
-  const principal=visibleEgob()||storedParent();
-  if(principal)rememberParent(principal);
+  const id=storedParent();
   return `<div class="allpa-egob-bridge-v843 visible" data-allpa-egob-bridge-inner="1">
+    <div class="egob-bridge-head"><div><div class="egob-bridge-title">Abrir / Firmar en eGOB</div><div class="egob-bridge-help">El trámite principal queda guardado como referencia del expediente. Si debe responder a un trámite hijo, cambie únicamente el campo “N.º trámite a responder”.</div></div><span class="egob-bridge-badge">eGOB · MEMORANDO V6</span></div>
+    <div class="egob-principal-grid">
+      <div><label>Trámite principal eGOB · enlace / ID</label><input type="text" data-egob-parent-v843 value="${escapeHtml(id)}" placeholder="https://.../issues/1274428  ó  1274428"><div class="egob-parent-ok" data-egob-parent-status-v843>${id?`Trámite principal guardado: ${escapeHtml(id)}`:'Pegue una sola vez el enlace del trámite principal o su ID.'}</div></div>
+    </div>
     <div class="egob-bridge-grid">
-      <div>
-        <label>N.º trámite a responder</label>
-        <input type="text" inputmode="numeric" data-egob-target-v844 data-using-principal-v844="1" value="${escapeHtml(principal)}" placeholder="ID del trámite eGOB">
-      </div>
+      <div><label>N.º trámite a responder</label><input type="text" inputmode="numeric" data-egob-target-v844 data-using-principal-v844="1" value="${escapeHtml(id)}" placeholder="${escapeHtml(id||'ID del trámite principal o hijo')}"><div class="egob-target-hint" data-egob-target-status-v844>${id?`Se responderá al trámite principal: <strong>${escapeHtml(id)}</strong>.`:'Primero registre el trámite principal.'}</div></div>
       <button type="button" class="egob-open-btn" data-egob-open-v843>ABRIR / FIRMAR EN eGOB</button>
     </div>
   </div>`;
@@ -45222,7 +45220,10 @@ function bridgeMarkup(structural=false){
 function bindRoot(root){
   if(!root||root.dataset.egobBridgeBoundV843==='1')return;
   root.dataset.egobBridgeBoundV843='1';
+  const input=findInput(root);
   const target=findTargetInput(root);
+  input?.addEventListener('input',()=>parentChanged(root,input));
+  input?.addEventListener('change',()=>parentChanged(root,input));
   target?.addEventListener('input',()=>targetChanged(root,target));
   target?.addEventListener('change',()=>targetChanged(root,target));
   root.querySelector('[data-egob-open-v843]')?.addEventListener('click',()=>openEgob(root));
@@ -45231,60 +45232,29 @@ function ensureStandardPanel(){
   const tab=document.getElementById('tab-vista');if(!tab)return;
   let box=document.getElementById('allpaEgobBridgeV843');
   const active=supported()&&!isStructural();
-
-  if(!box){
-    box=document.createElement('section');
-    box.id='allpaEgobBridgeV843';
-    box.className='allpa-egob-bridge-v843 no-print';
-    tab.insertBefore(box,tab.firstChild);
-  }
-
+  if(!box){box=document.createElement('section');box.id='allpaEgobBridgeV843';box.className='allpa-egob-bridge-v843 no-print';tab.appendChild(box);}
   box.classList.toggle('visible',active);
   if(!active){box.innerHTML='';box.dataset.egobBridgeBoundV843='';return;}
-
-  const desired=visibleEgob()||storedParent();
-  if(desired)rememberParent(desired);
-
-  if(!box.querySelector('[data-allpa-egob-bridge-inner]')){
-    box.innerHTML=bridgeMarkup(false);
-    box.dataset.egobBridgeBoundV843='';
-    bindRoot(box);
-  }
-
-  const target=findTargetInput(box);
-  if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){
-    target.value=desired;
-    target.dataset.usingPrincipalV844='1';
-  }
-
-  // Siempre al inicio de la pestaña: antes de Anexos, Asunto e Informe precargado.
-  if(tab.firstChild!==box)tab.insertBefore(box,tab.firstChild);
+  const current=idFromRoot(box);
+  const desired=storedParent();
+  if(!box.querySelector('[data-allpa-egob-bridge-inner]')){box.innerHTML=bridgeMarkup(false);box.dataset.egobBridgeBoundV843='';bindRoot(box);}
+  else if(desired&&findInput(box)&&!findInput(box).value){findInput(box).value=desired;setIndicator(box,desired);}
+  const target=findTargetInput(box);if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){target.value=desired;target.dataset.usingPrincipalV844='1';setTargetHint(box,desired);}
+  const reportWrap=tab.querySelector('.report-wrap');
+  const copy=document.getElementById('copyPanelAprobatorio');
+  if(copy&&copy.parentNode===tab){const after=copy.nextSibling;if(after!==box)tab.insertBefore(box,after);}
+  else if(reportWrap&&box.nextSibling!==reportWrap)tab.insertBefore(box,reportWrap);
 }
-function idFromRoot(root){return parseParent(findTargetInput(root)?.value||'');}
+function idFromRoot(root){return parseParent(findInput(root)?.value||'');}
 function ensureStructuralPanel(){
   const panel=document.getElementById('solicitudEstructuralCopyV7918');
   if(!panel||!isStructural())return;
   const grid=panel.querySelector('.se-grid');if(!grid)return;
-
   let host=panel.querySelector('.se-egob-bridge-v843');
-  if(!host){
-    host=document.createElement('div');
-    host.className='se-egob-bridge-v843';
-    host.innerHTML=bridgeMarkup(true);
-    grid.insertBefore(host,grid.firstChild);
-    bindRoot(host);
+  if(!host){host=document.createElement('div');host.className='se-egob-bridge-v843';host.innerHTML=bridgeMarkup(true);const reg=document.getElementById('registrarSolicitudEstructuralV7918');if(reg&&reg.parentNode===grid)grid.insertBefore(host,reg);else grid.appendChild(host);bindRoot(host);}
+  else{
+    const desired=storedParent();const input=findInput(host);if(desired&&input&&!input.value){input.value=desired;setIndicator(host,desired);}const target=findTargetInput(host);if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){target.value=desired;target.dataset.usingPrincipalV844='1';setTargetHint(host,desired);}
   }
-
-  const desired=visibleEgob()||storedParent();
-  if(desired)rememberParent(desired);
-
-  const target=findTargetInput(host);
-  if(desired&&target&&(!target.value||target.dataset.usingPrincipalV844==='1')){
-    target.value=desired;
-    target.dataset.usingPrincipalV844='1';
-  }
-
-  if(grid.firstChild!==host)grid.insertBefore(host,grid.firstChild);
 }
 function sync(){ensureStandardPanel();ensureStructuralPanel();}
 
@@ -45301,20 +45271,20 @@ window.AllpaEgobBridgeV844=Object.freeze({version:VERSION,sync,parseParent,openE
 
 
 <!-- ==========================================================
-     ALLPA V8.4.26 · HTML ESPECÍFICO PARA eGOB
+     ALLPA V8.4.14 · HTML ESPECÍFICO PARA eGOB
      - Evita que e-DOC trate filas largas como bloques indivisibles.
      - Requisitos y Factibilidades se preparan ANTES de abrir eGOB.
      - La extensión solo inserta y sincroniza; no reconstruye estas tablas.
      ========================================================== -->
-<script id="allpa-egob-body-v8432">
+<script id="allpa-egob-body-v8414">
 (function(){
 'use strict';
-if(window.__ALLPA_EGOB_BODY_V8432__) return;
-window.__ALLPA_EGOB_BODY_V8432__=true;
+if(window.__ALLPA_EGOB_BODY_V8414__) return;
+window.__ALLPA_EGOB_BODY_V8414__=true;
 
-const FLOW='data-egob-flow-v8432';
-const UNIT='data-egob-flow-unit-v8432';
-const PREP='data-allpa-egob-prepared-v8432';
+const FLOW='data-egob-flow-v8414';
+const UNIT='data-egob-flow-unit-v8414';
+const PREP='data-allpa-egob-prepared-v8414';
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function norm(v){return String(v??'').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();}
@@ -45373,44 +45343,6 @@ function wrapCell(cell,maxPx){
   return lines;
 }
 
-
-// V8.4.17
-// wrapCell() trabaja en PÍXELES, no en caracteres.
-// El ancho útil de las tablas en el PDF e-DOC es aprox. 500 px.
-// Esta función calcula el ancho de línea según el porcentaje real
-// que ocupa la celda dentro de la tabla.
-const EGOB_PRINTABLE_TABLE_PX_V8432 = 500;
-
-function wrapCellForTablePctV8432(cell, pct){
-  const p = Math.max(10, Math.min(100, Number(pct) || 100));
-  // Descontar padding/bordes para evitar que la última palabra rebose.
-  const usable = Math.max(120, (EGOB_PRINTABLE_TABLE_PX_V8432 * p / 100) - 12);
-  return wrapCell(cell, usable);
-}
-
-
-// V8.4.19
-// eGOB/CKEditor sí interpreta text-align-last, pero el motor final de
-// generación del documento no. Para justificar una fila física de una sola
-// línea, agregamos una segunda línea invisible de ancho 100 %. Así la línea
-// visible deja de ser la última línea del bloque y el motor WebKit/PDF aplica
-// text-align:justify de forma real.
-function justifyPhysicalLineV8432(html, forceJustify){
-  const content=html||'&nbsp;';
-  if(!forceJustify)return content;
-
-  return content +
-    '<span aria-hidden="true" style="' +
-      'display:inline-block;' +
-      'width:100%;' +
-      'height:0;' +
-      'line-height:0;' +
-      'font-size:0;' +
-      'overflow:hidden;' +
-      'vertical-align:top;' +
-    '">&nbsp;</span>';
-}
-
 function lineHtml(tokens){
   if(!tokens?.length)return '&nbsp;';
   return tokens.map(t=>{
@@ -45438,9 +45370,6 @@ function miniTable(classes,widths){
   t.className=classes||'';
   t.setAttribute(FLOW,'1');
   t.setAttribute(UNIT,'1');
-  // Marcadores estables para que la extensión no dependa de la versión.
-  t.setAttribute('data-egob-flow','1');
-  t.setAttribute('data-egob-flow-unit','1');
   t.setAttribute('width','100%');
   t.setAttribute('cellspacing','0');
   t.style.cssText='width:100%!important;max-width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;border-spacing:0!important;margin:0!important;page-break-inside:avoid!important;break-inside:avoid!important;background:transparent!important;';
@@ -45448,13 +45377,13 @@ function miniTable(classes,widths){
   return t;
 }
 
-const EGOB_BORDER_V8432='0.75pt solid #000';
+const EGOB_BORDER_V8414='0.75pt solid #000';
 
 function styleCell(td,{top=true,bottom=true,align='left',font='8.5pt',line='1.15',pad='2px 5px'}={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V8432,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V8432,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V8432:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8432:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8414,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8414,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8414:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8414:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45484,7 +45413,7 @@ function cloneHeaderTable(src,widths){
 }
 
 
-function logicalTableV8432(src,widths){
+function logicalTableV8414(src,widths){
   const t=document.createElement('table');
   t.className=src?.className||'';
   t.setAttribute('width','100%');
@@ -45511,7 +45440,7 @@ function logicalTableV8432(src,widths){
   return t;
 }
 
-function styleLogicalCellV8432(td,{
+function styleLogicalCellV8414(td,{
   align='left',
   font='8.5pt',
   line='1.12',
@@ -45520,10 +45449,10 @@ function styleLogicalCellV8432(td,{
   top=true,
   bottom=true
 }={}){
-  td.style.setProperty('border-left',EGOB_BORDER_V8432,'important');
-  td.style.setProperty('border-right',EGOB_BORDER_V8432,'important');
-  td.style.setProperty('border-top',top?EGOB_BORDER_V8432:'0','important');
-  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8432:'0','important');
+  td.style.setProperty('border-left',EGOB_BORDER_V8414,'important');
+  td.style.setProperty('border-right',EGOB_BORDER_V8414,'important');
+  td.style.setProperty('border-top',top?EGOB_BORDER_V8414:'0','important');
+  td.style.setProperty('border-bottom',bottom?EGOB_BORDER_V8414:'0','important');
   td.style.setProperty('padding',pad,'important');
   td.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
   td.style.setProperty('font-size',font,'important');
@@ -45536,15 +45465,10 @@ function styleLogicalCellV8432(td,{
   td.style.setProperty('background','transparent','important');
 }
 
-function styleLogicalHeaderV8432(thead){
-  // V8.4.21:
-  // El encabezado debe aparecer UNA sola vez. "table-header-group"
-  // hace que eGOB lo repita automáticamente en cada página.
-  thead.style.setProperty('display','table-row-group','important');
-  thead.style.setProperty('page-break-inside','avoid','important');
-  thead.style.setProperty('break-inside','avoid','important');
+function styleLogicalHeaderV8414(thead){
+  thead.style.setProperty('display','table-header-group','important');
   [...thead.querySelectorAll('th,td')].forEach(cell=>{
-    styleLogicalCellV8432(cell,{
+    styleLogicalCellV8414(cell,{
       align:'center',
       font:'8.2pt',
       line:'1.05',
@@ -45703,295 +45627,6 @@ function ensureRequirementsSourceV8414(root){
   return null;
 }
 
-
-function prepareDesistimientoEgobV8432(root){
-  const isDesistimiento =
-    !!root?.classList?.contains('report-desistimiento') ||
-    String((typeof state!=='undefined' && state?.tipoInforme)||'').trim()==='Informe de Desistimiento' ||
-    /INFORME\s+T[ÉE]CNICO\s+DE\s+DESISTIMIENTO/i.test(root?.textContent||'');
-
-  if(!isDesistimiento) return;
-
-  const BORDER=EGOB_BORDER_V8432;
-
-  function makeTable(widths, cls){
-    const t=document.createElement('table');
-    t.className=cls||'';
-    t.setAttribute('width','100%');
-    t.setAttribute('cellspacing','0');
-    t.setAttribute('data-egob-logical-v8412','1');
-    t.style.setProperty('width','100%','important');
-    t.style.setProperty('max-width','100%','important');
-    t.style.setProperty('table-layout','fixed','important');
-    t.style.setProperty('border-collapse','collapse','important');
-    t.style.setProperty('border-spacing','0','important');
-    t.style.setProperty('border','0','important');
-    t.style.setProperty('outline','0','important');
-    t.style.setProperty('margin','0','important');
-    t.style.setProperty('page-break-inside','avoid','important');
-    t.style.setProperty('break-inside','avoid','important');
-    t.style.setProperty('background','transparent','important');
-
-    const cg=document.createElement('colgroup');
-    widths.forEach(pct=>{
-      const col=document.createElement('col');
-      col.setAttribute('width',pct+'%');
-      col.style.setProperty('width',pct+'%','important');
-      cg.appendChild(col);
-    });
-    t.appendChild(cg);
-    return t;
-  }
-
-  function styleCriterionCell(cell, idx, header=false, top=true, bottom=true){
-    const pct=idx===0?7:46.5;
-    cell.removeAttribute('rowspan');
-    cell.removeAttribute('colspan');
-    cell.setAttribute('width',pct+'%');
-    cell.style.setProperty('width',pct+'%','important');
-    cell.style.setProperty('min-width',pct+'%','important');
-    cell.style.setProperty('max-width',pct+'%','important');
-    cell.style.setProperty('box-sizing','border-box','important');
-    cell.style.setProperty('border-left',BORDER,'important');
-    cell.style.setProperty('border-right',BORDER,'important');
-    cell.style.setProperty('border-top',top?BORDER:'0','important');
-    cell.style.setProperty('border-bottom',bottom?BORDER:'0','important');
-    cell.style.setProperty('padding',header?'3px 4px':'3px 5px','important');
-    cell.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
-    cell.style.setProperty('font-size',header?'8.2pt':'8.4pt','important');
-    cell.style.setProperty('line-height','1.12','important');
-    cell.style.setProperty('vertical-align',header?'middle':'top','important');
-    cell.style.setProperty('text-align',header?'center':(idx===0?'center':'left'),'important');
-    cell.style.setProperty('white-space',idx===0?'nowrap':'normal','important');
-    cell.style.setProperty('word-break','normal','important');
-    cell.style.setProperty('overflow-wrap','break-word','important');
-    if(header){
-      cell.style.setProperty('font-weight','700','important');
-      cell.style.setProperty('background','#d9d9d9','important');
-      cell.style.setProperty('background-color','#d9d9d9','important');
-    }else{
-      cell.style.setProperty('background','transparent','important');
-    }
-  }
-
-  // ==========================================================
-  // CRITERIO TÉCNICO
-  // Una cabecera física + una mini-tabla por observación.
-  // eGOB ya no puede repetir la cabecera ni recalcular columnas.
-  // ==========================================================
-  root.querySelectorAll('table.criterio-simple-v55').forEach(src=>{
-    const wrapper=document.createElement('div');
-    wrapper.className='egob-des-criterio-flow-v8430';
-    wrapper.setAttribute('data-egob-flow','desistimiento-criterio');
-    wrapper.style.setProperty('width','100%','important');
-    wrapper.style.setProperty('margin','0','important');
-    wrapper.style.setProperty('padding','0','important');
-    wrapper.style.setProperty('page-break-inside','auto','important');
-    wrapper.style.setProperty('break-inside','auto','important');
-
-    // Encabezado UNA sola vez, como tabla independiente.
-    const headTable=makeTable([7,46.5,46.5],'egob-des-criterio-header-v8430');
-    const headBody=document.createElement('tbody');
-    const sourceHead=src.querySelector('thead tr');
-    const hr=sourceHead ? sourceHead.cloneNode(true) : document.createElement('tr');
-
-    if(!sourceHead){
-      ['Nro.','Artículo / Norma','Aclaración'].forEach(txt=>{
-        const th=document.createElement('th');
-        th.textContent=txt;
-        hr.appendChild(th);
-      });
-    }
-
-    [...hr.children].forEach((cell,idx)=>styleCriterionCell(cell,idx,true,true,true));
-    headBody.appendChild(hr);
-    headTable.appendChild(headBody);
-    wrapper.appendChild(headTable);
-
-    const rows=[...src.querySelectorAll('tbody > tr')];
-    rows.forEach(row=>{
-      const t=makeTable([7,46.5,46.5],'egob-des-criterio-row-v8430');
-      const b=document.createElement('tbody');
-      const tr=row.cloneNode(true);
-      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
-
-      cells.forEach((cell,idx)=>styleCriterionCell(cell,idx,false,false,true));
-
-      tr.style.setProperty('page-break-inside','avoid','important');
-      tr.style.setProperty('break-inside','avoid','important');
-      b.appendChild(tr);
-      t.appendChild(b);
-      wrapper.appendChild(t);
-    });
-
-    src.replaceWith(wrapper);
-  });
-
-  // ==========================================================
-  // SUSTENTO TÉCNICO
-  // Una cabecera física + una mini-tabla por observación.
-  // Las imágenes se reconstruyen con ancho FÍSICO y centrado.
-  // ==========================================================
-  root.querySelectorAll('table.tech-note-table').forEach(src=>{
-    const wrapper=document.createElement('div');
-    wrapper.className='egob-des-sustento-flow-v8430';
-    wrapper.setAttribute('data-egob-flow','desistimiento-sustento');
-    wrapper.style.setProperty('width','100%','important');
-    wrapper.style.setProperty('margin','0','important');
-    wrapper.style.setProperty('padding','0','important');
-    wrapper.style.setProperty('page-break-inside','auto','important');
-    wrapper.style.setProperty('break-inside','auto','important');
-
-    function styleSustentoCell(cell,idx,header=false,top=true,bottom=true){
-      const pct=idx===0?7:93;
-      cell.removeAttribute('rowspan');
-      cell.removeAttribute('colspan');
-      cell.setAttribute('width',pct+'%');
-      cell.style.setProperty('width',pct+'%','important');
-      cell.style.setProperty('min-width',pct+'%','important');
-      cell.style.setProperty('max-width',pct+'%','important');
-      cell.style.setProperty('box-sizing','border-box','important');
-      cell.style.setProperty('border-left',BORDER,'important');
-      cell.style.setProperty('border-right',BORDER,'important');
-      cell.style.setProperty('border-top',top?BORDER:'0','important');
-      cell.style.setProperty('border-bottom',bottom?BORDER:'0','important');
-      cell.style.setProperty('padding',header?'3px 4px':'3px 5px','important');
-      cell.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
-      cell.style.setProperty('font-size',header?'8.2pt':'8.3pt','important');
-      cell.style.setProperty('line-height','1.12','important');
-      cell.style.setProperty('vertical-align',header?'middle':'top','important');
-      cell.style.setProperty('text-align',header?'center':(idx===0?'center':'left'),'important');
-      cell.style.setProperty('white-space',idx===0?'nowrap':'normal','important');
-      if(header){
-        cell.style.setProperty('font-weight','700','important');
-        cell.style.setProperty('background','#d9d9d9','important');
-      }else{
-        cell.style.setProperty('background','transparent','important');
-      }
-    }
-
-    // Encabezado una sola vez.
-    const headTable=makeTable([7,93],'egob-des-sustento-header-v8430');
-    const headBody=document.createElement('tbody');
-    const sourceHead=src.querySelector('thead tr');
-    const hr=sourceHead ? sourceHead.cloneNode(true) : document.createElement('tr');
-    if(!sourceHead){
-      ['Nro.','Texto del artículo'].forEach(txt=>{
-        const th=document.createElement('th');
-        th.textContent=txt;
-        hr.appendChild(th);
-      });
-    }
-    [...hr.children].forEach((cell,idx)=>styleSustentoCell(cell,idx,true,true,true));
-    headBody.appendChild(hr);
-    headTable.appendChild(headBody);
-    wrapper.appendChild(headTable);
-
-    const rows=[...src.querySelectorAll('tbody > tr')];
-
-    for(let i=0;i<rows.length;i++){
-      const row=rows[i];
-
-      if(row.classList.contains('sustento-img-row-v55')) continue;
-
-      // Fila de texto de la observación.
-      const t=makeTable([7,93],'egob-des-sustento-row-v8430');
-      const b=document.createElement('tbody');
-      const tr=row.cloneNode(true);
-      const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
-      cells.forEach((cell,idx)=>styleSustentoCell(cell,idx,false,false,true));
-      tr.style.setProperty('page-break-inside','avoid','important');
-      tr.style.setProperty('break-inside','avoid','important');
-      b.appendChild(tr);
-      t.appendChild(b);
-      wrapper.appendChild(t);
-
-      // Imágenes asociadas a esta observación.
-      const next=rows[i+1];
-      if(next?.classList?.contains('sustento-img-row-v55')){
-        const imgs=[...next.querySelectorAll('img')];
-        if(imgs.length){
-          const imgTable=makeTable([100],'egob-des-sustento-images-v8430');
-          const imgBody=document.createElement('tbody');
-          const ir=document.createElement('tr');
-          const td=document.createElement('td');
-
-          td.style.setProperty('border-left',BORDER,'important');
-          td.style.setProperty('border-right',BORDER,'important');
-          td.style.setProperty('border-top','0','important');
-          td.style.setProperty('border-bottom',BORDER,'important');
-          td.style.setProperty('padding','4mm 3mm','important');
-          td.style.setProperty('text-align','center','important');
-          td.style.setProperty('vertical-align','top','important');
-          td.style.setProperty('background','transparent','important');
-          td.style.setProperty('page-break-inside','avoid','important');
-          td.style.setProperty('break-inside','avoid','important');
-
-          const gallery=document.createElement('div');
-          gallery.style.setProperty('width','100%','important');
-          gallery.style.setProperty('text-align','center','important');
-          gallery.style.setProperty('margin','0 auto','important');
-          gallery.style.setProperty('page-break-inside','avoid','important');
-          gallery.style.setProperty('break-inside','avoid','important');
-
-          const many=imgs.length>1;
-
-          imgs.forEach((srcImg,idx)=>{
-            const holder=document.createElement(many?'span':'div');
-            holder.style.setProperty('display',many?'inline-block':'block','important');
-            holder.style.setProperty('width',many?'52mm':'70mm','important');
-            holder.style.setProperty('max-width',many?'52mm':'70mm','important');
-            holder.style.setProperty('margin',many?'1.5mm':'0 auto','important');
-            holder.style.setProperty('text-align','center','important');
-            holder.style.setProperty('vertical-align','top','important');
-
-            const img=srcImg.cloneNode(true);
-            img.removeAttribute('width');
-            img.removeAttribute('height');
-
-            // V8.4.32:
-            // eGOB respeta mejor width/height físicos que max-height.
-            // Para imagen individual se fuerza un marco 70 x 45 mm.
-            // object-fit:contain conserva la proporción sin recortar.
-            if(many){
-              img.setAttribute('width','197');
-              img.style.setProperty('width','100%','important');
-              img.style.setProperty('height','auto','important');
-              img.style.setProperty('max-height','40mm','important');
-            }else{
-              img.setAttribute('width','265');
-              img.setAttribute('height','170');
-              img.style.setProperty('width','70mm','important');
-              img.style.setProperty('height','45mm','important');
-              img.style.setProperty('max-width','70mm','important');
-              img.style.setProperty('max-height','45mm','important');
-            }
-
-            img.style.setProperty('display','block','important');
-            img.style.setProperty('object-fit','contain','important');
-            img.style.setProperty('margin','0 auto','important');
-            img.style.setProperty('box-sizing','border-box','important');
-            img.style.setProperty('page-break-inside','avoid','important');
-            img.style.setProperty('break-inside','avoid','important');
-
-            holder.appendChild(img);
-            gallery.appendChild(holder);
-          });
-
-          td.appendChild(gallery);
-          ir.appendChild(td);
-          imgBody.appendChild(ir);
-          imgTable.appendChild(imgBody);
-          wrapper.appendChild(imgTable);
-        }
-        i++;
-      }
-    }
-
-    src.replaceWith(wrapper);
-  });
-}
-
 function prepareRequirements(root){
   ensureRequirementsSourceV8414(root);
 
@@ -46003,7 +45638,6 @@ function prepareRequirements(root){
     const widths=[67,33];
     const wrapper=document.createElement('div');
     wrapper.setAttribute(FLOW,'requirements');
-    wrapper.setAttribute('data-egob-flow','requirements');
     wrapper.style.cssText=
       'width:100%!important;margin:0!important;padding:0!important;'+
       'page-break-inside:auto!important;break-inside:auto!important;';
@@ -46036,10 +45670,8 @@ function prepareRequirements(root){
 
       const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
       cells.forEach(cell=>{
-        // V8.4.21:
-        // Una sola separación horizontal entre requisitos:
-        // el borde inferior de la fila anterior es la línea compartida.
-        // No dibujamos borde superior ni usamos solapamientos.
+        // Solo el primer bloque (encabezado) tiene borde superior.
+        // Cada requisito aporta únicamente su borde inferior.
         styleCell(cell,{
           top:false,
           bottom:true,
@@ -46056,10 +45688,6 @@ function prepareRequirements(root){
 
       b.appendChild(tr);
       t.appendChild(b);
-
-      t.style.setProperty('margin-top','0','important');
-      t.style.setProperty('margin-bottom','0','important');
-
       wrapper.appendChild(t);
     });
 
@@ -46072,13 +45700,13 @@ function prepareConclusion(root){
   root.querySelectorAll('table.conclusion-report').forEach(src=>{
     if(src.dataset.egobLogicalV8411==='1') return;
 
-    const t=logicalTableV8432(src,[60,12,18,10]);
+    const t=logicalTableV8414(src,[60,12,18,10]);
     t.dataset.egobLogicalV8411='1';
 
     const thead=src.querySelector('thead');
     if(thead){
       const h=thead.cloneNode(true);
-      styleLogicalHeaderV8432(h);
+      styleLogicalHeaderV8414(h);
       t.appendChild(h);
     }
 
@@ -46094,7 +45722,7 @@ function prepareConclusion(root){
       const cells=[...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName));
       cells.forEach((cell,idx)=>{
         cell.removeAttribute('rowspan');
-        styleLogicalCellV8432(cell,{
+        styleLogicalCellV8414(cell,{
           align:idx===0?'left':'center',
           font:'8.2pt',
           line:'1.06',
@@ -46112,13 +45740,13 @@ function prepareConclusion(root){
 }
 
 
-function isZeroBorderV8432(value){
+function isZeroBorderV8414(value){
   const v=String(value||'').trim().toLowerCase();
   return !v || v==='0' || v==='0px' || v==='none' ||
          v.startsWith('0px ') || v.startsWith('0pt ');
 }
 
-function applyUniformThinBordersV8432(root){
+function applyUniformThinBordersV8414(root){
   root.querySelectorAll('table').forEach(table=>{
     table.style.setProperty('border-collapse','collapse','important');
     table.style.setProperty('border-spacing','0','important');
@@ -46132,41 +45760,23 @@ function applyUniformThinBordersV8432(root){
   ).forEach(cell=>{
     // No reemplazar top/bottom si ya fueron definidos por la lógica de paginación.
     if(!cell.style.getPropertyValue('border-left'))
-      cell.style.setProperty('border-left',EGOB_BORDER_V8432,'important');
+      cell.style.setProperty('border-left',EGOB_BORDER_V8414,'important');
     if(!cell.style.getPropertyValue('border-right'))
-      cell.style.setProperty('border-right',EGOB_BORDER_V8432,'important');
+      cell.style.setProperty('border-right',EGOB_BORDER_V8414,'important');
     if(!cell.style.getPropertyValue('border-top'))
-      cell.style.setProperty('border-top',EGOB_BORDER_V8432,'important');
+      cell.style.setProperty('border-top',EGOB_BORDER_V8414,'important');
     if(!cell.style.getPropertyValue('border-bottom'))
-      cell.style.setProperty('border-bottom',EGOB_BORDER_V8432,'important');
+      cell.style.setProperty('border-bottom',EGOB_BORDER_V8414,'important');
   });
 }
 
 function evidenceRow(row){
-  if(!row) return false;
-
-  if(
+  return !!row && (
     row.classList.contains('service-evidence-report-v03') ||
     row.classList.contains('service-evidence-report-v34') ||
     row.querySelector(':scope > td.detail-v13') ||
     row.querySelector(':scope > td.service-evidence-report-v34')
-  ){
-    return true;
-  }
-
-  // V8.4.16 · CAUSA RAÍZ ANTEPROYECTO:
-  // factsReport() genera las líneas de Evidencia como:
-  // <tr><td colspan="2">...</td></tr>
-  // sin ninguna clase semántica. Si no detectamos esta estructura,
-  // la fila pasa por la ruta genérica y conserva colspan=2, dejando
-  // fuera la columna FECHA.
-  const cells=[...row.children].filter(el=>/^(TD|TH)$/.test(el.tagName));
-  if(cells.length===1){
-    const span=parseInt(cells[0].getAttribute('colspan')||'1',10);
-    if(Number.isFinite(span) && span>=2) return true;
-  }
-
-  return false;
+  );
 }
 
 function evidenceParts(row){
@@ -46213,7 +45823,7 @@ function prepareAnteFactibilitiesV8413(root){
     ['EMPRESA','DOCUMENTO / TRÁMITE','FECHA'].forEach(text=>{
       const th=document.createElement('th');
       th.textContent=text;
-      styleLogicalCellV8432(th,{
+      styleLogicalCellV8414(th,{
         align:'center',
         font:'8.2pt',
         line:'1.05',
@@ -46242,7 +45852,7 @@ function prepareAnteFactibilitiesV8413(root){
         tc.forEach((cell,idx)=>{
           cell.removeAttribute('rowspan');
           cell.removeAttribute('colspan');
-          styleLogicalCellV8432(cell,{
+          styleLogicalCellV8414(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
@@ -46272,7 +45882,7 @@ function prepareAnteFactibilitiesV8413(root){
       const detail=row.querySelector('.fact-evidencia-v52');
 
       if(detail){
-        const lines=wrapCellForTablePctV8432(detail,80);
+        const lines=wrapCell(detail,95);
         const labelHtml=label?.innerHTML||'';
 
         lines.forEach((line,index)=>{
@@ -46292,15 +45902,15 @@ function prepareAnteFactibilitiesV8413(root){
           const first=index===0;
           const last=index===lines.length-1;
 
-          styleLogicalCellV8432(blank,{
+          styleLogicalCellV8414(blank,{
             align:'center',font:'8.0pt',line:'1.05',pad:'1px 3px',
             vertical:'top',top:first,bottom:last
           });
-          styleLogicalCellV8432(lab,{
+          styleLogicalCellV8414(lab,{
             align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px',
             vertical:'top',top:first,bottom:last
           });
-          styleLogicalCellV8432(det,{
+          styleLogicalCellV8414(det,{
             align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px',
             vertical:'top',top:first,bottom:last
           });
@@ -46319,231 +45929,10 @@ function prepareAnteFactibilitiesV8413(root){
   });
 }
 
-
-function prepareObraMayorStudiesByEntityV8432(root){
-  // Solo Obra Mayor.
-  try{
-    if(typeof isAnteproyectoV123==='function' && isAnteproyectoV123()) return;
-  }catch(_e){}
-
-  const src=root.querySelector(
-    'table.combined-studies-v13, table.combined-studies-v145, table.estudios-table'
-  );
-  if(!src) return;
-
-  const rows=[...src.querySelectorAll(':scope > tbody > tr')];
-  if(!rows.length) return;
-
-  // Confirmar que es la variante de 4 columnas de Obra Mayor.
-  const firstMain=rows.find(row=>{
-    if(evidenceRow(row)) return false;
-    return !!row.querySelector(':scope > td.type-v13, :scope > td.type-v145');
-  });
-  if(!firstMain) return;
-
-  const widths=[20,16,46,18];
-
-  const wrapper=document.createElement('div');
-  wrapper.className='egob-studies-om-flow-v8428';
-  wrapper.setAttribute('data-egob-flow','studies-obra-mayor');
-  wrapper.style.setProperty('width','100%','important');
-  wrapper.style.setProperty('margin','0','important');
-  wrapper.style.setProperty('padding','0','important');
-  wrapper.style.setProperty('page-break-inside','auto','important');
-  wrapper.style.setProperty('break-inside','auto','important');
-
-  function createStudyTable(){
-    const t=logicalTableV8432(src,widths);
-
-    // CRÍTICO V8.4.25:
-    // Quitar las clases que prepareFactibilities() busca.
-    // De lo contrario la transformación especial se procesa una segunda vez.
-    t.className='informe-table egob-studies-om-v8428';
-    t.dataset.egobLogicalV8411='1';
-    t.setAttribute('data-egob-flow-unit','studies-row');
-    t.style.setProperty('table-layout','fixed','important');
-    t.style.setProperty('page-break-inside','avoid','important');
-    t.style.setProperty('break-inside','avoid','important');
-    t.style.setProperty('margin','0','important');
-    return t;
-  }
-
-  function createHeader(){
-    const original=src.querySelector(':scope > thead');
-    if(!original) return null;
-    const h=original.cloneNode(true);
-    styleLogicalHeaderV8432(h);
-    // Encabezado UNA sola vez; no repetir al cambiar de página.
-    h.style.setProperty('display','table-row-group','important');
-    h.style.setProperty('page-break-inside','avoid','important');
-    h.style.setProperty('break-inside','avoid','important');
-    return h;
-  }
-
-  function evidenceLines(cell){
-    // Trabajar sobre el contenido REAL del informe final.
-    // Esto preserva toda Evidencia/Detalle sin depender de state.
-    return wrapCellForTablePctV8432(cell,100);
-  }
-
-  let currentEntity='';
-  let firstMainOutput=true;
-
-  for(let i=0;i<rows.length;i++){
-    const row=rows[i];
-
-    // Una fila de evidencia siempre se consume junto a la fila principal previa.
-    if(evidenceRow(row)) continue;
-
-    const type=row.querySelector(':scope > td.type-v13, :scope > td.type-v145');
-    if(!type) continue;
-
-    const entityCell=row.querySelector(':scope > td.entity-v13, :scope > td.entity-v145');
-    if(entityCell && norm(entityCell.textContent)){
-      currentEntity=norm(entityCell.textContent);
-    }
-
-    const doc=type.nextElementSibling;
-    const date=doc?.nextElementSibling;
-    if(!doc || !date) continue;
-
-    // Detectar antes si este registro tiene Evidencia/Detalle.
-    // Así una sola celda será responsable de la línea horizontal
-    // de separación entre la fila gris y el texto largo.
-    const next=rows[i+1];
-    const hasEvidence=!!(next && evidenceRow(next) && norm(evidenceParts(next)?.detail?.textContent));
-
-    // ----------------------------------------------------------
-    // Fila principal de la entidad/registro.
-    // Primer bloque incluye encabezado para no dejarlo huérfano.
-    // ----------------------------------------------------------
-    const main=createStudyTable();
-
-    if(firstMainOutput){
-      const h=createHeader();
-      if(h) main.appendChild(h);
-    }
-
-    const tbody=document.createElement('tbody');
-    const tr=document.createElement('tr');
-    tr.style.setProperty('page-break-inside','avoid','important');
-    tr.style.setProperty('break-inside','avoid','important');
-
-    const ent=document.createElement('td');
-    const typ=type.cloneNode(true);
-    const d=doc.cloneNode(true);
-    const dt=date.cloneNode(true);
-
-    ent.textContent=currentEntity||'';
-
-    [ent,typ,d,dt].forEach(cell=>{
-      cell.removeAttribute('rowspan');
-      cell.removeAttribute('colspan');
-    });
-
-    [ent,typ,d,dt].forEach((cell,idx)=>{
-      styleLogicalCellV8432(cell,{
-        align:'center',
-        font:'8.2pt',
-        line:'1.05',
-        pad:'2px 4px',
-        vertical:'middle',
-        // Si existe Evidencia/Detalle, la línea separadora la dibuja
-        // la PRIMERA línea de evidencia. Así evitamos bordes dobles y
-        // garantizamos que la línea sí aparezca en eGOB.
-        top:false,
-        bottom:!hasEvidence
-      });
-
-      // Gris claro SOLO en la fila principal de la entidad.
-      cell.style.setProperty('background','#e6e6e6','important');
-      cell.style.setProperty('-webkit-print-color-adjust','exact','important');
-      cell.style.setProperty('print-color-adjust','exact','important');
-
-      if(idx===0 || idx===1){
-        cell.style.setProperty('font-weight','700','important');
-      }
-    });
-
-    dt.style.setProperty('white-space','nowrap','important');
-
-    tr.append(ent,typ,d,dt);
-    tbody.appendChild(tr);
-    main.appendChild(tbody);
-    wrapper.appendChild(main);
-
-    firstMainOutput=false;
-
-    // ----------------------------------------------------------
-    // Evidencia inmediatamente asociada a esta fila principal.
-    // El HTML final de ALLPA garantiza main + detail secuencial.
-    // ----------------------------------------------------------
-    if(hasEvidence){
-      const parts=evidenceParts(next);
-      const detail=parts?.detail;
-
-      if(detail && norm(detail.textContent)){
-        const lines=evidenceLines(detail);
-
-        lines.forEach((line,lineIndex)=>{
-          const lineTable=createStudyTable();
-          const lineBody=document.createElement('tbody');
-          const lineRow=document.createElement('tr');
-          const cell=document.createElement('td');
-
-          const last=lineIndex===lines.length-1;
-          cell.colSpan=4;
-          cell.innerHTML=justifyPhysicalLineV8432(
-            lineHtml(line),
-            !last
-          );
-
-          const first=lineIndex===0;
-
-          styleLogicalCellV8432(cell,{
-            align:'justify',
-            font:'8.1pt',
-            line:'1.08',
-            pad:'1px 4px',
-            vertical:'top',
-            // V8.4.26:
-            // La primera línea de Evidencia dibuja la separación horizontal
-            // respecto de la fila gris. Las demás líneas no repiten ese borde.
-            top:first,
-            // Solo la última línea de evidencia cierra el bloque.
-            bottom:last
-          });
-
-          cell.style.setProperty('width','100%','important');
-          cell.style.setProperty('max-width','100%','important');
-          cell.style.setProperty('box-sizing','border-box','important');
-          cell.style.setProperty('background','#fff','important');
-
-          lineRow.style.setProperty('page-break-inside','avoid','important');
-          lineRow.style.setProperty('break-inside','avoid','important');
-          lineRow.appendChild(cell);
-          lineBody.appendChild(lineRow);
-          lineTable.appendChild(lineBody);
-          wrapper.appendChild(lineTable);
-        });
-      }
-
-      i++;
-    }
-  }
-
-  if(wrapper.children.length){
-    src.replaceWith(wrapper);
-  }
-}
-
 function prepareFactibilities(root){
   root.querySelectorAll(
     'table.combined-studies-v13, table.combined-studies-v145, table.estudios-table, table.factibilidades-ante-v52'
   ).forEach(src=>{
-    // No volver a procesar Estudios Complementarios de Obra Mayor
-    // que ya fueron preparados por V8.4.25.
-    if(src.closest('[data-egob-flow="studies-obra-mayor"]')) return;
     if(src.dataset.egobFactPreparedV8413==='1') return;
     src.dataset.egobFactPreparedV8413='1';
 
@@ -46577,7 +45966,7 @@ function prepareFactibilities(root){
           ? [20,16,46,18]
           : (firstMainCells.length===3 ? [20,65,15] : [20,80]));
 
-    const t=logicalTableV8432(src,widths);
+    const t=logicalTableV8414(src,widths);
     t.dataset.egobLogicalV8411='1';
     t.dataset.egobFactPreparedV8413='1';
 
@@ -46591,7 +45980,7 @@ function prepareFactibilities(root){
       ['EMPRESA','DOCUMENTO / TRÁMITE','FECHA'].forEach((text,idx)=>{
         const th=document.createElement('th');
         th.textContent=text;
-        styleLogicalCellV8432(th,{
+        styleLogicalCellV8414(th,{
           align:'center',
           font:'8.2pt',
           line:'1.05',
@@ -46612,16 +46001,12 @@ function prepareFactibilities(root){
       });
 
       thead.appendChild(hr);
-      // No repetir encabezado de Factibilidades al cambiar de página.
-      thead.style.setProperty('display','table-row-group','important');
-      thead.style.setProperty('page-break-inside','avoid','important');
-      thead.style.setProperty('break-inside','avoid','important');
       t.appendChild(thead);
     }else{
       const thead=src.querySelector('thead');
       if(thead){
         const h=thead.cloneNode(true);
-        styleLogicalHeaderV8432(h);
+        styleLogicalHeaderV8414(h);
         t.appendChild(h);
       }
     }
@@ -46649,7 +46034,7 @@ function prepareFactibilities(root){
           cell.removeAttribute('rowspan');
           cell.removeAttribute('colspan');
 
-          styleLogicalCellV8432(cell,{
+          styleLogicalCellV8414(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
@@ -46680,13 +46065,10 @@ function prepareFactibilities(root){
 
         const next=bodyRows[i+1];
         if(next&&evidenceRow(next)){
-          // V8.4.16: aquí entra también la fila histórica
-          // <td colspan="2">Evidencia...</td>, aunque no tenga clase.
           const {label,detail}=evidenceParts(next);
 
           if(detail){
-            // Evidencia ocupa las 3 columnas: 100 % del ancho útil.
-            const lines=wrapCellForTablePctV8432(detail,100);
+            const lines=wrapCell(detail,95);
             const labelHtml=label&&norm(label.textContent)?label.innerHTML:'';
 
             lines.forEach((line,k)=>{
@@ -46700,13 +46082,7 @@ function prepareFactibilities(root){
               const det=document.createElement('td');
               det.colSpan=3;
 
-              const first=k===0;
-              const last=k===lines.length-1;
-              const lineContent=justifyPhysicalLineV8432(
-                lineHtml(line),
-                !last
-              );
-
+              const lineContent=lineHtml(line);
               if(k===0 && labelHtml){
                 det.innerHTML=
                   '<span style="font-weight:700;">'+labelHtml+'</span>' +
@@ -46715,7 +46091,10 @@ function prepareFactibilities(root){
                 det.innerHTML=lineContent;
               }
 
-              styleLogicalCellV8432(det,{
+              const first=k===0;
+              const last=k===lines.length-1;
+
+              styleLogicalCellV8414(det,{
                 align:'justify',
                 font:'8.1pt',
                 line:'1.08',
@@ -46754,7 +46133,7 @@ function prepareFactibilities(root){
         tr.style.setProperty('break-inside','avoid','important');
 
         [...tr.children].filter(x=>/^(TD|TH)$/.test(x.tagName)).forEach((cell,idx)=>{
-          styleLogicalCellV8432(cell,{
+          styleLogicalCellV8414(cell,{
             align:'center',
             font:'8.2pt',
             line:'1.05',
@@ -46791,17 +46170,17 @@ function prepareFactibilities(root){
         x.removeAttribute('colspan');
       });
 
-      styleLogicalCellV8432(ent,{
+      styleLogicalCellV8414(ent,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
-      styleLogicalCellV8432(typ,{
+      styleLogicalCellV8414(typ,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
       typ.style.setProperty('font-weight','700','important');
-      styleLogicalCellV8432(d,{
+      styleLogicalCellV8414(d,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
-      styleLogicalCellV8432(dt,{
+      styleLogicalCellV8414(dt,{
         align:'center',font:'8.2pt',line:'1.05',pad:'2px 4px',vertical:'middle'
       });
       dt.style.setProperty('white-space','nowrap','important');
@@ -46814,43 +46193,40 @@ function prepareFactibilities(root){
         const {label,detail}=evidenceParts(next);
 
         if(detail){
-          // V8.4.22 · OBRA MAYOR:
-          // Evidencia/Detalle ocupa TODO el ancho de la tabla:
-          // ENTIDAD + TIPO + DOCUMENTO/TRÁMITE + FECHA.
-          // El texto visible "Evidencia / detalle" se elimina.
-          const lines=wrapCellForTablePctV8432(detail,100);
+          const lines=wrapCell(detail,95);
+          const labelHtml=label&&norm(label.textContent)?label.innerHTML:'';
 
           for(let k=0;k<lines.length;k++){
             const lr=document.createElement('tr');
             lr.style.setProperty('page-break-inside','avoid','important');
             lr.style.setProperty('break-inside','avoid','important');
 
+            const blank=document.createElement('td');
+            const lab=document.createElement('td');
             const det=document.createElement('td');
-            det.colSpan=4;
+            det.colSpan=2;
+
+            blank.innerHTML='&nbsp;';
+            lab.innerHTML=(k===0&&labelHtml)?labelHtml:'&nbsp;';
+            det.innerHTML=lineHtml(lines[k]);
 
             const first=k===0;
             const last=k===lines.length-1;
 
-            det.innerHTML=justifyPhysicalLineV8432(
-              lineHtml(lines[k]),
-              !last
-            );
-
-            styleLogicalCellV8432(det,{
-              align:'justify',
-              font:'8.1pt',
-              line:'1.08',
-              pad:'1px 4px',
-              vertical:'top',
-              top:first,
-              bottom:last
+            styleLogicalCellV8414(blank,{
+              align:'center',font:'8.1pt',line:'1.05',pad:'1px 3px',
+              vertical:'top',top:first,bottom:last
+            });
+            styleLogicalCellV8414(lab,{
+              align:'center',font:'7.9pt',line:'1.05',pad:'1px 3px',
+              vertical:'top',top:first,bottom:last
+            });
+            styleLogicalCellV8414(det,{
+              align:'justify',font:'8.1pt',line:'1.08',pad:'1px 4px',
+              vertical:'top',top:first,bottom:last
             });
 
-            det.style.setProperty('width','100%','important');
-            det.style.setProperty('max-width','100%','important');
-            det.style.setProperty('box-sizing','border-box','important');
-
-            lr.append(det);
+            lr.append(blank,lab,det);
             tbody.appendChild(lr);
           }
         }
@@ -46864,7 +46240,7 @@ function prepareFactibilities(root){
 }
 
 
-window.buildEgobBodyV8432=function(){
+window.buildEgobBodyV8414=function(){
   let p=null;
   try{
     if(typeof buildClipboardPayloadV154==='function')p=buildClipboardPayloadV154();
@@ -46876,82 +46252,17 @@ window.buildEgobBodyV8432=function(){
     const report=doc.querySelector('#report')||doc.querySelector('.report');
     if(!report)return p;
     report.setAttribute(PREP,'1');
-    // Marcador estable: la extensión debe respetar este HTML tal como ALLPA lo preparó.
-    report.setAttribute('data-allpa-egob-prepared','1');
-    prepareDesistimientoEgobV8432(report);
     prepareRequirements(report);
     prepareConclusion(report);
-    prepareObraMayorStudiesByEntityV8432(report);
     prepareFactibilities(report);
-    applyUniformThinBordersV8432(report);
+    applyUniformThinBordersV8414(report);
     const plain=norm(report.textContent||'');
     return {html:'<!DOCTYPE html>'+doc.documentElement.outerHTML,plain};
   }catch(err){
-    console.warn('[ALLPA eGOB V8.4.32] No se pudo preparar HTML específico.',err);
+    console.warn('[ALLPA eGOB V8.4.14] No se pudo preparar HTML específico.',err);
     return p;
   }
 };
-})();
-</script>
-
-
-<!-- ==========================================================
-     ALLPA V9.9.9 · RESTAURACIÓN PROYECTO SUBDIVISIÓN
-     Ruta independiente para no interferir con Obra Mayor,
-     Anteproyecto de Edificación ni la integración eGOB.
-     ========================================================== -->
-<script id="allpa-subdivision-project-restore-v999">
-(function(){
-'use strict';
-
-const SUBDIVISION_URL='anteproyecto_subdivision/index.html';
-
-window.openSubdivisionProjectV999=function(ev){
-  try{ev?.preventDefault?.();ev?.stopPropagation?.();}catch(_e){}
-  try{
-    localStorage.setItem('GADMR_PROJECT_TYPE_V123','anteproyecto_subdivision');
-    localStorage.setItem('ALLPA_LAST_PROJECT','anteproyecto_subdivision');
-  }catch(_e){}
-  window.location.href=new URL(SUBDIVISION_URL,window.location.href).href;
-  return false;
-};
-
-/* Protección adicional: si alguna capa histórica vuelve a escribir el onclick,
-   capturamos el clic antes de que llegue a selectProjectV123. */
-document.addEventListener('click',function(ev){
-  const btn=ev.target?.closest?.('#projectEntryV123 .project-option-v123');
-  if(!btn) return;
-  const text=String(btn.textContent||'').toUpperCase();
-  if(btn.dataset.subdivisionProject==='1' || text.includes('SUBDIVISIÓN') || text.includes('SUBDIVISION')){
-    ev.preventDefault();
-    ev.stopImmediatePropagation();
-    window.openSubdivisionProjectV999(ev);
-  }
-},true);
-
-function ensureSubdivisionCardV999(){
-  const box=document.querySelector('#projectEntryV123 .project-options-v123');
-  if(!box) return false;
-  if(box.querySelector('[data-subdivision-project="1"]')) return true;
-  const btn=document.createElement('button');
-  btn.type='button';
-  btn.className='project-option-v123';
-  btn.dataset.subdivisionProject='1';
-  btn.onclick=window.openSubdivisionProjectV999;
-  btn.innerHTML='<span class="num">3</span><span class="title">ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES SIN OBRAS</span><span class="arrow">→</span>';
-  box.appendChild(btn);
-  return true;
-}
-
-/* ALLPA reinstala varias capas después de cargar; por eso verificamos la tarjeta. */
-[0,150,400,900,1600,2800,4500,7000].forEach(ms=>setTimeout(ensureSubdivisionCardV999,ms));
-window.addEventListener('load',()=>[100,500,1200,2500,5000].forEach(ms=>setTimeout(ensureSubdivisionCardV999,ms)),{once:true});
-
-window.AllpaSubdivisionProjectV999=Object.freeze({
-  open:window.openSubdivisionProjectV999,
-  ensure:ensureSubdivisionCardV999,
-  url:SUBDIVISION_URL
-});
 })();
 </script>
 
