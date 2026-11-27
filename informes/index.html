@@ -16602,6 +16602,11 @@ function ensureProjectEntryV123(){
             <span class="title">ANTEPROYECTO DE EDIFICACIÓN</span>
             <span class="arrow">→</span>
           </button>
+          <button type="button" class="project-option-v123" data-subdivision-project="1" onclick="openSubdivisionProjectV999(event)">
+            <span class="num">3</span>
+            <span class="title">ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES SIN OBRAS</span>
+            <span class="arrow">→</span>
+          </button>
         </div>
       </div>
     </div>`;
@@ -46886,6 +46891,67 @@ window.buildEgobBodyV8432=function(){
     return p;
   }
 };
+})();
+</script>
+
+
+<!-- ==========================================================
+     ALLPA V9.9.9 · RESTAURACIÓN PROYECTO SUBDIVISIÓN
+     Ruta independiente para no interferir con Obra Mayor,
+     Anteproyecto de Edificación ni la integración eGOB.
+     ========================================================== -->
+<script id="allpa-subdivision-project-restore-v999">
+(function(){
+'use strict';
+
+const SUBDIVISION_URL='anteproyecto_subdivision/index.html';
+
+window.openSubdivisionProjectV999=function(ev){
+  try{ev?.preventDefault?.();ev?.stopPropagation?.();}catch(_e){}
+  try{
+    localStorage.setItem('GADMR_PROJECT_TYPE_V123','anteproyecto_subdivision');
+    localStorage.setItem('ALLPA_LAST_PROJECT','anteproyecto_subdivision');
+  }catch(_e){}
+  window.location.href=new URL(SUBDIVISION_URL,window.location.href).href;
+  return false;
+};
+
+/* Protección adicional: si alguna capa histórica vuelve a escribir el onclick,
+   capturamos el clic antes de que llegue a selectProjectV123. */
+document.addEventListener('click',function(ev){
+  const btn=ev.target?.closest?.('#projectEntryV123 .project-option-v123');
+  if(!btn) return;
+  const text=String(btn.textContent||'').toUpperCase();
+  if(btn.dataset.subdivisionProject==='1' || text.includes('SUBDIVISIÓN') || text.includes('SUBDIVISION')){
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    window.openSubdivisionProjectV999(ev);
+  }
+},true);
+
+function ensureSubdivisionCardV999(){
+  const box=document.querySelector('#projectEntryV123 .project-options-v123');
+  if(!box) return false;
+  if(box.querySelector('[data-subdivision-project="1"]')) return true;
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.className='project-option-v123';
+  btn.dataset.subdivisionProject='1';
+  btn.onclick=window.openSubdivisionProjectV999;
+  btn.innerHTML='<span class="num">3</span><span class="title">ANTEPROYECTO DE SUBDIVISIÓN PREDIAL DE DOS A DIEZ LOTES SIN OBRAS</span><span class="arrow">→</span>';
+  box.appendChild(btn);
+  return true;
+}
+
+/* ALLPA reinstala varias capas después de cargar; por eso verificamos la tarjeta. */
+[0,150,400,900,1600,2800,4500,7000].forEach(ms=>setTimeout(ensureSubdivisionCardV999,ms));
+window.addEventListener('load',()=>[100,500,1200,2500,5000].forEach(ms=>setTimeout(ensureSubdivisionCardV999,ms)),{once:true});
+
+window.AllpaSubdivisionProjectV999=Object.freeze({
+  open:window.openSubdivisionProjectV999,
+  ensure:ensureSubdivisionCardV999,
+  url:SUBDIVISION_URL
+});
 })();
 </script>
 
